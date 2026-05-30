@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b5aht06pe008k"
-path="res://.godot/imported/UI cooking.png-556431fbf8ca0ecf60bac67c1f940f84.ctex"
+uid="uid://bttxh3jxxrqh7"
+path="res://.godot/imported/UI_books.png-44af165ed5a300e2257c39994fc9ca85.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/UI/UI cooking.png"
-dest_files=["res://.godot/imported/UI cooking.png-556431fbf8ca0ecf60bac67c1f940f84.ctex"]
+source_file="res://assets/UI/UI_books.png"
+dest_files=["res://.godot/imported/UI_books.png-44af165ed5a300e2257c39994fc9ca85.ctex"]
 
 [params]
 

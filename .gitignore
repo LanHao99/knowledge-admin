@@ -2,11 +2,11 @@
 .godot/
 /android/
 
-# Editor/OS noise
-.DS_Store
-Thumbs.db
-
-# Local opencode dependencies/cache
+# 排除AI工作区保存
+.workbuddy/
 .opencode/
 .vscode/
+
+# 排除隐私代码
+.env
 

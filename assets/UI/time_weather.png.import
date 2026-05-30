@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bxiqquuycpbif"
-path="res://.godot/imported/Time & weather.png-16ffcb268bd523bffb4418359bc8844a.ctex"
+path="res://.godot/imported/time_weather.png-dd2b456c55daf3d5a921532b1364be6d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/UI/Time & weather.png"
-dest_files=["res://.godot/imported/Time & weather.png-16ffcb268bd523bffb4418359bc8844a.ctex"]
+source_file="res://assets/UI/time_weather.png"
+dest_files=["res://.godot/imported/time_weather.png-dd2b456c55daf3d5a921532b1364be6d.ctex"]
 
 [params]
 
