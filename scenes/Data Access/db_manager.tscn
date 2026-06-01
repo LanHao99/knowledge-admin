@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cexpycsf7qbqq"]
+
+[ext_resource type="Script" uid="uid://b5vp4o7d1wkb7" path="res://scenes/Data Access/db_manager.gd" id="1_3kadu"]
+
+[node name="DBManager" type="Node" unique_id=382133234]
+script = ExtResource("1_3kadu")

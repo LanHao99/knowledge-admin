@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://baxudmi5wtk6e"]
 
-[ext_resource type="Script" uid="uid://bgufnk7s51he8" path="res://sql_test.gd" id="1_43caf"]
+[ext_resource type="Script" uid="uid://bgufnk7s51he8" path="res://data/sql_test.gd" id="1_43caf"]
 
 [node name="SQLTest" type="Control" unique_id=682433001]
 layout_mode = 3

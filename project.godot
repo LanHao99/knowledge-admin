@@ -11,7 +11,6 @@ config_version=5
 [application]
 
 config/name="KnowledgeAdmin"
-run/main_scene="res://scenes/study_session.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
