@@ -3,8 +3,11 @@ class_name DBManager
 
 signal db_error(code: String, message: String)
 
+const SCHEMA_JSON_PATH: String = "res://data/db_schema.json"
+
 var _db: SQLite = null
 var _db_path: String = "user://knowledge_admin.db"
+var _schema_config: Dictionary = {}
 var _last_error: String = ""
 var _last_code: String = ""
 var _last_rows: Array[Dictionary] = []
@@ -14,14 +17,20 @@ func configure(db_path: String = "user://knowledge_admin.db") -> void: ## 配置
 	_db_path = db_path
 
 
-func open() -> bool: ## 创建并打开数据库连接
+func open() -> bool: ## 创建并打开数据库连接，同时加载 schema JSON
 	clear_last_error()
 
+	# 1) 创建并打开数据库
 	_db = SQLite.new()
 	_db.path = _db_path
-
 	if not _db.open_db():
 		_fail("DB_OPEN_FAILED", "打开数据库失败: %s" % _db_path)
+		return false
+
+	# 2) 读取 schema 配置文件
+	var schema_result := load_schema_config()
+	if not schema_result.get("success", false):
+		close()
 		return false
 
 	return true
@@ -40,6 +49,30 @@ func require_open() -> bool: ## 要求数据库已打开，否则返回失败
 		return true
 	_fail("DB_NOT_OPEN", "数据库尚未打开，请先调用 open()")
 	return false
+
+
+func load_schema_config() -> Dictionary: ## 从 JSON 文件读取 schema 配置
+	# 1) 检查文件是否存在
+	if not FileAccess.file_exists(SCHEMA_JSON_PATH):
+		return fail("SCHEMA_FILE_NOT_FOUND", "找不到 schema 文件: %s" % SCHEMA_JSON_PATH)
+
+	# 2) 读取文本
+	var file := FileAccess.open(SCHEMA_JSON_PATH, FileAccess.READ)
+	if file == null:
+		return fail("SCHEMA_FILE_OPEN_FAILED", "无法打开 schema 文件: %s" % SCHEMA_JSON_PATH)
+	var text: String = file.get_as_text()
+
+	# 3) 解析 JSON
+	var parser := JSON.new()
+	var parse_code: int = parser.parse(text)
+	if parse_code != OK:
+		return fail("SCHEMA_JSON_PARSE_FAILED", "schema JSON 解析失败: line=%d msg=%s" % [parser.get_error_line(), parser.get_error_message()])
+
+	if typeof(parser.data) != TYPE_DICTIONARY:
+		return fail("SCHEMA_JSON_INVALID", "schema JSON 顶层必须是 Dictionary")
+
+	_schema_config = parser.data
+	return ok(_schema_config)
 
 
 func begin_transaction() -> bool: ## 开始事务，保证多步写入要么全成功要么全失败
@@ -82,7 +115,7 @@ func fetch_all(sql: String, params: Array = []) -> Dictionary: ## 查询多行�
 	if not require_open():
 		return fail("DB_NOT_OPEN", "数据库尚未打开")
 
-	# 1) 执行查询（支持是否带参数）
+	# 1) 执行查询（支持带参/不带参）
 	clear_last_error()
 	var success: bool = false
 	if params.is_empty():
@@ -93,7 +126,7 @@ func fetch_all(sql: String, params: Array = []) -> Dictionary: ## 查询多行�
 	if not success:
 		return _sqlite_fail("SQL_QUERY_FAILED", sql)
 
-	# 2) 拿到插件返回的查询结果
+	# 2) 整理结果，确保是字典数组
 	var rows: Array = _db.query_result
 	_last_rows = []
 	for row in rows:
@@ -130,21 +163,18 @@ func scalar(sql: String, params: Array = [], default_value: Variant = null) -> D
 	return ok(default_value)
 
 
-func init_schema() -> Dictionary: ## 初始化项目需要的数据表和索引
+func init_schema() -> Dictionary: ## 根据 JSON 动态创建表和索引
 	if not require_open():
 		return fail("DB_NOT_OPEN", "数据库尚未打开")
+	if _schema_config.is_empty():
+		return fail("SCHEMA_NOT_LOADED", "schema 配置未加载，请先调用 open()")
 
-	# 1) 组织建表语句
-	var statements: Array[String] = [
-		"CREATE TABLE IF NOT EXISTS decks (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, parent_id INTEGER DEFAULT NULL, sort_order INTEGER NOT NULL DEFAULT 0, is_archived INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, FOREIGN KEY(parent_id) REFERENCES decks(id) ON DELETE CASCADE);",
-		"CREATE UNIQUE INDEX IF NOT EXISTS idx_decks_parent_name ON decks(parent_id, name);",
-		"CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY AUTOINCREMENT, note_type_id INTEGER NOT NULL, fields_data TEXT NOT NULL, created_at INTEGER NOT NULL);",
-		"CREATE TABLE IF NOT EXISTS cards (id INTEGER PRIMARY KEY AUTOINCREMENT, note_id INTEGER NOT NULL, deck_id INTEGER NOT NULL, template_order INTEGER NOT NULL DEFAULT 0, queue INTEGER NOT NULL DEFAULT 0, due INTEGER NOT NULL, reps INTEGER NOT NULL DEFAULT 0, lapses INTEGER NOT NULL DEFAULT 0, last_review_time INTEGER NOT NULL DEFAULT 0, last_rating INTEGER NOT NULL DEFAULT 0, last_time_taken INTEGER NOT NULL DEFAULT 0, review_history_json TEXT NOT NULL DEFAULT '[]', stability REAL NOT NULL DEFAULT 0.0, difficulty REAL NOT NULL DEFAULT 0.0, FOREIGN KEY(note_id) REFERENCES notes(id) ON DELETE CASCADE, FOREIGN KEY(deck_id) REFERENCES decks(id) ON DELETE CASCADE);",
-		"CREATE INDEX IF NOT EXISTS idx_cards_deck_queue_due ON cards(deck_id, queue, due);",
-		"CREATE INDEX IF NOT EXISTS idx_cards_note_id ON cards(note_id);"
-	]
+	var statements_result := _build_schema_statements()
+	if not statements_result.get("success", false):
+		return statements_result
 
-	# 2) 用事务保证要么全成功要么全失败
+	var statements: Array[String] = statements_result.get("data", [])
+
 	if not begin_transaction():
 		return fail("TX_BEGIN_FAILED", "初始化表结构时无法开启事务")
 
@@ -160,15 +190,17 @@ func init_schema() -> Dictionary: ## 初始化项目需要的数据表和索引
 	return ok()
 
 
-func reset_schema() -> Dictionary: ## 重置数据表（开发调试用，会清空数据）
+func reset_schema() -> Dictionary: ## 根据 JSON 配置的删除顺序重置表结构（开发调试用）
 	if not require_open():
 		return fail("DB_NOT_OPEN", "数据库尚未打开")
+	if _schema_config.is_empty():
+		return fail("SCHEMA_NOT_LOADED", "schema 配置未加载，请先调用 open()")
 
-	var drop_sql: Array[String] = [
-		"DROP TABLE IF EXISTS cards;",
-		"DROP TABLE IF EXISTS notes;",
-		"DROP TABLE IF EXISTS decks;"
-	]
+	var drop_result := _build_drop_statements()
+	if not drop_result.get("success", false):
+		return drop_result
+
+	var drop_sql: Array[String] = drop_result.get("data", [])
 
 	if not begin_transaction():
 		return fail("TX_BEGIN_FAILED", "重置表结构时无法开启事务")
@@ -231,6 +263,126 @@ func _fail(code: String, message: String, data: Variant = null) -> Dictionary: #
 		"error": message,
 		"code": code
 	}
+
+
+func _build_schema_statements() -> Dictionary: ## 把 schema 配置转换成 CREATE TABLE/INDEX SQL 列表
+	if not _schema_config.has("tables"):
+		return fail("SCHEMA_TABLES_MISSING", "schema 缺少 tables 字段")
+	if not _schema_config.has("indexes"):
+		return fail("SCHEMA_INDEXES_MISSING", "schema 缺少 indexes 字段")
+
+	var statements: Array[String] = []
+	var tables: Dictionary = _schema_config.get("tables", {})
+
+	for table_name in tables.keys():
+		var table_cfg: Dictionary = tables[table_name]
+		var table_result := _build_create_table_sql(table_name, table_cfg)
+		if not table_result.get("success", false):
+			return table_result
+		statements.append(table_result.get("data", ""))
+
+	var indexes: Array = _schema_config.get("indexes", [])
+	for index_cfg in indexes:
+		if index_cfg is Dictionary:
+			var index_result := _build_create_index_sql(index_cfg)
+			if not index_result.get("success", false):
+				return index_result
+			statements.append(index_result.get("data", ""))
+
+	return ok(statements)
+
+
+func _build_drop_statements() -> Dictionary: ## 把 schema 配置中的 drop 顺序转换成 DROP TABLE SQL 列表
+	if not _schema_config.has("drop_tables_order"):
+		return fail("SCHEMA_DROP_ORDER_MISSING", "schema 缺少 drop_tables_order 字段")
+
+	var order: Array = _schema_config.get("drop_tables_order", [])
+	var statements: Array[String] = []
+	for table_name in order:
+		statements.append("DROP TABLE IF EXISTS %s;" % table_name)
+
+	return ok(statements)
+
+
+func _build_create_table_sql(table_name: String, table_cfg: Dictionary) -> Dictionary: ## 依据表配置拼接 CREATE TABLE SQL
+	if not table_cfg.has("columns"):
+		return fail("SCHEMA_COLUMNS_MISSING", "表 %s 缺少 columns 定义" % table_name)
+
+	var columns_cfg: Dictionary = table_cfg.get("columns", {})
+	var parts: Array[String] = []
+
+	# 1) 拼接字段定义
+	for column_name in columns_cfg.keys():
+		var column_cfg: Dictionary = columns_cfg[column_name]
+		parts.append(_build_column_sql(column_name, column_cfg))
+
+	# 2) 拼接外键定义
+	var foreign_keys: Array = table_cfg.get("foreign_keys", [])
+	for fk in foreign_keys:
+		if fk is Dictionary:
+			parts.append(_build_foreign_key_sql(fk))
+
+	var body: String = ", ".join(parts)
+	var sql: String = "CREATE TABLE IF NOT EXISTS %s (%s);" % [table_name, body]
+	return ok(sql)
+
+
+func _build_column_sql(column_name: String, column_cfg: Dictionary) -> String: ## 把单个字段配置转换成列 SQL 片段
+	var part: String = "%s %s" % [column_name, str(column_cfg.get("data_type", "TEXT"))]
+
+	if bool(column_cfg.get("primary_key", false)):
+		part += " PRIMARY KEY"
+	if bool(column_cfg.get("auto_increment", false)):
+		part += " AUTOINCREMENT"
+	if bool(column_cfg.get("not_null", false)):
+		part += " NOT NULL"
+	if column_cfg.has("default"):
+		part += " DEFAULT %s" % _format_default_value(column_cfg.get("default"))
+
+	return part
+
+
+func _build_foreign_key_sql(fk_cfg: Dictionary) -> String: ## 把外键配置转换成 FOREIGN KEY SQL 片段
+	var column: String = str(fk_cfg.get("column", ""))
+	var ref_table: String = str(fk_cfg.get("ref_table", ""))
+	var ref_column: String = str(fk_cfg.get("ref_column", "id"))
+	var part: String = "FOREIGN KEY(%s) REFERENCES %s(%s)" % [column, ref_table, ref_column]
+
+	if fk_cfg.has("on_delete"):
+		part += " ON DELETE %s" % str(fk_cfg.get("on_delete", ""))
+
+	return part
+
+
+func _build_create_index_sql(index_cfg: Dictionary) -> Dictionary: ## 依据索引配置拼接 CREATE INDEX SQL
+	var name: String = str(index_cfg.get("name", ""))
+	var table_name: String = str(index_cfg.get("table", ""))
+	var columns: Array = index_cfg.get("columns", [])
+	if name == "" or table_name == "" or columns.is_empty():
+		return fail("SCHEMA_INDEX_INVALID", "索引配置不完整: %s" % str(index_cfg))
+
+	var unique_prefix: String = ""
+	if bool(index_cfg.get("unique", false)):
+		unique_prefix = "UNIQUE "
+
+	var column_list: PackedStringArray = []
+	for column_name in columns:
+		column_list.append(str(column_name))
+
+	var sql: String = "CREATE %sINDEX IF NOT EXISTS %s ON %s(%s);" % [unique_prefix, name, table_name, ", ".join(column_list)]
+	return ok(sql)
+
+
+func _format_default_value(value: Variant) -> String: ## 把 JSON 默认值转换为 SQL 可用文本
+	match typeof(value):
+		TYPE_NIL:
+			return "NULL"
+		TYPE_STRING:
+			return "'%s'" % str(value).replace("'", "''")
+		TYPE_BOOL:
+			return "1" if value else "0"
+		_:
+			return str(value)
 
 
 func _exec_bool(sql: String, code: String, message: String) -> bool: ## 给事务命令使用的简化布尔执行器

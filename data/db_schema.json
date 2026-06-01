@@ -1,0 +1,54 @@
+{
+  "tables": {
+    "decks": {
+      "columns": {
+        "id": {"data_type": "INTEGER", "primary_key": true, "auto_increment": true},
+        "name": {"data_type": "TEXT", "not_null": true},
+        "parent_id": {"data_type": "INTEGER", "default": null},
+        "sort_order": {"data_type": "INTEGER", "not_null": true, "default": 0},
+        "is_archived": {"data_type": "INTEGER", "not_null": true, "default": 0},
+        "created_at": {"data_type": "INTEGER", "not_null": true},
+        "updated_at": {"data_type": "INTEGER", "not_null": true}
+      },
+      "foreign_keys": [
+        {"column": "parent_id", "ref_table": "decks", "ref_column": "id", "on_delete": "CASCADE"}
+      ]
+    },
+    "notes": {
+      "columns": {
+        "id": {"data_type": "INTEGER", "primary_key": true, "auto_increment": true},
+        "note_type_id": {"data_type": "INTEGER", "not_null": true},
+        "fields_data": {"data_type": "TEXT", "not_null": true},
+        "created_at": {"data_type": "INTEGER", "not_null": true}
+      }
+    },
+    "cards": {
+      "columns": {
+        "id": {"data_type": "INTEGER", "primary_key": true, "auto_increment": true},
+        "note_id": {"data_type": "INTEGER", "not_null": true},
+        "deck_id": {"data_type": "INTEGER", "not_null": true},
+        "template_order": {"data_type": "INTEGER", "not_null": true, "default": 0},
+        "queue": {"data_type": "INTEGER", "not_null": true, "default": 0},
+        "due": {"data_type": "INTEGER", "not_null": true},
+        "reps": {"data_type": "INTEGER", "not_null": true, "default": 0},
+        "lapses": {"data_type": "INTEGER", "not_null": true, "default": 0},
+        "last_review_time": {"data_type": "INTEGER", "not_null": true, "default": 0},
+        "last_rating": {"data_type": "INTEGER", "not_null": true, "default": 0},
+        "last_time_taken": {"data_type": "INTEGER", "not_null": true, "default": 0},
+        "review_history_json": {"data_type": "TEXT", "not_null": true, "default": "[]"},
+        "stability": {"data_type": "REAL", "not_null": true, "default": 0.0},
+        "difficulty": {"data_type": "REAL", "not_null": true, "default": 0.0}
+      },
+      "foreign_keys": [
+        {"column": "note_id", "ref_table": "notes", "ref_column": "id", "on_delete": "CASCADE"},
+        {"column": "deck_id", "ref_table": "decks", "ref_column": "id", "on_delete": "CASCADE"}
+      ]
+    }
+  },
+  "indexes": [
+    {"name": "idx_decks_parent_name", "table": "decks", "columns": ["parent_id", "name"], "unique": true},
+    {"name": "idx_cards_deck_queue_due", "table": "cards", "columns": ["deck_id", "queue", "due"], "unique": false},
+    {"name": "idx_cards_note_id", "table": "cards", "columns": ["note_id"], "unique": false}
+  ],
+  "drop_tables_order": ["cards", "notes", "decks"]
+}
