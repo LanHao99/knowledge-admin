@@ -7,4 +7,4 @@
 
 [node name="StudySession" parent="." unique_id=948778194 instance=ExtResource("1_8q8l4")]
 
-[node name="CardUi" parent="." unique_id=1375471367 instance=ExtResource("2_x8trg")]
+[node name="CardUI" parent="." unique_id=1375471367 instance=ExtResource("2_x8trg")]

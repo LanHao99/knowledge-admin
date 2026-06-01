@@ -1,9 +1,18 @@
 extends Node
 class_name DBManager
 
+# 这是“数据层基类”，专门负责：
+# 1) 管理 sqlite 连接
+# 2) 执行 SQL（查询/写入/事务）
+# 3) 把 JSON 格式的表结构配置转成真实 SQL 并初始化数据库
+#
+# 你可以把它理解成：
+# - 业务层只说“我要查/改什么”
+# - DBManager 负责“具体怎么和数据库沟通”
+
 signal db_error(code: String, message: String)
 
-const SCHEMA_JSON_PATH: String = "res://data/db_schema.json"
+const SCHEMA_JSON_PATH: String = "res://data/db_schema.json" # 表结构配置文件路径
 
 var _db: SQLite = null
 var _db_path: String = "user://knowledge_admin.db"
@@ -27,7 +36,7 @@ func open() -> bool: ## 创建并打开数据库连接，同时加载 schema JSO
 		_fail("DB_OPEN_FAILED", "打开数据库失败: %s" % _db_path)
 		return false
 
-	# 2) 读取 schema 配置文件
+	# 2) 读取 schema 配置文件（后续 init_schema 会用到）
 	var schema_result := load_schema_config()
 	if not schema_result.get("success", false):
 		close()
@@ -56,13 +65,13 @@ func load_schema_config() -> Dictionary: ## 从 JSON 文件读取 schema 配置
 	if not FileAccess.file_exists(SCHEMA_JSON_PATH):
 		return fail("SCHEMA_FILE_NOT_FOUND", "找不到 schema 文件: %s" % SCHEMA_JSON_PATH)
 
-	# 2) 读取文本
+	# 2) 读取文本（这里只负责读文件，不做建表）
 	var file := FileAccess.open(SCHEMA_JSON_PATH, FileAccess.READ)
 	if file == null:
 		return fail("SCHEMA_FILE_OPEN_FAILED", "无法打开 schema 文件: %s" % SCHEMA_JSON_PATH)
 	var text: String = file.get_as_text()
 
-	# 3) 解析 JSON
+	# 3) 解析 JSON 并缓存到 _schema_config
 	var parser := JSON.new()
 	var parse_code: int = parser.parse(text)
 	if parse_code != OK:
@@ -95,7 +104,7 @@ func execute(sql: String) -> Dictionary: ## 执行不带参数的 SQL，返回�
 	if not _db.query(sql):
 		return _sqlite_fail("SQL_EXEC_FAILED", sql)
 
-	_last_rows = []
+	_last_rows = [] # 写操作后清空上一轮查询缓存
 	return ok()
 
 
@@ -107,7 +116,7 @@ func execute_bind(sql: String, params: Array = []) -> Dictionary: ## 执行带�
 	if not _db.query_with_bindings(sql, params):
 		return _sqlite_fail("SQL_BIND_EXEC_FAILED", sql)
 
-	_last_rows = []
+	_last_rows = [] # 写操作后清空上一轮查询缓存
 	return ok()
 
 
@@ -169,12 +178,14 @@ func init_schema() -> Dictionary: ## 根据 JSON 动态创建表和索引
 	if _schema_config.is_empty():
 		return fail("SCHEMA_NOT_LOADED", "schema 配置未加载，请先调用 open()")
 
+	# 1) 先把 JSON 配置转成 SQL 列表
 	var statements_result := _build_schema_statements()
 	if not statements_result.get("success", false):
 		return statements_result
 
 	var statements: Array[String] = statements_result.get("data", [])
 
+	# 2) 用事务执行，保证“要么都成功，要么都失败”
 	if not begin_transaction():
 		return fail("TX_BEGIN_FAILED", "初始化表结构时无法开启事务")
 
@@ -183,6 +194,7 @@ func init_schema() -> Dictionary: ## 根据 JSON 动态创建表和索引
 			rollback_transaction()
 			return _sqlite_fail("SCHEMA_INIT_FAILED", sql)
 
+	# 3) 全部成功后提交
 	if not commit_transaction():
 		rollback_transaction()
 		return fail("TX_COMMIT_FAILED", "初始化表结构提交失败")
@@ -196,12 +208,14 @@ func reset_schema() -> Dictionary: ## 根据 JSON 配置的删除顺序重置表
 	if _schema_config.is_empty():
 		return fail("SCHEMA_NOT_LOADED", "schema 配置未加载，请先调用 open()")
 
+	# 1) 根据配置拿到 DROP TABLE 顺序
 	var drop_result := _build_drop_statements()
 	if not drop_result.get("success", false):
 		return drop_result
 
 	var drop_sql: Array[String] = drop_result.get("data", [])
 
+	# 2) 先删旧表，再重建
 	if not begin_transaction():
 		return fail("TX_BEGIN_FAILED", "重置表结构时无法开启事务")
 
@@ -214,6 +228,7 @@ func reset_schema() -> Dictionary: ## 根据 JSON 配置的删除顺序重置表
 		rollback_transaction()
 		return fail("TX_COMMIT_FAILED", "删除旧表提交失败")
 
+	# 3) 删除完成后立刻按最新 JSON 重建
 	return init_schema()
 
 
@@ -274,6 +289,7 @@ func _build_schema_statements() -> Dictionary: ## 把 schema 配置转换成 CRE
 	var statements: Array[String] = []
 	var tables: Dictionary = _schema_config.get("tables", {})
 
+	# 先拼每张表的 CREATE TABLE
 	for table_name in tables.keys():
 		var table_cfg: Dictionary = tables[table_name]
 		var table_result := _build_create_table_sql(table_name, table_cfg)
@@ -281,6 +297,7 @@ func _build_schema_statements() -> Dictionary: ## 把 schema 配置转换成 CRE
 			return table_result
 		statements.append(table_result.get("data", ""))
 
+	# 再拼索引 CREATE INDEX
 	var indexes: Array = _schema_config.get("indexes", [])
 	for index_cfg in indexes:
 		if index_cfg is Dictionary:
@@ -322,14 +339,17 @@ func _build_create_table_sql(table_name: String, table_cfg: Dictionary) -> Dicti
 		if fk is Dictionary:
 			parts.append(_build_foreign_key_sql(fk))
 
+	# 把字段定义和外键定义拼成 CREATE TABLE (...) 主体
 	var body: String = ", ".join(parts)
 	var sql: String = "CREATE TABLE IF NOT EXISTS %s (%s);" % [table_name, body]
 	return ok(sql)
 
 
 func _build_column_sql(column_name: String, column_cfg: Dictionary) -> String: ## 把单个字段配置转换成列 SQL 片段
+	# 先拼 "字段名 + 类型"
 	var part: String = "%s %s" % [column_name, str(column_cfg.get("data_type", "TEXT"))]
 
+	# 再按配置追加约束
 	if bool(column_cfg.get("primary_key", false)):
 		part += " PRIMARY KEY"
 	if bool(column_cfg.get("auto_increment", false)):
@@ -361,6 +381,7 @@ func _build_create_index_sql(index_cfg: Dictionary) -> Dictionary: ## 依据索�
 	if name == "" or table_name == "" or columns.is_empty():
 		return fail("SCHEMA_INDEX_INVALID", "索引配置不完整: %s" % str(index_cfg))
 
+	# unique=true 时生成 UNIQUE INDEX，否则普通 INDEX
 	var unique_prefix: String = ""
 	if bool(index_cfg.get("unique", false)):
 		unique_prefix = "UNIQUE "
@@ -374,6 +395,8 @@ func _build_create_index_sql(index_cfg: Dictionary) -> Dictionary: ## 依据索�
 
 
 func _format_default_value(value: Variant) -> String: ## 把 JSON 默认值转换为 SQL 可用文本
+	# JSON 默认值要转换成 SQL 字面量：
+	# null -> NULL, string -> 'text', bool -> 1/0, 数字保持原样
 	match typeof(value):
 		TYPE_NIL:
 			return "NULL"

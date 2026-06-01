@@ -1,6 +1,18 @@
 [gd_scene format=3 uid="uid://cexpycsf7qbqq"]
 
-[ext_resource type="Script" uid="uid://b5vp4o7d1wkb7" path="res://scenes/Data Access/db_manager.gd" id="1_3kadu"]
+[ext_resource type="Script" uid="uid://76d7fpa5siri" path="res://scenes/Data Access/db_manager.gd" id="1_3kadu"]
+[ext_resource type="Script" uid="uid://8qd3fugdlw1k" path="res://scenes/Data Access/card_db.gd" id="2_8ni8d"]
+[ext_resource type="Script" uid="uid://dfqkpphnconet" path="res://scenes/Data Access/note_db.gd" id="3_7hi0s"]
+[ext_resource type="Script" uid="uid://dub5p5feql2s5" path="res://scenes/Data Access/deck_db.gd" id="4_x3tr7"]
 
 [node name="DBManager" type="Node" unique_id=382133234]
 script = ExtResource("1_3kadu")
+
+[node name="CardDB" type="Node" parent="." unique_id=773947311]
+script = ExtResource("2_8ni8d")
+
+[node name="NoteDB" type="Node" parent="." unique_id=1836190437]
+script = ExtResource("3_7hi0s")
+
+[node name="DeckDB" type="Node" parent="." unique_id=1212553175]
+script = ExtResource("4_x3tr7")

@@ -1,6 +1,16 @@
 extends Node
 class_name Manager
 
+# 这是“业务层基类”。
+# 作用：
+# 1) 给所有子管理器提供统一的数据库入口（_db_manager）
+# 2) 提供统一事务包装（begin/commit/rollback/run_in_transaction）
+# 3) 提供统一返回格式（ok/fail）
+#
+# 你可以把它理解成：
+# - 子类负责“做什么业务”
+# - 这个基类负责“如何安全地和数据库配合”
+
 signal manager_error(code: String, message: String)
 
 # 初始化数据库应用
@@ -19,7 +29,7 @@ func has_db_manager() -> bool: ## 检查是否已注入 db_manager
 	return _db_manager != null
 
 
-func require_db_manager() -> bool:
+func require_db_manager() -> bool: ## 要求 db_manager 必须存在，否则立刻报错
 	if has_db_manager():
 		return true
 	push_error("DB manager not set")
@@ -54,25 +64,31 @@ func rollback_transaction() -> bool: ## 统一回滚事务并做方法存在性�
 	return _db_manager.call("rollback_transaction")
 
 
-func run_in_transaction(action: Callable) -> Dictionary: ## 数据库操作自动化
+func run_in_transaction(action: Callable) -> Dictionary: ## 用“自动挡事务”执行业务动作（推荐子类优先用它）
+	# 步骤 1：先开事务
 	if not begin_transaction():
 		return fail("TX_BEGIN_FAILED", "无法开启事务")
-		
+
+	# 步骤 2：执行外部传进来的业务代码
 	var result = action.call()
-	
+
+	# 步骤 3：根据返回结果决定提交还是回滚
 
 	if typeof(result) == TYPE_DICTIONARY and result.get("success", false) == true:
 		if commit_transaction():
 			return result
 		else:
+			# 提交失败时也回滚，避免脏状态
 			rollback_transaction()
 			return fail("TX_COMMIT_FAILED", "操作成功了，但最后打包存入数据库时失败了")
 	else:
+		# 业务失败，直接回滚
 		rollback_transaction()
-		# 如果它本来就是个标准错误字典，就原样返回；不然就帮它包装成标准错误
+		# 如果 result 已是标准错误字典，就原样透传
 		if typeof(result) == TYPE_DICTIONARY and result.has("success"):
 			return result
 		else:
+			# 不是标准结构时，统一包装成 fail
 			return fail("TX_ACTION_FAILED", "事务操作执行失败或返回值不规范", result)
 
 
