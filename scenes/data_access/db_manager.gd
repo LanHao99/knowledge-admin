@@ -61,26 +61,13 @@ func require_open() -> bool: ## 要求数据库已打开，否则返回失败
 
 
 func load_schema_config() -> Dictionary: ## 从 JSON 文件读取 schema 配置
-	# 1) 检查文件是否存在
-	if not FileAccess.file_exists(SCHEMA_JSON_PATH):
-		return fail("SCHEMA_FILE_NOT_FOUND", "找不到 schema 文件: %s" % SCHEMA_JSON_PATH)
+	var result := SchemaParser.parse_json_file(SCHEMA_JSON_PATH)
+	if not result.get("success", false):
+		# 如果失败了，直接透传带有错误代码和信息的字典
+		return result
 
-	# 2) 读取文本（这里只负责读文件，不做建表）
-	var file := FileAccess.open(SCHEMA_JSON_PATH, FileAccess.READ)
-	if file == null:
-		return fail("SCHEMA_FILE_OPEN_FAILED", "无法打开 schema 文件: %s" % SCHEMA_JSON_PATH)
-	var text: String = file.get_as_text()
-
-	# 3) 解析 JSON 并缓存到 _schema_config
-	var parser := JSON.new()
-	var parse_code: int = parser.parse(text)
-	if parse_code != OK:
-		return fail("SCHEMA_JSON_PARSE_FAILED", "schema JSON 解析失败: line=%d msg=%s" % [parser.get_error_line(), parser.get_error_message()])
-
-	if typeof(parser.data) != TYPE_DICTIONARY:
-		return fail("SCHEMA_JSON_INVALID", "schema JSON 顶层必须是 Dictionary")
-
-	_schema_config = parser.data
+	# 成功则缓存下来
+	_schema_config = result.get("data", {})
 	return ok(_schema_config)
 
 
@@ -170,6 +157,53 @@ func scalar(sql: String, params: Array = [], default_value: Variant = null) -> D
 		return ok(row[key])
 
 	return ok(default_value)
+
+
+## 获取最后一次 INSERT 的 rowid。
+##
+## 输入: 无。
+## 输出: 返回标准字典。成功时 `data` 为 int（本连接最近一次 INSERT 的自增 ID）。
+func last_insert_rowid() -> Dictionary:
+	var result := scalar("SELECT last_insert_rowid() AS rowid;", [], 0)
+	if not result.get("success", false):
+		return result
+	return ok(int(result.get("data", 0)))
+
+
+## 检查指定表是否存在。
+##
+## 输入: table_name (String) - 表名（如 "decks"）。
+## 输出: bool。存在返回 true，不存在或查询失败返回 false。
+func table_exists(table_name: String) -> bool:
+	if not _is_safe_identifier(table_name):
+		push_warning("[DBManager] 非法表名: %s" % table_name)
+		return false
+	var result := scalar("SELECT COUNT(*) AS cnt FROM sqlite_master WHERE type='table' AND name=?;", [table_name], 0)
+	if not result.get("success", false):
+		return false
+	return int(result.get("data", 0)) > 0
+
+
+## 获取表行数（支持 WHERE 子句）。
+##
+## 输入:
+##   table_name (String) - 表名。
+##   where_sql (String) - 可选过滤条件，不要带 `WHERE` 关键字（如 "deck_id=? AND queue=?"）。
+##   params (Array) - where_sql 对应的绑定参数。
+## 输出: 返回标准字典。成功时 `data` 为 int（符合条件的行数）。
+func count(table_name: String, where_sql: String = "", params: Array = []) -> Dictionary:
+	if not _is_safe_identifier(table_name):
+		return fail("INVALID_TABLE_NAME", "非法表名: %s" % table_name)
+
+	var sql: String = "SELECT COUNT(*) AS cnt FROM %s" % table_name
+	if where_sql.strip_edges() != "":
+		sql += " WHERE %s" % where_sql
+	sql += ";"
+
+	var result := scalar(sql, params, 0)
+	if not result.get("success", false):
+		return result
+	return ok(int(result.get("data", 0)))
 
 
 func init_schema() -> Dictionary: ## 根据 JSON 动态创建表和索引
@@ -304,3 +338,17 @@ func _sqlite_fail(code: String, sql: String, prefix: String = "") -> Dictionary:
 		message = "%s | sqlite: %s" % [message, plugin_error]
 
 	return _fail(code, message)
+
+
+## 检查 SQL 标识符是否合法（仅允许字母、数字、下划线，且不能以数字开头）。
+##
+## 输入: identifier (String) - 待校验的标识符。
+## 输出: bool。合法返回 true，否则返回 false。
+func _is_safe_identifier(identifier: String) -> bool:
+	if identifier == "":
+		return false
+	var regex := RegEx.new()
+	var compile_code: int = regex.compile("^[A-Za-z_][A-Za-z0-9_]*$")
+	if compile_code != OK:
+		return false
+	return regex.search(identifier) != null
