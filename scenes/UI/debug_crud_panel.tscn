@@ -1,0 +1,214 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/debug_crud_panel.gd" id="1_bkhsq"]
+
+[node name="DebugCrudPanel" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_bkhsq")
+
+[node name="RootMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="MainVBox" type="VBoxContainer" parent="RootMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="Toolbar" type="HBoxContainer" parent="RootMargin/MainVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TitleLabel" type="Label" parent="RootMargin/MainVBox/Toolbar"]
+layout_mode = 2
+text = "Deck + Database CRUD Debug Panel"
+
+[node name="RefreshAllButton" type="Button" parent="RootMargin/MainVBox/Toolbar"]
+layout_mode = 2
+text = "Refresh All"
+
+[node name="ContentHBox" type="HBoxContainer" parent="RootMargin/MainVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="DeckPanel" type="PanelContainer" parent="RootMargin/MainVBox/ContentHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="DeckVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentHBox/DeckPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DeckTitle" type="Label" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox"]
+layout_mode = 2
+text = "Deck CRUD"
+
+[node name="DeckForm" type="GridContainer" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox"]
+layout_mode = 2
+columns = 2
+
+[node name="DeckNameLabel" type="Label" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
+layout_mode = 2
+text = "Name"
+
+[node name="DeckNameInput" type="LineEdit" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
+layout_mode = 2
+placeholder_text = "Deck name"
+
+[node name="DeckParentIdLabel" type="Label" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
+layout_mode = 2
+text = "Parent ID"
+
+[node name="DeckParentIdInput" type="SpinBox" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
+layout_mode = 2
+min_value = 0.0
+max_value = 999999.0
+step = 1.0
+rounded = true
+
+[node name="DeckIdLabel" type="Label" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
+layout_mode = 2
+text = "Deck ID"
+
+[node name="DeckIdInput" type="SpinBox" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
+layout_mode = 2
+min_value = 1.0
+max_value = 999999.0
+step = 1.0
+rounded = true
+
+[node name="DeckRenameLabel" type="Label" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
+layout_mode = 2
+text = "Rename To"
+
+[node name="DeckRenameInput" type="LineEdit" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
+layout_mode = 2
+placeholder_text = "New deck name"
+
+[node name="DeckButtons" type="HBoxContainer" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="CreateDeckButton" type="Button" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckButtons"]
+layout_mode = 2
+text = "Create"
+
+[node name="GetDeckButton" type="Button" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckButtons"]
+layout_mode = 2
+text = "Read"
+
+[node name="ListDeckButton" type="Button" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckButtons"]
+layout_mode = 2
+text = "List"
+
+[node name="RenameDeckButton" type="Button" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckButtons"]
+layout_mode = 2
+text = "Update"
+
+[node name="DeleteDeckButton" type="Button" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckButtons"]
+layout_mode = 2
+text = "Delete"
+
+[node name="DeckListView" type="ItemList" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="DbPanel" type="PanelContainer" parent="RootMargin/MainVBox/ContentHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="DbVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentHBox/DbPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DbTitle" type="Label" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox"]
+layout_mode = 2
+text = "Notes Table CRUD"
+
+[node name="DbForm" type="GridContainer" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox"]
+layout_mode = 2
+columns = 2
+
+[node name="NoteIdLabel" type="Label" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbForm"]
+layout_mode = 2
+text = "Note ID"
+
+[node name="NoteIdInput" type="SpinBox" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbForm"]
+layout_mode = 2
+min_value = 1.0
+max_value = 999999.0
+step = 1.0
+rounded = true
+
+[node name="NoteTypeLabel" type="Label" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbForm"]
+layout_mode = 2
+text = "Note Type"
+
+[node name="NoteTypeInput" type="SpinBox" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbForm"]
+layout_mode = 2
+min_value = 1.0
+max_value = 999999.0
+step = 1.0
+rounded = true
+
+[node name="NoteFieldsLabel" type="Label" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbForm"]
+layout_mode = 2
+text = "fields_data JSON"
+
+[node name="NoteFieldsInput" type="TextEdit" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbForm"]
+custom_minimum_size = Vector2(0, 90)
+layout_mode = 2
+
+[node name="DbButtons" type="HBoxContainer" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="CreateNoteButton" type="Button" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbButtons"]
+layout_mode = 2
+text = "Create"
+
+[node name="ReadNoteButton" type="Button" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbButtons"]
+layout_mode = 2
+text = "Read"
+
+[node name="UpdateNoteButton" type="Button" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbButtons"]
+layout_mode = 2
+text = "Update"
+
+[node name="DeleteNoteButton" type="Button" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbButtons"]
+layout_mode = 2
+text = "Delete"
+
+[node name="ListNoteButton" type="Button" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbButtons"]
+layout_mode = 2
+text = "List"
+
+[node name="NoteListView" type="ItemList" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="LogOutput" type="TextEdit" parent="RootMargin/MainVBox"]
+custom_minimum_size = Vector2(0, 220)
+layout_mode = 2
+size_flags_horizontal = 3
+editable = false
