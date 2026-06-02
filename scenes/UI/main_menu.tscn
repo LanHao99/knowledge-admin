@@ -36,7 +36,7 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 bbcode_enabled = true
-text = "[font_size=26][b][wave amp=6 freq=4]📚 Knowledge Admin[/wave][/b][/font_size]"
+text = "[font_size=26][wave amp=6 freq=4]📚 Knowledge Admin[/wave][/font_size]"
 fit_content = true
 scroll_active = false
 
@@ -45,14 +45,14 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="SettingsButton" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=1000000007]
+custom_minimum_size = Vector2(88, 36)
 layout_mode = 2
 text = "⚙ 设置"
-custom_minimum_size = Vector2(88, 36)
 
 [node name="DebugButton" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=1000000008]
+custom_minimum_size = Vector2(88, 36)
 layout_mode = 2
 text = "🔧 调试"
-custom_minimum_size = Vector2(88, 36)
 
 [node name="CenterArea" type="CenterContainer" parent="RootMargin/MainVBox" unique_id=1000000009]
 layout_mode = 2
@@ -60,9 +60,9 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="MainCard" type="PanelContainer" parent="RootMargin/MainVBox/CenterArea" unique_id=1000000010]
+custom_minimum_size = Vector2(520, 0)
 layout_mode = 2
 size_flags_horizontal = 4
-custom_minimum_size = Vector2(520, 0)
 
 [node name="CardVBox" type="VBoxContainer" parent="RootMargin/MainVBox/CenterArea/MainCard" unique_id=1000000011]
 layout_mode = 2
@@ -110,19 +110,22 @@ scroll_active = false
 layout_mode = 2
 
 [node name="DeckListBtn" type="Button" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000018]
+custom_minimum_size = Vector2(0, 44)
+size_flags_horizontal = 3
 layout_mode = 2
 text = "📖 牌组管理"
-custom_minimum_size = Vector2(0, 44)
 
 [node name="NoteBrowseBtn" type="Button" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000019]
+custom_minimum_size = Vector2(0, 44)
+size_flags_horizontal = 3
 layout_mode = 2
 text = "📝 笔记浏览"
-custom_minimum_size = Vector2(0, 44)
 
 [node name="StudyBtn" type="Button" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000020]
+custom_minimum_size = Vector2(0, 48)
+size_flags_horizontal = 3
 layout_mode = 2
 text = "▶ 开始学习"
-custom_minimum_size = Vector2(0, 48)
 
 [node name="Sep2" type="HSeparator" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000021]
 layout_mode = 2
