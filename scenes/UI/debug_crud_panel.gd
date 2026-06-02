@@ -3,9 +3,6 @@ extends Control
 
 var _deck_manager: DeckManager = null
 var _note_manager: NoteManager = null
-var _deck_db: DeckDB = null
-var _note_db: NoteDB = null
-var _card_db: CardDB = null
 var _fields_rows: Array = []
 
 @onready var _deck_name_input: LineEdit = $RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm/DeckNameInput
@@ -54,27 +51,7 @@ func _ready() -> void:
 		_refresh_note_list()
 
 
-## 退出场景时释放管理器和数据库节点。
-##
-## 输入: 无。
-## 输出: 无。
-func _exit_tree() -> void:
-	_clear_fields_editor()
-	if _deck_manager != null:
-		_deck_manager.queue_free()
-		_deck_manager = null
-	if _note_manager != null:
-		_note_manager.queue_free()
-		_note_manager = null
-	if _deck_db != null:
-		_deck_db.queue_free()
-		_deck_db = null
-	if _note_db != null:
-		_note_db.queue_free()
-		_note_db = null
-	if _card_db != null:
-		_card_db.queue_free()
-		_card_db = null
+## 退出场景时释放管理器节点（Manager 内部自行管理 DB 子节点）。\n##\n## 输入: 无。\n## 输出: 无。\nfunc _exit_tree() -> void:\n\t_clear_fields_editor()\n\tif _deck_manager != null:\n\t\t_deck_manager.queue_free()\n\t\t_deck_manager = null\n\tif _note_manager != null:\n\t\t_note_manager.queue_free()\n\t\t_note_manager = null
 
 
 ## 设定初始输入值与 fields 默认行。
@@ -148,12 +125,12 @@ func _get_selected_parent_id() -> int:
 	return selected_id
 
 
-## 创建并初始化数据库管理器和业务逻辑管理器。
+## 创建并初始化 Manager，由 Manager 自行管理 DB 生命周期。
 ##
 ## 输入: 无。
 ## 输出: bool - 初始化成功返回 true。
 func _ensure_database_ready() -> bool:
-	if _deck_manager != null and _deck_db != null and _deck_db.is_open():
+	if _deck_manager != null and _deck_manager.is_ready() and _note_manager != null and _note_manager.is_ready():
 		return true
 	
 	# 清理旧实例
@@ -163,53 +140,24 @@ func _ensure_database_ready() -> bool:
 	if _note_manager != null:
 		_note_manager.queue_free()
 		_note_manager = null
-	if _deck_db != null:
-		_deck_db.queue_free()
-		_deck_db = null
-	if _note_db != null:
-		_note_db.queue_free()
-		_note_db = null
-	if _card_db != null:
-		_card_db.queue_free()
-		_card_db = null
 	
-	# 创建数据层
-	_deck_db = DeckDB.new()
-	add_child(_deck_db)
-	_deck_db.configure("user://knowledge_admin.db")
+	const db_path: String = "user://knowledge_admin.db"
 	
-	if not _deck_db.open():
-		_append_log("数据库打开失败: %s" % _deck_db.get_last_error())
-		return false
-	
-	var init_result: Dictionary = _deck_db.init_schema()
-	if not init_result.get("success", false):
-		_append_log("Schema 初始化失败: %s" % _format_result(init_result))
-		return false
-	
-	# 创建其他 DB 实例（复用同一数据库连接路径）
-	_note_db = NoteDB.new()
-	add_child(_note_db)
-	_note_db.configure("user://knowledge_admin.db")
-	_note_db.open()
-	
-	_card_db = CardDB.new()
-	add_child(_card_db)
-	_card_db.configure("user://knowledge_admin.db")
-	_card_db.open()
-	
-	# 创建业务逻辑层
+	# 创建 DeckManager（内部自行创建 DeckDB）
 	_deck_manager = DeckManager.new()
 	add_child(_deck_manager)
-	_deck_manager.set_deck_db(_deck_db)
+	if not _deck_manager.setup(db_path):
+		_append_log("DeckManager 初始化失败")
+		return false
 	
+	# 创建 NoteManager（内部自行创建 NoteDB + CardDB + DeckDB）
 	_note_manager = NoteManager.new()
 	add_child(_note_manager)
-	_note_manager.set_note_db(_note_db)
-	_note_manager.set_card_db(_card_db)
-	_note_manager.set_deck_db(_deck_db)
+	if not _note_manager.setup(db_path):
+		_append_log("NoteManager 初始化失败")
+		return false
 	
-	_append_log("数据库与 Manager 层就绪: user://knowledge_admin.db")
+	_append_log("Manager 层就绪: " + db_path)
 	return true
 
 
