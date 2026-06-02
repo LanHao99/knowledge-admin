@@ -18,16 +18,16 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 16
 
 [node name="MainVBox" type="VBoxContainer" parent="RootMargin" unique_id=1000000003]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/separation = 12
+theme_override_constants/separation = 16
 
 [node name="TopBar" type="HBoxContainer" parent="RootMargin/MainVBox" unique_id=1000000004]
 layout_mode = 2
@@ -36,7 +36,7 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 bbcode_enabled = true
-text = "[font_size=22][b][wave amp=6 freq=4]📚 Knowledge Admin[/wave][/b][/font_size]"
+text = "[font_size=26][b][wave amp=6 freq=4]📚 Knowledge Admin[/wave][/b][/font_size]"
 fit_content = true
 scroll_active = false
 
@@ -47,10 +47,12 @@ size_flags_horizontal = 3
 [node name="SettingsButton" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=1000000007]
 layout_mode = 2
 text = "⚙ 设置"
+custom_minimum_size = Vector2(88, 36)
 
 [node name="DebugButton" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=1000000008]
 layout_mode = 2
 text = "🔧 调试"
+custom_minimum_size = Vector2(88, 36)
 
 [node name="CenterArea" type="CenterContainer" parent="RootMargin/MainVBox" unique_id=1000000009]
 layout_mode = 2
@@ -58,18 +60,18 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="MainCard" type="PanelContainer" parent="RootMargin/MainVBox/CenterArea" unique_id=1000000010]
-custom_minimum_size = Vector2(340, 0)
 layout_mode = 2
 size_flags_horizontal = 4
+custom_minimum_size = Vector2(520, 0)
 
 [node name="CardVBox" type="VBoxContainer" parent="RootMargin/MainVBox/CenterArea/MainCard" unique_id=1000000011]
 layout_mode = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 18
 
 [node name="LogoLabel" type="RichTextLabel" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000012]
 layout_mode = 2
 bbcode_enabled = true
-text = "[center][font_size=28][wave amp=10 freq=5]📚 Knowledge Admin[/wave][/font_size][/center]"
+text = "[center][font_size=36][wave amp=10 freq=5]📚 Knowledge Admin[/wave][/font_size][/center]"
 fit_content = true
 scroll_active = false
 
@@ -82,7 +84,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 bbcode_enabled = true
 text = "[center]牌组
-[font_size=22]—[/font_size][/center]"
+[font_size=26]—[/font_size][/center]"
 fit_content = true
 scroll_active = false
 
@@ -91,7 +93,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 bbcode_enabled = true
 text = "[center]待复习
-[font_size=22]—[/font_size][/center]"
+[font_size=26]—[/font_size][/center]"
 fit_content = true
 scroll_active = false
 
@@ -100,7 +102,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 bbcode_enabled = true
 text = "[center]今日
-[font_size=22]—[/font_size][/center]"
+[font_size=26]—[/font_size][/center]"
 fit_content = true
 scroll_active = false
 
@@ -110,14 +112,17 @@ layout_mode = 2
 [node name="DeckListBtn" type="Button" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000018]
 layout_mode = 2
 text = "📖 牌组管理"
+custom_minimum_size = Vector2(0, 44)
 
 [node name="NoteBrowseBtn" type="Button" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000019]
 layout_mode = 2
 text = "📝 笔记浏览"
+custom_minimum_size = Vector2(0, 44)
 
 [node name="StudyBtn" type="Button" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000020]
 layout_mode = 2
 text = "▶ 开始学习"
+custom_minimum_size = Vector2(0, 48)
 
 [node name="Sep2" type="HSeparator" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000021]
 layout_mode = 2
@@ -136,3 +141,13 @@ size_flags_horizontal = 3
 [node name="StatusLabel" type="Label" parent="RootMargin/MainVBox/BottomBar" unique_id=1000000025]
 layout_mode = 2
 text = "就绪 ✓"
+
+[node name="Container" type="Container" parent="." unique_id=355516080]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 420.0
+offset_top = 174.0
+offset_right = -420.0
+offset_bottom = -174.0

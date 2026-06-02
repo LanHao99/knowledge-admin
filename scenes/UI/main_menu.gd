@@ -39,10 +39,10 @@ func _setup_panel_style() -> void:
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.08, 0.08, 0.12, 0.92)
 	style.set_corner_radius_all(12)
-	style.content_margin_left = 24
-	style.content_margin_top = 18
-	style.content_margin_right = 24
-	style.content_margin_bottom = 18
+	style.content_margin_left = 32
+	style.content_margin_top = 24
+	style.content_margin_right = 32
+	style.content_margin_bottom = 24
 	_main_card.add_theme_stylebox_override("panel", style)
 
 
