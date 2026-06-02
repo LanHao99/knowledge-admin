@@ -8,14 +8,12 @@ class_name NoteManager
 
 
 var _note_db: NoteDB = null
-var _card_db: CardDB = null  # 保留用于跨表事务（create_note / delete_note），不直接写 SQL
+var _card_db: CardDB = null # 保留用于跨表事务（create_note / delete_note），不直接写 SQL
 var _deck_db: DeckDB = null
 var _last_generate_error: Dictionary = {}
 
 
-## 初始化数据层并打开数据库，由 Manager 自行管理 DB 生命周期。
-##
-## 输入: db_path (String) - 数据库文件路径（如 "user://knowledge_admin.db"）。
+## 初始化数据层并打开数据库，由 Manager 自行管理 DB 生命周期。## 输入: db_path (String) - 数据库文件路径（如 "user://knowledge_admin.db"）。
 ## 输出: bool - 初始化成功返回 true。
 func setup(db_path: String) -> bool:
 	_note_db = NoteDB.new()
@@ -48,17 +46,13 @@ func setup(db_path: String) -> bool:
 	return true
 
 
-## 检查是否已完成 setup 初始化。
-##
-## 输入: 无。
+## 检查是否已完成 setup 初始化。## 输入: 无。
 ## 输出: bool - 已初始化返回 true。
 func is_ready() -> bool:
 	return _note_db != null and _note_db.is_open() and _card_db != null and _card_db.is_open()
 
 
-## 创建笔记并生成对应卡片。
-##
-## 输入:
+## 创建笔记并生成对应卡片。## 输入:
 ##   note_type_id (int) - 笔记类型 ID。
 ##   fields (Dictionary) - 字段数据。
 ##   deck_id (int) - 目标牌组 ID。
@@ -109,9 +103,7 @@ func create_note(note_type_id: int, fields: Dictionary, deck_id: int, tags: Arra
 	return tx_result
 
 
-## 更新笔记字段与标签。
-##
-## 输入:
+## 更新笔记字段与标签。## 输入:
 ##   note_id (int) - 笔记 ID。
 ##   fields (Dictionary) - 新字段数据。
 ##   tags (Array[String]) - 标签列表（当前仅保留接口）。
@@ -144,9 +136,7 @@ func update_note(note_id: int, fields: Dictionary, tags: Array[String] = []) -> 
 	return ok(note)
 
 
-## 删除笔记及其关联卡片。
-##
-## 输入: note_id (int) - 笔记 ID。
+## 删除笔记及其关联卡片。## 输入: note_id (int) - 笔记 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 `{deleted_cards: int}`。
 func delete_note(note_id: int) -> Dictionary:
 	if _note_db == null:
@@ -181,9 +171,7 @@ func delete_note(note_id: int) -> Dictionary:
 	return tx_result
 
 
-## 获取单条笔记。
-##
-## 输入: note_id (int) - 笔记 ID。
+## 获取单条笔记。## 输入: note_id (int) - 笔记 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 NoteEntity 或 null。
 func get_note(note_id: int) -> Dictionary:
 	if _note_db == null:
@@ -191,9 +179,7 @@ func get_note(note_id: int) -> Dictionary:
 	return _note_db.get_note_by_id(note_id)
 
 
-## 获取全部笔记列表。
-##
-## 输入: 无。
+## 获取全部笔记列表。## 输入: 无。
 ## 输出: 返回标准字典。成功时 `data` 为 Array[NoteEntity]。
 func get_all_notes() -> Dictionary:
 	if _note_db == null:
@@ -201,9 +187,7 @@ func get_all_notes() -> Dictionary:
 	return _note_db.get_all_notes()
 
 
-## 按牌组获取笔记列表。
-##
-## 输入: deck_id (int) - 牌组 ID。
+## 按牌组获取笔记列表。## 输入: deck_id (int) - 牌组 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 Array[NoteEntity]。
 func get_notes_by_deck(deck_id: int) -> Dictionary:
 	if _note_db == null:
@@ -211,9 +195,7 @@ func get_notes_by_deck(deck_id: int) -> Dictionary:
 	return _note_db.get_notes_by_deck(deck_id)
 
 
-## 按关键词搜索笔记。
-##
-## 输入:
+## 按关键词搜索笔记。## 输入:
 ##   query (String) - 搜索词。
 ##   deck_id (int) - 可选牌组过滤，0 表示全局搜索。
 ## 输出: 返回标准字典。成功时 `data` 为 Array[NoteEntity]。
@@ -224,9 +206,7 @@ func search_notes(query: String, deck_id: int = 0) -> Dictionary:
 
 
 ## 获取渲染卡片所需的内容（卡片 + 关联笔记的字段数据）。
-## Note ↔ Card 的内容拼接逻辑归属 NoteManager，因为内容的"正反面"由笔记字段决定。
-##
-## 输入: card_id (int) - 卡片 ID。
+## Note ↔ Card 的内容拼接逻辑归属 NoteManager，因为内容的"正反面"由笔记字段决定。## 输入: card_id (int) - 卡片 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 `{front, back, fields, card, note}`。
 func get_content_for_card(card_id: int) -> Dictionary:
 	if _card_db == null:
@@ -270,9 +250,7 @@ func get_content_for_card(card_id: int) -> Dictionary:
 # ── 内部工具方法 ──
 
 
-## 根据 note_type 生成卡片（V1 每条笔记只生成 1 张卡）。
-##
-## 输入:
+## 根据 note_type 生成卡片（V1 每条笔记只生成 1 张卡）。## 输入:
 ##   note_id (int) - 笔记 ID。
 ##   deck_id (int) - 目标牌组 ID。
 ##   note_type_id (int) - 笔记类型 ID。
@@ -305,9 +283,7 @@ func _generate_cards_for_note(note_id: int, deck_id: int, note_type_id: int) -> 
 	return [card]
 
 
-## 校验牌组是否存在。
-##
-## 输入: deck_id (int) - 牌组 ID。
+## 校验牌组是否存在。## 输入: deck_id (int) - 牌组 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 true。
 func _validate_deck_exists(deck_id: int) -> Dictionary:
 	if deck_id <= 0:
@@ -332,9 +308,7 @@ func _validate_deck_exists(deck_id: int) -> Dictionary:
 	return ok(true)
 
 
-## 按候选字段名顺序获取第一个非空值。
-##
-## 输入:
+## 按候选字段名顺序获取第一个非空值。## 输入:
 ##   fields (Dictionary) - 字段字典。
 ##   candidates (Array[String]) - 候选键名列表。
 ## 输出: String。找到则返回对应文本，否则返回空字符串。

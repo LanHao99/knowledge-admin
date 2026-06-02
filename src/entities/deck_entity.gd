@@ -27,9 +27,7 @@ var created_at: int = 0
 var updated_at: int = 0
 
 
-## 将当前实体序列化为字典，便于传给数据层执行 INSERT/UPDATE。
-##
-## 输出: Dictionary，键名与数据库 decks 表字段一一对应。id 为 0 时不写入（让数据库自增）。
+## 将当前实体序列化为字典，便于传给数据层执行 INSERT/UPDATE。## 输出: Dictionary，键名与数据库 decks 表字段一一对应。id 为 0 时不写入（让数据库自增）。
 func to_dict() -> Dictionary:
 	var d := {
 		"name": name,
@@ -44,9 +42,7 @@ func to_dict() -> Dictionary:
 	return d
 
 
-## 从字典反序列化，用于数据层 SELECT 查询后将行记录转换为类型安全的实体对象。
-##
-## 输入: d (Dictionary) - 数据库查询返回的行字典，键名应与 decks 表字段对应。
+## 从字典反序列化，用于数据层 SELECT 查询后将行记录转换为类型安全的实体对象。## 输入: d (Dictionary) - 数据库查询返回的行字典，键名应与 decks 表字段对应。
 func from_dict(d: Dictionary) -> void:
 	if d.has("id"):
 		var val = d.get("id")
@@ -77,24 +73,18 @@ func from_dict(d: Dictionary) -> void:
 		updated_at = int(val) if val != null else 0
 
 
-## 判断当前牌组是否为根级（无父节点）。
-##
-## 输出: bool，parent_id == 0 时返回 true。
+## 判断当前牌组是否为根级（无父节点）。## 输出: bool，parent_id == 0 时返回 true。
 func is_root() -> bool:
 	return parent_id == 0
 
 
-## 返回牌组路径层级分隔符（用于未来实现牌组全路径显示）。
-##
-## 输出: String，固定返回 "::"（对齐 Anki 的牌组层级表示习惯）。
+## 返回牌组路径层级分隔符（用于未来实现牌组全路径显示）。## 输出: String，固定返回 "::"（对齐 Anki 的牌组层级表示习惯）。
 func get_path_separator() -> String:
 	return "::"
 
 
 ## 返回牌组在 UI 中显示的完整路径字符串（如 "语言::日语::N1词汇"）。
-## 当前为占位实现，未来可配合 DeckManager 的 get_deck_tree 递归拼接父节点名称。
-##
-## 输入: parent_name (String) - 父牌组名称，空字符串表示根级。
+## 当前为占位实现，未来可配合 DeckManager 的 get_deck_tree 递归拼接父节点名称。## 输入: parent_name (String) - 父牌组名称，空字符串表示根级。
 ## 输出: String，拼接后的完整路径。
 func get_full_path(parent_name: String = "") -> String:
 	if parent_name.is_empty():
@@ -102,8 +92,6 @@ func get_full_path(parent_name: String = "") -> String:
 	return parent_name + get_path_separator() + name
 
 
-## 生成一个当前时间的 Unix 时间戳，用于新建或更新时填充 created_at / updated_at。
-##
-## 输出: int，当前系统时间的 Unix 时间戳（秒级）。
+## 生成一个当前时间的 Unix 时间戳，用于新建或更新时填充 created_at / updated_at。## 输出: int，当前系统时间的 Unix 时间戳（秒级）。
 static func now_timestamp() -> int:
 	return int(Time.get_unix_time_from_system())

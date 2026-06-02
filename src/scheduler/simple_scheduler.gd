@@ -10,9 +10,7 @@ const _LEARNING_STEP_SECONDS: int = 10 * 60
 const _SECONDS_PER_DAY: int = 86400
 
 
-## 计算下一次复习状态。
-##
-## 输入:
+## 计算下一次复习状态。## 输入:
 ##   card (CardEntity) - 当前卡片实体。
 ##   rating (int) - 用户评分，取值见 Scheduler.Rating。
 ##   now_timestamp (int) - 当前 Unix 时间戳（秒）。
@@ -75,9 +73,7 @@ func calculate_next_state(card: CardEntity, rating: int, now_timestamp: int) -> 
 	}
 
 
-## 获取卡片当前应归属的队列。
-##
-## 输入:
+## 获取卡片当前应归属的队列。## 输入:
 ##   card (CardEntity) - 当前卡片实体。
 ##   now_day_index (int) - 当前天数索引。
 ##   now_timestamp (int) - 当前 Unix 时间戳（秒）。
@@ -102,9 +98,7 @@ func classify_queue(card: CardEntity, now_day_index: int, now_timestamp: int) ->
 			return Queue.NEW
 
 
-## 返回新卡片的默认调度状态。
-##
-## 输入: 无。
+## 返回新卡片的默认调度状态。## 输入: 无。
 ## 输出: Dictionary，包含 queue/due/reps/lapses/stability/difficulty。
 func get_initial_state() -> Dictionary:
 	return {
@@ -117,9 +111,7 @@ func get_initial_state() -> Dictionary:
 	}
 
 
-## 估算某评分对应的下次间隔文案。
-##
-## 输入:
+## 估算某评分对应的下次间隔文案。## 输入:
 ##   card (CardEntity) - 当前卡片实体。
 ##   rating (int) - 用户评分，取值见 Scheduler.Rating。
 ## 输出: String，形如 "10分钟后"、"4天后"。
@@ -144,9 +136,7 @@ func estimate_next_interval(card: CardEntity, rating: int) -> String:
 	return "%d天后" % estimated_days
 
 
-## 解析当前卡片的基础间隔天数。
-##
-## 输入:
+## 解析当前卡片的基础间隔天数。## 输入:
 ##   card (CardEntity) - 当前卡片实体。
 ##   now_day_index (int) - 当前天数索引。
 ## 输出: int，最小为 1 的间隔天数。
@@ -164,9 +154,7 @@ func _resolve_current_interval_days(card: CardEntity, now_day_index: int) -> int
 	return 1
 
 
-## 计算简单版易度因子（SM-2 风格）。
-##
-## 输入: card (CardEntity) - 当前卡片实体。
+## 计算简单版易度因子（SM-2 风格）。## 输入: card (CardEntity) - 当前卡片实体。
 ## 输出: float，取值范围 1.3~3.0。
 func _get_ease_factor(card: CardEntity) -> float:
 	if card.difficulty <= 0.0:
@@ -175,25 +163,19 @@ func _get_ease_factor(card: CardEntity) -> float:
 	return _clampf(factor, 1.3, 3.0)
 
 
-## 返回当前 Unix 时间戳（秒）。
-##
-## 输入: 无。
+## 返回当前 Unix 时间戳（秒）。## 输入: 无。
 ## 输出: int，当前系统时间戳。
 func _now_timestamp() -> int:
 	return int(Time.get_unix_time_from_system())
 
 
-## 将 Unix 时间戳转换为天数索引。
-##
-## 输入: unix_timestamp (int) - Unix 时间戳（秒）。
+## 将 Unix 时间戳转换为天数索引。## 输入: unix_timestamp (int) - Unix 时间戳（秒）。
 ## 输出: int，天数索引。
 func _day_index_from_timestamp(unix_timestamp: int) -> int:
 	return int(unix_timestamp / _SECONDS_PER_DAY)
 
 
-## 对浮点数做区间裁剪（兼容性封装）。
-##
-## 输入:
+## 对浮点数做区间裁剪（兼容性封装）。## 输入:
 ##   value (float) - 待裁剪值。
 ##   min_value (float) - 最小值。
 ##   max_value (float) - 最大值。

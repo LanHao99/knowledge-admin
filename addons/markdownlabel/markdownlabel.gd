@@ -1,9 +1,7 @@
 @tool
 class_name MarkdownLabel
 extends RichTextLabel
-## A control for displaying Markdown-style text.
-##
-## A custom node that extends [RichTextLabel] to use Markdown instead of BBCode.
+## A control for displaying Markdown-style text.## A custom node that extends [RichTextLabel] to use Markdown instead of BBCode.
 ## [br][br]
 ## [b][u]Usage:[/u][/b]
 ## Simply add a MarkdownLabel to the scene and write its [member markdown_text] field in Markdown format. Alternatively, you can use the  [method display_file] method to automatically import the contents of a Markdown file.
@@ -12,9 +10,7 @@ extends RichTextLabel
 ## [br][br]
 ## You can still use BBCode tags that don't have a Markdown equivalent, such as `[u]underlined text[/u]`, allowing you to have the full functionality of RichTextLabel with the simplicity and readibility of Markdown.
 ## [br][br]
-## Check out the full guide in the Github repo readme file (linked below). If encountering any unreported bug or unexpected bahaviour, please ensure that your Markdown is written as clean as possible, following best practices.
-##
-## @tutorial(Github repository): https://github.com/daenvil/MarkdownLabel
+## Check out the full guide in the Github repo readme file (linked below). If encountering any unreported bug or unexpected bahaviour, please ensure that your Markdown is written as clean as possible, following best practices.## @tutorial(Github repository): https://github.com/daenvil/MarkdownLabel
 
 const _ESCAPE_PLACEHOLDER := ";$\uFFFD:%s$;"
 const _ESCAPEABLE_CHARACTERS := "\\*_~`[]()\"<>#-+.!"
@@ -34,7 +30,7 @@ signal task_checkbox_clicked(id: int, line: int, checked: bool, task_string: Str
 
 ## The text to be displayed in Markdown format.[br][br]
 ## [i]Note: the [member RichTextLabel.text] property is overridden so modifying it through code has the same effect as modifying [member markdown_text].[/i]
-@export_multiline var markdown_text: String : set = _set_markdown_text
+@export_multiline var markdown_text: String: set = _set_markdown_text
 
 ## If enabled, links will be automatically handled by this node, without needing to manually connect them. Valid header anchors will make the label scroll to that header's position. Valid URLs and e-mails will be opened according to the user's default settings.
 @export var automatic_links := true
@@ -43,53 +39,53 @@ signal task_checkbox_clicked(id: int, line: int, checked: bool, task_string: Str
 
 @export_group("Header formats")
 ## Formatting options for level-1 headers
-@export var h1 := H1Format.new() : set = _set_h1_format
+@export var h1 := H1Format.new(): set = _set_h1_format
 ## Formatting options for level-2 headers
-@export var h2 := H2Format.new() : set = _set_h2_format
+@export var h2 := H2Format.new(): set = _set_h2_format
 ## Formatting options for level-3 headers
-@export var h3 := H3Format.new() : set = _set_h3_format
+@export var h3 := H3Format.new(): set = _set_h3_format
 ## Formatting options for level-4 headers
-@export var h4 := H4Format.new() : set = _set_h4_format
+@export var h4 := H4Format.new(): set = _set_h4_format
 ## Formatting options for level-5 headers
-@export var h5 := H5Format.new() : set = _set_h5_format
+@export var h5 := H5Format.new(): set = _set_h5_format
 ## Formatting options for level-6 headers
-@export var h6 := H6Format.new() : set = _set_h6_format
+@export var h6 := H6Format.new(): set = _set_h6_format
 
 @export_group("Task lists")
 ## Whether task list checkboxes are clickable or not.
-@export var enable_checkbox_clicks := true :
+@export var enable_checkbox_clicks := true:
 	set(new_value):
 		enable_checkbox_clicks = new_value
 		queue_update()
 ## String that will be displayed for unchecked task list items. Accepts BBCode and Markdown.
-@export var unchecked_item_character := "☐" :
+@export var unchecked_item_character := "☐":
 	set(new_value):
 		unchecked_item_character = new_value
 		queue_update()
 ## String that will be displayed for checked task list items. Accepts BBCode and Markdown.
-@export var checked_item_character := "☑" :
+@export var checked_item_character := "☑":
 	set(new_value):
 		checked_item_character = new_value
 		queue_update()
 
 @export_group("Horizontal rules", "hr_")
 ## Height of horizontal rules. Only for Godot 4.5+.
-@export_range(0, 99, 1, "suffix:px") var hr_height: int = 2 :
+@export_range(0, 99, 1, "suffix:px") var hr_height: int = 2:
 	set(new_value):
 		hr_height = new_value
 		queue_update()
 ## Width of horizontal rules, as a percentage of the label's width. Only for Godot 4.5+.
-@export_range(0, 100, 1, "suffix:%") var hr_width: float = 90 :
+@export_range(0, 100, 1, "suffix:%") var hr_width: float = 90:
 	set(new_value):
 		hr_width = new_value
 		queue_update()
 ## Alignment of horizontal rules. Only for Godot 4.5+.
-@export_enum("left", "center", "right") var hr_alignment: String = "center" :
+@export_enum("left", "center", "right") var hr_alignment: String = "center":
 	set(new_value):
 		hr_alignment = new_value
 		queue_update()
 ## Color of horizontal rules. Only for Godot 4.5+.
-@export var hr_color: Color = Color.WHITE :
+@export var hr_color: Color = Color.WHITE:
 	set(new_value):
 		hr_color = new_value
 		queue_update()
@@ -329,7 +325,7 @@ func _convert_markdown(source_text: String = "") -> String:
 				current_code_block_char_count = line.strip_edges().length()
 				_debug("... opening tilde block")
 				continue
-		if within_code_block: #ignore any formatting inside code block
+		if within_code_block: # ignore any formatting inside code block
 			_converted_text += _escape_bbcode(line)
 			continue
 		
@@ -593,7 +589,7 @@ func _process_link_syntax(line: String) -> String:
 			)
 			if title_result and title:
 				processed_line = processed_line.insert(
-					_start + _text.get_start() +12 +url.length() + _text.get_string(1).length(),
+					_start + _text.get_start() + 12 + url.length() + _text.get_string(1).length(),
 					"[/hint]"
 				).insert(_start + _text.get_start(), "[hint=%s]" % title)
 			_debug("... hyperlink: " + result.get_string())
@@ -633,7 +629,7 @@ func _process_text_formatting_syntax(line: String) -> String:
 		var _end := result.get_end()
 		processed_line = processed_line.erase(_start, 2).insert(_start, "[b]")
 		processed_line = processed_line.erase(_end - 1, 2).insert(_end - 1, "[/b]")
-		_debug("... bold text: "+result.get_string(2))
+		_debug("... bold text: " + result.get_string(2))
 	
 	# Italic text
 	while true:
@@ -661,7 +657,7 @@ func _process_text_formatting_syntax(line: String) -> String:
 			processed_line = processed_line.erase(_start, 1).insert(_start, "[i]")
 			processed_line = processed_line.erase(_end + 1, 1).insert(_end + 1, "[/i]")
 			
-		_debug("... italic text: "+result.get_string(2))
+		_debug("... italic text: " + result.get_string(2))
 	
 	# Strike-through text
 	regex.compile("(\\~\\~)(.+?)\\1")
@@ -688,7 +684,7 @@ func _process_header_syntax(line: String) -> String:
 		for _char in result.get_string():
 			if _char != "#" or n == 6:
 				break
-			n+=1
+			n += 1
 		var n_spaces := 0
 		for _char in result.get_string().substr(n):
 			if _char != " ":
@@ -732,7 +728,7 @@ func _process_hr_syntax(line: String) -> String:
 	return processed_line
 
 func _escape_bbcode(source: String) -> String:
-	return source.replacen("[",_ESCAPE_PLACEHOLDER).replacen("]","[rb]").replacen(_ESCAPE_PLACEHOLDER,"[lb]")
+	return source.replacen("[", _ESCAPE_PLACEHOLDER).replacen("]", "[rb]").replacen(_ESCAPE_PLACEHOLDER, "[lb]")
 
 func _escape_chars(_text: String) -> String:
 	var escaped_text := _text
@@ -742,12 +738,12 @@ func _escape_chars(_text: String) -> String:
 		escaped_text = escaped_text.replacen(_char, _ESCAPE_PLACEHOLDER % _escaped_characters_map[_char])
 	return escaped_text
 
-func _reset_escaped_chars(_text: String,code:=false) -> String:
+func _reset_escaped_chars(_text: String, code := false) -> String:
 	var unescaped_text := _text
 	for _char in _ESCAPEABLE_CHARACTERS:
 		if not _char in _escaped_characters_map:
 			continue
-		unescaped_text = unescaped_text.replacen(_ESCAPE_PLACEHOLDER%_escaped_characters_map[_char],"\\"+_char if code else _char)
+		unescaped_text = unescaped_text.replacen(_ESCAPE_PLACEHOLDER%_escaped_characters_map[_char], "\\" + _char if code else _char)
 	return unescaped_text
 
 func _debug(string: String) -> void:
@@ -758,7 +754,7 @@ func _debug(string: String) -> void:
 func _denotes_fenced_code_block(line: String, character: String) -> bool:
 	var stripped_line := line.strip_edges()
 	var count := stripped_line.count(character)
-	if count >= 3 and count==stripped_line.length():
+	if count >= 3 and count == stripped_line.length():
 		return true
 	else:
 		return false
@@ -780,12 +776,12 @@ func _process_escaped_characters(line: String) -> String:
 func _process_table_syntax(line: String) -> String:
 	if line.count("|") < 2:
 		if _within_table:
-			_debug ("... end of table")
+			_debug("... end of table")
 			_within_table = false
-			return "[/table]\n"+line
+			return "[/table]\n" + line
 		else:
 			return line
-	_debug("... table row: "+line)
+	_debug("... table row: " + line)
 	_table_row += 1
 	var split_line := line.trim_prefix("|").trim_suffix("|").split("|")
 	var processed_line := ""
@@ -797,7 +793,7 @@ func _process_table_syntax(line: String) -> String:
 		var is_delimiter := true
 		for cell in split_line:
 			var stripped_cell := cell.strip_edges()
-			if stripped_cell.count("-")+stripped_cell.count(":") != stripped_cell.length():
+			if stripped_cell.count("-") + stripped_cell.count(":") != stripped_cell.length():
 				is_delimiter = false
 				break
 		if is_delimiter:
@@ -821,7 +817,7 @@ func _get_header_format(level: int) -> Resource:
 			return h5
 		6:
 			return h6
-	push_warning("Invalid header level: "+str(level))
+	push_warning("Invalid header level: " + str(level))
 	return null
 
 func _get_header_tags(header_format: Resource, closing := false) -> String:
@@ -853,10 +849,10 @@ func _get_header_tags(header_format: Resource, closing := false) -> String:
 	return tags
 
 func _get_header_reference(header_string: String) -> String:
-	var anchor := "#" + header_string.lstrip("#").strip_edges().to_lower().replace(" ","-")
+	var anchor := "#" + header_string.lstrip("#").strip_edges().to_lower().replace(" ", "-")
 	if anchor in _header_anchor_count:
 		_header_anchor_count[anchor] += 1
-		anchor += "-" + str(_header_anchor_count[anchor]-1)
+		anchor += "-" + str(_header_anchor_count[anchor] - 1)
 	else:
 		_header_anchor_count[anchor] = 1
 	return anchor
@@ -871,6 +867,6 @@ func _on_checkbox_clicked(id: int, was_checked: bool) -> void:
 		push_error("Couldn't find the clicked task list checkbox (id=%d, line=%d)" % [id, iline]) # Shouldn't happen. Please report the bug if it happens.
 		return
 	lines[iline] = lines[iline].erase(i, old_string.length()).insert(i, new_string)
-	_set("text", "\n".join(lines)) #calling [text] directly from this class does not use [_set()].
+	_set("text", "\n".join(lines)) # calling [text] directly from this class does not use [_set()].
 	task_checkbox_clicked.emit(id, iline, !was_checked, lines[iline].substr(i + 4))
 #endregion

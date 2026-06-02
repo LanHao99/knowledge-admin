@@ -5,9 +5,7 @@ class_name DeckManager
 var _deck_db: DeckDB = null
 
 
-## 初始化数据层并打开数据库，由 Manager 自行管理 DB 生命周期。
-##
-## 输入: db_path (String) - 数据库文件路径（如 "user://knowledge_admin.db"）。
+## 初始化数据层并打开数据库，由 Manager 自行管理 DB 生命周期。## 输入: db_path (String) - 数据库文件路径（如 "user://knowledge_admin.db"）。
 ## 输出: bool - 初始化成功返回 true。
 func setup(db_path: String) -> bool:
 	_deck_db = DeckDB.new()
@@ -26,25 +24,19 @@ func setup(db_path: String) -> bool:
 	return true
 
 
-## 获取当前 DeckDB 引用（供其他 Manager 跨仓库查询）。
-##
-## 输入: 无。
+## 获取当前 DeckDB 引用（供其他 Manager 跨仓库查询）。## 输入: 无。
 ## 输出: DeckDB - 牌组仓库对象；未初始化时为 null。
 func get_deck_db() -> DeckDB:
 	return _deck_db
 
 
-## 检查是否已完成 setup 初始化。
-##
-## 输入: 无。
+## 检查是否已完成 setup 初始化。## 输入: 无。
 ## 输出: bool - 已初始化返回 true。
 func is_ready() -> bool:
 	return _deck_db != null and _deck_db.is_open()
 
 
-## 创建牌组。
-##
-## 输入:
+## 创建牌组。## 输入:
 ##   name (String) - 牌组名称。
 ##   parent_id (int) - 父牌组 ID，0 表示根级。
 ## 输出: 返回标准字典。成功时 `data` 为 DeckEntity。
@@ -79,9 +71,7 @@ func create_deck(name: String, parent_id: int = 0) -> Dictionary:
 	return tx_result
 
 
-## 重命名牌组。
-##
-## 输入:
+## 重命名牌组。## 输入:
 ##   deck_id (int) - 牌组 ID。
 ##   new_name (String) - 新名称。
 ## 输出: 返回标准字典。成功时 `data` 为 DeckEntity。
@@ -112,9 +102,7 @@ func rename_deck(deck_id: int, new_name: String) -> Dictionary:
 	return ok(deck)
 
 
-## 移动牌组到新的父节点。
-##
-## 输入:
+## 移动牌组到新的父节点。## 输入:
 ##   deck_id (int) - 牌组 ID。
 ##   new_parent_id (int) - 新父牌组 ID，0 表示移动到根级。
 ## 输出: 返回标准字典。成功时 `data` 为 DeckEntity。
@@ -155,9 +143,7 @@ func move_deck(deck_id: int, new_parent_id: int) -> Dictionary:
 	return ok(deck)
 
 
-## 归档或恢复牌组。
-##
-## 输入:
+## 归档或恢复牌组。## 输入:
 ##   deck_id (int) - 牌组 ID。
 ##   archived (bool) - true 表示归档，false 表示恢复。
 ## 输出: 返回标准字典。成功时 `data` 为 DeckEntity。
@@ -181,9 +167,7 @@ func archive_deck(deck_id: int, archived: bool = true) -> Dictionary:
 	return ok(deck)
 
 
-## 删除牌组（硬删除）。
-##
-## 输入: deck_id (int) - 牌组 ID。
+## 删除牌组（硬删除）。## 输入: deck_id (int) - 牌组 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 null。
 func delete_deck(deck_id: int) -> Dictionary:
 	if _deck_db == null:
@@ -209,9 +193,7 @@ func delete_deck(deck_id: int) -> Dictionary:
 	return ok()
 
 
-## 获取单个牌组。
-##
-## 输入: deck_id (int) - 牌组 ID。
+## 获取单个牌组。## 输入: deck_id (int) - 牌组 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 DeckEntity 或 null。
 func get_deck(deck_id: int) -> Dictionary:
 	if _deck_db == null:
@@ -219,9 +201,7 @@ func get_deck(deck_id: int) -> Dictionary:
 	return _deck_db.get_deck_by_id(deck_id)
 
 
-## 按名称获取牌组。
-##
-## 输入: name (String) - 牌组名称。
+## 按名称获取牌组。## 输入: name (String) - 牌组名称。
 ## 输出: 返回标准字典。成功时 `data` 为 DeckEntity 或 null。
 func get_deck_by_name(name: String) -> Dictionary:
 	if _deck_db == null:
@@ -229,9 +209,7 @@ func get_deck_by_name(name: String) -> Dictionary:
 	return _deck_db.get_deck_by_name(name)
 
 
-## 获取全部牌组列表（默认不含归档）。
-##
-## 输入: 无。
+## 获取全部牌组列表（默认不含归档）。## 输入: 无。
 ## 输出: 返回标准字典。成功时 `data` 为 Array[DeckEntity]。
 func get_all_decks() -> Dictionary:
 	if _deck_db == null:
@@ -239,9 +217,7 @@ func get_all_decks() -> Dictionary:
 	return _deck_db.get_all_decks(false)
 
 
-## 获取牌组树结构。
-##
-## 输入: 无。
+## 获取牌组树结构。## 输入: 无。
 ## 输出: 返回标准字典。成功时 `data` 为树节点数组。
 func get_deck_tree() -> Dictionary:
 	if _deck_db == null:
@@ -249,9 +225,7 @@ func get_deck_tree() -> Dictionary:
 	return _deck_db.get_deck_tree()
 
 
-## 获取牌组卡片统计。
-##
-## 输入: deck_id (int) - 牌组 ID。
+## 获取牌组卡片统计。## 输入: deck_id (int) - 牌组 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 `{new, learning, review, total}`。
 func get_deck_counts(deck_id: int) -> Dictionary:
 	if _deck_db == null:
@@ -259,9 +233,7 @@ func get_deck_counts(deck_id: int) -> Dictionary:
 	return _deck_db.get_deck_card_counts(deck_id)
 
 
-## 检查同级中是否存在同名牌组。
-##
-## 输入:
+## 检查同级中是否存在同名牌组。## 输入:
 ##   name (String) - 牌组名称。
 ##   parent_id (int) - 父牌组 ID。
 ##   exclude_id (int) - 可选排除的牌组 ID（用于重命名场景）。
@@ -292,9 +264,7 @@ func _is_name_conflict(name: String, parent_id: int, exclude_id: int = 0) -> boo
 	return not row.is_empty()
 
 
-## 清空全部数据（cards, notes, decks）。
-##
-## 输入: 无。
+## 清空全部数据（cards, notes, decks）。## 输入: 无。
 ## 输出: 返回标准字典。成功时 `data` 为删除统计 Dictionary。
 func clear_all_data() -> Dictionary:
 	if _deck_db == null:
@@ -322,9 +292,7 @@ func clear_all_data() -> Dictionary:
 	)
 
 
-## 判断 candidate_parent_id 是否位于 deck_id 的子树中。
-##
-## 输入:
+## 判断 candidate_parent_id 是否位于 deck_id 的子树中。## 输入:
 ##   candidate_parent_id (int) - 待检查的新父节点 ID。
 ##   deck_id (int) - 当前牌组 ID。
 ## 输出: bool。会形成循环时返回 true。

@@ -20,7 +20,7 @@ static var _shared_connections: Dictionary = {}
 
 var _db: SQLite = null
 var _db_path: String = "user://knowledge_admin.db"
-var _owns_connection: bool = false  # 当前实例是否对共享连接持有一份引用计数
+var _owns_connection: bool = false # 当前实例是否对共享连接持有一份引用计数
 var _schema_config: Dictionary = {}
 var _last_error: String = ""
 var _last_code: String = ""
@@ -76,9 +76,7 @@ func close() -> void: ## 释放当前实例对共享连接的引用，归零时�
 	_db = null
 
 
-## 暴露底层 SQLite 句柄，供跨仓库事务做"同连接去重"使用。
-##
-## 输入: 无。
+## 暴露底层 SQLite 句柄，供跨仓库事务做"同连接去重"使用。## 输入: 无。
 ## 输出: SQLite - 当前持有的底层连接；未打开返回 null。
 func get_sqlite() -> SQLite:
 	return _db
@@ -199,9 +197,7 @@ func scalar(sql: String, params: Array = [], default_value: Variant = null) -> D
 	return ok(default_value)
 
 
-## 获取最后一次 INSERT 的 rowid。
-##
-## 输入: 无。
+## 获取最后一次 INSERT 的 rowid。## 输入: 无。
 ## 输出: 返回标准字典。成功时 `data` 为 int（本连接最近一次 INSERT 的自增 ID）。
 func last_insert_rowid() -> Dictionary:
 	var result := scalar("SELECT last_insert_rowid() AS rowid;", [], 0)
@@ -210,9 +206,7 @@ func last_insert_rowid() -> Dictionary:
 	return ok(int(result.get("data", 0)))
 
 
-## 获取最后一次 INSERT、UPDATE 或 DELETE 操作影响的行数。
-##
-## 输入: 无。
+## 获取最后一次 INSERT、UPDATE 或 DELETE 操作影响的行数。## 输入: 无。
 ## 输出: 返回标准字典。成功时 `data` 为 int（最后一次数据变更影响的行数）。
 func changes() -> Dictionary:
 	var result := scalar("SELECT changes() AS cnt;", [], 0)
@@ -221,9 +215,7 @@ func changes() -> Dictionary:
 	return ok(int(result.get("data", 0)))
 
 
-## 检查指定表是否存在。
-##
-## 输入: table_name (String) - 表名（如 "decks"）。
+## 检查指定表是否存在。## 输入: table_name (String) - 表名（如 "decks"）。
 ## 输出: bool。存在返回 true，不存在或查询失败返回 false。
 func table_exists(table_name: String) -> bool:
 	if not _is_safe_identifier(table_name):
@@ -235,9 +227,7 @@ func table_exists(table_name: String) -> bool:
 	return int(result.get("data", 0)) > 0
 
 
-## 获取表行数（支持 WHERE 子句）。
-##
-## 输入:
+## 获取表行数（支持 WHERE 子句）。## 输入:
 ##   table_name (String) - 表名。
 ##   where_sql (String) - 可选过滤条件，不要含 `WHERE` 关键字（如 "deck_id=? AND queue=?"）。
 ##   params (Array) - where_sql 对应的绑定参数。
@@ -391,9 +381,7 @@ func _sqlite_fail(code: String, sql: String, prefix: String = "") -> Dictionary:
 	return _fail(code, message)
 
 
-## 校验 SQL 标识符是否合法（仅允许字母、数字、下划线，且不能以数字开头）。
-##
-## 输入: identifier (String) - 待校验的标识符。
+## 校验 SQL 标识符是否合法（仅允许字母、数字、下划线，且不能以数字开头）。## 输入: identifier (String) - 待校验的标识符。
 ## 输出: bool。合法返回 true，否则返回 false。
 func _is_safe_identifier(identifier: String) -> bool:
 	if identifier == "":

@@ -5,9 +5,7 @@ extends RefCounted
 # 它的所有方法都是 static 的，不需要实例化即可调用。
 # 这样做可以将“解析逻辑”与“数据库执行逻辑”彻底解耦。
 
-## 解析 JSON 文件并返回 schema_config 字典。
-##
-## 输入: file_path (String) - JSON 文件的绝对或相对路径（如 "res://data/db_schema.json"）。
+## 解析 JSON 文件并返回 schema_config 字典。## 输入: file_path (String) - JSON 文件的绝对或相对路径（如 "res://data/db_schema.json"）。
 ## 输出: 返回标准字典。成功时 `data` 为解析出来的 Dictionary。
 static func parse_json_file(file_path: String) -> Dictionary:
 	if not FileAccess.file_exists(file_path):
@@ -30,9 +28,7 @@ static func parse_json_file(file_path: String) -> Dictionary:
 	return _ok(parser.data)
 
 
-## 主入口1：生成建表和建索引语句。
-##
-## 输入: schema_config (Dictionary) - 从 db_schema.json 解析出来的完整字典，必须包含 "tables" 和 "indexes" 键。
+## 主入口1：生成建表和建索引语句。## 输入: schema_config (Dictionary) - 从 db_schema.json 解析出来的完整字典，必须包含 "tables" 和 "indexes" 键。
 ## 输出: 返回标准字典。成功时 `data` 为 Array[String]，包含所有要执行的 CREATE TABLE 和 CREATE INDEX 语句。
 static func build_schema_statements(schema_config: Dictionary) -> Dictionary:
 	if not schema_config.has("tables"):
@@ -63,9 +59,7 @@ static func build_schema_statements(schema_config: Dictionary) -> Dictionary:
 	return _ok(statements)
 
 
-## 主入口2：生成删表语句（用于重置数据库）。
-##
-## 输入: schema_config (Dictionary) - 必须包含 "drop_tables_order" 数组，指示安全删除表的顺序。
+## 主入口2：生成删表语句（用于重置数据库）。## 输入: schema_config (Dictionary) - 必须包含 "drop_tables_order" 数组，指示安全删除表的顺序。
 ## 输出: 返回标准字典。成功时 `data` 为 Array[String]，包含按顺序排列的 DROP TABLE IF EXISTS 语句。
 static func build_drop_statements(schema_config: Dictionary) -> Dictionary:
 	if not schema_config.has("drop_tables_order"):

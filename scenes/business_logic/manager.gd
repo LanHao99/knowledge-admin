@@ -41,9 +41,7 @@ func require_db_manager() -> bool: ## 要求 db_manager 必须存在，否则立
 	return false
 
 
-## 发出"实体已创建"通知信号。
-##
-## 输入:
+## 发出"实体已创建"通知信号。## 输入:
 ##   entity_type (String) - 实体类型，如 "deck"、"note"、"card"。
 ##   entity_id (int) - 实体主键 ID。
 ## 输出: 无。
@@ -51,9 +49,7 @@ func _notify_created(entity_type: String, entity_id: int) -> void:
 	entity_created.emit(entity_type, entity_id)
 
 
-## 发出"实体已更新"通知信号。
-##
-## 输入:
+## 发出"实体已更新"通知信号。## 输入:
 ##   entity_type (String) - 实体类型，如 "deck"、"note"、"card"。
 ##   entity_id (int) - 实体主键 ID。
 ## 输出: 无。
@@ -61,9 +57,7 @@ func _notify_updated(entity_type: String, entity_id: int) -> void:
 	entity_updated.emit(entity_type, entity_id)
 
 
-## 发出"实体已删除"通知信号。
-##
-## 输入:
+## 发出"实体已删除"通知信号。## 输入:
 ##   entity_type (String) - 实体类型，如 "deck"、"note"、"card"。
 ##   entity_id (int) - 实体主键 ID。
 ## 输出: 无。
@@ -127,9 +121,7 @@ func run_in_transaction(action: Callable) -> Dictionary: ## 用"自动挡事务"
 
 ## 在多个 DBManager 上执行统一事务（跨仓库业务编排使用）。
 ## 内部会按底层 SQLite 句柄去重，同一物理连接只发一次 BEGIN/COMMIT，
-## 避免同一 SQLite 文件被多个连接各自持锁导致 SQLITE_BUSY。
-##
-## 输入:
+## 避免同一 SQLite 文件被多个连接各自持锁导致 SQLITE_BUSY。## 输入:
 ##   databases (Array) - 参与事务的 DBManager 列表。
 ##   action (Callable) - 事务体，需返回标准结果字典。
 ## 输出: 返回标准字典。成功时透传 action 的成功结果。
@@ -165,13 +157,11 @@ func run_in_databases_transaction(databases: Array, action: Callable) -> Diction
 
 
 ## 按底层 SQLite 句柄去重：多个 DBManager 若共享同一底层连接，只保留一个。
-## DBManager.get_sqlite() 返回 null 的实例会被过滤（未初始化或已关闭）。
-##
-## 输入: databases (Array) - 原始 DBManager 列表。
+## DBManager.get_sqlite() 返回 null 的实例会被过滤（未初始化或已关闭）。## 输入: databases (Array) - 原始 DBManager 列表。
 ## 输出: Array - 去重后的 DBManager 列表，每个唯一 SQLite 句柄对应一个实例。
 func _dedupe_by_sqlite(databases: Array) -> Array:
-	var seen_connections: Array = []  # Array[SQLite]
-	var unique_dbs: Array = []        # Array[DBManager]
+	var seen_connections: Array = [] # Array[SQLite]
+	var unique_dbs: Array = [] # Array[DBManager]
 
 	for obj in databases:
 		if obj == null:
@@ -190,17 +180,13 @@ func _dedupe_by_sqlite(databases: Array) -> Array:
 	return unique_dbs
 
 
-## 判断一个返回值是否是标准成功字典。
-##
-## 输入: result (Variant) - 任意返回值。
+## 判断一个返回值是否是标准成功字典。## 输入: result (Variant) - 任意返回值。
 ## 输出: bool。是标准成功结构时返回 true。
 func _is_success_result(result: Variant) -> bool:
 	return typeof(result) == TYPE_DICTIONARY and result.get("success", false) == true
 
 
-## 对给定数据库列表执行回滚（忽略回滚失败，尽力而为）。
-##
-## 输入: databases (Array) - DBManager 列表。
+## 对给定数据库列表执行回滚（忽略回滚失败，尽力而为）。## 输入: databases (Array) - DBManager 列表。
 ## 输出: 无。
 func _rollback_databases(databases: Array) -> void:
 	for db in databases:
@@ -208,9 +194,7 @@ func _rollback_databases(databases: Array) -> void:
 			db.rollback_transaction()
 
 
-## 获取当前 Unix 时间戳（秒级）。
-##
-## 输入: 无。
+## 获取当前 Unix 时间戳（秒级）。## 输入: 无。
 ## 输出: int - 当前系统时间戳。
 func _now_timestamp() -> int:
 	return int(Time.get_unix_time_from_system())

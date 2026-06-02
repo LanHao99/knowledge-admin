@@ -7,9 +7,7 @@
 
 
 ```gdscript
-## 解析 JSON 文件并返回 schema_config 字典。
-##
-## 输入: file_path (String) - JSON 文件的绝对或相对路径（如 "res://data/db_schema.json"）。
+## 解析 JSON 文件并返回 schema_config 字典。## 输入: file_path (String) - JSON 文件的绝对或相对路径（如 "res://data/db_schema.json"）。
 ## 输出: 返回标准字典。成功时 `data` 为解析出来的 Dictionary。
 static func parse_json_file(file_path: String) -> Dictionary:
 ```

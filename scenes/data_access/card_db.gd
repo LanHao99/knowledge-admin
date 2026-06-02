@@ -5,9 +5,7 @@ class_name CardDB
 const _SECONDS_PER_DAY: int = 86400
 
 
-## 创建一张新卡片并返回创建后的实体对象。
-##
-## 输入:
+## 创建一张新卡片并返回创建后的实体对象。## 输入:
 ##   note_id (int) - 关联笔记 ID。
 ##   deck_id (int) - 归属牌组 ID。
 ##   template_order (int) - 模板序号。
@@ -33,9 +31,7 @@ func create_card(note_id: int, deck_id: int, template_order: int = 0) -> Diction
 	return get_card_by_id(int(id_result.get("data", 0)))
 
 
-## 根据 ID 查询单张卡片。
-##
-## 输入: card_id (int) - 卡片 ID。
+## 根据 ID 查询单张卡片。## 输入: card_id (int) - 卡片 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 CardEntity；未找到时为 null。
 func get_card_by_id(card_id: int) -> Dictionary:
 	var result := fetch_one("SELECT * FROM cards WHERE id = ? LIMIT 1;", [card_id])
@@ -49,9 +45,7 @@ func get_card_by_id(card_id: int) -> Dictionary:
 	return ok(_row_to_card_entity(row))
 
 
-## 更新整张卡片记录。
-##
-## 输入: card (CardEntity) - 待更新实体，要求 id > 0。
+## 更新整张卡片记录。## 输入: card (CardEntity) - 待更新实体，要求 id > 0。
 ## 输出: 返回标准字典。成功时 `data` 为 null。
 func update_card(card: CardEntity) -> Dictionary:
 	if card == null or card.id <= 0:
@@ -76,17 +70,13 @@ func update_card(card: CardEntity) -> Dictionary:
 	])
 
 
-## 删除单张卡片。
-##
-## 输入: card_id (int) - 卡片 ID。
+## 删除单张卡片。## 输入: card_id (int) - 卡片 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 null。
 func delete_card(card_id: int) -> Dictionary:
 	return execute_bind("DELETE FROM cards WHERE id = ?;", [card_id])
 
 
-## 删除某个笔记下的全部卡片。
-##
-## 输入: note_id (int) - 笔记 ID。
+## 删除某个笔记下的全部卡片。## 输入: note_id (int) - 笔记 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 int（删除数量）。
 func delete_cards_by_note(note_id: int) -> Dictionary:
 	var before_result := count("cards", "note_id = ?", [note_id])
@@ -101,9 +91,7 @@ func delete_cards_by_note(note_id: int) -> Dictionary:
 	return ok(to_delete)
 
 
-## 查询指定队列的到期卡片。
-##
-## 输入:
+## 查询指定队列的到期卡片。## 输入:
 ##   deck_id (int) - 牌组 ID。
 ##   queue_type (int) - 队列类型（0=new, 1=learning, 2=review）。
 ##   limit (int) - 限制条数，<=0 表示不限制。
@@ -130,9 +118,7 @@ func get_due_cards(deck_id: int, queue_type: int, limit: int = 20) -> Dictionary
 	return ok(_rows_to_card_entities(result.get("data", [])))
 
 
-## 综合查询某牌组全部到期卡片（new/learning/review）。
-##
-## 输入:
+## 综合查询某牌组全部到期卡片（new/learning/review）。## 输入:
 ##   deck_id (int) - 牌组 ID。
 ##   now_day_index (int) - 当前天数索引（review/new 使用）。
 ##   now_timestamp (int) - 当前 Unix 时间戳（learning 使用）。
@@ -157,9 +143,7 @@ func get_all_due_cards(deck_id: int, now_day_index: int, now_timestamp: int) -> 
 	})
 
 
-## 查询牌组卡片数量统计。
-##
-## 输入: deck_id (int) - 牌组 ID。
+## 查询牌组卡片数量统计。## 输入: deck_id (int) - 牌组 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 `{new, learning, review, suspended, total}`。
 func get_card_counts(deck_id: int) -> Dictionary:
 	var stats := {
@@ -197,9 +181,7 @@ func get_card_counts(deck_id: int) -> Dictionary:
 	return ok(stats)
 
 
-## 记录一次复习结果（单条更新）。
-##
-## 输入:
+## 记录一次复习结果（单条更新）。## 输入:
 ##   card_id (int) - 卡片 ID。
 ##   rating (int) - 评分（1~4）。
 ##   time_taken_ms (int) - 答题耗时（毫秒）。
@@ -229,9 +211,7 @@ func record_review(card_id: int, rating: int, time_taken_ms: int, new_due: int, 
 	])
 
 
-## 批量移动卡片到新牌组。
-##
-## 输入:
+## 批量移动卡片到新牌组。## 输入:
 ##   card_ids (Array[int]) - 卡片 ID 列表。
 ##   new_deck_id (int) - 新牌组 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 int（更新数量）。
@@ -256,9 +236,7 @@ func move_cards_to_deck(card_ids: Array[int], new_deck_id: int) -> Dictionary:
 	return ok(unique_ids.size())
 
 
-## 批量暂停或恢复卡片。
-##
-## 输入:
+## 批量暂停或恢复卡片。## 输入:
 ##   card_ids (Array[int]) - 卡片 ID 列表。
 ##   suspended (bool) - true 设为暂停；false 从暂停恢复为新卡队列。
 ## 输出: 返回标准字典。成功时 `data` 为 int（更新数量）。
@@ -293,9 +271,7 @@ func suspend_cards(card_ids: Array[int], suspended: bool = true) -> Dictionary:
 	return ok(unique_ids.size())
 
 
-## 在指定时间上下文中查询到期卡片。
-##
-## 输入:
+## 在指定时间上下文中查询到期卡片。## 输入:
 ##   deck_id (int) - 牌组 ID。
 ##   queue_type (int) - 队列类型。
 ##   limit (int) - 限制条数，<=0 表示不限制。
@@ -321,9 +297,7 @@ func _get_due_cards_with_time(deck_id: int, queue_type: int, limit: int, now_day
 	return ok(_rows_to_card_entities(result.get("data", [])))
 
 
-## 将单行查询结果转换为 CardEntity。
-##
-## 输入: row (Dictionary) - cards 表的一行数据。
+## 将单行查询结果转换为 CardEntity。## 输入: row (Dictionary) - cards 表的一行数据。
 ## 输出: CardEntity - 反序列化后的实体对象。
 func _row_to_card_entity(row: Dictionary) -> CardEntity:
 	var entity := CardEntity.new()
@@ -331,9 +305,7 @@ func _row_to_card_entity(row: Dictionary) -> CardEntity:
 	return entity
 
 
-## 将多行查询结果转换为 CardEntity 数组。
-##
-## 输入: rows (Array) - cards 表的多行数据。
+## 将多行查询结果转换为 CardEntity 数组。## 输入: rows (Array) - cards 表的多行数据。
 ## 输出: Array[CardEntity]。
 func _rows_to_card_entities(rows: Array) -> Array[CardEntity]:
 	var entities: Array[CardEntity] = []
@@ -343,9 +315,7 @@ func _rows_to_card_entities(rows: Array) -> Array[CardEntity]:
 	return entities
 
 
-## 构造 SQL IN 子句占位符（如 "?,?,?"）。
-##
-## 输入: count_value (int) - 占位符数量。
+## 构造 SQL IN 子句占位符（如 "?,?,?"）。## 输入: count_value (int) - 占位符数量。
 ## 输出: String - 占位符字符串。
 func _build_in_placeholders(count_value: int) -> String:
 	if count_value <= 0:
@@ -356,9 +326,7 @@ func _build_in_placeholders(count_value: int) -> String:
 	return ",".join(parts)
 
 
-## 去重并清洗 ID 列表（仅保留 >0 的整数）。
-##
-## 输入: ids (Array[int]) - 原始 ID 列表。
+## 去重并清洗 ID 列表（仅保留 >0 的整数）。## 输入: ids (Array[int]) - 原始 ID 列表。
 ## 输出: Array[int] - 去重后的 ID 列表。
 func _unique_int_ids(ids: Array[int]) -> Array[int]:
 	var visited: Dictionary = {}

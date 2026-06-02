@@ -2,9 +2,7 @@ extends DBManager
 class_name DeckDB
 
 
-## 创建一个新牌组并返回创建后的实体对象。
-##
-## 输入:
+## 创建一个新牌组并返回创建后的实体对象。## 输入:
 ##   name (String) - 牌组名称，不能为空。
 ##   parent_id (int) - 父牌组 ID，0 表示根级牌组。
 ##   sort_order (int) - 同级排序值，越小越靠前。
@@ -31,9 +29,7 @@ func create_deck(name: String, parent_id: int = 0, sort_order: int = 0) -> Dicti
 	return get_deck_by_id(int(id_result.get("data", 0)))
 
 
-## 根据 ID 查询单个牌组。
-##
-## 输入: deck_id (int) - 牌组 ID。
+## 根据 ID 查询单个牌组。## 输入: deck_id (int) - 牌组 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 DeckEntity；未找到时为 null。
 func get_deck_by_id(deck_id: int) -> Dictionary:
 	var result := fetch_one("SELECT * FROM decks WHERE id = ? LIMIT 1;", [deck_id])
@@ -47,9 +43,7 @@ func get_deck_by_id(deck_id: int) -> Dictionary:
 	return ok(_row_to_deck_entity(row))
 
 
-## 根据名称查询单个牌组。
-##
-## 输入: name (String) - 牌组名称。
+## 根据名称查询单个牌组。## 输入: name (String) - 牌组名称。
 ## 输出: 返回标准字典。成功时 `data` 为 DeckEntity；未找到时为 null。
 func get_deck_by_name(name: String) -> Dictionary:
 	var result := fetch_one("SELECT * FROM decks WHERE name = ? LIMIT 1;", [name])
@@ -63,9 +57,7 @@ func get_deck_by_name(name: String) -> Dictionary:
 	return ok(_row_to_deck_entity(row))
 
 
-## 更新已有牌组数据。
-##
-## 输入: deck (DeckEntity) - 待更新的牌组实体，要求 id > 0。
+## 更新已有牌组数据。## 输入: deck (DeckEntity) - 待更新的牌组实体，要求 id > 0。
 ## 输出: 返回标准字典。成功时 `data` 为 null。
 func update_deck(deck: DeckEntity) -> Dictionary:
 	if deck == null or deck.id <= 0:
@@ -91,17 +83,13 @@ func update_deck(deck: DeckEntity) -> Dictionary:
 	])
 
 
-## 删除指定牌组。
-##
-## 输入: deck_id (int) - 要删除的牌组 ID。
+## 删除指定牌组。## 输入: deck_id (int) - 要删除的牌组 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 null。
 func delete_deck(deck_id: int) -> Dictionary:
 	return execute_bind("DELETE FROM decks WHERE id = ?;", [deck_id])
 
 
-## 获取全部牌组列表。
-##
-## 输入: include_archived (bool) - 是否包含归档牌组。
+## 获取全部牌组列表。## 输入: include_archived (bool) - 是否包含归档牌组。
 ## 输出: 返回标准字典。成功时 `data` 为 Array[DeckEntity]。
 func get_all_decks(include_archived: bool = false) -> Dictionary:
 	var sql := "SELECT * FROM decks"
@@ -117,9 +105,7 @@ func get_all_decks(include_archived: bool = false) -> Dictionary:
 	return ok(_rows_to_deck_entities(result.get("data", [])))
 
 
-## 获取某个父牌组下的直接子牌组。
-##
-## 输入: parent_id (int) - 父牌组 ID；传 0 获取根级牌组。
+## 获取某个父牌组下的直接子牌组。## 输入: parent_id (int) - 父牌组 ID；传 0 获取根级牌组。
 ## 输出: 返回标准字典。成功时 `data` 为 Array[DeckEntity]。
 func get_child_decks(parent_id: int) -> Dictionary:
 	var sql: String
@@ -137,9 +123,7 @@ func get_child_decks(parent_id: int) -> Dictionary:
 	return ok(_rows_to_deck_entities(result.get("data", [])))
 
 
-## 组装牌组树结构。
-##
-## 输入: 无。
+## 组装牌组树结构。## 输入: 无。
 ## 输出: 返回标准字典。成功时 `data` 为树节点数组，节点结构为 `{deck: DeckEntity, children: Array}`。
 func get_deck_tree() -> Dictionary:
 	var all_result := get_all_decks(true)
@@ -169,9 +153,7 @@ func get_deck_tree() -> Dictionary:
 	return ok(roots)
 
 
-## 获取某个牌组下的卡片统计。
-##
-## 输入: deck_id (int) - 牌组 ID。
+## 获取某个牌组下的卡片统计。## 输入: deck_id (int) - 牌组 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 `{new, learning, review, total}`。
 func get_deck_card_counts(deck_id: int) -> Dictionary:
 	var stats := {
@@ -207,9 +189,7 @@ func get_deck_card_counts(deck_id: int) -> Dictionary:
 	return ok(stats)
 
 
-## 将单行查询结果转换为 DeckEntity。
-##
-## 输入: row (Dictionary) - decks 表的一行数据。
+## 将单行查询结果转换为 DeckEntity。## 输入: row (Dictionary) - decks 表的一行数据。
 ## 输出: DeckEntity - 反序列化后的实体对象。
 func _row_to_deck_entity(row: Dictionary) -> DeckEntity:
 	var entity := DeckEntity.new()
@@ -217,9 +197,7 @@ func _row_to_deck_entity(row: Dictionary) -> DeckEntity:
 	return entity
 
 
-## 将多行查询结果转换为实体数组。
-##
-## 输入: rows (Array) - decks 表的多行数据。
+## 将多行查询结果转换为实体数组。## 输入: rows (Array) - decks 表的多行数据。
 ## 输出: Array[DeckEntity] - 牌组实体数组。
 func _rows_to_deck_entities(rows: Array) -> Array[DeckEntity]:
 	var entities: Array[DeckEntity] = []

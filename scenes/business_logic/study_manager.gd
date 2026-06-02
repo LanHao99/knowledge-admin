@@ -23,33 +23,25 @@ var _done_count: int = 0
 var _last_answer_stack: Array = []
 
 
-## 注入 DeckManager。
-##
-## 输入: deck_manager (DeckManager) - 牌组业务管理器。
+## 注入 DeckManager。## 输入: deck_manager (DeckManager) - 牌组业务管理器。
 ## 输出: 无。
 func set_deck_manager(deck_manager: DeckManager) -> void:
 	_deck_manager = deck_manager
 
 
-## 注入 CardManager。
-##
-## 输入: card_manager (CardManager) - 卡片业务管理器。
+## 注入 CardManager。## 输入: card_manager (CardManager) - 卡片业务管理器。
 ## 输出: 无。
 func set_card_manager(card_manager: CardManager) -> void:
 	_card_manager = card_manager
 
 
-## 注入 NoteManager（可选）。
-##
-## 输入: note_manager (NoteManager) - 笔记业务管理器。
+## 注入 NoteManager（可选）。## 输入: note_manager (NoteManager) - 笔记业务管理器。
 ## 输出: 无。
 func set_note_manager(note_manager: NoteManager) -> void:
 	_note_manager = note_manager
 
 
-## 开启学习会话。
-##
-## 输入:
+## 开启学习会话。## 输入:
 ##   deck_id (int) - 目标牌组 ID。
 ##   new_limit (int) - 新卡上限。
 ##   review_limit (int) - 复习卡上限。
@@ -104,9 +96,7 @@ func start_session(deck_id: int, new_limit: int = 20, review_limit: int = 100) -
 	return ok({"counts": counts})
 
 
-## 结束学习会话并清理内存状态。
-##
-## 输入: 无。
+## 结束学习会话并清理内存状态。## 输入: 无。
 ## 输出: 返回标准字典。成功时 `data` 为统计信息字典。
 func end_session() -> Dictionary:
 	if not _is_active:
@@ -118,17 +108,13 @@ func end_session() -> Dictionary:
 	return ok(stats)
 
 
-## 判断会话是否处于激活状态。
-##
-## 输入: 无。
+## 判断会话是否处于激活状态。## 输入: 无。
 ## 输出: bool。激活返回 true。
 func is_session_active() -> bool:
 	return _is_active
 
 
-## 获取当前卡片。
-##
-## 输入: 无。
+## 获取当前卡片。## 输入: 无。
 ## 输出: 返回标准字典。成功时 `data` 为 CardEntity 或 null。
 func get_current_card() -> Dictionary:
 	if not _is_active:
@@ -138,9 +124,7 @@ func get_current_card() -> Dictionary:
 	return ok(_current_queue[_current_card_index])
 
 
-## 显示答案面（翻卡）。
-##
-## 输入: 无。
+## 显示答案面（翻卡）。## 输入: 无。
 ## 输出: 返回标准字典。成功时 `data` 为当前 CardEntity。
 func show_answer() -> Dictionary:
 	if not _is_active:
@@ -158,9 +142,7 @@ func show_answer() -> Dictionary:
 	return ok(card)
 
 
-## 回答当前卡片并推进队列。
-##
-## 输入: rating (int) - 用户评分（1~4）。
+## 回答当前卡片并推进队列。## 输入: rating (int) - 用户评分（1~4）。
 ## 输出: 返回标准字典。成功时 `data` 为 `{next_card, counts, interval}`。
 func answer(rating: int) -> Dictionary:
 	if not _is_active:
@@ -230,9 +212,7 @@ func answer(rating: int) -> Dictionary:
 	})
 
 
-## 跳过当前卡片并推进到下一张。
-##
-## 输入: 无。
+## 跳过当前卡片并推进到下一张。## 输入: 无。
 ## 输出: 返回标准字典。成功时 `data` 为下一个 CardEntity 或 null。
 func skip_card() -> Dictionary:
 	if not _is_active:
@@ -259,17 +239,13 @@ func skip_card() -> Dictionary:
 	return ok(null)
 
 
-## 撤销上一次答案（预留能力，当前返回未实现）。
-##
-## 输入: 无。
+## 撤销上一次答案（预留能力，当前返回未实现）。## 输入: 无。
 ## 输出: 返回标准字典。当前固定返回失败。
 func undo_last_answer() -> Dictionary:
 	return fail("UNDO_NOT_IMPLEMENTED", "撤销功能尚未实现")
 
 
-## 获取当前会话进度。
-##
-## 输入: 无。
+## 获取当前会话进度。## 输入: 无。
 ## 输出: Dictionary - `{total, done, remaining, new_seen, review_seen, elapsed_ms}`。
 func get_session_progress() -> Dictionary:
 	if _session == null:
@@ -292,9 +268,7 @@ func get_session_progress() -> Dictionary:
 	}
 
 
-## 对卡片数组做限量截取。
-##
-## 输入:
+## 对卡片数组做限量截取。## 输入:
 ##   cards (Array[CardEntity]) - 原卡片数组。
 ##   limit (int) - 最大数量，<=0 表示不限制。
 ## 输出: Array[CardEntity] - 截取后的数组。
@@ -309,9 +283,7 @@ func _slice_cards(cards: Array[CardEntity], limit: int) -> Array[CardEntity]:
 	return result
 
 
-## 计算当前队列分布统计。
-##
-## 输入: 无。
+## 计算当前队列分布统计。## 输入: 无。
 ## 输出: Dictionary - `{new, learning, review, total, remaining}`。
 func _calculate_counts() -> Dictionary:
 	var stats := {
@@ -332,9 +304,7 @@ func _calculate_counts() -> Dictionary:
 	return stats
 
 
-## 构建会话结束统计。
-##
-## 输入: 无。
+## 构建会话结束统计。## 输入: 无。
 ## 输出: Dictionary - 会话统计汇总。
 func _build_stats() -> Dictionary:
 	if _session == null:
@@ -347,9 +317,6 @@ func _build_stats() -> Dictionary:
 
 
 ## 重置运行时状态。
-##
-## 输入: 无。
-## 输出: 无。
 func _reset_runtime_state() -> void:
 	_session = null
 	_current_queue.clear()
@@ -361,17 +328,13 @@ func _reset_runtime_state() -> void:
 	_last_answer_stack.clear()
 
 
-## 获取当前毫秒时间戳。
-##
-## 输入: 无。
+## 获取当前毫秒时间戳。## 输入: 无。
 ## 输出: int - 当前毫秒时间戳。
 func _now_msec() -> int:
 	return Time.get_ticks_msec()
 
 
-## 将任意数组安全转换为 CardEntity 强类型数组。
-##
-## 输入: value (Variant) - 任意数组值，元素可为 CardEntity/Dictionary。
+## 将任意数组安全转换为 CardEntity 强类型数组。## 输入: value (Variant) - 任意数组值，元素可为 CardEntity/Dictionary。
 ## 输出: Array[CardEntity] - 转换后的卡片数组。
 func _to_card_array(value: Variant) -> Array[CardEntity]:
 	var cards: Array[CardEntity] = []

@@ -26,9 +26,7 @@ var created_at: int = 0
 
 
 ## 将当前实体序列化为字典，便于传给数据层执行 INSERT/UPDATE。
-## fields_data 字典会被 JSON 序列化后存入数据库。
-##
-## 输出: Dictionary，键名与数据库 notes 表字段一一对应。
+## fields_data 字典会被 JSON 序列化后存入数据库。## 输出: Dictionary，键名与数据库 notes 表字段一一对应。
 func to_dict() -> Dictionary:
 	var d := {
 		"note_type_id": note_type_id,
@@ -41,36 +39,28 @@ func to_dict() -> Dictionary:
 
 
 ## 从字典反序列化，用于数据层 SELECT 查询后将行记录转换为类型安全的实体对象。
-## 会自动调用 fields_from_json() 将 JSON 字符串解析为 fields_data 字典。
-##
-## 输入: d (Dictionary) - 数据库查询返回的行字典，键名应与 notes 表字段对应。
+## 会自动调用 fields_from_json() 将 JSON 字符串解析为 fields_data 字典。## 输入: d (Dictionary) - 数据库查询返回的行字典，键名应与 notes 表字段对应。
 func from_dict(d: Dictionary) -> void:
-	if d.has("id"):           id = int(d.get("id", 0))
+	if d.has("id"): id = int(d.get("id", 0))
 	if d.has("note_type_id"): note_type_id = int(d.get("note_type_id", 0))
-	if d.has("fields_data"):  fields_from_json(str(d.get("fields_data", "{}")))
-	if d.has("created_at"):   created_at = int(d.get("created_at", 0))
+	if d.has("fields_data"): fields_from_json(str(d.get("fields_data", "{}")))
+	if d.has("created_at"): created_at = int(d.get("created_at", 0))
 
 
-## 获取指定字段的内容。
-##
-## 输入: field_name (String) - 字段名，如 "正面"、"背面"。
+## 获取指定字段的内容。## 输入: field_name (String) - 字段名，如 "正面"、"背面"。
 ## 输出: String，字段值。字段不存在时返回空字符串。
 func get_field(field_name: String) -> String:
 	return str(fields_data.get(field_name, ""))
 
 
-## 设置指定字段的内容。
-##
-## 输入:
+## 设置指定字段的内容。## 输入:
 ##   field_name (String) - 字段名。
 ##   value (String) - 要写入的内容。
 func set_field(field_name: String, value: String) -> void:
 	fields_data[field_name] = value
 
 
-## 将 fields_data 字典序列化为 JSON 字符串，用于写入数据库。
-##
-## 输出: String，JSON 格式的字符串。序列化失败时返回 "{}"。
+## 将 fields_data 字典序列化为 JSON 字符串，用于写入数据库。## 输出: String，JSON 格式的字符串。序列化失败时返回 "{}"。
 func fields_to_json() -> String:
 	var json := JSON.new()
 	var result := json.stringify(fields_data)
@@ -80,9 +70,7 @@ func fields_to_json() -> String:
 	return result
 
 
-## 将 JSON 字符串解析为 fields_data 字典，用于从数据库读取后恢复。
-##
-## 输入: json_str (String) - JSON 格式的字符串。
+## 将 JSON 字符串解析为 fields_data 字典，用于从数据库读取后恢复。## 输入: json_str (String) - JSON 格式的字符串。
 func fields_from_json(json_str: String) -> void:
 	if json_str.is_empty():
 		fields_data = {}
@@ -102,15 +90,11 @@ func fields_from_json(json_str: String) -> void:
 
 ## 获取该笔记对应的卡片应该归属的默认牌组 ID。
 ## 当前为占位实现：返回 0 表示由调用方（NoteManager）根据业务规则决定。
-## 未来可在 note_types 表中扩展 default_deck_id 字段。
-##
-## 输出: int，默认牌组 ID。
+## 未来可在 note_types 表中扩展 default_deck_id 字段。## 输出: int，默认牌组 ID。
 func get_default_deck_id() -> int:
 	return 0
 
 
-## 生成一个当前时间的 Unix 时间戳。
-##
-## 输出: int，当前系统时间的 Unix 时间戳（秒级）。
+## 生成一个当前时间的 Unix 时间戳。## 输出: int，当前系统时间的 Unix 时间戳（秒级）。
 static func now_timestamp() -> int:
 	return int(Time.get_unix_time_from_system())

@@ -9,9 +9,7 @@ var _card_db: CardDB = null
 var _scheduler: Scheduler = null
 
 
-## 初始化数据层并打开数据库，由 Manager 自行管理 DB 生命周期。
-##
-## 输入: db_path (String) - 数据库文件路径（如 "user://knowledge_admin.db"）。
+## 初始化数据层并打开数据库，由 Manager 自行管理 DB 生命周期。## 输入: db_path (String) - 数据库文件路径（如 "user://knowledge_admin.db"）。
 ## 输出: bool - 初始化成功返回 true。
 func setup(db_path: String) -> bool:
 	_card_db = CardDB.new()
@@ -27,34 +25,26 @@ func setup(db_path: String) -> bool:
 	return true
 
 
-## 检查是否已完成 setup 初始化。
-##
-## 输入: 无。
+## 检查是否已完成 setup 初始化。## 输入: 无。
 ## 输出: bool - 已初始化返回 true。
 func is_ready() -> bool:
 	return _card_db != null and _card_db.is_open()
 
 
-## 暴露底层 CardDB 实例，供 NoteManager 跨仓库事务编排使用。
-##
-## 输入: 无。
+## 暴露底层 CardDB 实例，供 NoteManager 跨仓库事务编排使用。## 输入: 无。
 ## 输出: CardDB - 卡片仓库对象；未初始化时返回 null。
 func get_card_db() -> CardDB:
 	return _card_db
 
 
-## 注入调度器实例。
-##
-## 输入: scheduler (Scheduler) - 调度算法实现。
+## 注入调度器实例。## 输入: scheduler (Scheduler) - 调度算法实现。
 ## 输出: 无。
 func set_scheduler(scheduler: Scheduler) -> void:
 	_scheduler = scheduler
 
 
 ## 创建一张复习卡片（供 NoteManager 在创建笔记后调用）。
-## 调用方负责事务边界，本方法仅执行单条 INSERT 并返回实体。
-##
-## 输入:
+## 调用方负责事务边界，本方法仅执行单条 INSERT 并返回实体。## 输入:
 ##   note_id (int) - 关联笔记 ID。
 ##   deck_id (int) - 归属牌组 ID。
 ##   template_order (int) - 模板序号，默认 0。
@@ -71,9 +61,7 @@ func create_card(note_id: int, deck_id: int, template_order: int = 0) -> Diction
 
 
 ## 删除某笔记下的全部卡片（供 NoteManager 在删除笔记前调用）。
-## 调用方负责事务边界。
-##
-## 输入: note_id (int) - 笔记 ID。
+## 调用方负责事务边界。## 输入: note_id (int) - 笔记 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 int（删除的卡片数量）。
 func delete_cards_by_note(note_id: int) -> Dictionary:
 	if _card_db == null:
@@ -84,9 +72,7 @@ func delete_cards_by_note(note_id: int) -> Dictionary:
 	return _card_db.delete_cards_by_note(note_id)
 
 
-## 获取单张卡片。
-##
-## 输入: card_id (int) - 卡片 ID。
+## 获取单张卡片。## 输入: card_id (int) - 卡片 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 CardEntity 或 null。
 func get_card(card_id: int) -> Dictionary:
 	if _card_db == null:
@@ -94,9 +80,7 @@ func get_card(card_id: int) -> Dictionary:
 	return _card_db.get_card_by_id(card_id)
 
 
-## 获取某条笔记下的卡片列表。
-##
-## 输入: note_id (int) - 笔记 ID。
+## 获取某条笔记下的卡片列表。## 输入: note_id (int) - 笔记 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 Array[CardEntity]。
 func get_cards_by_note(note_id: int) -> Dictionary:
 	if _card_db == null:
@@ -111,9 +95,7 @@ func get_cards_by_note(note_id: int) -> Dictionary:
 	return ok(_map_rows_to_cards(rows_result.get("data", [])))
 
 
-## 获取某个牌组下的卡片列表。
-##
-## 输入: deck_id (int) - 牌组 ID。
+## 获取某个牌组下的卡片列表。## 输入: deck_id (int) - 牌组 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 Array[CardEntity]。
 func get_cards_by_deck(deck_id: int) -> Dictionary:
 	if _card_db == null:
@@ -128,9 +110,7 @@ func get_cards_by_deck(deck_id: int) -> Dictionary:
 	return ok(_map_rows_to_cards(rows_result.get("data", [])))
 
 
-## 获取指定队列的到期卡片。
-##
-## 输入:
+## 获取指定队列的到期卡片。## 输入:
 ##   deck_id (int) - 牌组 ID。
 ##   queue_type (int) - 队列类型。
 ##   limit (int) - 限制条数。
@@ -141,9 +121,7 @@ func get_due_cards(deck_id: int, queue_type: int, limit: int = 20) -> Dictionary
 	return _card_db.get_due_cards(deck_id, queue_type, limit)
 
 
-## 组装某牌组的学习队列。
-##
-## 输入: deck_id (int) - 牌组 ID。
+## 组装某牌组的学习队列。## 输入: deck_id (int) - 牌组 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 `{new, learning, review, counts}`。
 func get_study_queue(deck_id: int) -> Dictionary:
 	if _card_db == null:
@@ -174,9 +152,7 @@ func get_study_queue(deck_id: int) -> Dictionary:
 	})
 
 
-## 提交一次卡片作答，计算并落库下一状态。
-##
-## 输入:
+## 提交一次卡片作答，计算并落库下一状态。## 输入:
 ##   card_id (int) - 卡片 ID。
 ##   rating (int) - 评分（1~4）。
 ##   time_taken_ms (int) - 本次作答耗时（毫秒）。
@@ -238,9 +214,7 @@ func answer_card(card_id: int, rating: int, time_taken_ms: int) -> Dictionary:
 	})
 
 
-## 暂停或恢复单张卡片。
-##
-## 输入:
+## 暂停或恢复单张卡片。## 输入:
 ##   card_id (int) - 卡片 ID。
 ##   suspended (bool) - true 暂停，false 恢复。
 ## 输出: 返回标准字典。成功时 `data` 为 CardEntity。
@@ -262,9 +236,7 @@ func suspend_card(card_id: int, suspended: bool = true) -> Dictionary:
 	return ok(card_result.get("data", null))
 
 
-## 搁置或取消搁置单张卡片。
-##
-## 输入:
+## 搁置或取消搁置单张卡片。## 输入:
 ##   card_id (int) - 卡片 ID。
 ##   buried (bool) - true 搁置，false 取消搁置。
 ## 输出: 返回标准字典。成功时 `data` 为 CardEntity。
@@ -296,9 +268,7 @@ func bury_card(card_id: int, buried: bool = true) -> Dictionary:
 	return ok(card)
 
 
-## 将卡片重置为全新状态。
-##
-## 输入: card_id (int) - 卡片 ID。
+## 将卡片重置为全新状态。## 输入: card_id (int) - 卡片 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 CardEntity。
 func reset_card(card_id: int) -> Dictionary:
 	if _card_db == null:
@@ -332,9 +302,7 @@ func reset_card(card_id: int) -> Dictionary:
 	return ok(card)
 
 
-## 移动单张卡片到新牌组。
-##
-## 输入:
+## 移动单张卡片到新牌组。## 输入:
 ##   card_id (int) - 卡片 ID。
 ##   new_deck_id (int) - 新牌组 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 CardEntity。
@@ -367,17 +335,13 @@ func move_card_to_deck(card_id: int, new_deck_id: int) -> Dictionary:
 # ── 内部工具方法 ──
 
 
-## 校验调度器返回的 next_state 是否包含必要字段。
-##
-## 输入: next_state (Dictionary) - 调度器返回字典。
+## 校验调度器返回的 next_state 是否包含必要字段。## 输入: next_state (Dictionary) - 调度器返回字典。
 ## 输出: bool。字段齐全返回 true。
 func _is_valid_next_state(next_state: Dictionary) -> bool:
 	return next_state.has("queue") and next_state.has("due") and next_state.has("reps") and next_state.has("lapses")
 
 
-## 将查询行数组映射为 CardEntity 数组。
-##
-## 输入: rows (Array) - cards 表行字典数组。
+## 将查询行数组映射为 CardEntity 数组。## 输入: rows (Array) - cards 表行字典数组。
 ## 输出: Array[CardEntity]。
 func _map_rows_to_cards(rows: Array) -> Array[CardEntity]:
 	var cards: Array[CardEntity] = []
@@ -390,9 +354,7 @@ func _map_rows_to_cards(rows: Array) -> Array[CardEntity]:
 	return cards
 
 
-## 将任意数组安全转换为 CardEntity 强类型数组。
-##
-## 输入: value (Variant) - 任意数组值，元素可为 CardEntity/Dictionary。
+## 将任意数组安全转换为 CardEntity 强类型数组。## 输入: value (Variant) - 任意数组值，元素可为 CardEntity/Dictionary。
 ## 输出: Array[CardEntity] - 转换后的卡片数组。
 func _to_card_array(value: Variant) -> Array[CardEntity]:
 	var cards: Array[CardEntity] = []
