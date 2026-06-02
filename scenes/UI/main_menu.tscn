@@ -1,6 +1,135 @@
 [gd_scene format=3 uid="uid://2ds8mbjfhjgv"]
 
-[ext_resource type="Script" uid="uid://cq2lg4ykcc4xo" path="res://scenes/ui/main_menu.gd" id="1_qwnig"]
+[ext_resource type="Script" uid="uid://cq2lg4ykcc4xo" path="res://scenes/ui/main_menu.gd" id="1_script"]
 
-[node name="MainMenu" type="Node2D" unique_id=90679421]
-script = ExtResource("1_qwnig")
+[node name="MainMenu" type="Control" unique_id=1000000001]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="RootMargin" type="MarginContainer" parent="." unique_id=1000000002]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="MainVBox" type="VBoxContainer" parent="RootMargin" unique_id=1000000003]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="TopBar" type="HBoxContainer" parent="RootMargin/MainVBox" unique_id=1000000004]
+layout_mode = 2
+
+[node name="AppTitle" type="RichTextLabel" parent="RootMargin/MainVBox/TopBar" unique_id=1000000005]
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+text = "[font_size=22][b]📚 Knowledge Admin[/b][/font_size]"
+fit_content = true
+scroll_active = false
+
+[node name="TopSpacer" type="Control" parent="RootMargin/MainVBox/TopBar" unique_id=1000000006]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SettingsButton" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=1000000007]
+layout_mode = 2
+text = "⚙ 设置"
+
+[node name="DebugButton" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=1000000008]
+layout_mode = 2
+text = "🔧 调试"
+
+[node name="CenterArea" type="CenterContainer" parent="RootMargin/MainVBox" unique_id=1000000009]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MainCard" type="PanelContainer" parent="RootMargin/MainVBox/CenterArea" unique_id=1000000010]
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(340, 0)
+
+[node name="CardVBox" type="VBoxContainer" parent="RootMargin/MainVBox/CenterArea/MainCard" unique_id=1000000011]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="LogoLabel" type="RichTextLabel" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000012]
+layout_mode = 2
+bbcode_enabled = true
+text = "[center][font_size=28]📚 Knowledge Admin[/font_size][/center]"
+fit_content = true
+scroll_active = false
+
+[node name="StatsGrid" type="GridContainer" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000013]
+layout_mode = 2
+columns = 3
+
+[node name="DeckStat" type="RichTextLabel" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox/StatsGrid" unique_id=1000000014]
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+text = "[center]牌组\n[font_size=22]—[/font_size][/center]"
+fit_content = true
+scroll_active = false
+
+[node name="DueStat" type="RichTextLabel" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox/StatsGrid" unique_id=1000000015]
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+text = "[center]待复习\n[font_size=22]—[/font_size][/center]"
+fit_content = true
+scroll_active = false
+
+[node name="TodayStat" type="RichTextLabel" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox/StatsGrid" unique_id=1000000016]
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+text = "[center]今日\n[font_size=22]—[/font_size][/center]"
+fit_content = true
+scroll_active = false
+
+[node name="Sep1" type="HSeparator" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000017]
+layout_mode = 2
+
+[node name="DeckListBtn" type="Button" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000018]
+layout_mode = 2
+text = "📖 牌组管理"
+
+[node name="NoteBrowseBtn" type="Button" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000019]
+layout_mode = 2
+text = "📝 笔记浏览"
+
+[node name="StudyBtn" type="Button" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000020]
+layout_mode = 2
+text = "▶ 开始学习"
+
+[node name="Sep2" type="HSeparator" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000021]
+layout_mode = 2
+
+[node name="BottomBar" type="HBoxContainer" parent="RootMargin/MainVBox" unique_id=1000000022]
+layout_mode = 2
+
+[node name="VersionLabel" type="Label" parent="RootMargin/MainVBox/BottomBar" unique_id=1000000023]
+layout_mode = 2
+text = "v1.0.0 | Godot 4.6"
+
+[node name="BottomSpacer" type="Control" parent="RootMargin/MainVBox/BottomBar" unique_id=1000000024]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="StatusLabel" type="Label" parent="RootMargin/MainVBox/BottomBar" unique_id=1000000025]
+layout_mode = 2
+text = "就绪 ✓"
