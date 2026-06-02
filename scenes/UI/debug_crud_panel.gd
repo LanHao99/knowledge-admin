@@ -332,6 +332,11 @@ func _refresh_deck_list() -> void:
 		_deck_list_view.add_item(item_line)
 	_append_log("")
 
+	# 自动同步 deck_id 输入框到第一个可用牌组（解决 ID 递增后默认值脱节问题）
+	if not decks.is_empty():
+		var first_id: int = decks[0].id
+		_auto_sync_deck_id_input(first_id)
+
 
 # ──────────────────────────────────────────────────────────────
 # Notes CRUD
@@ -753,6 +758,21 @@ func _stringify_deck(deck: DeckEntity) -> String:
 		deck.created_at,
 		deck.updated_at
 	]
+
+
+## 自动同步 deck_id 输入框到可用牌组。当前值无效时回退到给定 ID。## 输入: fallback_id (int) - 回退的牌组 ID。
+## 输出: 无。
+func _auto_sync_deck_id_input(fallback_id: int) -> void:
+	var target_id: int = roundi(_deck_target_id_input.value)
+	if target_id == fallback_id:
+		return
+	if _deck_manager == null:
+		return
+	var check := _deck_manager.get_deck(target_id)
+	if check.get("success", false) and check.get("data", null) != null:
+		return  # 当前 ID 指向的牌组存在，不覆盖用户选择
+	_deck_target_id_input.value = fallback_id
+	_note_deck_id_input.value = fallback_id
 
 
 ## 把标准结果字典格式化为可读字符串。## 输入: result (Dictionary) - 标准返回字典。

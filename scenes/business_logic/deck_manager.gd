@@ -287,6 +287,11 @@ func clear_all_data() -> Dictionary:
 			if changes_result.get("success", false):
 				stats[table] = int(changes_result.get("data", 0))
 		
+		# 重置自增计数器，下次创建 ID 从 1 开始
+		var seq_result := _deck_db.execute_bind("DELETE FROM sqlite_sequence WHERE name IN ('cards', 'notes', 'decks');", [])
+		if not seq_result.get("success", false):
+			return seq_result
+
 		batch_operation_completed.emit("all_data", stats["cards"] + stats["notes"] + stats["decks"])
 		return ok(stats)
 	)
