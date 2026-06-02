@@ -61,15 +61,25 @@ func _connect_signals() -> void:
 		_debug_button.pressed.connect(_on_debug_pressed)
 
 
-## 对需要 BBCode 动态效果的节点做额外样式覆盖。## 输入: 无。
+## 对需要 BBCode 动态效果的节点做额外样式覆盖，并设置按钮最小尺寸。## 输入: 无。
 ## 输出: 无。
 func _apply_bbcode_overrides() -> void:
 	# 高亮"开始学习"按钮
 	if _study_btn != null:
 		_study_btn.add_theme_color_override("font_color", Color(1.0, 0.85, 0.25, 1.0))
+		_study_btn.custom_minimum_size = Vector2(0, 48)
+	# 导航按钮统一高度
+	if _deck_list_btn != null:
+		_deck_list_btn.custom_minimum_size = Vector2(0, 44)
+	if _note_browse_btn != null:
+		_note_browse_btn.custom_minimum_size = Vector2(0, 44)
 	# 调试按钮用淡色
 	if _debug_button != null:
 		_debug_button.add_theme_color_override("font_color", Color(0.6, 0.6, 0.7, 1.0))
+		_debug_button.custom_minimum_size = Vector2(88, 36)
+	# 设置按钮
+	if _settings_button != null:
+		_settings_button.custom_minimum_size = Vector2(88, 36)
 	# 底部状态用半透明
 	if _status_label != null:
 		_status_label.add_theme_color_override("font_color", Color(0.55, 0.55, 0.6, 1.0))
