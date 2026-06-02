@@ -7,6 +7,12 @@ extends RefCounted
 # 由 StudyManager 在会话开始时创建，会话结束时销毁。
 # 不加入 Godot 节点树，由 StudyManager 持有引用。
 
+# ── 评分常量（与 CardEntity 对齐，但独立定义以避免实体层循环依赖）──
+const RATING_AGAIN: int = 1  ## 完全遗忘。
+const RATING_HARD: int  = 2  ## 勉强想起。
+const RATING_GOOD: int  = 3  ## 正常回忆。
+const RATING_EASY: int  = 4  ## 轻松回忆。
+
 ## 本次学习的目标牌组 ID。0 表示"全部牌组"（跨牌组学习模式）。
 var deck_id: int = 0
 
@@ -74,7 +80,7 @@ func add_time_ms(time_ms: int) -> void:
 ## 记录一次评分事件，更新扩展统计。
 ##
 ## 输入:
-##   rating (int) - 评分，取值见 CardEntity.RATING_* 常量（1~4）。
+##   rating (int) - 评分，取值 1=Again, 2=Hard, 3=Good, 4=Easy。
 ##   time_taken_ms (int) - 本次答题耗时（毫秒）。
 ##   is_new_card (bool) - 是否为新卡片，影响 new_cards_seen 计数。
 func record_answer(rating: int, time_taken_ms: int, is_new_card: bool = false) -> void:
@@ -87,10 +93,10 @@ func record_answer(rating: int, time_taken_ms: int, is_new_card: bool = false) -
 	# 按评分分类计数
 	var rating_key: String = ""
 	match rating:
-		CardEntity.RATING_AGAIN: rating_key = "again_count"
-		CardEntity.RATING_HARD:  rating_key = "hard_count"
-		CardEntity.RATING_GOOD:  rating_key = "good_count"
-		CardEntity.RATING_EASY:  rating_key = "easy_count"
+		RATING_AGAIN: rating_key = "again_count"
+		RATING_HARD:  rating_key = "hard_count"
+		RATING_GOOD:  rating_key = "good_count"
+		RATING_EASY:  rating_key = "easy_count"
 	if not rating_key.is_empty():
 		session_stats[rating_key] = int(session_stats.get(rating_key, 0)) + 1
 
