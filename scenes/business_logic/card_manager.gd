@@ -1,9 +1,11 @@
-extends Manager
+﻿extends Manager
 class_name CardManager
+
+## 卡片复习管理器，负责卡片的复习生命周期（调度、评分、状态变更）。
+## 不持有 note 相关数据——卡片内容渲染由 NoteManager.get_content_for_card() 提供。
 
 
 var _card_db: CardDB = null
-var _note_db: NoteDB = null
 var _scheduler: Scheduler = null
 
 
@@ -22,13 +24,6 @@ func setup(db_path: String) -> bool:
 		push_error("[CardManager] CardDB Schema 初始化失败")
 		return false
 
-	_note_db = NoteDB.new()
-	add_child(_note_db)
-	_note_db.configure(db_path)
-	if not _note_db.open():
-		push_error("[CardManager] NoteDB 打开失败: %s" % _note_db.get_last_error())
-		return false
-
 	return true
 
 
@@ -37,7 +32,15 @@ func setup(db_path: String) -> bool:
 ## 输入: 无。
 ## 输出: bool - 已初始化返回 true。
 func is_ready() -> bool:
-	return _card_db != null and _card_db.is_open() and _note_db != null and _note_db.is_open()
+	return _card_db != null and _card_db.is_open()
+
+
+## 暴露底层 CardDB 实例，供 NoteManager 跨仓库事务编排使用。
+##
+## 输入: 无。
+## 输出: CardDB - 卡片仓库对象；未初始化时返回 null。
+func get_card_db() -> CardDB:
+	return _card_db
 
 
 ## 注入调度器实例。
@@ -46,6 +49,39 @@ func is_ready() -> bool:
 ## 输出: 无。
 func set_scheduler(scheduler: Scheduler) -> void:
 	_scheduler = scheduler
+
+
+## 创建一张复习卡片（供 NoteManager 在创建笔记后调用）。
+## 调用方负责事务边界，本方法仅执行单条 INSERT 并返回实体。
+##
+## 输入:
+##   note_id (int) - 关联笔记 ID。
+##   deck_id (int) - 归属牌组 ID。
+##   template_order (int) - 模板序号，默认 0。
+## 输出: 返回标准字典。成功时 `data` 为 CardEntity。
+func create_card(note_id: int, deck_id: int, template_order: int = 0) -> Dictionary:
+	if _card_db == null:
+		return fail("CARD_DB_NOT_SET", "card_db 未注入")
+	if note_id <= 0:
+		return fail("NOTE_ID_INVALID", "note_id 必须大于 0")
+	if deck_id <= 0:
+		return fail("DECK_ID_INVALID", "deck_id 必须大于 0")
+
+	return _card_db.create_card(note_id, deck_id, template_order)
+
+
+## 删除某笔记下的全部卡片（供 NoteManager 在删除笔记前调用）。
+## 调用方负责事务边界。
+##
+## 输入: note_id (int) - 笔记 ID。
+## 输出: 返回标准字典。成功时 `data` 为 int（删除的卡片数量）。
+func delete_cards_by_note(note_id: int) -> Dictionary:
+	if _card_db == null:
+		return fail("CARD_DB_NOT_SET", "card_db 未注入")
+	if note_id <= 0:
+		return fail("NOTE_ID_INVALID", "note_id 必须大于 0")
+
+	return _card_db.delete_cards_by_note(note_id)
 
 
 ## 获取单张卡片。
@@ -153,7 +189,7 @@ func answer_card(card_id: int, rating: int, time_taken_ms: int) -> Dictionary:
 	if card_id <= 0:
 		return fail("CARD_ID_INVALID", "card_id 必须大于 0")
 	if rating < CardEntity.RATING_AGAIN or rating > CardEntity.RATING_EASY:
-		return fail("RATING_INVALID", "rating 必须在 1~4 范围内")
+		return fail("RATING_INVALID", "rating 必须在 1~4 范围")
 
 	var card_result := _card_db.get_card_by_id(card_id)
 	if not card_result.get("success", false):
@@ -328,47 +364,7 @@ func move_card_to_deck(card_id: int, new_deck_id: int) -> Dictionary:
 	return ok(card_result.get("data", null))
 
 
-## 获取渲染卡片所需内容（卡片 + 关联笔记字段）。
-##
-## 输入: card_id (int) - 卡片 ID。
-## 输出: 返回标准字典。成功时 `data` 为 `{front, back, fields, card, note}`。
-func get_card_content(card_id: int) -> Dictionary:
-	if _card_db == null:
-		return fail("CARD_DB_NOT_SET", "card_db 未注入")
-	if _note_db == null:
-		return fail("NOTE_DB_NOT_SET", "note_db 未注入")
-
-	var card_result := _card_db.get_card_by_id(card_id)
-	if not card_result.get("success", false):
-		return card_result
-	var card: CardEntity = card_result.get("data", null)
-	if card == null:
-		return fail("CARD_NOT_FOUND", "卡片不存在")
-
-	var note_result := _note_db.get_note_by_id(card.note_id)
-	if not note_result.get("success", false):
-		return note_result
-	var note: NoteEntity = note_result.get("data", null)
-	if note == null:
-		return fail("NOTE_NOT_FOUND", "关联笔记不存在")
-
-	var front: String = _pick_field_value(note.fields_data, ["front", "Front", "正面", "question", "Question"])
-	var back: String = _pick_field_value(note.fields_data, ["back", "Back", "背面", "answer", "Answer"])
-	if front == "" and not note.fields_data.is_empty():
-		var first_key: Variant = note.fields_data.keys()[0]
-		front = str(note.fields_data.get(first_key, ""))
-	if back == "" and note.fields_data.size() > 1:
-		var keys: Array = note.fields_data.keys()
-		var second_key: Variant = keys[1]
-		back = str(note.fields_data.get(second_key, ""))
-
-	return ok({
-		"front": front,
-		"back": back,
-		"fields": note.fields_data.duplicate(true),
-		"card": card,
-		"note": note
-	})
+# ── 内部工具方法 ──
 
 
 ## 校验调度器返回的 next_state 是否包含必要字段。
@@ -410,18 +406,3 @@ func _to_card_array(value: Variant) -> Array[CardEntity]:
 			card.from_dict(item)
 			cards.append(card)
 	return cards
-
-
-## 按候选字段名顺序获取第一个非空值。
-##
-## 输入:
-##   fields (Dictionary) - 字段字典。
-##   candidates (Array[String]) - 候选键名列表。
-## 输出: String。找到则返回对应文本，否则返回空字符串。
-func _pick_field_value(fields: Dictionary, candidates: Array[String]) -> String:
-	for key in candidates:
-		if fields.has(key):
-			var value: String = str(fields.get(key, "")).strip_edges()
-			if value != "":
-				return value
-	return ""

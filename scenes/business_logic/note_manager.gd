@@ -1,9 +1,14 @@
-extends Manager
+﻿extends Manager
 class_name NoteManager
+
+## 笔记管理器，负责笔记（知识点）的完整生命周期，同时管理 笔记↔卡片 的派生关系。
+## 笔记是"知识单元"的载体（fields_data 存储实际内容），卡片是复习引擎的调度单元。
+## NoteManager 持有 card_db 用于 create_note/delete_note 中的跨表事务编排——
+## 这是合理的，因为"创建笔记时生成卡片"和"删除笔记时级联删卡"是笔记领域的业务规则。
 
 
 var _note_db: NoteDB = null
-var _card_db: CardDB = null
+var _card_db: CardDB = null  # 保留用于跨表事务（create_note / delete_note），不直接写 SQL
 var _deck_db: DeckDB = null
 var _last_generate_error: Dictionary = {}
 
@@ -120,7 +125,7 @@ func update_note(note_id: int, fields: Dictionary, tags: Array[String] = []) -> 
 		return fail("NOTE_FIELDS_EMPTY", "fields 不能为空")
 
 	if not tags.is_empty():
-		# 当前 schema 暂无 tags 独立存储，预留参数仅用于接口兼容。
+		# 当前 schema 暂无 tags 独立存储，预留参数仅用于接口兼容
 		pass
 
 	var note_result := _note_db.get_note_by_id(note_id)
@@ -218,6 +223,53 @@ func search_notes(query: String, deck_id: int = 0) -> Dictionary:
 	return _note_db.search_notes(query, deck_id)
 
 
+## 获取渲染卡片所需的内容（卡片 + 关联笔记的字段数据）。
+## Note ↔ Card 的内容拼接逻辑归属 NoteManager，因为内容的"正反面"由笔记字段决定。
+##
+## 输入: card_id (int) - 卡片 ID。
+## 输出: 返回标准字典。成功时 `data` 为 `{front, back, fields, card, note}`。
+func get_content_for_card(card_id: int) -> Dictionary:
+	if _card_db == null:
+		return fail("CARD_DB_NOT_SET", "card_db 未注入")
+	if _note_db == null:
+		return fail("NOTE_DB_NOT_SET", "note_db 未注入")
+
+	var card_result := _card_db.get_card_by_id(card_id)
+	if not card_result.get("success", false):
+		return card_result
+	var card: CardEntity = card_result.get("data", null)
+	if card == null:
+		return fail("CARD_NOT_FOUND", "卡片不存在")
+
+	var note_result := _note_db.get_note_by_id(card.note_id)
+	if not note_result.get("success", false):
+		return note_result
+	var note: NoteEntity = note_result.get("data", null)
+	if note == null:
+		return fail("NOTE_NOT_FOUND", "关联笔记不存在")
+
+	var front: String = _pick_field_value(note.fields_data, ["front", "Front", "正面", "question", "Question"])
+	var back: String = _pick_field_value(note.fields_data, ["back", "Back", "背面", "answer", "Answer"])
+	if front == "" and not note.fields_data.is_empty():
+		var first_key: Variant = note.fields_data.keys()[0]
+		front = str(note.fields_data.get(first_key, ""))
+	if back == "" and note.fields_data.size() > 1:
+		var keys: Array = note.fields_data.keys()
+		var second_key: Variant = keys[1]
+		back = str(note.fields_data.get(second_key, ""))
+
+	return ok({
+		"front": front,
+		"back": back,
+		"fields": note.fields_data.duplicate(true),
+		"card": card,
+		"note": note
+	})
+
+
+# ── 内部工具方法 ──
+
+
 ## 根据 note_type 生成卡片（V1 每条笔记只生成 1 张卡）。
 ##
 ## 输入:
@@ -278,3 +330,18 @@ func _validate_deck_exists(deck_id: int) -> Dictionary:
 	if int(count_result.get("data", 0)) <= 0:
 		return fail("DECK_NOT_FOUND", "牌组不存在")
 	return ok(true)
+
+
+## 按候选字段名顺序获取第一个非空值。
+##
+## 输入:
+##   fields (Dictionary) - 字段字典。
+##   candidates (Array[String]) - 候选键名列表。
+## 输出: String。找到则返回对应文本，否则返回空字符串。
+func _pick_field_value(fields: Dictionary, candidates: Array[String]) -> String:
+	for key in candidates:
+		if fields.has(key):
+			var value: String = str(fields.get(key, "")).strip_edges()
+			if value != "":
+				return value
+	return ""
