@@ -36,7 +36,7 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 bbcode_enabled = true
-text = "[font_size=22][b]📚 Knowledge Admin[/b][/font_size]"
+text = "[font_size=22][b][wave amp=6 freq=4]📚 Knowledge Admin[/wave][/b][/font_size]"
 fit_content = true
 scroll_active = false
 
@@ -58,9 +58,9 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="MainCard" type="PanelContainer" parent="RootMargin/MainVBox/CenterArea" unique_id=1000000010]
+custom_minimum_size = Vector2(340, 0)
 layout_mode = 2
 size_flags_horizontal = 4
-custom_minimum_size = Vector2(340, 0)
 
 [node name="CardVBox" type="VBoxContainer" parent="RootMargin/MainVBox/CenterArea/MainCard" unique_id=1000000011]
 layout_mode = 2
@@ -69,7 +69,7 @@ theme_override_constants/separation = 14
 [node name="LogoLabel" type="RichTextLabel" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000012]
 layout_mode = 2
 bbcode_enabled = true
-text = "[center][font_size=28]📚 Knowledge Admin[/font_size][/center]"
+text = "[center][font_size=28][wave amp=10 freq=5]📚 Knowledge Admin[/wave][/font_size][/center]"
 fit_content = true
 scroll_active = false
 
@@ -81,7 +81,8 @@ columns = 3
 layout_mode = 2
 size_flags_horizontal = 3
 bbcode_enabled = true
-text = "[center]牌组\n[font_size=22]—[/font_size][/center]"
+text = "[center]牌组
+[font_size=22]—[/font_size][/center]"
 fit_content = true
 scroll_active = false
 
@@ -89,7 +90,8 @@ scroll_active = false
 layout_mode = 2
 size_flags_horizontal = 3
 bbcode_enabled = true
-text = "[center]待复习\n[font_size=22]—[/font_size][/center]"
+text = "[center]待复习
+[font_size=22]—[/font_size][/center]"
 fit_content = true
 scroll_active = false
 
@@ -97,7 +99,8 @@ scroll_active = false
 layout_mode = 2
 size_flags_horizontal = 3
 bbcode_enabled = true
-text = "[center]今日\n[font_size=22]—[/font_size][/center]"
+text = "[center]今日
+[font_size=22]—[/font_size][/center]"
 fit_content = true
 scroll_active = false
 
