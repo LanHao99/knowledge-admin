@@ -7,20 +7,37 @@ var _note_db: NoteDB = null
 var _scheduler: Scheduler = null
 
 
-## 注入 CardDB 数据仓库。
+## 初始化数据层并打开数据库，由 Manager 自行管理 DB 生命周期。
 ##
-## 输入: card_db (CardDB) - 卡片仓库对象。
-## 输出: 无。
-func set_card_db(card_db: CardDB) -> void:
-	_card_db = card_db
+## 输入: db_path (String) - 数据库文件路径（如 "user://knowledge_admin.db"）。
+## 输出: bool - 初始化成功返回 true。
+func setup(db_path: String) -> bool:
+	_card_db = CardDB.new()
+	add_child(_card_db)
+	_card_db.configure(db_path)
+	if not _card_db.open():
+		push_error("[CardManager] CardDB 打开失败: %s" % _card_db.get_last_error())
+		return false
+	if not _card_db.init_schema():
+		push_error("[CardManager] CardDB Schema 初始化失败")
+		return false
+
+	_note_db = NoteDB.new()
+	add_child(_note_db)
+	_note_db.configure(db_path)
+	if not _note_db.open():
+		push_error("[CardManager] NoteDB 打开失败: %s" % _note_db.get_last_error())
+		return false
+
+	return true
 
 
-## 注入 NoteDB 数据仓库（用于渲染内容聚合）。
+## 检查是否已完成 setup 初始化。
 ##
-## 输入: note_db (NoteDB) - 笔记仓库对象。
-## 输出: 无。
-func set_note_db(note_db: NoteDB) -> void:
-	_note_db = note_db
+## 输入: 无。
+## 输出: bool - 已初始化返回 true。
+func is_ready() -> bool:
+	return _card_db != null and _card_db.is_open() and _note_db != null and _note_db.is_open()
 
 
 ## 注入调度器实例。

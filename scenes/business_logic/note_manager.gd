@@ -8,28 +8,47 @@ var _deck_db: DeckDB = null
 var _last_generate_error: Dictionary = {}
 
 
-## 注入 NoteDB 数据仓库。
+## 初始化数据层并打开数据库，由 Manager 自行管理 DB 生命周期。
 ##
-## 输入: note_db (NoteDB) - 笔记仓库对象。
-## 输出: 无。
-func set_note_db(note_db: NoteDB) -> void:
-	_note_db = note_db
+## 输入: db_path (String) - 数据库文件路径（如 "user://knowledge_admin.db"）。
+## 输出: bool - 初始化成功返回 true。
+func setup(db_path: String) -> bool:
+	_note_db = NoteDB.new()
+	add_child(_note_db)
+	_note_db.configure(db_path)
+	if not _note_db.open():
+		push_error("[NoteManager] NoteDB 打开失败: %s" % _note_db.get_last_error())
+		return false
+	if not _note_db.init_schema():
+		push_error("[NoteManager] NoteDB Schema 初始化失败")
+		return false
+
+	_card_db = CardDB.new()
+	add_child(_card_db)
+	_card_db.configure(db_path)
+	if not _card_db.open():
+		push_error("[NoteManager] CardDB 打开失败: %s" % _card_db.get_last_error())
+		return false
+	if not _card_db.init_schema():
+		push_error("[NoteManager] CardDB Schema 初始化失败")
+		return false
+
+	_deck_db = DeckDB.new()
+	add_child(_deck_db)
+	_deck_db.configure(db_path)
+	if not _deck_db.open():
+		push_error("[NoteManager] DeckDB 打开失败: %s" % _deck_db.get_last_error())
+		return false
+
+	return true
 
 
-## 注入 CardDB 数据仓库。
+## 检查是否已完成 setup 初始化。
 ##
-## 输入: card_db (CardDB) - 卡片仓库对象。
-## 输出: 无。
-func set_card_db(card_db: CardDB) -> void:
-	_card_db = card_db
-
-
-## 注入 DeckDB 数据仓库（可选）。
-##
-## 输入: deck_db (DeckDB) - 牌组仓库对象。
-## 输出: 无。
-func set_deck_db(deck_db: DeckDB) -> void:
-	_deck_db = deck_db
+## 输入: 无。
+## 输出: bool - 已初始化返回 true。
+func is_ready() -> bool:
+	return _note_db != null and _note_db.is_open() and _card_db != null and _card_db.is_open()
 
 
 ## 创建笔记并生成对应卡片。

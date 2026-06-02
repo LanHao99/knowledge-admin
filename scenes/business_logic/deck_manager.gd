@@ -5,20 +5,41 @@ class_name DeckManager
 var _deck_db: DeckDB = null
 
 
-## 注入 DeckDB 数据仓库实例。
+## 初始化数据层并打开数据库，由 Manager 自行管理 DB 生命周期。
 ##
-## 输入: deck_db (DeckDB) - 牌组仓库对象。
-## 输出: 无。
-func set_deck_db(deck_db: DeckDB) -> void:
-	_deck_db = deck_db
+## 输入: db_path (String) - 数据库文件路径（如 "user://knowledge_admin.db"）。
+## 输出: bool - 初始化成功返回 true。
+func setup(db_path: String) -> bool:
+	_deck_db = DeckDB.new()
+	add_child(_deck_db)
+	_deck_db.configure(db_path)
+
+	if not _deck_db.open():
+		push_error("[DeckManager] 数据库打开失败: %s" % _deck_db.get_last_error())
+		return false
+
+	var init_result: Dictionary = _deck_db.init_schema()
+	if not init_result.get("success", false):
+		push_error("[DeckManager] Schema 初始化失败: %s" % init_result.get("error", ""))
+		return false
+
+	return true
 
 
-## 获取当前注入的 DeckDB 引用。
+## 获取当前 DeckDB 引用（供其他 Manager 跨仓库查询）。
 ##
 ## 输入: 无。
-## 输出: DeckDB - 牌组仓库对象；未注入时为 null。
+## 输出: DeckDB - 牌组仓库对象；未初始化时为 null。
 func get_deck_db() -> DeckDB:
 	return _deck_db
+
+
+## 检查是否已完成 setup 初始化。
+##
+## 输入: 无。
+## 输出: bool - 已初始化返回 true。
+func is_ready() -> bool:
+	return _deck_db != null and _deck_db.is_open()
 
 
 ## 创建牌组。
