@@ -18,8 +18,8 @@ enum Queue { NEW = 0, LEARNING = 1, REVIEW = 2, SUSPENDED = -1, BURIED = -2 }
 # ── 核心算法接口 ──
 
 ## 计算下一次复习状态（纯函数，无副作用）
-## 输入：当前 CardEntity + 用户评分
-## 输出：新的状态字典（不修改原始 CardEntity）
+## 输入：当前 CardEntity + 用户评分 + 当前 Unix 时间戳（秒）
+## 输出：新的状态字典（不修改原 CardEntity）
 @abstract func calculate_next_state(card: CardEntity, rating: int, now_timestamp: int) -> Dictionary
     # return {
     #   "queue": int,
@@ -49,12 +49,15 @@ enum Queue { NEW = 0, LEARNING = 1, REVIEW = 2, SUSPENDED = -1, BURIED = -2 }
 class_name SimpleScheduler
 extends Scheduler
 
-# 基于 SM-2 简化版：
-# - Again → queue=LEARNING, due=+10min, reps+1, lapses+1
-# - Hard  → queue=REVIEW, interval*1.2, reps+1
-# - Good  → queue=REVIEW, interval*ease_factor, reps+1
-# - Easy  → queue=REVIEW, interval*ease_factor*1.3, reps+1
-# - New → 首次 Review 根据评分进入 LEARNING/REVIEW
+# 基于 SM-2 思路的简化调度器
+# - 只做纯计算，不触碰数据库
+# - learning 队列按秒级时间戳调度
+# - review 队列按天数索引调度
+# 逻辑：
+# - Again：queue=LEARNING, due=+10min, lapses+1, stability减半, difficulty增加
+# - Hard：queue=REVIEW, interval*1.2, reps+1, difficulty微增
+# - Good：queue=REVIEW, interval*ease_factor, reps+1, difficulty微降
+# - Easy：queue=REVIEW, interval*ease_factor*1.3, reps+1, difficulty下降
 ```
 
 ### 4.3 FsrsScheduler（未来预留）
@@ -66,5 +69,3 @@ extends Scheduler
 # 预留 FSRS-4.5/5.0 参数化实现
 # 从数据库读取 stability/difficulty，运行 FSRS 公式
 ```
-
----
