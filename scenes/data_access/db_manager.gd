@@ -1,21 +1,26 @@
-extends Node
+﻿extends Node
 class_name DBManager
 
-## 这是“数据层基类”，专门负责：
+## 这是"数据层基类"，专门负责：
 # 1) 管理 sqlite 连接
 # 2) 执行 SQL（查询/写入/事务）
-# 3) 把 JSON 格式的表结构配置转成真实 SQL 并初始化数据库
+# 3) 把 JSON 格式的表结构配置转成真实 SQL 并初始化数据表
 # 4) 统一错误处理和返回格式
 # 你可以把它理解成：
-# - 业务层只说“我要查/改什么”
-# - DBManager 负责“具体怎么和数据库沟通”
+# - 业务层只说"我要查/改什么"
+# - DBManager 负责"具体怎么和数据库沟通"
 
 signal db_error(code: String, message: String)
 
 const SCHEMA_JSON_PATH: String = "res://data/db_schema.json" # 表结构配置文件路径
 
+# 进程内共享的 SQLite 句柄缓存：同一 db_path 仅持有一个底层连接，避免多连接对同一文件同时写入触发 SQLITE_BUSY (database is locked)
+# 值结构: {"db": SQLite, "refs": int}
+static var _shared_connections: Dictionary = {}
+
 var _db: SQLite = null
 var _db_path: String = "user://knowledge_admin.db"
+var _owns_connection: bool = false  # 当前实例是否对共享连接持有一份引用计数
 var _schema_config: Dictionary = {}
 var _last_error: String = ""
 var _last_code: String = ""
@@ -26,17 +31,31 @@ func configure(db_path: String = "user://knowledge_admin.db") -> void: ## 配置
 	_db_path = db_path
 
 
-func open() -> bool: ## 创建并打开数据库连接，同时加载 schema JSON
+func open() -> bool: ## 创建或复用同 db_path 的共享连接，并加载 schema JSON
 	clear_last_error()
 
-	# 1) 创建并打开数据库
-	_db = SQLite.new()
-	_db.path = _db_path
-	if not _db.open_db():
-		_fail("DB_OPEN_FAILED", "打开数据库失败: %s" % _db_path)
-		return false
+	# 1) 优先复用已存在的共享连接，避免对同一文件开多个 SQLite 句柄导致跨连接写锁冲突
+	if _shared_connections.has(_db_path):
+		var entry: Dictionary = _shared_connections[_db_path]
+		_db = entry.get("db", null)
+		if _db == null:
+			_shared_connections.erase(_db_path)
+		elif not _owns_connection:
+			entry["refs"] = int(entry.get("refs", 0)) + 1
+			_owns_connection = true
 
-	# 2) 读取 schema 配置文件（后续 init_schema 会用到）
+	# 2) 没有共享连接则新建一个并登记
+	if _db == null:
+		_db = SQLite.new()
+		_db.path = _db_path
+		if not _db.open_db():
+			_fail("DB_OPEN_FAILED", "打开数据库失败: %s" % _db_path)
+			_db = null
+			return false
+		_shared_connections[_db_path] = {"db": _db, "refs": 1}
+		_owns_connection = true
+
+	# 3) 读取 schema 配置文件（后续 init_schema 会用到）
 	var schema_result := load_schema_config()
 	if not schema_result.get("success", false):
 		close()
@@ -45,8 +64,29 @@ func open() -> bool: ## 创建并打开数据库连接，同时加载 schema JSO
 	return true
 
 
-func close() -> void: ## 关闭数据库连接（当前插件无显式 close 时直接置空）
+func close() -> void: ## 释放当前实例对共享连接的引用，归零时真正放手底层 SQLite
+	if _owns_connection and _shared_connections.has(_db_path):
+		var entry: Dictionary = _shared_connections[_db_path]
+		var refs: int = int(entry.get("refs", 0)) - 1
+		if refs <= 0:
+			_shared_connections.erase(_db_path)
+		else:
+			entry["refs"] = refs
+	_owns_connection = false
 	_db = null
+
+
+## 暴露底层 SQLite 句柄，供跨仓库事务做"同连接去重"使用。
+##
+## 输入: 无。
+## 输出: SQLite - 当前持有的底层连接；未打开返回 null。
+func get_sqlite() -> SQLite:
+	return _db
+
+
+func _exit_tree() -> void: ## 节点销毁时自动释放共享连接引用，避免泄漏
+	if _owns_connection:
+		close()
 
 
 func is_open() -> bool: ## 检查数据库是否已经打开
@@ -111,7 +151,7 @@ func fetch_all(sql: String, params: Array = []) -> Dictionary: ## 查询多行�
 	if not require_open():
 		return fail("DB_NOT_OPEN", "数据库尚未打开")
 
-	# 1) 执行查询（支持带参/不带参）
+	# 1) 执行查询（支持带/不带参）
 	clear_last_error()
 	var success: bool = false
 	if params.is_empty():
@@ -199,7 +239,7 @@ func table_exists(table_name: String) -> bool:
 ##
 ## 输入:
 ##   table_name (String) - 表名。
-##   where_sql (String) - 可选过滤条件，不要带 `WHERE` 关键字（如 "deck_id=? AND queue=?"）。
+##   where_sql (String) - 可选过滤条件，不要含 `WHERE` 关键字（如 "deck_id=? AND queue=?"）。
 ##   params (Array) - where_sql 对应的绑定参数。
 ## 输出: 返回标准字典。成功时 `data` 为 int（符合条件的行数）。
 func count(table_name: String, where_sql: String = "", params: Array = []) -> Dictionary:
@@ -230,7 +270,7 @@ func init_schema() -> Dictionary: ## 根据 JSON 动态创建表和索引
 
 	var statements: Array[String] = statements_result.get("data", [])
 
-	# 2) 用事务执行，保证“要么都成功，要么都失败”
+	# 2) 用事务执行，保证"要么都成功，要么都失败"
 	if not begin_transaction():
 		return fail("TX_BEGIN_FAILED", "初始化表结构时无法开启事务")
 
@@ -351,7 +391,7 @@ func _sqlite_fail(code: String, sql: String, prefix: String = "") -> Dictionary:
 	return _fail(code, message)
 
 
-## 检查 SQL 标识符是否合法（仅允许字母、数字、下划线，且不能以数字开头）。
+## 校验 SQL 标识符是否合法（仅允许字母、数字、下划线，且不能以数字开头）。
 ##
 ## 输入: identifier (String) - 待校验的标识符。
 ## 输出: bool。合法返回 true，否则返回 false。

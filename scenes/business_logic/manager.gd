@@ -1,15 +1,15 @@
-extends Node
+﻿extends Node
 class_name Manager
 
-# 这是“业务层基类”。
+# 这是"业务层基类"
 # 作用：
 # 1) 给所有子管理器提供统一的数据库入口（_db_manager）
 # 2) 提供统一事务包装（begin/commit/rollback/run_in_transaction）
 # 3) 提供统一返回格式（ok/fail）
 #
 # 你可以把它理解成：
-# - 子类负责“做什么业务”
-# - 这个基类负责“如何安全地和数据库配合”
+# - 子类负责"做什么业务"
+# - 这个基类负责"如何安全地和数据库配合"
 
 signal manager_error(code: String, message: String)
 signal entity_created(entity_type: String, entity_id: int)
@@ -41,7 +41,7 @@ func require_db_manager() -> bool: ## 要求 db_manager 必须存在，否则立
 	return false
 
 
-## 发出“实体已创建”通知信号。
+## 发出"实体已创建"通知信号。
 ##
 ## 输入:
 ##   entity_type (String) - 实体类型，如 "deck"、"note"、"card"。
@@ -51,7 +51,7 @@ func _notify_created(entity_type: String, entity_id: int) -> void:
 	entity_created.emit(entity_type, entity_id)
 
 
-## 发出“实体已更新”通知信号。
+## 发出"实体已更新"通知信号。
 ##
 ## 输入:
 ##   entity_type (String) - 实体类型，如 "deck"、"note"、"card"。
@@ -61,7 +61,7 @@ func _notify_updated(entity_type: String, entity_id: int) -> void:
 	entity_updated.emit(entity_type, entity_id)
 
 
-## 发出“实体已删除”通知信号。
+## 发出"实体已删除"通知信号。
 ##
 ## 输入:
 ##   entity_type (String) - 实体类型，如 "deck"、"note"、"card"。
@@ -98,7 +98,7 @@ func rollback_transaction() -> bool: ## 统一回滚事务并做方法存在性�
 	return _db_manager.call("rollback_transaction")
 
 
-func run_in_transaction(action: Callable) -> Dictionary: ## 用“自动挡事务”执行业务动作（推荐子类优先用它）
+func run_in_transaction(action: Callable) -> Dictionary: ## 用"自动挡事务"执行业务动作（推荐子类优先用它）
 	# 步骤 1：先开事务
 	if not begin_transaction():
 		return fail("TX_BEGIN_FAILED", "无法开启事务")
@@ -107,7 +107,6 @@ func run_in_transaction(action: Callable) -> Dictionary: ## 用“自动挡事�
 	var result = action.call()
 
 	# 步骤 3：根据返回结果决定提交还是回滚
-
 	if typeof(result) == TYPE_DICTIONARY and result.get("success", false) == true:
 		if commit_transaction():
 			return result
@@ -122,19 +121,22 @@ func run_in_transaction(action: Callable) -> Dictionary: ## 用“自动挡事�
 		if typeof(result) == TYPE_DICTIONARY and result.has("success"):
 			return result
 		else:
-			# 不是标准结构时，统一包装成 fail
+			# 不是标准结构时，统一包装为 fail
 			return fail("TX_ACTION_FAILED", "事务操作执行失败或返回值不规范", result)
 
 
 ## 在多个 DBManager 上执行统一事务（跨仓库业务编排使用）。
+## 内部会按底层 SQLite 句柄去重，同一物理连接只发一次 BEGIN/COMMIT，
+## 避免同一 SQLite 文件被多个连接各自持锁导致 SQLITE_BUSY。
 ##
 ## 输入:
-##   databases (Array) - 参与事务的 DBManager 列表（可包含重复或 null，会自动去重过滤）。
+##   databases (Array) - 参与事务的 DBManager 列表。
 ##   action (Callable) - 事务体，需返回标准结果字典。
 ## 输出: 返回标准字典。成功时透传 action 的成功结果。
 func run_in_databases_transaction(databases: Array, action: Callable) -> Dictionary:
-	var dbs: Array = _normalize_databases(databases)
-	if dbs.is_empty():
+	# 1) 按底层 SQLite 句柄去重，保证同一物理连接只跑一次事务
+	var dbs_by_conn: Array = _dedupe_by_sqlite(databases)
+	if dbs_by_conn.is_empty():
 		var direct_result: Variant = action.call()
 		if _is_success_result(direct_result):
 			return direct_result
@@ -142,24 +144,50 @@ func run_in_databases_transaction(databases: Array, action: Callable) -> Diction
 			return direct_result
 		return fail("TX_ACTION_FAILED", "事务操作执行失败或返回值不规范", direct_result)
 
-	for db in dbs:
+	for db in dbs_by_conn:
 		if not db.begin_transaction():
-			_rollback_databases(dbs)
+			_rollback_databases(dbs_by_conn)
 			return fail("TX_BEGIN_FAILED", "无法开启跨仓库事务")
 
 	var result: Variant = action.call()
 	if not _is_success_result(result):
-		_rollback_databases(dbs)
+		_rollback_databases(dbs_by_conn)
 		if typeof(result) == TYPE_DICTIONARY and result.has("success"):
 			return result
 		return fail("TX_ACTION_FAILED", "事务操作执行失败或返回值不规范", result)
 
-	for db in dbs:
+	for db in dbs_by_conn:
 		if not db.commit_transaction():
-			_rollback_databases(dbs)
+			_rollback_databases(dbs_by_conn)
 			return fail("TX_COMMIT_FAILED", "跨仓库事务提交失败")
 
 	return result
+
+
+## 按底层 SQLite 句柄去重：多个 DBManager 若共享同一底层连接，只保留一个。
+## DBManager.get_sqlite() 返回 null 的实例会被过滤（未初始化或已关闭）。
+##
+## 输入: databases (Array) - 原始 DBManager 列表。
+## 输出: Array - 去重后的 DBManager 列表，每个唯一 SQLite 句柄对应一个实例。
+func _dedupe_by_sqlite(databases: Array) -> Array:
+	var seen_connections: Array = []  # Array[SQLite]
+	var unique_dbs: Array = []        # Array[DBManager]
+
+	for obj in databases:
+		if obj == null:
+			continue
+		if not (obj is DBManager):
+			continue
+		var db: DBManager = obj as DBManager
+		var sqlite: SQLite = db.get_sqlite()
+		if sqlite == null:
+			continue
+		if seen_connections.has(sqlite):
+			continue
+		seen_connections.append(sqlite)
+		unique_dbs.append(db)
+
+	return unique_dbs
 
 
 ## 判断一个返回值是否是标准成功字典。
@@ -168,23 +196,6 @@ func run_in_databases_transaction(databases: Array, action: Callable) -> Diction
 ## 输出: bool。是标准成功结构时返回 true。
 func _is_success_result(result: Variant) -> bool:
 	return typeof(result) == TYPE_DICTIONARY and result.get("success", false) == true
-
-
-## 过滤并去重 DBManager 数组，保证事务参与者列表有效。
-##
-## 输入: databases (Array) - 原始数据库对象列表。
-## 输出: Array - 去重后的 DBManager 列表。
-func _normalize_databases(databases: Array) -> Array:
-	var unique_list: Array = []
-	for db in databases:
-		if db == null:
-			continue
-		if not (db is DBManager):
-			continue
-		if unique_list.has(db):
-			continue
-		unique_list.append(db)
-	return unique_list
 
 
 ## 对给定数据库列表执行回滚（忽略回滚失败，尽力而为）。
