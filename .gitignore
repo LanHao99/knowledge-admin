@@ -6,6 +6,8 @@
 .workbuddy/
 .opencode/
 .vscode/
+.deepseek/
+.codewhale/
 
 # 排除隐私代码
 .env
