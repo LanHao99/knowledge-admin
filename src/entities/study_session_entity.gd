@@ -8,15 +8,15 @@ extends RefCounted
 # 不加入 Godot 节点树，由 StudyManager 持有引用。
 
 # ── 评分常量（与 CardEntity 对齐，但独立定义以避免实体层循环依赖）──
-const RATING_AGAIN: int = 1  ## 完全遗忘。
-const RATING_HARD: int  = 2  ## 勉强想起。
-const RATING_GOOD: int  = 3  ## 正常回忆。
-const RATING_EASY: int  = 4  ## 轻松回忆。
+const RATING_AGAIN: int = 1 ## 完全遗忘。
+const RATING_HARD: int = 2 ## 勉强想起。
+const RATING_GOOD: int = 3 ## 正常回忆。
+const RATING_EASY: int = 4 ## 轻松回忆。
 
 ## 本次学习的目标牌组 ID。0 表示"全部牌组"（跨牌组学习模式）。
 var deck_id: int = 0
 
-## 会话开始的 Unix 时间戳（秒级），用于计算总时长。
+## 会话开始的 Unix 时间戳（秒级）
 var started_at: int = 0
 
 ## 本次会话中已见过的新卡片数量。
@@ -51,11 +51,11 @@ func to_dict() -> Dictionary:
 ##
 ## 输入: d (Dictionary) - 包含会话数据的字典。
 func from_dict(d: Dictionary) -> void:
-	if d.has("deck_id"):             deck_id = int(d.get("deck_id", 0))
-	if d.has("started_at"):          started_at = int(d.get("started_at", 0))
-	if d.has("new_cards_seen"):      new_cards_seen = int(d.get("new_cards_seen", 0))
-	if d.has("review_cards_seen"):   review_cards_seen = int(d.get("review_cards_seen", 0))
-	if d.has("total_time_ms"):       total_time_ms = int(d.get("total_time_ms", 0))
+	if d.has("deck_id"): deck_id = int(d.get("deck_id", 0))
+	if d.has("started_at"): started_at = int(d.get("started_at", 0))
+	if d.has("new_cards_seen"): new_cards_seen = int(d.get("new_cards_seen", 0))
+	if d.has("review_cards_seen"): review_cards_seen = int(d.get("review_cards_seen", 0))
+	if d.has("total_time_ms"): total_time_ms = int(d.get("total_time_ms", 0))
 	if d.has("session_stats") and typeof(d.get("session_stats")) == TYPE_DICTIONARY:
 		session_stats = d.get("session_stats").duplicate()
 
@@ -94,9 +94,9 @@ func record_answer(rating: int, time_taken_ms: int, is_new_card: bool = false) -
 	var rating_key: String = ""
 	match rating:
 		RATING_AGAIN: rating_key = "again_count"
-		RATING_HARD:  rating_key = "hard_count"
-		RATING_GOOD:  rating_key = "good_count"
-		RATING_EASY:  rating_key = "easy_count"
+		RATING_HARD: rating_key = "hard_count"
+		RATING_GOOD: rating_key = "good_count"
+		RATING_EASY: rating_key = "easy_count"
 	if not rating_key.is_empty():
 		session_stats[rating_key] = int(session_stats.get(rating_key, 0)) + 1
 

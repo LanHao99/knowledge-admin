@@ -4,24 +4,6 @@
 
 ### 文件结构总览
 
-- scenes
-  
-  - ui
-  
-  - business_logic
-  
-  - data_access
-
-- src
-  
-  - entities
-  
-  - scheduler
-
-- data
-  
-  - 
-
 ```text
 res://
 ├── scenes/
