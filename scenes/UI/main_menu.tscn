@@ -58,9 +58,8 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="MainCard" type="PanelContainer" parent="RootMargin/MainVBox/CenterArea" unique_id=1000000010]
-custom_minimum_size = Vector2(520, 0)
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 3
 
 [node name="CardVBox" type="VBoxContainer" parent="RootMargin/MainVBox/CenterArea/MainCard" unique_id=1000000011]
 layout_mode = 2

@@ -36,6 +36,7 @@ func _ready() -> void:
 func _setup_panel_style() -> void:
 	if _main_card == null:
 		return
+	_main_card.custom_minimum_size = Vector2(520, 0)
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.08, 0.08, 0.12, 0.92)
 	style.set_corner_radius_all(12)
@@ -67,12 +68,12 @@ func _apply_bbcode_overrides() -> void:
 	# 高亮"开始学习"按钮
 	if _study_btn != null:
 		_study_btn.add_theme_color_override("font_color", Color(1.0, 0.85, 0.25, 1.0))
-		_study_btn.custom_minimum_size = Vector2(0, 48)
-	# 导航按钮统一高度
+		_study_btn.custom_minimum_size = Vector2(300, 48)
+	# 导航按钮统一高度 + 固定最小宽度
 	if _deck_list_btn != null:
-		_deck_list_btn.custom_minimum_size = Vector2(0, 44)
+		_deck_list_btn.custom_minimum_size = Vector2(300, 44)
 	if _note_browse_btn != null:
-		_note_browse_btn.custom_minimum_size = Vector2(0, 44)
+		_note_browse_btn.custom_minimum_size = Vector2(300, 44)
 	# 调试按钮用淡色
 	if _debug_button != null:
 		_debug_button.add_theme_color_override("font_color", Color(0.6, 0.6, 0.7, 1.0))
