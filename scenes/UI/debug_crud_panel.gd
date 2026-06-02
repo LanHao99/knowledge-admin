@@ -51,7 +51,18 @@ func _ready() -> void:
 		_refresh_note_list()
 
 
-## 退出场景时释放管理器节点（Manager 内部自行管理 DB 子节点）。\n##\n## 输入: 无。\n## 输出: 无。\nfunc _exit_tree() -> void:\n\t_clear_fields_editor()\n\tif _deck_manager != null:\n\t\t_deck_manager.queue_free()\n\t\t_deck_manager = null\n\tif _note_manager != null:\n\t\t_note_manager.queue_free()\n\t\t_note_manager = null
+## 退出场景时释放管理器节点（Manager 内部自行管理 DB 子节点）。
+##
+## 输入: 无。
+## 输出: 无。
+func _exit_tree() -> void:
+	_clear_fields_editor()
+	if _deck_manager != null:
+		_deck_manager.queue_free()
+		_deck_manager = null
+	if _note_manager != null:
+		_note_manager.queue_free()
+		_note_manager = null
 
 
 ## 设定初始输入值与 fields 默认行。
