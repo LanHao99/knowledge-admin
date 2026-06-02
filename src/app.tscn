@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://cxc1723paayrj"]
+
+[ext_resource type="Script" uid="uid://m5ru7a6v0xg5" path="res://src/app.gd" id="1_o6we8"]
+[ext_resource type="PackedScene" uid="uid://e6228fopf20e" path="res://scenes/business_logic/manager.tscn" id="1_v7qwe"]
+[ext_resource type="PackedScene" uid="uid://cexpycsf7qbqq" path="res://scenes/data_access/db_manager.tscn" id="2_j9krt"]
+
+[node name="App" type="Node" unique_id=669197153]
+script = ExtResource("1_o6we8")
+
+[node name="Manager" parent="." unique_id=1396860961 instance=ExtResource("1_v7qwe")]
+
+[node name="DBManager" parent="." unique_id=382133234 instance=ExtResource("2_j9krt")]

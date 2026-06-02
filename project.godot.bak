@@ -16,7 +16,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-App="*res://src/app.tscn"
+Autoload="*uid://bi8dg380h7ady"
 
 [display]
 

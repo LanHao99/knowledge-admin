@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://c6qm842csuitm"]
 
-[ext_resource type="PackedScene" uid="uid://cm7cssji38evv" path="res://scenes/UI/note_editor.tscn" id="1_wyxdt"]
+[ext_resource type="PackedScene" uid="uid://cm7cssji38evv" path="res://scenes/ui/note_editor.tscn" id="1_wyxdt"]
 
 [node name="NoteList" type="Control" unique_id=1140525113]
 layout_mode = 3

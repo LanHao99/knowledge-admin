@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://e6228fopf20e"]
 
-[ext_resource type="Script" uid="uid://d0se6j1do6av3" path="res://scenes/Business Logic/manager.gd" id="1_enkqh"]
-[ext_resource type="Script" uid="uid://bcs58x4g7qkj" path="res://scenes/Business Logic/deck_manager.gd" id="2_h1vor"]
-[ext_resource type="Script" uid="uid://bia2lj3sfqp0w" path="res://scenes/Business Logic/study_manager.gd" id="3_by3je"]
-[ext_resource type="Script" uid="uid://bt60eff08maet" path="res://scenes/Business Logic/note_manager.gd" id="4_184f3"]
-[ext_resource type="Script" uid="uid://bv7e1c1tp12uf" path="res://scenes/Business Logic/card_manager.gd" id="5_6a45a"]
+[ext_resource type="Script" uid="uid://d0se6j1do6av3" path="res://scenes/business_logic/manager.gd" id="1_enkqh"]
+[ext_resource type="Script" uid="uid://bcs58x4g7qkj" path="res://scenes/business_logic/deck_manager.gd" id="2_h1vor"]
+[ext_resource type="Script" uid="uid://bia2lj3sfqp0w" path="res://scenes/business_logic/study_manager.gd" id="3_by3je"]
+[ext_resource type="Script" uid="uid://bt60eff08maet" path="res://scenes/business_logic/note_manager.gd" id="4_184f3"]
+[ext_resource type="Script" uid="uid://bv7e1c1tp12uf" path="res://scenes/business_logic/card_manager.gd" id="5_6a45a"]
 
 [node name="Manager" type="Node" unique_id=1396860961]
 script = ExtResource("1_enkqh")

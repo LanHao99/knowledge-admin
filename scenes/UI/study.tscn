@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cue75gf0um62k"]
 
-[ext_resource type="PackedScene" uid="uid://dddcmah5tjw7q" path="res://scenes/UI/study_session.tscn" id="1_8q8l4"]
-[ext_resource type="PackedScene" uid="uid://bvqb37meud3w8" path="res://scenes/UI/card_ui.tscn" id="2_x8trg"]
+[ext_resource type="PackedScene" uid="uid://dddcmah5tjw7q" path="res://scenes/ui/study_session.tscn" id="1_8q8l4"]
+[ext_resource type="PackedScene" uid="uid://bvqb37meud3w8" path="res://scenes/ui/card_ui.tscn" id="2_x8trg"]
 
 [node name="Study" type="Node2D" unique_id=1293919655]
 
