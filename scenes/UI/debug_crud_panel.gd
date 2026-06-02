@@ -1,7 +1,11 @@
 extends Control
 
 
+var _deck_manager: DeckManager = null
+var _note_manager: NoteManager = null
 var _deck_db: DeckDB = null
+var _note_db: NoteDB = null
+var _card_db: CardDB = null
 var _fields_rows: Array = []
 
 @onready var _deck_name_input: LineEdit = $RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm/DeckNameInput
@@ -50,15 +54,27 @@ func _ready() -> void:
 		_refresh_note_list()
 
 
-## 退出场景时释放数据库节点并清理 fields 行。
+## 退出场景时释放管理器和数据库节点。
 ##
 ## 输入: 无。
 ## 输出: 无。
 func _exit_tree() -> void:
 	_clear_fields_editor()
+	if _deck_manager != null:
+		_deck_manager.queue_free()
+		_deck_manager = null
+	if _note_manager != null:
+		_note_manager.queue_free()
+		_note_manager = null
 	if _deck_db != null:
 		_deck_db.queue_free()
 		_deck_db = null
+	if _note_db != null:
+		_note_db.queue_free()
+		_note_db = null
+	if _card_db != null:
+		_card_db.queue_free()
+		_card_db = null
 
 
 ## 设定初始输入值与 fields 默认行。
@@ -128,35 +144,72 @@ func _on_parent_option_changed(index: int) -> void:
 func _get_selected_parent_id() -> int:
 	var selected_id: int = _deck_parent_option.get_item_id(_deck_parent_option.selected)
 	if selected_id == -1:
-		return int(_deck_parent_custom_spin.value)
+		return roundi(_deck_parent_custom_spin.value)
 	return selected_id
 
 
-## 创建并初始化 DeckDB，作为本场景数据库调试入口。
+## 创建并初始化数据库管理器和业务逻辑管理器。
 ##
 ## 输入: 无。
 ## 输出: bool - 初始化成功返回 true。
 func _ensure_database_ready() -> bool:
-	if _deck_db != null and _deck_db.is_open():
+	if _deck_manager != null and _deck_db != null and _deck_db.is_open():
 		return true
+	
+	# 清理旧实例
+	if _deck_manager != null:
+		_deck_manager.queue_free()
+		_deck_manager = null
+	if _note_manager != null:
+		_note_manager.queue_free()
+		_note_manager = null
 	if _deck_db != null:
 		_deck_db.queue_free()
 		_deck_db = null
-
+	if _note_db != null:
+		_note_db.queue_free()
+		_note_db = null
+	if _card_db != null:
+		_card_db.queue_free()
+		_card_db = null
+	
+	# 创建数据层
 	_deck_db = DeckDB.new()
 	add_child(_deck_db)
 	_deck_db.configure("user://knowledge_admin.db")
-
+	
 	if not _deck_db.open():
 		_append_log("数据库打开失败: %s" % _deck_db.get_last_error())
 		return false
-
+	
 	var init_result: Dictionary = _deck_db.init_schema()
 	if not init_result.get("success", false):
 		_append_log("Schema 初始化失败: %s" % _format_result(init_result))
 		return false
-
-	_append_log("数据库就绪: user://knowledge_admin.db")
+	
+	# 创建其他 DB 实例（复用同一数据库连接路径）
+	_note_db = NoteDB.new()
+	add_child(_note_db)
+	_note_db.configure("user://knowledge_admin.db")
+	_note_db.open()
+	
+	_card_db = CardDB.new()
+	add_child(_card_db)
+	_card_db.configure("user://knowledge_admin.db")
+	_card_db.open()
+	
+	# 创建业务逻辑层
+	_deck_manager = DeckManager.new()
+	add_child(_deck_manager)
+	_deck_manager.set_deck_db(_deck_db)
+	
+	_note_manager = NoteManager.new()
+	add_child(_note_manager)
+	_note_manager.set_note_db(_note_db)
+	_note_manager.set_card_db(_card_db)
+	_note_manager.set_deck_db(_deck_db)
+	
+	_append_log("数据库与 Manager 层就绪: user://knowledge_admin.db")
 	return true
 
 
@@ -174,9 +227,9 @@ func _on_create_deck_pressed() -> void:
 		return
 	var deck_name: String = _deck_name_input.text.strip_edges()
 	var parent_id: int = _get_selected_parent_id()
-	var sort_order: int = int(_deck_sort_order_input.value)
+	var sort_order: int = roundi(_deck_sort_order_input.value)
 	_log_operation_header("create_deck", "name=%s parent_id=%d sort_order=%d" % [deck_name, parent_id, sort_order])
-	var result: Dictionary = _deck_db.create_deck(deck_name, parent_id, sort_order)
+	var result: Dictionary = _deck_manager.create_deck(deck_name, parent_id)
 	_log_result(result)
 	if result.get("success", false):
 		var deck: DeckEntity = result.get("data", null)
@@ -193,9 +246,9 @@ func _on_create_deck_pressed() -> void:
 func _on_read_deck_pressed() -> void:
 	if not _ensure_database_ready():
 		return
-	var deck_id: int = int(_deck_target_id_input.value)
+	var deck_id: int = roundi(_deck_target_id_input.value)
 	_log_operation_header("read_deck", "id=%d" % deck_id)
-	var result: Dictionary = _deck_db.get_deck_by_id(deck_id)
+	var result: Dictionary = _deck_manager.get_deck(deck_id)
 	_log_result(result)
 	if result.get("success", false):
 		var deck: DeckEntity = result.get("data", null)
@@ -216,11 +269,11 @@ func _on_read_deck_pressed() -> void:
 func _on_update_deck_pressed() -> void:
 	if not _ensure_database_ready():
 		return
-	var deck_id: int = int(_deck_target_id_input.value)
+	var deck_id: int = roundi(_deck_target_id_input.value)
 	var deck_name: String = _deck_name_input.text.strip_edges()
 	var is_archived: bool = _deck_archived_check.button_pressed
 	_log_operation_header("update_deck", "id=%d name=%s is_archived=%s" % [deck_id, deck_name, str(is_archived)])
-	var get_result: Dictionary = _deck_db.get_deck_by_id(deck_id)
+	var get_result: Dictionary = _deck_manager.get_deck(deck_id)
 	if not get_result.get("success", false):
 		_log_result(get_result)
 		_append_log("")
@@ -231,13 +284,20 @@ func _on_update_deck_pressed() -> void:
 		_append_log("")
 		return
 	var before_str: String = _stringify_deck(deck)
-	deck.name = deck_name
-	deck.is_archived = is_archived
-	var update_result: Dictionary = _deck_db.update_deck(deck)
+	
+	var update_result: Dictionary
+	if deck.name != deck_name:
+		update_result = _deck_manager.rename_deck(deck_id, deck_name)
+	else:
+		update_result = {"success": true}
+	
+	if update_result.get("success", false) and deck.is_archived != is_archived:
+		update_result = _deck_manager.archive_deck(deck_id, is_archived)
+	
 	_log_result(update_result)
 	_append_log("  BEFORE: %s" % before_str)
 	if update_result.get("success", false):
-		var after_result: Dictionary = _deck_db.get_deck_by_id(deck_id)
+		var after_result: Dictionary = _deck_manager.get_deck(deck_id)
 		if after_result.get("success", false) and after_result.get("data", null) != null:
 			var after_deck: DeckEntity = after_result.get("data")
 			_append_log("  AFTER:  %s" % _stringify_deck(after_deck))
@@ -252,18 +312,14 @@ func _on_update_deck_pressed() -> void:
 func _on_delete_deck_pressed() -> void:
 	if not _ensure_database_ready():
 		return
-	var deck_id: int = int(_deck_target_id_input.value)
+	var deck_id: int = roundi(_deck_target_id_input.value)
 	_log_operation_header("delete_deck", "id=%d" % deck_id)
-	var get_result: Dictionary = _deck_db.get_deck_by_id(deck_id)
+	var get_result: Dictionary = _deck_manager.get_deck(deck_id)
 	if get_result.get("success", false) and get_result.get("data", null) != null:
 		var deck: DeckEntity = get_result.get("data")
 		_append_log("  BEFORE: %s" % _stringify_deck(deck))
-	var result: Dictionary = _deck_db.delete_deck(deck_id)
+	var result: Dictionary = _deck_manager.delete_deck(deck_id)
 	_log_result(result)
-	if result.get("success", false):
-		var changes_result: Dictionary = _deck_db.changes()
-		if changes_result.get("success", false):
-			_append_log("  rows_affected: %s" % str(changes_result.get("data", 0)))
 	_append_log("")
 	_refresh_deck_list()
 
@@ -288,7 +344,7 @@ func _on_deck_item_double_clicked(index: int) -> void:
 		return
 	if not _ensure_database_ready():
 		return
-	var result: Dictionary = _deck_db.get_deck_by_id(deck_id)
+	var result: Dictionary = _deck_manager.get_deck(deck_id)
 	if result.get("success", false) and result.get("data", null) != null:
 		_populate_deck_form(result.get("data"))
 
@@ -306,7 +362,7 @@ func _get_deck_id_from_list_item(line: String) -> int:
 	if end_idx == -1:
 		end_idx = line.length()
 	var id_str := line.substr(start_idx + prefix.length(), end_idx - start_idx - prefix.length())
-	return int(id_str.strip_edges())
+	return id_str.strip_edges().to_int()
 
 
 ## 把牌组实体回填到表单。
@@ -332,10 +388,10 @@ func _populate_deck_form(deck: DeckEntity) -> void:
 ## 输入: 无。
 ## 输出: 无。
 func _refresh_deck_list() -> void:
-	if _deck_db == null:
+	if _deck_manager == null:
 		return
 	_deck_list_view.clear()
-	var result: Dictionary = _deck_db.get_all_decks(true)
+	var result: Dictionary = _deck_manager.get_all_decks()
 	if not result.get("success", false):
 		_append_log("刷新牌组列表失败 -> %s" % _format_result(result))
 		_append_log("")
@@ -375,7 +431,7 @@ func _refresh_deck_list() -> void:
 func _on_create_note_pressed() -> void:
 	if not _ensure_database_ready():
 		return
-	var note_type_id: int = int(_note_type_input.value)
+	var note_type_id: int = roundi(_note_type_input.value)
 	var fields_dict: Dictionary = _fields_to_dict()
 	if fields_dict.is_empty():
 		_append_log("创建 note 失败: fields 至少需要一个字段")
@@ -383,20 +439,19 @@ func _on_create_note_pressed() -> void:
 		return
 	var fields_json: String = JSON.stringify(fields_dict)
 	_log_operation_header("create_note", "note_type_id=%d fields=%s" % [note_type_id, fields_json])
-	var now_ts: int = int(Time.get_unix_time_from_system())
-	var create_result: Dictionary = _deck_db.execute_bind(
-		"INSERT INTO notes(note_type_id, fields_data, created_at) VALUES(?, ?, ?);",
-		[note_type_id, fields_json, now_ts]
-	)
-	_log_result(create_result)
-	if create_result.get("success", false):
-		var id_result: Dictionary = _deck_db.last_insert_rowid()
-		if id_result.get("success", false):
-			var new_id: int = int(id_result.get("data", 0))
-			_note_id_input.value = new_id
-			var read_result: Dictionary = _deck_db.fetch_one("SELECT * FROM notes WHERE id = ?;", [new_id])
-			if read_result.get("success", false) and not read_result.get("data", {}).is_empty():
-				_append_log("  full_row: %s" % _stringify_note_row(read_result.get("data", {})))
+	
+	var deck_id: int = roundi(_deck_target_id_input.value)
+	if deck_id <= 0:
+		deck_id = 1  # 默认牌组
+	
+	var result: Dictionary = _note_manager.create_note(note_type_id, fields_dict, deck_id, [])
+	_log_result(result)
+	if result.get("success", false):
+		var data: Dictionary = result.get("data", {})
+		var note: NoteEntity = data.get("note", null)
+		if note != null:
+			_note_id_input.value = note.id
+			_append_log("  full_row: %s" % _stringify_note_entity(note))
 	_append_log("")
 	_refresh_note_list()
 
@@ -408,14 +463,14 @@ func _on_create_note_pressed() -> void:
 func _on_read_note_pressed() -> void:
 	if not _ensure_database_ready():
 		return
-	var note_id: int = int(_note_id_input.value)
+	var note_id: int = roundi(_note_id_input.value)
 	_log_operation_header("read_note", "id=%d" % note_id)
-	var result: Dictionary = _deck_db.fetch_one("SELECT * FROM notes WHERE id = ? LIMIT 1;", [note_id])
+	var result: Dictionary = _note_manager.get_note(note_id)
 	_log_result(result)
-	var row: Dictionary = result.get("data", {})
-	if not row.is_empty():
-		_append_log("  full_row: %s" % _stringify_note_row(row))
-		_populate_note_form(row)
+	var note: NoteEntity = result.get("data", null)
+	if note != null:
+		_append_log("  full_row: %s" % _stringify_note_entity(note))
+		_populate_note_form_from_entity(note)
 	else:
 		_append_log("  data: null (not found)")
 	_append_log("")
@@ -428,7 +483,7 @@ func _on_read_note_pressed() -> void:
 func _on_update_note_pressed() -> void:
 	if not _ensure_database_ready():
 		return
-	var note_id: int = int(_note_id_input.value)
+	var note_id: int = roundi(_note_id_input.value)
 	var note_type_id: int = int(_note_type_input.value)
 	var fields_dict: Dictionary = _fields_to_dict()
 	if fields_dict.is_empty():
@@ -437,18 +492,17 @@ func _on_update_note_pressed() -> void:
 		return
 	var fields_json: String = JSON.stringify(fields_dict)
 	_log_operation_header("update_note", "id=%d note_type_id=%d fields=%s" % [note_id, note_type_id, fields_json])
-	var before_result: Dictionary = _deck_db.fetch_one("SELECT * FROM notes WHERE id = ?;", [note_id])
-	if before_result.get("success", false) and not before_result.get("data", {}).is_empty():
-		_append_log("  BEFORE: %s" % _stringify_note_row(before_result.get("data", {})))
-	var update_result: Dictionary = _deck_db.execute_bind(
-		"UPDATE notes SET note_type_id = ?, fields_data = ? WHERE id = ?;",
-		[note_type_id, fields_json, note_id]
-	)
+	
+	var before_result: Dictionary = _note_manager.get_note(note_id)
+	if before_result.get("success", false) and before_result.get("data", null) != null:
+		_append_log("  BEFORE: %s" % _stringify_note_entity(before_result.get("data")))
+	
+	var update_result: Dictionary = _note_manager.update_note(note_id, fields_dict, [])
 	_log_result(update_result)
 	if update_result.get("success", false):
-		var after_result: Dictionary = _deck_db.fetch_one("SELECT * FROM notes WHERE id = ?;", [note_id])
-		if after_result.get("success", false) and not after_result.get("data", {}).is_empty():
-			_append_log("  AFTER:  %s" % _stringify_note_row(after_result.get("data", {})))
+		var after_result: Dictionary = _note_manager.get_note(note_id)
+		if after_result.get("success", false) and after_result.get("data", null) != null:
+			_append_log("  AFTER:  %s" % _stringify_note_entity(after_result.get("data")))
 	_append_log("")
 	_refresh_note_list()
 
@@ -460,17 +514,13 @@ func _on_update_note_pressed() -> void:
 func _on_delete_note_pressed() -> void:
 	if not _ensure_database_ready():
 		return
-	var note_id: int = int(_note_id_input.value)
+	var note_id: int = roundi(_note_id_input.value)
 	_log_operation_header("delete_note", "id=%d" % note_id)
-	var before_result: Dictionary = _deck_db.fetch_one("SELECT * FROM notes WHERE id = ?;", [note_id])
-	if before_result.get("success", false) and not before_result.get("data", {}).is_empty():
-		_append_log("  BEFORE: %s" % _stringify_note_row(before_result.get("data", {})))
-	var result: Dictionary = _deck_db.execute_bind("DELETE FROM notes WHERE id = ?;", [note_id])
+	var before_result: Dictionary = _note_manager.get_note(note_id)
+	if before_result.get("success", false) and before_result.get("data", null) != null:
+		_append_log("  BEFORE: %s" % _stringify_note_entity(before_result.get("data")))
+	var result: Dictionary = _note_manager.delete_note(note_id)
 	_log_result(result)
-	if result.get("success", false):
-		var changes_result: Dictionary = _deck_db.changes()
-		if changes_result.get("success", false):
-			_append_log("  rows_affected: %s" % str(changes_result.get("data", 0)))
 	_append_log("")
 	_refresh_note_list()
 
@@ -498,25 +548,24 @@ func _on_note_item_double_clicked(index: int) -> void:
 	var end_idx := line.find("|", start_idx)
 	if end_idx == -1:
 		end_idx = line.length()
-	var note_id: int = int(line.substr(start_idx + prefix.length(), end_idx - start_idx - prefix.length()).strip_edges())
+	var note_id: int = line.substr(start_idx + prefix.length(), end_idx - start_idx - prefix.length()).strip_edges().to_int()
 	if note_id <= 0:
 		return
 	if not _ensure_database_ready():
 		return
-	var result: Dictionary = _deck_db.fetch_one("SELECT * FROM notes WHERE id = ?;", [note_id])
-	if result.get("success", false) and not result.get("data", {}).is_empty():
-		_populate_note_form(result.get("data", {}))
+	var result: Dictionary = _note_manager.get_note(note_id)
+	if result.get("success", false) and result.get("data", null) != null:
+		_populate_note_form_from_entity(result.get("data"))
 
 
-## 把 notes 行数据回填到表单与 fields 编辑器。
+## 把 NoteEntity 数据回填到表单与 fields 编辑器。
 ##
-## 输入: row (Dictionary) - notes 表的一行。
+## 输入: note (NoteEntity) - 笔记实体。
 ## 输出: 无。
-func _populate_note_form(row: Dictionary) -> void:
-	_note_id_input.value = int(row.get("id", 0))
-	_note_type_input.value = int(row.get("note_type_id", 0))
-	var fields_str: String = str(row.get("fields_data", "{}"))
-	_json_to_fields(fields_str)
+func _populate_note_form_from_entity(note: NoteEntity) -> void:
+	_note_id_input.value = note.id
+	_note_type_input.value = note.note_type_id
+	_json_to_fields(JSON.stringify(note.fields_data))
 
 
 ## 刷新 notes ItemList 并输出完整表格日志。
@@ -524,40 +573,38 @@ func _populate_note_form(row: Dictionary) -> void:
 ## 输入: 无。
 ## 输出: 无。
 func _refresh_note_list() -> void:
-	if _deck_db == null:
+	if _note_manager == null:
 		return
 	_note_list_view.clear()
-	var result: Dictionary = _deck_db.fetch_all("SELECT * FROM notes ORDER BY id DESC LIMIT 50;")
+	var result: Dictionary = _note_manager.get_all_notes()
 	if not result.get("success", false):
 		_append_log("刷新 notes 列表失败 -> %s" % _format_result(result))
 		_append_log("")
 		return
-	var rows: Array = result.get("data", [])
-	_log_operation_header("list_notes", "%d rows (recent 50)" % rows.size())
+	var notes: Array[NoteEntity] = result.get("data", [])
+	_log_operation_header("list_notes", "%d rows" % notes.size())
 	_append_log("  id | note_type_id | fields_json                              | created_at")
 	_append_log("  ---+--------------+------------------------------------------+------------")
-	for row in rows:
-		if not (row is Dictionary):
-			continue
-		var fields_json: String = str(row.get("fields_data", "{}"))
-		_append_log("  %-3s| %-13s| %-41s| %-10s" % [
-			str(row.get("id", "")),
-			str(row.get("note_type_id", "")),
+	for note in notes:
+		var fields_json: String = JSON.stringify(note.fields_data)
+		_append_log("  %-3d| %-13d| %-41s| %-10d" % [
+			note.id,
+			note.note_type_id,
 			truncate_string(fields_json, 40),
-			str(row.get("created_at", ""))
+			note.created_at
 		])
-		var item_line: String = "id=%s | type=%s | fields=%s" % [str(row.get("id", "")), str(row.get("note_type_id", "")), truncate_string(fields_json, 60)]
+		var item_line: String = "id=%d | type=%d | fields=%s" % [note.id, note.note_type_id, truncate_string(fields_json, 60)]
 		_note_list_view.add_item(item_line)
 	_append_log("")
 
 
-## 把 notes 行渲染为完整可读字符串（含字段展开）。
+## 把 NoteEntity 渲染为完整可读字符串（含字段展开）。
 ##
-## 输入: row (Dictionary) - notes 表的一行。
+## 输入: note (NoteEntity) - 笔记实体。
 ## 输出: String - 格式化的完整行字符串。
-func _stringify_note_row(row: Dictionary) -> String:
-	var base := "id=%s note_type_id=%s created_at=%s" % [str(row.get("id", "")), str(row.get("note_type_id", "")), str(row.get("created_at", ""))]
-	var fields_str: String = str(row.get("fields_data", "{}"))
+func _stringify_note_entity(note: NoteEntity) -> String:
+	var base := "id=%d note_type_id=%d created_at=%d" % [note.id, note.note_type_id, note.created_at]
+	var fields_str: String = JSON.stringify(note.fields_data)
 	var parser := JSON.new()
 	if parser.parse(fields_str) == OK and typeof(parser.data) == TYPE_DICTIONARY:
 		var d: Dictionary = parser.data
@@ -693,37 +740,20 @@ func _on_clear_data_confirmed() -> void:
 		return
 	var start_time: int = Time.get_ticks_msec()
 	_log_operation_header("clear_all_data", "truncate cards, notes, decks (schema preserved)")
-	if not _deck_db.begin_transaction():
-		_append_log("  FAIL: 无法开启事务")
-		_append_log("")
-		return
-	var tables := ["cards", "notes", "decks"]
-	var ok_all := true
-	for table_name in tables:
-		var del_result: Dictionary = _deck_db.execute_bind("DELETE FROM %s;" % table_name, [])
-		if not del_result.get("success", false):
-			_append_log("  FAIL DELETE %s: %s" % [table_name, _format_result(del_result)])
-			ok_all = false
-			break
-		var changes_result: Dictionary = _deck_db.changes()
-		var deleted_count: int = 0
-		if changes_result.get("success", false):
-			deleted_count = int(changes_result.get("data", 0))
-		_append_log("  DELETE FROM %-8s → %d rows" % [table_name, deleted_count])
-	if ok_all:
-		if not _deck_db.commit_transaction():
-			_deck_db.rollback_transaction()
-			_append_log("  FAIL: 事务提交失败")
-		else:
-			var elapsed: int = Time.get_ticks_msec() - start_time
-			_append_log("  OK - committed in %d ms" % elapsed)
+	
+	var result: Dictionary = _deck_manager.clear_all_data()
+	if result.get("success", false):
+		var stats: Dictionary = result.get("data", {})
+		_append_log("  DELETE FROM cards    → %d rows" % stats.get("cards", 0))
+		_append_log("  DELETE FROM notes    → %d rows" % stats.get("notes", 0))
+		_append_log("  DELETE FROM decks    → %d rows" % stats.get("decks", 0))
+		var elapsed: int = Time.get_ticks_msec() - start_time
+		_append_log("  OK - committed in %d ms" % elapsed)
 	else:
-		_deck_db.rollback_transaction()
-		_append_log("  ROLLED BACK")
+		_append_log("  FAIL: %s" % _format_result(result))
 	_append_log("")
 	_setup_default_inputs()
 	_clear_fields_editor()
-	_setup_default_inputs()
 	_refresh_deck_list()
 	_refresh_note_list()
 

@@ -27,7 +27,7 @@ window/stretch/scale=2.0
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/godot-sqlite/plugin.cfg")
+enabled=PackedStringArray("res://addons/godot-sqlite/plugin.cfg", "res://addons/markdownlabel/plugin.cfg")
 
 [gui]
 

@@ -271,6 +271,36 @@ func _is_name_conflict(name: String, parent_id: int, exclude_id: int = 0) -> boo
 	return not row.is_empty()
 
 
+## 清空全部数据（cards, notes, decks）。
+##
+## 输入: 无。
+## 输出: 返回标准字典。成功时 `data` 为删除统计 Dictionary。
+func clear_all_data() -> Dictionary:
+	if _deck_db == null:
+		return fail("DECK_DB_NOT_SET", "deck_db 未注入")
+	
+	return run_in_databases_transaction([_deck_db], func() -> Dictionary:
+		var stats := {
+			"cards": 0,
+			"notes": 0,
+			"decks": 0
+		}
+		
+		var tables := ["cards", "notes", "decks"]
+		for table in tables:
+			var del_result := _deck_db.execute_bind("DELETE FROM %s;" % table, [])
+			if not del_result.get("success", false):
+				return del_result
+			
+			var changes_result := _deck_db.changes()
+			if changes_result.get("success", false):
+				stats[table] = int(changes_result.get("data", 0))
+		
+		batch_operation_completed.emit("all_data", stats["cards"] + stats["notes"] + stats["decks"])
+		return ok(stats)
+	)
+
+
 ## 判断 candidate_parent_id 是否位于 deck_id 的子树中。
 ##
 ## 输入:

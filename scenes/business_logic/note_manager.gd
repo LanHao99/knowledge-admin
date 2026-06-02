@@ -167,6 +167,16 @@ func get_note(note_id: int) -> Dictionary:
 	return _note_db.get_note_by_id(note_id)
 
 
+## 获取全部笔记列表。
+##
+## 输入: 无。
+## 输出: 返回标准字典。成功时 `data` 为 Array[NoteEntity]。
+func get_all_notes() -> Dictionary:
+	if _note_db == null:
+		return fail("NOTE_DB_NOT_SET", "note_db 未注入")
+	return _note_db.get_all_notes()
+
+
 ## 按牌组获取笔记列表。
 ##
 ## 输入: deck_id (int) - 牌组 ID。

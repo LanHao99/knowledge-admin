@@ -170,6 +170,17 @@ func last_insert_rowid() -> Dictionary:
 	return ok(int(result.get("data", 0)))
 
 
+## 获取最后一次 INSERT、UPDATE 或 DELETE 操作影响的行数。
+##
+## 输入: 无。
+## 输出: 返回标准字典。成功时 `data` 为 int（最后一次数据变更影响的行数）。
+func changes() -> Dictionary:
+	var result := scalar("SELECT changes() AS cnt;", [], 0)
+	if not result.get("success", false):
+		return result
+	return ok(int(result.get("data", 0)))
+
+
 ## 检查指定表是否存在。
 ##
 ## 输入: table_name (String) - 表名（如 "decks"）。

@@ -148,6 +148,17 @@ func get_notes_count(deck_id: int = 0) -> Dictionary:
 	return ok(int(result.get("data", 0)))
 
 
+## 获取全部笔记列表。
+##
+## 输入: 无。
+## 输出: 返回标准字典。成功时 `data` 为 Array[NoteEntity]。
+func get_all_notes() -> Dictionary:
+	var result := fetch_all("SELECT * FROM notes ORDER BY id DESC;", [])
+	if not result.get("success", false):
+		return result
+	return ok(_rows_to_note_entities(result.get("data", [])))
+
+
 ## 将单行查询结果转换为 NoteEntity。
 ##
 ## 输入: row (Dictionary) - notes 表的一行数据。

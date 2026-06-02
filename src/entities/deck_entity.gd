@@ -48,13 +48,33 @@ func to_dict() -> Dictionary:
 ##
 ## 输入: d (Dictionary) - 数据库查询返回的行字典，键名应与 decks 表字段对应。
 func from_dict(d: Dictionary) -> void:
-	if d.has("id"):       id = int(d.get("id", 0))
-	if d.has("name"):      name = str(d.get("name", ""))
-	if d.has("parent_id"): parent_id = int(d.get("parent_id", 0))
-	if d.has("sort_order"): sort_order = int(d.get("sort_order", 0))
-	if d.has("is_archived"): is_archived = bool(int(d.get("is_archived", 0)))
-	if d.has("created_at"): created_at = int(d.get("created_at", 0))
-	if d.has("updated_at"): updated_at = int(d.get("updated_at", 0))
+	if d.has("id"):
+		var val = d.get("id")
+		id = int(val) if val != null else 0
+	
+	if d.has("name"):
+		var val = d.get("name")
+		name = str(val) if val != null else ""
+	
+	if d.has("parent_id"):
+		var val = d.get("parent_id")
+		parent_id = int(val) if val != null else 0
+	
+	if d.has("sort_order"):
+		var val = d.get("sort_order")
+		sort_order = int(val) if val != null else 0
+	
+	if d.has("is_archived"):
+		var val = d.get("is_archived")
+		is_archived = bool(int(val)) if val != null else false
+	
+	if d.has("created_at"):
+		var val = d.get("created_at")
+		created_at = int(val) if val != null else 0
+	
+	if d.has("updated_at"):
+		var val = d.get("updated_at")
+		updated_at = int(val) if val != null else 0
 
 
 ## 判断当前牌组是否为根级（无父节点）。
