@@ -13,7 +13,7 @@ var _fields_rows: Array = []
 @onready var _deck_archived_check: CheckBox = $RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm/DeckArchivedCheck
 @onready var _deck_list_view: ItemList = $RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckListView
 @onready var _note_id_input: SpinBox = $RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/NoteIdInput
-@onready var _note_type_input: SpinBox = $RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/NoteTypeInput
+@onready var _note_deck_id_input: SpinBox = $RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/NoteTypeInput
 @onready var _fields_editor: VBoxContainer = $RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/FieldsEditorWrapper/FieldsEditor
 @onready var _add_field_button: Button = $RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/FieldsEditorWrapper/AddFieldButton
 @onready var _note_list_view: ItemList = $RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NoteListView
@@ -38,9 +38,6 @@ var _fields_rows: Array = []
 
 
 ## 初始化调试场景，建立数据库连接、设定默认值、绑定事件。
-##
-## 输入: 无。
-## 输出: 无。
 func _ready() -> void:
 	_setup_default_inputs()
 	_setup_parent_option()
@@ -52,9 +49,6 @@ func _ready() -> void:
 
 
 ## 退出场景时释放管理器节点（Manager 内部自行管理 DB 子节点）。
-##
-## 输入: 无。
-## 输出: 无。
 func _exit_tree() -> void:
 	_clear_fields_editor()
 	if _deck_manager != null:
@@ -66,25 +60,19 @@ func _exit_tree() -> void:
 
 
 ## 设定初始输入值与 fields 默认行。
-##
-## 输入: 无。
-## 输出: 无。
 func _setup_default_inputs() -> void:
 	_deck_name_input.text = "Debug Deck"
 	_deck_target_id_input.value = 1
 	_deck_sort_order_input.value = 0
 	_deck_archived_check.button_pressed = false
 	_note_id_input.value = 1
-	_note_type_input.value = 1
+	_note_deck_id_input.value = 1
 	_log_output.text = ""
 	_add_field_row("front", "demo front")
 	_add_field_row("back", "demo back")
 
 
 ## 填充 Parent 下拉选项：Root(0) + Custom。
-##
-## 输入: 无。
-## 输出: 无。
 func _setup_parent_option() -> void:
 	_deck_parent_option.add_item("Root (parent_id=0)", 0)
 	_deck_parent_option.add_item("Custom...", -1)
@@ -92,9 +80,6 @@ func _setup_parent_option() -> void:
 
 
 ## 绑定全部按钮与列表事件。
-##
-## 输入: 无。
-## 输出: 无。
 func _bind_actions() -> void:
 	_create_deck_button.pressed.connect(_on_create_deck_pressed)
 	_read_deck_button.pressed.connect(_on_read_deck_pressed)
@@ -117,17 +102,13 @@ func _bind_actions() -> void:
 	_clear_data_confirm.confirmed.connect(_on_clear_data_confirmed)
 
 
-## 当 Parent OptionButton 切换时，显示/隐藏自定义 SpinBox。
-##
-## 输入: index (int) - 选中项索引。
+## 当 Parent OptionButton 切换时，显示/隐藏自定义 SpinBox。## 输入: index (int) - 选中项索引。
 ## 输出: 无。
 func _on_parent_option_changed(index: int) -> void:
 	_deck_parent_custom_spin.visible = (_deck_parent_option.get_item_id(index) == -1)
 
 
-## 获取当前选中的 parent_id 值。
-##
-## 输入: 无。
+## 获取当前选中的 parent_id 值。## 输入: 无。
 ## 输出: int - Root 返回 0，Custom 返回 SpinBox 值。
 func _get_selected_parent_id() -> int:
 	var selected_id: int = _deck_parent_option.get_item_id(_deck_parent_option.selected)
@@ -136,9 +117,7 @@ func _get_selected_parent_id() -> int:
 	return selected_id
 
 
-## 创建并初始化 Manager，由 Manager 自行管理 DB 生命周期。
-##
-## 输入: 无。
+## 创建并初始化 Manager，由 Manager 自行管理 DB 生命周期。## 输入: 无。
 ## 输出: bool - 初始化成功返回 true。
 func _ensure_database_ready() -> bool:
 	if _deck_manager != null and _deck_manager.is_ready() and _note_manager != null and _note_manager.is_ready():
@@ -178,9 +157,6 @@ func _ensure_database_ready() -> bool:
 
 
 ## 创建牌组，打印完整返回行并自动回填 Target ID。
-##
-## 输入: 无。
-## 输出: 无。
 func _on_create_deck_pressed() -> void:
 	if not _ensure_database_ready():
 		return
@@ -199,9 +175,6 @@ func _on_create_deck_pressed() -> void:
 
 
 ## 按 Target ID 查询牌组，打印完整行并回填表单。
-##
-## 输入: 无。
-## 输出: 无。
 func _on_read_deck_pressed() -> void:
 	if not _ensure_database_ready():
 		return
@@ -222,9 +195,6 @@ func _on_read_deck_pressed() -> void:
 
 
 ## 按 Target ID 更新牌组（name + is_archived），打印改前/改后完整行。
-##
-## 输入: 无。
-## 输出: 无。
 func _on_update_deck_pressed() -> void:
 	if not _ensure_database_ready():
 		return
@@ -265,9 +235,6 @@ func _on_update_deck_pressed() -> void:
 
 
 ## 删除指定牌组，打印删除前快照与受影响行数。
-##
-## 输入: 无。
-## 输出: 无。
 func _on_delete_deck_pressed() -> void:
 	if not _ensure_database_ready():
 		return
@@ -284,18 +251,13 @@ func _on_delete_deck_pressed() -> void:
 
 
 ## 列出全部牌组，日志打印完整表格。
-##
-## 输入: 无。
-## 输出: 无。
 func _on_list_decks_pressed() -> void:
 	if not _ensure_database_ready():
 		return
 	_refresh_deck_list()
 
 
-## 双击牌组列表行→回填表单。
-##
-## 输入: index (int) - 被双击的列表项索引。
+## 双击牌组列表行→回填表单。## 输入: index (int) - 被双击的列表项索引。
 ## 输出: 无。
 func _on_deck_item_double_clicked(index: int) -> void:
 	var deck_id: int = _get_deck_id_from_list_item(_deck_list_view.get_item_text(index))
@@ -308,9 +270,7 @@ func _on_deck_item_double_clicked(index: int) -> void:
 		_populate_deck_form(result.get("data"))
 
 
-## 从列表行文本中提取牌组 id。
-##
-## 输入: line (String) - 列表行文本，格式 "id=X | ..."。
+## 从列表行文本中提取牌组 id。## 输入: line (String) - 列表行文本，格式 "id=X | ..."。
 ## 输出: int - 提取到的 id，失败返回 0。
 func _get_deck_id_from_list_item(line: String) -> int:
 	var prefix := "id="
@@ -324,9 +284,7 @@ func _get_deck_id_from_list_item(line: String) -> int:
 	return id_str.strip_edges().to_int()
 
 
-## 把牌组实体回填到表单。
-##
-## 输入: deck (DeckEntity) - 牌组实体。
+## 把牌组实体回填到表单。## 输入: deck (DeckEntity) - 牌组实体。
 ## 输出: 无。
 func _populate_deck_form(deck: DeckEntity) -> void:
 	_deck_name_input.text = deck.name
@@ -343,9 +301,6 @@ func _populate_deck_form(deck: DeckEntity) -> void:
 
 
 ## 刷新牌组 ItemList 并输出完整表格日志。
-##
-## 输入: 无。
-## 输出: 无。
 func _refresh_deck_list() -> void:
 	if _deck_manager == null:
 		return
@@ -384,26 +339,43 @@ func _refresh_deck_list() -> void:
 
 
 ## 创建 notes 记录，打印 full_row 并自动回填 ID。
-##
-## 输入: 无。
-## 输出: 无。
 func _on_create_note_pressed() -> void:
 	if not _ensure_database_ready():
 		return
-	var note_type_id: int = roundi(_note_type_input.value)
+	const FALLBACK_NOTE_TYPE_ID: int = 1
 	var fields_dict: Dictionary = _fields_to_dict()
 	if fields_dict.is_empty():
 		_append_log("创建 note 失败: fields 至少需要一个字段")
 		_append_log("")
 		return
 	var fields_json: String = JSON.stringify(fields_dict)
-	_log_operation_header("create_note", "note_type_id=%d fields=%s" % [note_type_id, fields_json])
-	
-	var deck_id: int = roundi(_deck_target_id_input.value)
-	if deck_id <= 0:
-		deck_id = 1  # 默认牌组
-	
-	var result: Dictionary = _note_manager.create_note(note_type_id, fields_dict, deck_id, [])
+
+	# 获取目标牌组 ID，牌组不存在时自动回退到第一个可用牌组
+	var deck_id: int = roundi(_note_deck_id_input.value)
+	var requested_id: int = deck_id
+	var deck_result := _deck_manager.get_deck(deck_id)
+	if not deck_result.get("success", false) or deck_result.get("data", null) == null:
+		var all_decks := _deck_manager.get_all_decks()
+		if all_decks.get("success", false):
+			var decks: Array = all_decks.get("data", [])
+			if not decks.is_empty():
+				var first_deck: DeckEntity = decks[0]
+				deck_id = first_deck.id
+				_note_deck_id_input.value = deck_id
+				if requested_id != deck_id:
+					_append_log("  info: 牌组 id=%d 不存在，自动使用第一个可用牌组 id=%d (%s)" % [requested_id, deck_id, first_deck.name])
+			else:
+				_append_log("创建 note 失败: 没有任何可用牌组，请先创建牌组")
+				_append_log("")
+				return
+		else:
+			_append_log("创建 note 失败: 无法查询牌组列表")
+			_append_log("")
+			return
+
+	_log_operation_header("create_note", "deck_id=%d note_type_id=%d fields=%s" % [deck_id, FALLBACK_NOTE_TYPE_ID, fields_json])
+
+	var result: Dictionary = _note_manager.create_note(FALLBACK_NOTE_TYPE_ID, fields_dict, deck_id, [])
 	_log_result(result)
 	if result.get("success", false):
 		var data: Dictionary = result.get("data", {})
@@ -416,9 +388,6 @@ func _on_create_note_pressed() -> void:
 
 
 ## 按 Note ID 读取记录，打印完整行并拆分 fields。
-##
-## 输入: 无。
-## 输出: 无。
 func _on_read_note_pressed() -> void:
 	if not _ensure_database_ready():
 		return
@@ -436,21 +405,17 @@ func _on_read_note_pressed() -> void:
 
 
 ## 更新 notes 记录，打印 BEFORE + AFTER。
-##
-## 输入: 无。
-## 输出: 无。
 func _on_update_note_pressed() -> void:
 	if not _ensure_database_ready():
 		return
 	var note_id: int = roundi(_note_id_input.value)
-	var note_type_id: int = int(_note_type_input.value)
 	var fields_dict: Dictionary = _fields_to_dict()
 	if fields_dict.is_empty():
 		_append_log("更新 note 失败: fields 至少需要一个字段")
 		_append_log("")
 		return
 	var fields_json: String = JSON.stringify(fields_dict)
-	_log_operation_header("update_note", "id=%d note_type_id=%d fields=%s" % [note_id, note_type_id, fields_json])
+	_log_operation_header("update_note", "id=%d fields=%s" % [note_id, fields_json])
 	
 	var before_result: Dictionary = _note_manager.get_note(note_id)
 	if before_result.get("success", false) and before_result.get("data", null) != null:
@@ -467,9 +432,6 @@ func _on_update_note_pressed() -> void:
 
 
 ## 删除 notes 记录，打印删除前快照与受影响行数。
-##
-## 输入: 无。
-## 输出: 无。
 func _on_delete_note_pressed() -> void:
 	if not _ensure_database_ready():
 		return
@@ -485,18 +447,13 @@ func _on_delete_note_pressed() -> void:
 
 
 ## 列出最近 notes，日志打印完整表格。
-##
-## 输入: 无。
-## 输出: 无。
 func _on_list_notes_pressed() -> void:
 	if not _ensure_database_ready():
 		return
 	_refresh_note_list()
 
 
-## 双击 notes 列表行→回填表单。
-##
-## 输入: index (int) - 被双击的列表项索引。
+## 双击 notes 列表行→回填表单。## 输入: index (int) - 被双击的列表项索引。
 ## 输出: 无。
 func _on_note_item_double_clicked(index: int) -> void:
 	var line: String = _note_list_view.get_item_text(index)
@@ -517,20 +474,14 @@ func _on_note_item_double_clicked(index: int) -> void:
 		_populate_note_form_from_entity(result.get("data"))
 
 
-## 把 NoteEntity 数据回填到表单与 fields 编辑器。
-##
-## 输入: note (NoteEntity) - 笔记实体。
+## 把 NoteEntity 数据回填到表单与 fields 编辑器（不覆盖 Deck ID 输入框，保持用户上次选择）。## 输入: note (NoteEntity) - 笔记实体。
 ## 输出: 无。
 func _populate_note_form_from_entity(note: NoteEntity) -> void:
 	_note_id_input.value = note.id
-	_note_type_input.value = note.note_type_id
 	_json_to_fields(JSON.stringify(note.fields_data))
 
 
 ## 刷新 notes ItemList 并输出完整表格日志。
-##
-## 输入: 无。
-## 输出: 无。
 func _refresh_note_list() -> void:
 	if _note_manager == null:
 		return
@@ -557,9 +508,7 @@ func _refresh_note_list() -> void:
 	_append_log("")
 
 
-## 把 NoteEntity 渲染为完整可读字符串（含字段展开）。
-##
-## 输入: note (NoteEntity) - 笔记实体。
+## 把 NoteEntity 渲染为完整可读字符串（含字段展开）。## 输入: note (NoteEntity) - 笔记实体。
 ## 输出: String - 格式化的完整行字符串。
 func _stringify_note_entity(note: NoteEntity) -> String:
 	var base := "id=%d note_type_id=%d created_at=%d" % [note.id, note.note_type_id, note.created_at]
@@ -579,9 +528,7 @@ func _stringify_note_entity(note: NoteEntity) -> String:
 # ──────────────────────────────────────────────────────────────
 
 
-## 向 fields 编辑器添加一行键值输入。
-##
-## 输入: key (String) - 字段键名默认值；value (String) - 字段值默认值。
+## 向 fields 编辑器添加一行键值输入。## 输入: key (String) - 字段键名默认值；value (String) - 字段值默认值。
 ## 输出: 无。
 func _add_field_row(key: String = "", value: String = "") -> void:
 	var hbox := HBoxContainer.new()
@@ -614,16 +561,11 @@ func _add_field_row(key: String = "", value: String = "") -> void:
 
 
 ## + Add Field 按钮回调。
-##
-## 输入: 无。
-## 输出: 无。
 func _on_add_field_pressed() -> void:
 	_add_field_row()
 
 
-## 删除指定 fields 行。
-##
-## 输入: hbox (HBoxContainer) - 待删除的行容器。
+## 删除指定 fields 行。## 输入: hbox (HBoxContainer) - 待删除的行容器。
 ## 输出: 无。
 func _on_remove_field_pressed(hbox: HBoxContainer) -> void:
 	for i in range(_fields_rows.size()):
@@ -634,9 +576,6 @@ func _on_remove_field_pressed(hbox: HBoxContainer) -> void:
 
 
 ## 清空 fields 编辑器所有行。
-##
-## 输入: 无。
-## 输出: 无。
 func _clear_fields_editor() -> void:
 	for row in _fields_rows:
 		var hbox: HBoxContainer = row.get("container", null)
@@ -645,9 +584,7 @@ func _clear_fields_editor() -> void:
 	_fields_rows.clear()
 
 
-## 把当前 fields 行序列化为 Dictionary。
-##
-## 输入: 无。
+## 把当前 fields 行序列化为 Dictionary。## 输入: 无。
 ## 输出: Dictionary - 键值对字典，忽略空 key 的行。
 func _fields_to_dict() -> Dictionary:
 	var d := {}
@@ -660,9 +597,7 @@ func _fields_to_dict() -> Dictionary:
 	return d
 
 
-## 将 JSON 字符串解析后回填到 fields 编辑器。
-##
-## 输入: json_str (String) - fields_data 的 JSON 字符串。
+## 将 JSON 字符串解析后回填到 fields 编辑器。## 输入: json_str (String) - fields_data 的 JSON 字符串。
 ## 输出: 无。
 func _json_to_fields(json_str: String) -> void:
 	_clear_fields_editor()
@@ -683,17 +618,11 @@ func _json_to_fields(json_str: String) -> void:
 
 
 ## 打开确认对话框。
-##
-## 输入: 无。
-## 输出: 无。
 func _on_clear_all_pressed() -> void:
 	_clear_data_confirm.popup_centered()
 
 
 ## 事务内清空 cards/notes/decks 三表数据（保留表结构），打印每表行数。
-##
-## 输入: 无。
-## 输出: 无。
 func _on_clear_data_confirmed() -> void:
 	if not _ensure_database_ready():
 		return
@@ -722,9 +651,7 @@ func _on_clear_data_confirmed() -> void:
 # ──────────────────────────────────────────────────────────────
 
 
-## 打印操作标题头。
-##
-## 输入: op (String) - 操作名称；input_info (String) - 输入参数描述。
+## 打印操作标题头。## 输入: op (String) - 操作名称；input_info (String) - 输入参数描述。
 ## 输出: 无。
 func _log_operation_header(op: String, input_info: String) -> void:
 	var timestamp: String = Time.get_time_string_from_system()
@@ -733,9 +660,7 @@ func _log_operation_header(op: String, input_info: String) -> void:
 	_scroll_to_bottom()
 
 
-## 打印标准返回字典结果。
-##
-## 输入: result (Dictionary) - 标准返回字典。
+## 打印标准返回字典结果。## 输入: result (Dictionary) - 标准返回字典。
 ## 输出: 无。
 func _log_result(result: Dictionary) -> void:
 	if result.get("success", false):
@@ -747,9 +672,7 @@ func _log_result(result: Dictionary) -> void:
 	_scroll_to_bottom()
 
 
-## 打印数据内容块（支持多行）。
-##
-## 输入: data_str (String) - 数据字符串，可包含换行。
+## 打印数据内容块（支持多行）。## 输入: data_str (String) - 数据字符串，可包含换行。
 ## 输出: 无。
 func _log_data(data_str: String) -> void:
 	for line in data_str.split("\n"):
@@ -757,9 +680,7 @@ func _log_data(data_str: String) -> void:
 	_scroll_to_bottom()
 
 
-## 向底部日志面板追加一行文本。
-##
-## 输入: message (String) - 待写入日志。
+## 向底部日志面板追加一行文本。## 输入: message (String) - 待写入日志。
 ## 输出: 无。
 func _append_log(message: String) -> void:
 	_log_output.text += message + "\n"
@@ -767,34 +688,22 @@ func _append_log(message: String) -> void:
 
 
 ## 滚动日志到底部。
-##
-## 输入: 无。
-## 输出: 无。
 func _scroll_to_bottom() -> void:
 	_log_output.set_caret_line(_log_output.get_line_count())
 
 
 ## 复制全部日志到剪贴板。
-##
-## 输入: 无。
-## 输出: 无。
 func _on_copy_log_pressed() -> void:
 	DisplayServer.clipboard_set(_log_output.text)
 	_append_log("[日志已复制到剪贴板]")
 
 
 ## 清空日志面板。
-##
-## 输入: 无。
-## 输出: 无。
 func _on_clear_log_pressed() -> void:
 	_log_output.text = ""
 
 
 ## 导出日志到 user://logs/database/ 目录。
-##
-## 输入: 无。
-## 输出: 无。
 func _on_export_log_pressed() -> void:
 	var log_dir := "user://logs/database"
 	var dir := DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(log_dir))
@@ -817,9 +726,6 @@ func _on_export_log_pressed() -> void:
 
 
 ## 一键刷新牌组与 notes 列表。
-##
-## 输入: 无。
-## 输出: 无。
 func _on_refresh_all_pressed() -> void:
 	if not _ensure_database_ready():
 		return
@@ -832,9 +738,7 @@ func _on_refresh_all_pressed() -> void:
 # ──────────────────────────────────────────────────────────────
 
 
-## 把 DeckEntity 渲染为单行完整字符串。
-##
-## 输入: deck (DeckEntity) - 牌组实体。
+## 把 DeckEntity 渲染为单行完整字符串。## 输入: deck (DeckEntity) - 牌组实体。
 ## 输出: String - 包含所有列的格式化字符串。
 func _stringify_deck(deck: DeckEntity) -> String:
 	var parent_text: String = "NULL"
@@ -851,9 +755,7 @@ func _stringify_deck(deck: DeckEntity) -> String:
 	]
 
 
-## 把标准结果字典格式化为可读字符串。
-##
-## 输入: result (Dictionary) - 标准返回字典。
+## 把标准结果字典格式化为可读字符串。## 输入: result (Dictionary) - 标准返回字典。
 ## 输出: String - 简短日志文本。
 func _format_result(result: Dictionary) -> String:
 	if result.get("success", false):
@@ -863,9 +765,7 @@ func _format_result(result: Dictionary) -> String:
 	return "FAIL code=%s error=%s" % [code, error_message]
 
 
-## 截断字符串到指定长度。
-##
-## 输入: s (String) - 原始字符串；max_len (int) - 最大长度。
+## 截断字符串到指定长度。## 输入: s (String) - 原始字符串；max_len (int) - 最大长度。
 ## 输出: String - 截断后字符串，超出部分用 … 替代。
 static func truncate_string(s: String, max_len: int) -> String:
 	if s.length() <= max_len:
