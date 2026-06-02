@@ -1,24 +1,251 @@
 extends Manager
-
-# NoteManager：处理“笔记（notes）”相关业务。
-# 这里将来会放：
-# - 创建笔记
-# - 编辑笔记字段
-# - 删除笔记
-# - 根据 note_type 生成对应 cards
-#
-# 设计目标：
-# - 让 UI 只传数据，不关心数据库细节
-# - 用 run_in_transaction 保证多步操作安全
+class_name NoteManager
 
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	# 预留：注入 db_manager 或做启动检查
-	pass
+var _note_db: NoteDB = null
+var _card_db: CardDB = null
+var _deck_db: DeckDB = null
+var _last_generate_error: Dictionary = {}
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	# 预留：业务管理器通常不需要每帧轮询
-	pass
+## 注入 NoteDB 数据仓库。
+##
+## 输入: note_db (NoteDB) - 笔记仓库对象。
+## 输出: 无。
+func set_note_db(note_db: NoteDB) -> void:
+	_note_db = note_db
+
+
+## 注入 CardDB 数据仓库。
+##
+## 输入: card_db (CardDB) - 卡片仓库对象。
+## 输出: 无。
+func set_card_db(card_db: CardDB) -> void:
+	_card_db = card_db
+
+
+## 注入 DeckDB 数据仓库（可选）。
+##
+## 输入: deck_db (DeckDB) - 牌组仓库对象。
+## 输出: 无。
+func set_deck_db(deck_db: DeckDB) -> void:
+	_deck_db = deck_db
+
+
+## 创建笔记并生成对应卡片。
+##
+## 输入:
+##   note_type_id (int) - 笔记类型 ID。
+##   fields (Dictionary) - 字段数据。
+##   deck_id (int) - 目标牌组 ID。
+##   tags (Array[String]) - 标签列表（当前仅保留接口）。
+## 输出: 返回标准字典。成功时 `data` 为 `{note: NoteEntity, cards: Array[CardEntity]}`。
+func create_note(note_type_id: int, fields: Dictionary, deck_id: int, tags: Array[String] = []) -> Dictionary:
+	if _note_db == null:
+		return fail("NOTE_DB_NOT_SET", "note_db 未注入")
+	if _card_db == null:
+		return fail("CARD_DB_NOT_SET", "card_db 未注入")
+	if note_type_id <= 0:
+		return fail("NOTE_TYPE_INVALID", "note_type_id 必须大于 0")
+	if fields.is_empty():
+		return fail("NOTE_FIELDS_EMPTY", "fields 不能为空")
+	if deck_id <= 0:
+		return fail("DECK_ID_INVALID", "deck_id 必须大于 0")
+
+	var deck_check := _validate_deck_exists(deck_id)
+	if not deck_check.get("success", false):
+		return deck_check
+
+	var note_fields_json: String = JSON.new().stringify(fields)
+	if note_fields_json == "":
+		return fail("NOTE_FIELDS_JSON_INVALID", "fields 无法序列化为 JSON")
+
+	var tx_result := run_in_databases_transaction([_note_db, _card_db], func() -> Dictionary:
+		var note_result := _note_db.create_note(note_type_id, note_fields_json, ",".join(tags))
+		if not note_result.get("success", false):
+			return note_result
+
+		var note: NoteEntity = note_result.get("data", null)
+		if note == null:
+			return fail("NOTE_CREATE_FAILED", "创建笔记后未返回实体")
+
+		var cards: Array[CardEntity] = _generate_cards_for_note(note.id, deck_id, note_type_id)
+		if cards.is_empty() and not _last_generate_error.is_empty():
+			return _last_generate_error
+
+		_notify_created("note", note.id)
+		if not cards.is_empty():
+			batch_operation_completed.emit("card", cards.size())
+		return ok({
+			"note": note,
+			"cards": cards
+		})
+	)
+
+	return tx_result
+
+
+## 更新笔记字段与标签。
+##
+## 输入:
+##   note_id (int) - 笔记 ID。
+##   fields (Dictionary) - 新字段数据。
+##   tags (Array[String]) - 标签列表（当前仅保留接口）。
+## 输出: 返回标准字典。成功时 `data` 为 NoteEntity。
+func update_note(note_id: int, fields: Dictionary, tags: Array[String] = []) -> Dictionary:
+	if _note_db == null:
+		return fail("NOTE_DB_NOT_SET", "note_db 未注入")
+	if note_id <= 0:
+		return fail("NOTE_ID_INVALID", "note_id 必须大于 0")
+	if fields.is_empty():
+		return fail("NOTE_FIELDS_EMPTY", "fields 不能为空")
+
+	if not tags.is_empty():
+		# 当前 schema 暂无 tags 独立存储，预留参数仅用于接口兼容。
+		pass
+
+	var note_result := _note_db.get_note_by_id(note_id)
+	if not note_result.get("success", false):
+		return note_result
+	var note: NoteEntity = note_result.get("data", null)
+	if note == null:
+		return fail("NOTE_NOT_FOUND", "笔记不存在")
+
+	note.fields_data = fields.duplicate(true)
+	var update_result := _note_db.update_note(note)
+	if not update_result.get("success", false):
+		return update_result
+
+	_notify_updated("note", note_id)
+	return ok(note)
+
+
+## 删除笔记及其关联卡片。
+##
+## 输入: note_id (int) - 笔记 ID。
+## 输出: 返回标准字典。成功时 `data` 为 `{deleted_cards: int}`。
+func delete_note(note_id: int) -> Dictionary:
+	if _note_db == null:
+		return fail("NOTE_DB_NOT_SET", "note_db 未注入")
+	if _card_db == null:
+		return fail("CARD_DB_NOT_SET", "card_db 未注入")
+	if note_id <= 0:
+		return fail("NOTE_ID_INVALID", "note_id 必须大于 0")
+
+	var note_result := _note_db.get_note_by_id(note_id)
+	if not note_result.get("success", false):
+		return note_result
+	if note_result.get("data", null) == null:
+		return fail("NOTE_NOT_FOUND", "笔记不存在")
+
+	var tx_result := run_in_databases_transaction([_note_db, _card_db], func() -> Dictionary:
+		var delete_cards_result := _card_db.delete_cards_by_note(note_id)
+		if not delete_cards_result.get("success", false):
+			return delete_cards_result
+
+		var delete_note_result := _note_db.delete_note(note_id)
+		if not delete_note_result.get("success", false):
+			return delete_note_result
+
+		var deleted_cards: int = int(delete_cards_result.get("data", 0))
+		_notify_deleted("note", note_id)
+		if deleted_cards > 0:
+			batch_operation_completed.emit("card", deleted_cards)
+		return ok({"deleted_cards": deleted_cards})
+	)
+
+	return tx_result
+
+
+## 获取单条笔记。
+##
+## 输入: note_id (int) - 笔记 ID。
+## 输出: 返回标准字典。成功时 `data` 为 NoteEntity 或 null。
+func get_note(note_id: int) -> Dictionary:
+	if _note_db == null:
+		return fail("NOTE_DB_NOT_SET", "note_db 未注入")
+	return _note_db.get_note_by_id(note_id)
+
+
+## 按牌组获取笔记列表。
+##
+## 输入: deck_id (int) - 牌组 ID。
+## 输出: 返回标准字典。成功时 `data` 为 Array[NoteEntity]。
+func get_notes_by_deck(deck_id: int) -> Dictionary:
+	if _note_db == null:
+		return fail("NOTE_DB_NOT_SET", "note_db 未注入")
+	return _note_db.get_notes_by_deck(deck_id)
+
+
+## 按关键词搜索笔记。
+##
+## 输入:
+##   query (String) - 搜索词。
+##   deck_id (int) - 可选牌组过滤，0 表示全局搜索。
+## 输出: 返回标准字典。成功时 `data` 为 Array[NoteEntity]。
+func search_notes(query: String, deck_id: int = 0) -> Dictionary:
+	if _note_db == null:
+		return fail("NOTE_DB_NOT_SET", "note_db 未注入")
+	return _note_db.search_notes(query, deck_id)
+
+
+## 根据 note_type 生成卡片（V1 每条笔记只生成 1 张卡）。
+##
+## 输入:
+##   note_id (int) - 笔记 ID。
+##   deck_id (int) - 目标牌组 ID。
+##   note_type_id (int) - 笔记类型 ID。
+## 输出: Array[CardEntity] - 创建成功的卡片数组。
+func _generate_cards_for_note(note_id: int, deck_id: int, note_type_id: int) -> Array[CardEntity]:
+	_last_generate_error = {}
+	if _card_db == null:
+		_last_generate_error = fail("CARD_DB_NOT_SET", "card_db 未注入")
+		return []
+	if note_id <= 0:
+		_last_generate_error = fail("NOTE_ID_INVALID", "note_id 必须大于 0")
+		return []
+	if deck_id <= 0:
+		_last_generate_error = fail("DECK_ID_INVALID", "deck_id 必须大于 0")
+		return []
+	if note_type_id <= 0:
+		_last_generate_error = fail("NOTE_TYPE_INVALID", "note_type_id 必须大于 0")
+		return []
+
+	var card_result := _card_db.create_card(note_id, deck_id, 0)
+	if not card_result.get("success", false):
+		_last_generate_error = card_result
+		return []
+
+	var card: CardEntity = card_result.get("data", null)
+	if card == null:
+		_last_generate_error = fail("CARD_CREATE_FAILED", "创建卡片后未返回实体")
+		return []
+
+	return [card]
+
+
+## 校验牌组是否存在。
+##
+## 输入: deck_id (int) - 牌组 ID。
+## 输出: 返回标准字典。成功时 `data` 为 true。
+func _validate_deck_exists(deck_id: int) -> Dictionary:
+	if deck_id <= 0:
+		return fail("DECK_ID_INVALID", "deck_id 必须大于 0")
+
+	if _deck_db != null:
+		var deck_result := _deck_db.get_deck_by_id(deck_id)
+		if not deck_result.get("success", false):
+			return deck_result
+		if deck_result.get("data", null) == null:
+			return fail("DECK_NOT_FOUND", "牌组不存在")
+		return ok(true)
+
+	if _card_db == null:
+		return fail("DECK_DB_NOT_SET", "deck_db 未注入，且无法回退到 card_db 校验")
+
+	var count_result := _card_db.count("decks", "id = ?", [deck_id])
+	if not count_result.get("success", false):
+		return count_result
+	if int(count_result.get("data", 0)) <= 0:
+		return fail("DECK_NOT_FOUND", "牌组不存在")
+	return ok(true)

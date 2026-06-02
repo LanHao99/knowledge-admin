@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://scenes/ui/debug_crud_panel.gd" id="1_bkhsq"]
+[ext_resource type="Script" path="res://scenes/ui/debug_crud_panel.gd" id="1_dbg"]
 
 [node name="DebugCrudPanel" type="Control"]
 layout_mode = 3
@@ -9,7 +9,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_bkhsq")
+script = ExtResource("1_dbg")
 
 [node name="RootMargin" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -18,197 +18,284 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
 
 [node name="MainVBox" type="VBoxContainer" parent="RootMargin"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="Toolbar" type="HBoxContainer" parent="RootMargin/MainVBox"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 10
 
 [node name="TitleLabel" type="Label" parent="RootMargin/MainVBox/Toolbar"]
 layout_mode = 2
-text = "Deck + Database CRUD Debug Panel"
+text = "Deck + Notes CRUD Debug Panel"
+size_flags_horizontal = 3
+
+[node name="ClearAllDataButton" type="Button" parent="RootMargin/MainVBox/Toolbar"]
+layout_mode = 2
+text = "Clear All Data"
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
 
 [node name="RefreshAllButton" type="Button" parent="RootMargin/MainVBox/Toolbar"]
 layout_mode = 2
 text = "Refresh All"
 
-[node name="ContentHBox" type="HBoxContainer" parent="RootMargin/MainVBox"]
+[node name="MainHSplit" type="HSplitContainer" parent="RootMargin/MainVBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/separation = 12
+theme_override_constants/separation = 4
 
-[node name="DeckPanel" type="PanelContainer" parent="RootMargin/MainVBox/ContentHBox"]
+[node name="ContentHBox" type="HBoxContainer" parent="RootMargin/MainVBox/MainHSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="DeckPanel" type="PanelContainer" parent="RootMargin/MainVBox/MainHSplit/ContentHBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="DeckVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentHBox/DeckPanel"]
+[node name="DeckVBox" type="VBoxContainer" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
-[node name="DeckTitle" type="Label" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox"]
+[node name="DeckTitle" type="Label" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox"]
 layout_mode = 2
 text = "Deck CRUD"
 
-[node name="DeckForm" type="GridContainer" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox"]
+[node name="DeckForm" type="GridContainer" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox"]
 layout_mode = 2
 columns = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 4
 
-[node name="DeckNameLabel" type="Label" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
+[node name="DeckNameLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
 layout_mode = 2
 text = "Name"
+tooltip_text = "Create: new deck name | Update: new name for target deck"
 
-[node name="DeckNameInput" type="LineEdit" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
+[node name="DeckNameInput" type="LineEdit" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
 layout_mode = 2
+size_flags_horizontal = 3
 placeholder_text = "Deck name"
 
-[node name="DeckParentIdLabel" type="Label" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
+[node name="DeckTargetIdLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
+layout_mode = 2
+text = "Target Deck ID"
+tooltip_text = "Used for Read / Update / Delete operations"
+
+[node name="DeckTargetIdInput" type="SpinBox" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
+layout_mode = 2
+min_value = 1.0
+max_value = 999999.0
+step = 1.0
+rounded = true
+
+[node name="DeckParentLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
 layout_mode = 2
 text = "Parent ID"
+tooltip_text = "Create: parent of new deck | other ops: ignored (0 = root)"
 
-[node name="DeckParentIdInput" type="SpinBox" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
+[node name="DeckParentOption" type="OptionButton" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="DeckParentCustomSpin" type="SpinBox" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
+layout_mode = 2
+visible = false
+min_value = 0.0
+max_value = 999999.0
+step = 1.0
+rounded = true
+
+[node name="DeckSortOrderLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
+layout_mode = 2
+text = "Sort Order"
+tooltip_text = "Create: sort order for new deck | other ops: ignored"
+
+[node name="DeckSortOrderInput" type="SpinBox" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
 layout_mode = 2
 min_value = 0.0
 max_value = 999999.0
 step = 1.0
 rounded = true
 
-[node name="DeckIdLabel" type="Label" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
+[node name="DeckArchivedLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
 layout_mode = 2
-text = "Deck ID"
+text = "Archived"
+tooltip_text = "Update: set archive status | Create: always creates as not archived"
 
-[node name="DeckIdInput" type="SpinBox" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
+[node name="DeckArchivedCheck" type="CheckBox" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
 layout_mode = 2
-min_value = 1.0
-max_value = 999999.0
-step = 1.0
-rounded = true
+text = "is_archived"
 
-[node name="DeckRenameLabel" type="Label" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
+[node name="DeckButtons" type="HBoxContainer" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox"]
 layout_mode = 2
-text = "Rename To"
+theme_override_constants/separation = 6
 
-[node name="DeckRenameInput" type="LineEdit" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckForm"]
-layout_mode = 2
-placeholder_text = "New deck name"
-
-[node name="DeckButtons" type="HBoxContainer" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="CreateDeckButton" type="Button" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckButtons"]
+[node name="CreateDeckButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons"]
 layout_mode = 2
 text = "Create"
 
-[node name="GetDeckButton" type="Button" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckButtons"]
+[node name="ReadDeckButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons"]
 layout_mode = 2
 text = "Read"
 
-[node name="ListDeckButton" type="Button" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckButtons"]
-layout_mode = 2
-text = "List"
-
-[node name="RenameDeckButton" type="Button" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckButtons"]
+[node name="UpdateDeckButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons"]
 layout_mode = 2
 text = "Update"
 
-[node name="DeleteDeckButton" type="Button" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox/DeckButtons"]
+[node name="DeleteDeckButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons"]
 layout_mode = 2
 text = "Delete"
 
-[node name="DeckListView" type="ItemList" parent="RootMargin/MainVBox/ContentHBox/DeckPanel/DeckVBox"]
+[node name="ListDeckButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons"]
+layout_mode = 2
+text = "List"
+
+[node name="DeckListView" type="ItemList" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="DbPanel" type="PanelContainer" parent="RootMargin/MainVBox/ContentHBox"]
+[node name="NotesPanel" type="PanelContainer" parent="RootMargin/MainVBox/MainHSplit/ContentHBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="DbVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentHBox/DbPanel"]
+[node name="NotesVBox" type="VBoxContainer" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
-[node name="DbTitle" type="Label" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox"]
+[node name="NotesTitle" type="Label" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox"]
 layout_mode = 2
 text = "Notes Table CRUD"
 
-[node name="DbForm" type="GridContainer" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox"]
+[node name="NotesForm" type="GridContainer" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox"]
 layout_mode = 2
 columns = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 4
 
-[node name="NoteIdLabel" type="Label" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbForm"]
+[node name="NoteIdLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm"]
 layout_mode = 2
 text = "Note ID"
+tooltip_text = "Target for Read / Update / Delete"
 
-[node name="NoteIdInput" type="SpinBox" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbForm"]
+[node name="NoteIdInput" type="SpinBox" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm"]
 layout_mode = 2
 min_value = 1.0
 max_value = 999999.0
 step = 1.0
 rounded = true
 
-[node name="NoteTypeLabel" type="Label" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbForm"]
+[node name="NoteTypeLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm"]
 layout_mode = 2
-text = "Note Type"
+text = "Note Type ID"
+tooltip_text = "Used for Create / Update"
 
-[node name="NoteTypeInput" type="SpinBox" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbForm"]
+[node name="NoteTypeInput" type="SpinBox" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm"]
 layout_mode = 2
 min_value = 1.0
 max_value = 999999.0
 step = 1.0
 rounded = true
 
-[node name="NoteFieldsLabel" type="Label" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbForm"]
+[node name="FieldsLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm"]
 layout_mode = 2
-text = "fields_data JSON"
+text = "Fields"
+tooltip_text = "Key-value pairs auto-serialized to fields_data JSON"
 
-[node name="NoteFieldsInput" type="TextEdit" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbForm"]
-custom_minimum_size = Vector2(0, 90)
+[node name="FieldsEditorWrapper" type="VBoxContainer" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm"]
 layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
 
-[node name="DbButtons" type="HBoxContainer" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox"]
+[node name="FieldsEditor" type="VBoxContainer" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/FieldsEditorWrapper"]
 layout_mode = 2
-theme_override_constants/separation = 8
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
 
-[node name="CreateNoteButton" type="Button" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbButtons"]
+[node name="AddFieldButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/FieldsEditorWrapper"]
+layout_mode = 2
+text = "+ Add Field"
+
+[node name="NotesButtons" type="HBoxContainer" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="CreateNoteButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons"]
 layout_mode = 2
 text = "Create"
 
-[node name="ReadNoteButton" type="Button" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbButtons"]
+[node name="ReadNoteButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons"]
 layout_mode = 2
 text = "Read"
 
-[node name="UpdateNoteButton" type="Button" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbButtons"]
+[node name="UpdateNoteButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons"]
 layout_mode = 2
 text = "Update"
 
-[node name="DeleteNoteButton" type="Button" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbButtons"]
+[node name="DeleteNoteButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons"]
 layout_mode = 2
 text = "Delete"
 
-[node name="ListNoteButton" type="Button" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox/DbButtons"]
+[node name="ListNoteButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons"]
 layout_mode = 2
 text = "List"
 
-[node name="NoteListView" type="ItemList" parent="RootMargin/MainVBox/ContentHBox/DbPanel/DbVBox"]
+[node name="NoteListView" type="ItemList" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="LogOutput" type="TextEdit" parent="RootMargin/MainVBox"]
-custom_minimum_size = Vector2(0, 220)
+[node name="LogPanel" type="PanelContainer" parent="RootMargin/MainVBox/MainHSplit"]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="LogVBox" type="VBoxContainer" parent="RootMargin/MainVBox/MainHSplit/LogPanel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="LogToolbar" type="HBoxContainer" parent="RootMargin/MainVBox/MainHSplit/LogPanel/LogVBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="LogTitleLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/LogPanel/LogVBox/LogToolbar"]
+layout_mode = 2
+text = "Log"
+size_flags_horizontal = 3
+
+[node name="CopyLogButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/LogPanel/LogVBox/LogToolbar"]
+layout_mode = 2
+text = "Copy"
+
+[node name="ClearLogButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/LogPanel/LogVBox/LogToolbar"]
+layout_mode = 2
+text = "Clear"
+
+[node name="ExportLogButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/LogPanel/LogVBox/LogToolbar"]
+layout_mode = 2
+text = "Export"
+
+[node name="LogOutput" type="TextEdit" parent="RootMargin/MainVBox/MainHSplit/LogPanel/LogVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 editable = false
+wrap_mode = 2
+
+[node name="ClearDataConfirm" type="ConfirmationDialog" parent="."]
+title = "清空测试数据"
+dialog_text = "将清空 cards / notes / decks 三张表的所有数据。表结构保留不变。此操作不可撤销，确定继续？"
+ok_button_text = "清空"
