@@ -181,6 +181,33 @@ func get_card_counts(deck_id: int) -> Dictionary:
 	return ok(stats)
 
 
+## 跨全牌组统计到期卡片总数（不含暂停/搁置）。## 输入:
+##   now_day_index (int) - 当前天数索引。
+##   now_timestamp (int) - 当前 Unix 时间戳（秒）。
+## 输出: 返回标准字典。成功时 `data` 为 int（到期卡片总数）。
+func get_global_due_count(now_day_index: int, now_timestamp: int) -> Dictionary:
+	var sql := """SELECT COUNT(*) AS cnt FROM cards 
+		WHERE queue IN (?, ?, ?) 
+		AND (
+			(queue IN (?, ?) AND due <= ?)
+			OR
+			(queue = ? AND due <= ?)
+		);"""
+	var params: Array = [
+		CardEntity.QUEUE_NEW, CardEntity.QUEUE_LEARNING, CardEntity.QUEUE_REVIEW,
+		CardEntity.QUEUE_NEW, CardEntity.QUEUE_REVIEW, now_day_index,
+		CardEntity.QUEUE_LEARNING, now_timestamp
+	]
+	return scalar(sql, params)
+
+
+## 统计今天复习过的卡片数（按 last_review_time 落在今天的内部）。## 输入: today_start_ts (int) - 今天零点的 Unix 时间戳。
+## 输出: 返回标准字典。成功时 `data` 为 int（今日复习卡片数）。
+func get_today_studied_count(today_start_ts: int) -> Dictionary:
+	var sql := "SELECT COUNT(*) AS cnt FROM cards WHERE last_review_time >= ?;"
+	return scalar(sql, [today_start_ts])
+
+
 ## 记录一次复习结果（单条更新）。## 输入:
 ##   card_id (int) - 卡片 ID。
 ##   rating (int) - 评分（1~4）。

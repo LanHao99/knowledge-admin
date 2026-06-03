@@ -152,6 +152,24 @@ func get_study_queue(deck_id: int) -> Dictionary:
 	})
 
 
+## 跨全牌组统计到期卡片总数（不含暂停/搁置）。## 输入:
+##   now_day_index (int) - 当前天数索引。
+##   now_timestamp (int) - 当前 Unix 时间戳（秒）。
+## 输出: 返回标准字典。成功时 `data` 为 int（到期卡片总数）。
+func get_global_due_count(now_day_index: int, now_timestamp: int) -> Dictionary:
+	if _card_db == null:
+		return fail("CARD_DB_NOT_SET", "card_db 未注入")
+	return _card_db.get_global_due_count(now_day_index, now_timestamp)
+
+
+## 统计今天复习过的卡片数。## 输入: today_start_ts (int) - 今天零点的 Unix 时间戳。
+## 输出: 返回标准字典。成功时 `data` 为 int。
+func get_today_studied_count(today_start_ts: int) -> Dictionary:
+	if _card_db == null:
+		return fail("CARD_DB_NOT_SET", "card_db 未注入")
+	return _card_db.get_today_studied_count(today_start_ts)
+
+
 ## 提交一次卡片作答，计算并落库下一状态。## 输入:
 ##   card_id (int) - 卡片 ID。
 ##   rating (int) - 评分（1~4）。

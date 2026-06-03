@@ -3,7 +3,7 @@
 > **路径**: `res://scenes/ui/main_menu.gd` / `main_menu.tscn`
 > **继承**: `Control`（建议从 Node2D 迁移为 Control）
 > **类型**: UI 层 — 程序入口场景
-> **状态**: Phase 1 已实现（基础布局 + 导航按钮 + BBCode 样式）
+> **状态**: Phase 2 已实现（统计面板数据接入）
 
 ---
 
@@ -210,10 +210,13 @@ main_menu._ready()
 **待实现**：
 
 - `project.godot` 中将 `run/main_scene` 指向 `main_menu.tscn`
-- Phase 2 统计面板数据接入
 - Phase 3 设置弹窗
 
 **Phase 2 实现记录**：
 
-- `note_list.tscn` + `note_list.gd` 已实现：Tree 按牌组分组展示笔记列表、双击展开内嵌编辑面板、新建笔记 ConfirmationDialog
-- 导航路径 `res://scenes/ui/note_list.tscn` 已在 `_on_note_browse_pressed()` 中激活
+- `main_menu.gd` 新增 `_ensure_managers_ready()`：场景启动时创建独立 `DeckManager` + `CardManager` 实例（遵循 LRN-006 降级方案），初始化失败时底部状态栏显示红色错误提示
+- `main_menu.gd` 新增 `_refresh_stats()`：从 Manager 拉取三个统计数据，用 `_update_stat_label()` BBCode 更新 RichTextLabel
+- 统计项定义：**牌组数** → `DeckManager.get_all_decks().data.size()`，**待复习** → `CardManager.get_global_due_count()`（跨全牌组计数 new+learning+review 且 due<=now），**今日已学** → `CardManager.get_today_studied_count()`（按 last_review_time>=今日零点计数）
+- `CardDB` 新增两个全局统计方法：`get_global_due_count(now_day_index, now_timestamp)` 和 `get_today_studied_count(today_start_ts)`，均为 `scalar()` 聚合查询
+- `CardManager` 新增对应包装方法，透传到 CardDB
+- `main_menu.gd` 新增 `_exit_tree()` 释放 Manager 实例
