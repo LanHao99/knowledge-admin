@@ -1,4 +1,4 @@
-﻿extends Node
+extends Node
 class_name Manager
 
 # 这是"业务层基类"

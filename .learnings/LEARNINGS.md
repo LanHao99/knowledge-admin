@@ -178,3 +178,39 @@ main_menu Phase 2 需要三个全局统计：牌组数、待复习数、今日�
 - Source: conversation
 - Related Files: scenes/data_access/card_db.gd, scenes/business_logic/card_manager.gd, scenes/ui/main_menu.gd
 - Tags: stats, aggregation, sql, architecture
+
+---
+
+## [LRN-20260603-008] best_practice
+
+**Logged**: 2026-06-03T21:30:00+08:00
+**Priority**: critical
+**Status**: done
+**Area**: config
+
+### Summary
+UTF-8 BOM 导致 Godot 4.x class_name 全局注册失败 —— 级联编译错误
+
+### Details
+Windows 部分编辑器（记事本、VS Code 某些编码设置）保存 UTF-8 文件时默认附加 BOM (U+FEFF, `﻿`)。Godot 4.x GDScript 解析器将 BOM 视为非法字符，导致该文件的 `class_name` 无法注册。
+
+本次事故中 4 个文件被 BOM 污染：
+- `manager.gd`（基类 `Manager`）
+- `db_manager.gd`（基类 `DBManager`）
+- `card_manager.gd`（`CardManager`）
+- `note_manager.gd`（`NoteManager`）
+
+两个基类污染产生级联效应：所有 `extends Manager` 和 `extends DBManager` 的子类全部失效，导致 `card_ui.gd` 无法识别 `StudyManager`/`NoteManager`/`CardManager`。
+
+修复：移除 4 个文件的 BOM 字节（`raw[3:]`）。
+
+### Suggested Action
+1. 优先用 Godot 内置编辑器编辑 `.gd` 文件
+2. `.editorconfig` 中 `[*.gd]` 显式声明 `charset = utf-8` + `end_of_line = lf`
+3. `.git/hooks/pre-commit` Python 脚本硬拦截 BOM 污染提交
+4. 编译报错时排查级联依赖：基类失效 → 所有子类报错，根因在依赖链顶端
+
+### Metadata
+- Source: debugging
+- Related Files: scenes/business_logic/manager.gd, scenes/data_access/db_manager.gd, scenes/ui/card_ui.gd
+- Tags: bom, encoding, class_name, godot-parser, cascade-failure, git-hooks

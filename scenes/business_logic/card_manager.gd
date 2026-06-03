@@ -1,4 +1,4 @@
-﻿extends Manager
+extends Manager
 class_name CardManager
 
 ## 卡片复习管理器，负责卡片的复习生命周期（调度、评分、状态变更）。

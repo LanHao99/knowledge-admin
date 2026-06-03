@@ -1,4 +1,4 @@
-﻿extends Node
+extends Node
 class_name DBManager
 
 ## 这是"数据层基类"，专门负责：

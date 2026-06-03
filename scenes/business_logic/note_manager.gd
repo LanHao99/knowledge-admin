@@ -1,4 +1,4 @@
-﻿extends Manager
+extends Manager
 class_name NoteManager
 
 ## 笔记管理器，负责笔记（知识点）的完整生命周期，同时管理 笔记↔卡片 的派生关系。
