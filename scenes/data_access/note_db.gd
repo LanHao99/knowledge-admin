@@ -5,9 +5,10 @@ class_name NoteDB
 ## 创建一条笔记记录并返回创建后的实体对象。## 输入:
 ##   note_type_id (int) - 笔记类型 ID。
 ##   fields_json (String) - 字段 JSON 字符串。
+##   deck_id (int) - 所属牌组 ID。
 ##   tags (String) - 预留标签字符串，当前 schema 未落库，仅保留参数兼容。
 ## 输出: 返回标准字典。成功时 `data` 为 NoteEntity。
-func create_note(note_type_id: int, fields_json: String, tags: String = "") -> Dictionary:
+func create_note(note_type_id: int, fields_json: String, deck_id: int = 0, tags: String = "") -> Dictionary:
 	if note_type_id <= 0:
 		return fail("NOTE_TYPE_INVALID", "note_type_id 必须大于 0")
 
@@ -16,8 +17,8 @@ func create_note(note_type_id: int, fields_json: String, tags: String = "") -> D
 		pass
 	var now_ts: int = int(Time.get_unix_time_from_system())
 	var insert_result := execute_bind(
-		"INSERT INTO notes(note_type_id, fields_data, created_at) VALUES(?, ?, ?);",
-		[note_type_id, fields_json, now_ts]
+		"INSERT INTO notes(note_type_id, deck_id, fields_data, created_at) VALUES(?, ?, ?, ?);",
+		[note_type_id, deck_id, fields_json, now_ts]
 	)
 	if not insert_result.get("success", false):
 		return insert_result
@@ -49,8 +50,8 @@ func update_note(note: NoteEntity) -> Dictionary:
 	if note == null or note.id <= 0:
 		return fail("NOTE_ID_INVALID", "更新笔记时 note.id 必须大于 0")
 
-	var sql := "UPDATE notes SET note_type_id = ?, fields_data = ? WHERE id = ?;"
-	return execute_bind(sql, [note.note_type_id, note.fields_to_json(), note.id])
+	var sql := "UPDATE notes SET note_type_id = ?, deck_id = ?, fields_data = ? WHERE id = ?;"
+	return execute_bind(sql, [note.note_type_id, note.deck_id, note.fields_to_json(), note.id])
 
 
 ## 删除单条笔记。## 输入: note_id (int) - 笔记 ID。

@@ -79,7 +79,7 @@ func create_note(note_type_id: int, fields: Dictionary, deck_id: int, tags: Arra
 		return fail("NOTE_FIELDS_JSON_INVALID", "fields 无法序列化为 JSON")
 
 	var tx_result := run_in_databases_transaction([_note_db, _card_db], func() -> Dictionary:
-		var note_result := _note_db.create_note(note_type_id, note_fields_json, ",".join(tags))
+		var note_result := _note_db.create_note(note_type_id, note_fields_json, deck_id, ",".join(tags))
 		if not note_result.get("success", false):
 			return note_result
 
