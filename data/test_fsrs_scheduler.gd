@@ -268,11 +268,11 @@ func test_a10_fuzzing() -> Dictionary:
 # ── 工具 ──
 
 func ok() -> Dictionary:
-	return {pass = true, message = ""}
+	return {"pass": true, "message": ""}
 
 
 func err(msg: String) -> Dictionary:
-	return {pass = false, message = msg}
+	return {"pass": false, "message": msg}
 
 
 func _approx(actual: float, expected: float, tolerance: float) -> bool:
