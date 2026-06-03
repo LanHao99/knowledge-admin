@@ -42,8 +42,8 @@ var _signals_connected: bool = false
 
 # ── 卡片内容区 ──
 @onready var _card_panel: PanelContainer = $"MainVBox/CardPanel"
-@onready var _content_label: RichTextLabel = $"MainVBox/CardPanel/PanelCenter/CardContentVBox/ContentLabel"
-@onready var _flip_hint: Label = $"MainVBox/CardPanel/PanelCenter/CardContentVBox/FlipHint"
+@onready var _content_label: RichTextLabel = $"MainVBox/CardPanel/CardContentVBox/ContentLabel"
+@onready var _flip_hint: Label = $"MainVBox/CardPanel/CardContentVBox/FlipHint"
 
 # ── 评分按钮 ──
 @onready var _answer_bar: HBoxContainer = $"MainVBox/AnswerBar"
