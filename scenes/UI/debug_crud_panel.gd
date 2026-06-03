@@ -282,8 +282,8 @@ func _on_create_note_pressed() -> void:
 		return
 	var deck_id: int = roundi(_note_deck_id_input.value)
 	var fields: Dictionary = _read_fields_from_editor()
-	var note_type_id: int = 0
-	_log_operation_header("create_note", "deck_id=%d fields=%s" % [deck_id, str(fields)])
+	var note_type_id: int = 1
+	_log_operation_header("create_note", "deck_id=%d note_type_id=%d fields=%s" % [deck_id, note_type_id, str(fields)])
 	var result: Dictionary = _note_manager.create_note(note_type_id, fields, deck_id)
 	_log_result(result)
 	if result.get("success", false):
@@ -318,8 +318,8 @@ func _on_update_note_pressed() -> void:
 	var note_id: int = roundi(_note_id_input.value)
 	var deck_id: int = roundi(_note_deck_id_input.value)
 	var fields: Dictionary = _read_fields_from_editor()
-	var note_type_id: int = 0
-	_log_operation_header("update_note", "id=%d deck_id=%d fields=%s" % [note_id, deck_id, str(fields)])
+	var note_type_id: int = 1
+	_log_operation_header("update_note", "id=%d note_type_id=%d deck_id=%d fields=%s" % [note_id, note_type_id, deck_id, str(fields)])
 	var result: Dictionary = _note_manager.update_note_fields(note_id, note_type_id, fields, deck_id)
 	_log_result(result)
 	if result.get("success", false):
@@ -394,22 +394,19 @@ func _on_gen_test_data_pressed() -> void:
 		var back: String = info["back"]
 		var rating: int = info["rating"]
 
-		# 创建笔记
+		# 创建笔记（note_type_id=1 占位；create_note 内部自动生成卡片）
 		var fields := {"front": front, "back": back}
-		var note_result := _note_manager.create_note(0, fields, deck_id)
+		var note_result := _note_manager.create_note(1, fields, deck_id)
 		if not note_result.get("success", false):
 			summaries.append("  ❌ 笔记创建失败: %s" % str(note_result.get("error", "")))
 			continue
-		var note: NoteEntity = note_result.get("data")
-		if note == null:
+		var data: Dictionary = note_result.get("data", {})
+		var note: NoteEntity = data.get("note", null)
+		var cards: Array[CardEntity] = data.get("cards", [])
+		if note == null or cards.is_empty():
+			summaries.append("  ❌ 笔记/卡片为空")
 			continue
-
-		# 创建卡片
-		var card_result := _test_card_manager.create_card(note.id, deck_id)
-		if not card_result.get("success", false):
-			summaries.append("  ❌ 卡片创建失败")
-			continue
-		var card: CardEntity = card_result.get("data")
+		var card: CardEntity = cards[0]
 
 		# 模拟评分
 		var next_state := _test_scheduler.calculate_next_state(card, rating, now_ts)
