@@ -36,7 +36,7 @@ func run_all_tests() -> Dictionary:
 	for case in cases:
 		var name: String = case["name"]
 		var method: Callable = case["method"]
-		var result := method.call()
+		var result: Dictionary = method.call()
 		if result.get("pass", false):
 			passed += 1
 			print("  ✅ %s" % name)
