@@ -21,6 +21,7 @@ var _deck_names: Dictionary = {}  # deck_id → deck_name 缓存
 @onready var _edit_panel: PanelContainer = $RootMargin/MainVBox/EditPanel
 @onready var _edit_title: Label = $RootMargin/MainVBox/EditPanel/EditVBox/EditHeader/EditTitle
 @onready var _close_edit_btn: Button = $RootMargin/MainVBox/EditPanel/EditVBox/EditHeader/CloseEditBtn
+@onready var _edit_deck_select: OptionButton = $RootMargin/MainVBox/EditPanel/EditVBox/DeckRow/EditDeckSelect
 @onready var _fields_edit: VBoxContainer = $RootMargin/MainVBox/EditPanel/EditVBox/FieldsEdit
 @onready var _deck_label: Label = $RootMargin/MainVBox/EditPanel/EditVBox/MetaInfo/DeckLabel
 @onready var _created_label: Label = $RootMargin/MainVBox/EditPanel/EditVBox/MetaInfo/CreatedLabel
@@ -308,8 +309,10 @@ func _show_editor(note: NoteEntity) -> void:
 	_clear_editor_rows()
 
 	_edit_title.text = "编辑笔记 #%d" % note.id
-	_deck_label.text = "牌组: %s" % _get_deck_name(note.deck_id)
-	_created_label.text = "创建: %s" % _format_timestamp(note.created_at)
+	_deck_label.text = "创建: %s" % _format_timestamp(note.created_at)
+
+	# 填充牌组下拉
+	_refill_deck_select(_edit_deck_select, note.deck_id)
 
 	# 动态生成字段编辑器
 	for field_name in note.fields_data:
@@ -338,7 +341,8 @@ func _on_save_pressed() -> void:
 	for row in _editor_rows:
 		fields[row.field_name] = row.input.text
 
-	var result := _note_manager.update_note(note_id, fields)
+	var new_deck_id: int = _edit_deck_select.get_selected_id()
+	var result := _note_manager.update_note(note_id, fields, new_deck_id)
 	if result.get("success", false):
 		_set_status("笔记 #%d 已保存 ✓" % note_id)
 		_edit_panel.visible = false
@@ -457,6 +461,29 @@ func _switch_scene(path: String, label: String) -> void:
 		_set_status("[color=#FF6666]场景不存在: %s[/color]" % label)
 		return
 	get_tree().change_scene_to_file(path)
+
+
+## 填充牌组下拉列表（编辑面板用）。## 输入:
+##   option (OptionButton) - 目标下拉控件。
+##   current_deck_id (int) - 当前选中值。
+## 输出: 无。
+func _refill_deck_select(option: OptionButton, current_deck_id: int) -> void:
+	option.clear()
+	if _deck_manager == null:
+		return
+	var result := _deck_manager.get_all_decks()
+	if not result.get("success", false):
+		return
+	var selected_idx := 0
+	var idx := 0
+	for deck in result.get("data", []):
+		if not (deck is DeckEntity):
+			continue
+		option.add_item(deck.name, deck.id)
+		if deck.id == current_deck_id:
+			selected_idx = idx
+		idx += 1
+	option.select(selected_idx)
 
 
 ## 设置底部状态栏文本（支持 BBCode）。## 输入: text (String) - 状态文本。

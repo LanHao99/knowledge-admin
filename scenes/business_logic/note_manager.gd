@@ -103,12 +103,13 @@ func create_note(note_type_id: int, fields: Dictionary, deck_id: int, tags: Arra
 	return tx_result
 
 
-## 更新笔记字段与标签。## 输入:
+## 更新笔记字段与标签，可选变更所属牌组。## 输入:
 ##   note_id (int) - 笔记 ID。
 ##   fields (Dictionary) - 新字段数据。
+##   deck_id (int) - 可选，新牌组 ID。传 -1 表示不更改。
 ##   tags (Array[String]) - 标签列表（当前仅保留接口）。
 ## 输出: 返回标准字典。成功时 `data` 为 NoteEntity。
-func update_note(note_id: int, fields: Dictionary, tags: Array[String] = []) -> Dictionary:
+func update_note(note_id: int, fields: Dictionary, deck_id: int = -1, tags: Array[String] = []) -> Dictionary:
 	if _note_db == null:
 		return fail("NOTE_DB_NOT_SET", "note_db 未注入")
 	if note_id <= 0:
@@ -128,6 +129,8 @@ func update_note(note_id: int, fields: Dictionary, tags: Array[String] = []) -> 
 		return fail("NOTE_NOT_FOUND", "笔记不存在")
 
 	note.fields_data = fields.duplicate(true)
+	if deck_id >= 0:
+		note.deck_id = deck_id
 	var update_result := _note_db.update_note(note)
 	if not update_result.get("success", false):
 		return update_result

@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://n073listnote01"]
+[gd_scene format=3 uid="uid://c6qm842csuitm"]
 
-[ext_resource type="Script" id="1_script" path="res://scenes/ui/note_list.gd"]
+[ext_resource type="Script" uid="uid://bhmupko5l8v" path="res://scenes/ui/note_list.gd" id="1_script"]
 
 [node name="NoteList" type="Control" unique_id=2000000001]
 layout_mode = 3
@@ -38,8 +38,8 @@ text = "← 返回"
 
 [node name="TitleLabel" type="Label" parent="RootMargin/MainVBox/TopBar" unique_id=2000000006]
 layout_mode = 2
-text = "📝 笔记列表"
 theme_override_font_sizes/font_size = 20
+text = "📝 笔记列表"
 
 [node name="TopSpacer" type="Control" parent="RootMargin/MainVBox/TopBar" unique_id=2000000007]
 layout_mode = 2
@@ -54,13 +54,12 @@ layout_mode = 2
 size_flags_vertical = 3
 columns = 3
 column_titles_visible = true
-hide_root = true
 allow_reselect = true
+hide_root = true
 
 [node name="EditPanel" type="PanelContainer" parent="RootMargin/MainVBox" unique_id=2000000010]
 visible = false
 layout_mode = 2
-theme_override_styles/panel = null
 
 [node name="EditVBox" type="VBoxContainer" parent="RootMargin/MainVBox/EditPanel" unique_id=2000000011]
 layout_mode = 2
@@ -71,8 +70,8 @@ layout_mode = 2
 
 [node name="EditTitle" type="Label" parent="RootMargin/MainVBox/EditPanel/EditVBox/EditHeader" unique_id=2000000013]
 layout_mode = 2
-text = "编辑笔记"
 theme_override_font_sizes/font_size = 16
+text = "编辑笔记"
 
 [node name="EditHeaderSpacer" type="Control" parent="RootMargin/MainVBox/EditPanel/EditVBox/EditHeader" unique_id=2000000014]
 layout_mode = 2
@@ -81,6 +80,19 @@ size_flags_horizontal = 3
 [node name="CloseEditBtn" type="Button" parent="RootMargin/MainVBox/EditPanel/EditVBox/EditHeader" unique_id=2000000015]
 layout_mode = 2
 text = "✕ 关闭"
+
+[node name="DeckRow" type="HBoxContainer" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=2000000036]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DeckSelectLabel" type="Label" parent="RootMargin/MainVBox/EditPanel/EditVBox/DeckRow" unique_id=2000000037]
+layout_mode = 2
+text = "牌组:"
+custom_minimum_size = Vector2(80, 0)
+
+[node name="EditDeckSelect" type="OptionButton" parent="RootMargin/MainVBox/EditPanel/EditVBox/DeckRow" unique_id=2000000038]
+layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="FieldsEdit" type="VBoxContainer" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=2000000016]
 layout_mode = 2
@@ -92,13 +104,13 @@ theme_override_constants/separation = 24
 
 [node name="DeckLabel" type="Label" parent="RootMargin/MainVBox/EditPanel/EditVBox/MetaInfo" unique_id=2000000018]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1)
 text = "牌组: —"
-theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1.0)
 
 [node name="CreatedLabel" type="Label" parent="RootMargin/MainVBox/EditPanel/EditVBox/MetaInfo" unique_id=2000000019]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1)
 text = "创建: —"
-theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1.0)
 
 [node name="ActionBar" type="HBoxContainer" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=2000000020]
 layout_mode = 2
@@ -109,35 +121,36 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="SaveBtn" type="Button" parent="RootMargin/MainVBox/EditPanel/EditVBox/ActionBar" unique_id=2000000022]
+custom_minimum_size = Vector2(120, 36)
 layout_mode = 2
 text = "💾 保存"
-custom_minimum_size = Vector2(120, 36)
 
 [node name="DeleteBtn" type="Button" parent="RootMargin/MainVBox/EditPanel/EditVBox/ActionBar" unique_id=2000000023]
-layout_mode = 2
-text = "🗑 删除"
 custom_minimum_size = Vector2(120, 36)
-theme_override_colors/font_color = Color(0.95, 0.3, 0.3, 1.0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.3, 0.3, 1)
+text = "🗑 删除"
 
 [node name="StatusBar" type="HBoxContainer" parent="RootMargin/MainVBox" unique_id=2000000024]
 layout_mode = 2
 
 [node name="StatusLabel" type="Label" parent="RootMargin/MainVBox/StatusBar" unique_id=2000000025]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1)
 text = "就绪"
-theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1.0)
 
 [node name="NewNoteDialog" type="ConfirmationDialog" parent="." unique_id=2000000026]
+oversampling_override = 1.0
 title = "新建笔记"
+position = Vector2i(0, 36)
 size = Vector2i(420, 320)
 ok_button_text = "创建"
 
 [node name="DialogVBox" type="VBoxContainer" parent="NewNoteDialog" unique_id=2000000027]
-layout_mode = 0
 offset_left = 8.0
 offset_top = 8.0
-offset_right = -8.0
-offset_bottom = -8.0
+offset_right = 412.0
+offset_bottom = 271.0
 theme_override_constants/separation = 16
 
 [node name="DeckSelectLabel" type="Label" parent="NewNoteDialog/DialogVBox" unique_id=2000000028]
