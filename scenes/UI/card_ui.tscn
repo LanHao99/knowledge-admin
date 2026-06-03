@@ -12,13 +12,14 @@ grow_vertical = 2
 script = ExtResource("1_script")
 
 [node name="MainVBox" type="VBoxContainer" parent="." unique_id=705032707]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 theme_override_constants/separation = 16
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_right = 48
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_bottom = 24
 
 [node name="TopBar" type="HBoxContainer" parent="MainVBox" unique_id=705032708]
 layout_mode = 2
@@ -58,6 +59,8 @@ alignment = 1
 
 [node name="ContentLabel" type="RichTextLabel" parent="MainVBox/CardPanel/PanelCenter/CardContentVBox" unique_id=705032716]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 theme_override_font_sizes/normal_font_size = 28
 bbcode_enabled = true
 text = "加载中…"
