@@ -142,6 +142,13 @@ func _rebuild_tree() -> void:
 	_deck_tree.set_column_title(1, "📝 新")
 	_deck_tree.set_column_title(2, "🔄 复习")
 	_deck_tree.set_column_title(3, "总计")
+	_deck_tree.set_column_expand(0, true)
+	_deck_tree.set_column_expand(1, false)
+	_deck_tree.set_column_expand(2, false)
+	_deck_tree.set_column_expand(3, false)
+	_deck_tree.set_column_custom_minimum_width(1, 60)
+	_deck_tree.set_column_custom_minimum_width(2, 60)
+	_deck_tree.set_column_custom_minimum_width(3, 60)
 	_deck_tree.hide_root = true
 
 	if _deck_manager == null:
@@ -228,7 +235,10 @@ func _on_item_activated() -> void:
 	var selected: TreeItem = _deck_tree.get_selected()
 	if selected == null:
 		return
-	var deck_id: int = selected.get_metadata(0)
+	var meta: Variant = selected.get_metadata(0)
+	if typeof(meta) != TYPE_INT:
+		return
+	var deck_id: int = int(meta)
 	if deck_id <= 0 or _deck_manager == null:
 		return
 

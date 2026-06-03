@@ -183,6 +183,11 @@ func _rebuild_tree() -> void:
 	_note_tree.set_column_title(0, "📝 笔记")
 	_note_tree.set_column_title(1, "📂 牌组")
 	_note_tree.set_column_title(2, "📅 创建时间")
+	_note_tree.set_column_expand(0, true)
+	_note_tree.set_column_expand(1, false)
+	_note_tree.set_column_expand(2, false)
+	_note_tree.set_column_custom_minimum_width(1, 100)
+	_note_tree.set_column_custom_minimum_width(2, 100)
 	_note_tree.hide_root = true
 
 	if _note_manager == null:
@@ -276,9 +281,11 @@ func _on_item_activated() -> void:
 	var selected: TreeItem = _note_tree.get_selected()
 	if selected == null:
 		return
-	var note_id: int = selected.get_metadata(0)
+	var meta: Variant = selected.get_metadata(0)
+	if typeof(meta) != TYPE_INT:
+		return  # 分组标题行无 metadata，忽略双击
+	var note_id: int = int(meta)
 	if note_id <= 0:
-		# 可能是分组标题，忽略
 		return
 	if _note_manager == null:
 		return
