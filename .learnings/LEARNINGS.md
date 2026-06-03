@@ -157,3 +157,24 @@ UI 场景独立创建 Manager 实例而非依赖 Autoload —— 降级方案
 - Tags: architecture, autoload, manager, dependency-injection
 
 ---
+
+## [LRN-20260603-007] best_practice
+
+**Logged**: 2026-06-03T14:00:00+08:00
+**Priority**: medium
+**Status**: pending
+**Area**: backend
+
+### Summary
+跨牌组全局统计查询应放在 CardDB 层，用 scalar() 做 COUNT 聚合，避免在 UI 层逐牌组累加
+
+### Details
+main_menu Phase 2 需要三个全局统计：牌组数、待复习数、今日已学数。待复习和今日已学没有现成方法，需要在 CardDB 层新增 `get_global_due_count()` 和 `get_today_studied_count()`，使用 DBManager 已有的 `scalar()` 方法做 COUNT 聚合。CardManager 各加一个包装方法透传。保持了"数据访问在 DB 层、业务编排在 Manager 层、UI 只调 Manager"的分层约束。
+
+### Suggested Action
+后续需要跨实体聚合统计时，遵循同样的分层模式：先加 DB 层方法，再加 Manager 层包装。
+
+### Metadata
+- Source: conversation
+- Related Files: scenes/data_access/card_db.gd, scenes/business_logic/card_manager.gd, scenes/ui/main_menu.gd
+- Tags: stats, aggregation, sql, architecture
