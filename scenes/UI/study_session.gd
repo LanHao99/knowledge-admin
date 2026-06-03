@@ -197,6 +197,7 @@ func _on_deck_activated() -> void:
 ## study.gd 回调：切换到学习视图，隐藏牌组选择器，显示浮层栏。## 输入: deck_id (int) - 选中的牌组 ID。
 ## 输出: 无。
 func enter_learning(_deck_id: int) -> void:
+	_exiting = false
 	_deck_picker.visible = false
 	_in_study_bar.visible = true
 	_set_state(StudyState.LEARNING)
@@ -242,7 +243,6 @@ func _on_session_ended(_stats: Dictionary) -> void:
 ## 输出: 无。
 func show_completion(stats: Dictionary) -> void:
 	if _exiting:
-		_exiting = false
 		return
 	_in_study_bar.visible = false
 	_last_stats = stats

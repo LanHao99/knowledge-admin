@@ -4,6 +4,7 @@
 
 [node name="CardUI" type="Control" unique_id=705032705]
 layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 100.0
@@ -48,9 +49,9 @@ horizontal_alignment = 2
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+mouse_filter = 1
 
 [node name="CardContentVBox" type="VBoxContainer" parent="MainVBox/CardPanel" unique_id=705032715]
-mouse_filter = 2
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -58,6 +59,7 @@ theme_override_constants/separation = 16
 alignment = 1
 
 [node name="ContentLabel" type="RichTextLabel" parent="MainVBox/CardPanel/CardContentVBox" unique_id=705032716]
+mouse_filter = 2
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -70,6 +72,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="FlipHint" type="Label" parent="MainVBox/CardPanel/CardContentVBox" unique_id=705032717]
+mouse_filter = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.5, 0.55, 1)
 theme_override_font_sizes/font_size = 14
