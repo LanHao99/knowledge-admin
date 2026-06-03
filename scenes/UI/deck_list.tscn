@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bs7ylhcyyh8m0"]
 
-[ext_resource type="Script" id="1_script" path="res://scenes/ui/deck_list.gd"]
+[ext_resource type="Script" uid="uid://bsqx806wmtqeu" path="res://scenes/ui/deck_list.gd" id="1_script"]
+[ext_resource type="Theme" uid="uid://bi54ign8ggomc" path="res://assets/Classic95/Classic95.tres" id="1_wt2bv"]
 
 [node name="DeckList" type="Control" unique_id=738797820]
 layout_mode = 3
@@ -9,9 +10,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_wt2bv")
 script = ExtResource("1_script")
 
-[node name="RootMargin" type="MarginContainer" parent="." unique_id=3000000002]
+[node name="RootMargin" type="MarginContainer" parent="." unique_id=-1294967294]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -23,148 +25,147 @@ theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 16
 
-[node name="MainVBox" type="VBoxContainer" parent="RootMargin" unique_id=3000000003]
+[node name="MainVBox" type="VBoxContainer" parent="RootMargin" unique_id=-1294967293]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 12
 
-[node name="TopBar" type="HBoxContainer" parent="RootMargin/MainVBox" unique_id=3000000004]
+[node name="TopBar" type="HBoxContainer" parent="RootMargin/MainVBox" unique_id=-1294967292]
 layout_mode = 2
 
-[node name="BackBtn" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=3000000005]
+[node name="BackBtn" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=-1294967291]
 layout_mode = 2
 text = "← 返回"
 
-[node name="TitleLabel" type="Label" parent="RootMargin/MainVBox/TopBar" unique_id=3000000006]
+[node name="TitleLabel" type="Label" parent="RootMargin/MainVBox/TopBar" unique_id=-1294967290]
 layout_mode = 2
-text = "📚 牌组管理"
 theme_override_font_sizes/font_size = 20
+text = "📚 牌组管理"
 
-[node name="TopSpacer" type="Control" parent="RootMargin/MainVBox/TopBar" unique_id=3000000007]
+[node name="TopSpacer" type="Control" parent="RootMargin/MainVBox/TopBar" unique_id=-1294967289]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="NewDeckBtn" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=3000000008]
+[node name="NewDeckBtn" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=-1294967288]
 layout_mode = 2
 text = "+ 新建牌组"
 
-[node name="DeckTree" type="Tree" parent="RootMargin/MainVBox" unique_id=3000000009]
+[node name="DeckTree" type="Tree" parent="RootMargin/MainVBox" unique_id=-1294967287]
 layout_mode = 2
 size_flags_vertical = 3
 columns = 4
 column_titles_visible = true
-hide_root = true
 allow_reselect = true
+hide_root = true
 
-[node name="EditPanel" type="PanelContainer" parent="RootMargin/MainVBox" unique_id=3000000010]
+[node name="EditPanel" type="PanelContainer" parent="RootMargin/MainVBox" unique_id=-1294967286]
 visible = false
 layout_mode = 2
 
-[node name="EditVBox" type="VBoxContainer" parent="RootMargin/MainVBox/EditPanel" unique_id=3000000011]
+[node name="EditVBox" type="VBoxContainer" parent="RootMargin/MainVBox/EditPanel" unique_id=-1294967285]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="EditHeader" type="HBoxContainer" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=3000000012]
+[node name="EditHeader" type="HBoxContainer" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=-1294967284]
 layout_mode = 2
 
-[node name="EditTitle" type="Label" parent="RootMargin/MainVBox/EditPanel/EditVBox/EditHeader" unique_id=3000000013]
+[node name="EditTitle" type="Label" parent="RootMargin/MainVBox/EditPanel/EditVBox/EditHeader" unique_id=-1294967283]
 layout_mode = 2
-text = "编辑牌组"
 theme_override_font_sizes/font_size = 16
+text = "编辑牌组"
 
-[node name="EditHeaderSpacer" type="Control" parent="RootMargin/MainVBox/EditPanel/EditVBox/EditHeader" unique_id=3000000014]
+[node name="EditHeaderSpacer" type="Control" parent="RootMargin/MainVBox/EditPanel/EditVBox/EditHeader" unique_id=-1294967282]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CloseEditBtn" type="Button" parent="RootMargin/MainVBox/EditPanel/EditVBox/EditHeader" unique_id=3000000015]
+[node name="CloseEditBtn" type="Button" parent="RootMargin/MainVBox/EditPanel/EditVBox/EditHeader" unique_id=-1294967281]
 layout_mode = 2
 text = "✕ 关闭"
 
-[node name="NameLabel" type="Label" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=3000000016]
+[node name="NameLabel" type="Label" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=-1294967280]
 layout_mode = 2
 text = "牌组名称:"
 
-[node name="NameInput" type="LineEdit" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=3000000017]
+[node name="NameInput" type="LineEdit" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=-1294967279]
 layout_mode = 2
 placeholder_text = "输入牌组名称…"
 
-[node name="ParentLabel" type="Label" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=3000000018]
+[node name="ParentLabel" type="Label" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=-1294967278]
 layout_mode = 2
 text = "父牌组:"
 
-[node name="ParentSelect" type="OptionButton" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=3000000019]
+[node name="ParentSelect" type="OptionButton" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=-1294967277]
 layout_mode = 2
 
-[node name="MetaInfo" type="HBoxContainer" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=3000000020]
+[node name="MetaInfo" type="HBoxContainer" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=-1294967276]
 layout_mode = 2
 theme_override_constants/separation = 24
 
-[node name="CardStats" type="Label" parent="RootMargin/MainVBox/EditPanel/EditVBox/MetaInfo" unique_id=3000000021]
+[node name="CardStats" type="Label" parent="RootMargin/MainVBox/EditPanel/EditVBox/MetaInfo" unique_id=-1294967275]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1)
 text = "卡片: —"
-theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1.0)
 
-[node name="CreatedLabel" type="Label" parent="RootMargin/MainVBox/EditPanel/EditVBox/MetaInfo" unique_id=3000000022]
+[node name="CreatedLabel" type="Label" parent="RootMargin/MainVBox/EditPanel/EditVBox/MetaInfo" unique_id=-1294967274]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1)
 text = "创建: —"
-theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1.0)
 
-[node name="ActionBar" type="HBoxContainer" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=3000000023]
+[node name="ActionBar" type="HBoxContainer" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=-1294967273]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ArchiveCheck" type="CheckButton" parent="RootMargin/MainVBox/EditPanel/EditVBox/ActionBar" unique_id=3000000024]
+[node name="ArchiveCheck" type="CheckButton" parent="RootMargin/MainVBox/EditPanel/EditVBox/ActionBar" unique_id=-1294967272]
 layout_mode = 2
 text = "归档"
 
-[node name="ActionSpacer" type="Control" parent="RootMargin/MainVBox/EditPanel/EditVBox/ActionBar" unique_id=3000000025]
+[node name="ActionSpacer" type="Control" parent="RootMargin/MainVBox/EditPanel/EditVBox/ActionBar" unique_id=-1294967271]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="SaveBtn" type="Button" parent="RootMargin/MainVBox/EditPanel/EditVBox/ActionBar" unique_id=3000000026]
+[node name="SaveBtn" type="Button" parent="RootMargin/MainVBox/EditPanel/EditVBox/ActionBar" unique_id=-1294967270]
+custom_minimum_size = Vector2(120, 36)
 layout_mode = 2
 text = "💾 保存"
-custom_minimum_size = Vector2(120, 36)
 
-[node name="DeleteBtn" type="Button" parent="RootMargin/MainVBox/EditPanel/EditVBox/ActionBar" unique_id=3000000027]
+[node name="DeleteBtn" type="Button" parent="RootMargin/MainVBox/EditPanel/EditVBox/ActionBar" unique_id=-1294967269]
+custom_minimum_size = Vector2(120, 36)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.3, 0.3, 1)
 text = "🗑 删除"
-custom_minimum_size = Vector2(120, 36)
-theme_override_colors/font_color = Color(0.95, 0.3, 0.3, 1.0)
 
-[node name="StatusBar" type="HBoxContainer" parent="RootMargin/MainVBox" unique_id=3000000028]
+[node name="StatusBar" type="HBoxContainer" parent="RootMargin/MainVBox" unique_id=-1294967268]
 layout_mode = 2
 
-[node name="StatusLabel" type="Label" parent="RootMargin/MainVBox/StatusBar" unique_id=3000000029]
+[node name="StatusLabel" type="Label" parent="RootMargin/MainVBox/StatusBar" unique_id=-1294967267]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1)
 text = "就绪"
-theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1.0)
 
-[node name="NewDeckDialog" type="ConfirmationDialog" parent="." unique_id=3000000030]
+[node name="NewDeckDialog" type="ConfirmationDialog" parent="." unique_id=-1294967266]
 title = "新建牌组"
 size = Vector2i(380, 220)
 ok_button_text = "创建"
 
-[node name="DialogVBox" type="VBoxContainer" parent="NewDeckDialog" unique_id=3000000031]
-layout_mode = 0
+[node name="DialogVBox" type="VBoxContainer" parent="NewDeckDialog" unique_id=-1294967265]
 offset_left = 8.0
 offset_top = 8.0
 offset_right = -8.0
 offset_bottom = -8.0
 theme_override_constants/separation = 16
 
-[node name="NameLabel" type="Label" parent="NewDeckDialog/DialogVBox" unique_id=3000000032]
+[node name="NameLabel" type="Label" parent="NewDeckDialog/DialogVBox" unique_id=-1294967264]
 layout_mode = 2
 text = "牌组名称:"
 
-[node name="NameInput" type="LineEdit" parent="NewDeckDialog/DialogVBox" unique_id=3000000033]
+[node name="NameInput" type="LineEdit" parent="NewDeckDialog/DialogVBox" unique_id=-1294967263]
 layout_mode = 2
 placeholder_text = "输入牌组名称…"
 
-[node name="ParentLabel" type="Label" parent="NewDeckDialog/DialogVBox" unique_id=3000000034]
+[node name="ParentLabel" type="Label" parent="NewDeckDialog/DialogVBox" unique_id=-1294967262]
 layout_mode = 2
 text = "父牌组 (可选):"
 
-[node name="ParentSelect" type="OptionButton" parent="NewDeckDialog/DialogVBox" unique_id=3000000035]
+[node name="ParentSelect" type="OptionButton" parent="NewDeckDialog/DialogVBox" unique_id=-1294967261]
 layout_mode = 2

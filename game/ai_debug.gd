@@ -13,17 +13,33 @@ extends Control
 
 # ── API 配置 ──
 const API_URL: String = "https://api.deepseek.com/v1/chat/completions"
-const API_KEY: String = ""  # TODO: 填入你的 API Key
+const API_CFG_PATH: String = "res://api.cfg"
 const MODEL: String = "deepseek-chat"
+
+var _api_key: String = ""  ## 从 api.cfg 读取的密钥，不在代码中硬编码
 
 
 ## 连接按钮信号和 HTTP 回调。## 输入: 无。
 ## 输出: 无。
 func _ready() -> void:
+	_load_api_key()
 	_send_btn.pressed.connect(_on_send_pressed)
 	_back_btn.pressed.connect(_on_back_pressed)
 	_request.request_completed.connect(_on_response)
 	_set_status("就绪。输入消息后点击发送")
+
+
+## 从 res://api.cfg 读取 API Key（ConfigFile 格式）。## 输入: 无。
+## 输出: 无。
+func _load_api_key() -> void:
+	var cfg := ConfigFile.new()
+	var err := cfg.load(API_CFG_PATH)
+	if err != OK:
+		_set_status("[color=#FFAA44]api.cfg 未配置[/color]")
+		return
+	_api_key = cfg.get_value("api", "key", "")
+	if _api_key == "" or _api_key.begins_with("sk-your-"):
+		_set_status("[color=#FFAA44]请编辑 api.cfg 填入 API Key[/color]")
 
 
 ## 发送按钮回调：构建 JSON 并通过 HTTPRequest 发送。## 输入: 无。
@@ -34,8 +50,8 @@ func _on_send_pressed() -> void:
 		_set_status("输入不能为空")
 		return
 
-	if API_KEY == "":
-		_append_output("[color=#FF6666]请先在代码中设置 API_KEY[/color]")
+	if _api_key == "":
+		_append_output("[color=#FF6666]请先在 api.cfg 中设置 API Key[/color]")
 		return
 
 	_send_btn.disabled = true
@@ -54,7 +70,7 @@ func _on_send_pressed() -> void:
 	var json_body := JSON.stringify(body)
 	var headers: Array[String] = [
 		"Content-Type: application/json",
-		"Authorization: Bearer " + API_KEY
+		"Authorization: Bearer " + _api_key
 	]
 
 	var error := _request.request(API_URL, headers, HTTPClient.METHOD_POST, json_body)

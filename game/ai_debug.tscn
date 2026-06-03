@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://a0debug001"]
+[gd_scene format=3 uid="uid://0debug001"]
 
 [ext_resource type="Script" id="1_script" path="res://game/ai_debug.gd"]
 

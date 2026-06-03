@@ -12,5 +12,6 @@
 
 # 排除隐私代码
 .env
+api.cfg
 .fsrs/
 

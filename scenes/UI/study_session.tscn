@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://dddcmah5tjw7q"]
 
+[ext_resource type="Theme" uid="uid://bi54ign8ggomc" path="res://assets/Classic95/Classic95.tres" id="1_ayumo"]
 [ext_resource type="Script" uid="uid://dixkcnplmduxn" path="res://scenes/ui/study_session.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://bvqb37meud3w8" path="res://scenes/ui/card_ui.tscn" id="2_card_ui"]
 
@@ -10,17 +11,18 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_ayumo")
 script = ExtResource("1_script")
 
-[node name="DeckPicker" type="Control" parent="." unique_id=6000000001]
-layout_mode = 3
+[node name="DeckPicker" type="Control" parent="." unique_id=1705032705]
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="RootMargin" type="MarginContainer" parent="DeckPicker" unique_id=6000000002]
+[node name="RootMargin" type="MarginContainer" parent="DeckPicker" unique_id=1705032706]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -32,49 +34,50 @@ theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 16
 
-[node name="MainVBox" type="VBoxContainer" parent="DeckPicker/RootMargin" unique_id=6000000003]
+[node name="MainVBox" type="VBoxContainer" parent="DeckPicker/RootMargin" unique_id=1705032707]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 12
 
-[node name="TopBar" type="HBoxContainer" parent="DeckPicker/RootMargin/MainVBox" unique_id=6000000004]
+[node name="TopBar" type="HBoxContainer" parent="DeckPicker/RootMargin/MainVBox" unique_id=1705032708]
 layout_mode = 2
 
-[node name="BackBtn" type="Button" parent="DeckPicker/RootMargin/MainVBox/TopBar" unique_id=6000000005]
-layout_mode = 2
+[node name="BackBtn" type="Button" parent="DeckPicker/RootMargin/MainVBox/TopBar" unique_id=1705032709]
 custom_minimum_size = Vector2(88, 36)
+layout_mode = 2
 text = "← 返回主菜单"
 
-[node name="TitleLabel" type="Label" parent="DeckPicker/RootMargin/MainVBox/TopBar" unique_id=6000000006]
+[node name="TitleLabel" type="Label" parent="DeckPicker/RootMargin/MainVBox/TopBar" unique_id=1705032710]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "选择牌组开始学习"
 
-[node name="TopSpacer" type="Control" parent="DeckPicker/RootMargin/MainVBox/TopBar" unique_id=6000000007]
+[node name="TopSpacer" type="Control" parent="DeckPicker/RootMargin/MainVBox/TopBar" unique_id=1705032711]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="DeckTree" type="Tree" parent="DeckPicker/RootMargin/MainVBox" unique_id=6000000008]
+[node name="DeckTree" type="Tree" parent="DeckPicker/RootMargin/MainVBox" unique_id=1705032712]
 layout_mode = 2
 size_flags_vertical = 3
 columns = 4
 column_titles_visible = true
-hide_root = true
 allow_reselect = true
+hide_root = true
 
-[node name="StatusBar" type="HBoxContainer" parent="DeckPicker/RootMargin/MainVBox" unique_id=6000000009]
+[node name="StatusBar" type="HBoxContainer" parent="DeckPicker/RootMargin/MainVBox" unique_id=1705032713]
 layout_mode = 2
 
-[node name="StatusLabel" type="Label" parent="DeckPicker/RootMargin/MainVBox/StatusBar" unique_id=6000000010]
+[node name="StatusLabel" type="Label" parent="DeckPicker/RootMargin/MainVBox/StatusBar" unique_id=1705032714]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1.0)
+theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1)
 text = "就绪"
 
 [node name="CardUI" parent="." unique_id=1375471367 instance=ExtResource("2_card_ui")]
 visible = false
+layout_mode = 1
 
-[node name="InStudyBar" type="HBoxContainer" parent="." unique_id=6000000011]
+[node name="InStudyBar" type="HBoxContainer" parent="." unique_id=1705032715]
 visible = false
 layout_mode = 0
 offset_left = 8.0
@@ -83,36 +86,36 @@ offset_right = 520.0
 offset_bottom = 44.0
 theme_override_constants/separation = 12
 
-[node name="ExitStudyBtn" type="Button" parent="InStudyBar" unique_id=6000000013]
+[node name="ExitStudyBtn" type="Button" parent="InStudyBar" unique_id=1705032717]
 layout_mode = 2
 text = "← 退出学习"
 
-[node name="DeckNameLabel" type="Label" parent="InStudyBar" unique_id=6000000014]
+[node name="DeckNameLabel" type="Label" parent="InStudyBar" unique_id=1705032718]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.8, 0.85, 1.0)
+theme_override_colors/font_color = Color(0.8, 0.8, 0.85, 1)
 theme_override_font_sizes/font_size = 16
 vertical_alignment = 1
 
-[node name="StudySpacer" type="Control" parent="InStudyBar" unique_id=6000000015]
+[node name="StudySpacer" type="Control" parent="InStudyBar" unique_id=1705032719]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ProgressLabel" type="Label" parent="InStudyBar" unique_id=6000000016]
+[node name="ProgressLabel" type="Label" parent="InStudyBar" unique_id=1705032720]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1.0)
+theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1)
 theme_override_font_sizes/font_size = 16
 horizontal_alignment = 2
 
-[node name="CompletionPanel" type="Control" parent="." unique_id=6000000017]
+[node name="CompletionPanel" type="Control" parent="." unique_id=1705032721]
 visible = false
-layout_mode = 3
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="CompletionMargin" type="MarginContainer" parent="CompletionPanel" unique_id=6000000018]
+[node name="CompletionMargin" type="MarginContainer" parent="CompletionPanel" unique_id=1705032722]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -124,32 +127,32 @@ theme_override_constants/margin_top = 32
 theme_override_constants/margin_right = 32
 theme_override_constants/margin_bottom = 32
 
-[node name="CompletionCenter" type="CenterContainer" parent="CompletionPanel/CompletionMargin" unique_id=6000000019]
+[node name="CompletionCenter" type="CenterContainer" parent="CompletionPanel/CompletionMargin" unique_id=1705032723]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="CompletionVBox" type="VBoxContainer" parent="CompletionPanel/CompletionMargin/CompletionCenter" unique_id=6000000020]
+[node name="CompletionVBox" type="VBoxContainer" parent="CompletionPanel/CompletionMargin/CompletionCenter" unique_id=1705032724]
 layout_mode = 2
 theme_override_constants/separation = 16
 alignment = 1
 
-[node name="CompletionTitle" type="Label" parent="CompletionPanel/CompletionMargin/CompletionCenter/CompletionVBox" unique_id=6000000021]
+[node name="CompletionTitle" type="Label" parent="CompletionPanel/CompletionMargin/CompletionCenter/CompletionVBox" unique_id=1705032725]
 layout_mode = 2
+theme_override_font_sizes/font_size = 28
 text = "🎉 学习完成！"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 28
 
-[node name="CompletionStats" type="RichTextLabel" parent="CompletionPanel/CompletionMargin/CompletionCenter/CompletionVBox" unique_id=6000000022]
+[node name="CompletionStats" type="RichTextLabel" parent="CompletionPanel/CompletionMargin/CompletionCenter/CompletionVBox" unique_id=1705032726]
 layout_mode = 2
-bbcode_enabled = true
-scroll_active = false
-fit_content = true
-text = "—"
 theme_override_font_sizes/normal_font_size = 18
+bbcode_enabled = true
+text = "—"
+fit_content = true
+scroll_active = false
 
-[node name="CompletionBackBtn" type="Button" parent="CompletionPanel/CompletionMargin/CompletionCenter/CompletionVBox" unique_id=6000000025]
-layout_mode = 2
+[node name="CompletionBackBtn" type="Button" parent="CompletionPanel/CompletionMargin/CompletionCenter/CompletionVBox" unique_id=1705032729]
 custom_minimum_size = Vector2(200, 48)
+layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "返回牌组列表"

@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://c6qm842csuitm"]
 
 [ext_resource type="Script" uid="uid://bhmupko5l8v" path="res://scenes/ui/note_list.gd" id="1_script"]
+[ext_resource type="Theme" uid="uid://bi54ign8ggomc" path="res://assets/Classic95/Classic95.tres" id="1_v0n6d"]
 
 [node name="NoteList" type="Control" unique_id=2000000001]
 layout_mode = 3
@@ -9,6 +10,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_v0n6d")
 script = ExtResource("1_script")
 
 [node name="RootMargin" type="MarginContainer" parent="." unique_id=2000000002]
@@ -86,9 +88,9 @@ layout_mode = 2
 theme_override_constants/separation = 8
 
 [node name="DeckSelectLabel" type="Label" parent="RootMargin/MainVBox/EditPanel/EditVBox/DeckRow" unique_id=2000000037]
+custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 text = "牌组:"
-custom_minimum_size = Vector2(80, 0)
 
 [node name="EditDeckSelect" type="OptionButton" parent="RootMargin/MainVBox/EditPanel/EditVBox/DeckRow" unique_id=2000000038]
 layout_mode = 2

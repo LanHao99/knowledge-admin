@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://bvqb37meud3w8"]
 
+[ext_resource type="Theme" uid="uid://bi54ign8ggomc" path="res://assets/Classic95/Classic95.tres" id="1_1kpl7"]
 [ext_resource type="Script" uid="uid://8ey10lt4270c" path="res://scenes/ui/card_ui.gd" id="1_script"]
 
 [node name="CardUI" type="Control" unique_id=705032705]
@@ -13,6 +14,7 @@ offset_right = -100.0
 offset_bottom = -100.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_1kpl7")
 script = ExtResource("1_script")
 
 [node name="MainVBox" type="VBoxContainer" parent="." unique_id=705032707]
@@ -59,10 +61,10 @@ theme_override_constants/separation = 16
 alignment = 1
 
 [node name="ContentLabel" type="RichTextLabel" parent="MainVBox/CardPanel/CardContentVBox" unique_id=705032716]
-mouse_filter = 2
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+mouse_filter = 2
 theme_override_font_sizes/normal_font_size = 28
 bbcode_enabled = true
 text = "加载中…"
@@ -72,7 +74,6 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="FlipHint" type="Label" parent="MainVBox/CardPanel/CardContentVBox" unique_id=705032717]
-mouse_filter = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.5, 0.55, 1)
 theme_override_font_sizes/font_size = 14

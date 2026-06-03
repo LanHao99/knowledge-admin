@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://2ds8mbjfhjgv"]
 
+[ext_resource type="Theme" uid="uid://bi54ign8ggomc" path="res://assets/Classic95/Classic95.tres" id="1_fe2o3"]
 [ext_resource type="Script" uid="uid://cq2lg4ykcc4xo" path="res://scenes/ui/main_menu.gd" id="1_script"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_maincard"]
@@ -20,6 +21,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_fe2o3")
 script = ExtResource("1_script")
 
 [node name="RootMargin" type="MarginContainer" parent="." unique_id=1000000002]

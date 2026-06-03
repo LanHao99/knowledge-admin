@@ -30,7 +30,7 @@ enabled=PackedStringArray("res://addons/godot-sqlite/plugin.cfg", "res://addons/
 
 [gui]
 
-theme/custom_font="uid://b4hdxgswsfw27"
+theme/custom_font="uid://c76ct6f0pkvcl"
 
 [physics]
 

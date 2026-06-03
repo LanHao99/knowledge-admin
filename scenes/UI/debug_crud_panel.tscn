@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bo3fq8wqe6mpx"]
 
 [ext_resource type="Script" uid="uid://du4uyfhe10oc3" path="res://scenes/ui/debug_crud_panel.gd" id="1_dbg"]
+[ext_resource type="Theme" uid="uid://bi54ign8ggomc" path="res://assets/Classic95/Classic95.tres" id="1_o5hv5"]
 
 [node name="DebugCrudPanel" type="Control" unique_id=1707544301]
 layout_mode = 3
@@ -9,6 +10,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_o5hv5")
 script = ExtResource("1_dbg")
 
 [node name="RootMargin" type="MarginContainer" parent="." unique_id=1429757578]
@@ -38,7 +40,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Deck + Notes CRUD Debug Panel"
 
-[node name="GenTestDataBtn" type="Button" parent="RootMargin/MainVBox/Toolbar" unique_id=9000000020]
+[node name="GenTestDataBtn" type="Button" parent="RootMargin/MainVBox/Toolbar" unique_id=410065428]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.8, 0.3, 1)
 text = "生成测试数据"
@@ -62,7 +64,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 4
 
-[node name="LeftVSplit" type="VSplitContainer" parent="RootMargin/MainVBox/MainHSplit" unique_id=9000000001]
+[node name="LeftVSplit" type="VSplitContainer" parent="RootMargin/MainVBox/MainHSplit" unique_id=410065409]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -269,88 +271,87 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="StudyTestPanel" type="PanelContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit" unique_id=9000000002]
+[node name="StudyTestPanel" type="PanelContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit" unique_id=410065410]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="StudyTestVBox" type="VBoxContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel" unique_id=9000000003]
+[node name="StudyTestVBox" type="VBoxContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel" unique_id=410065411]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="StudyTestTitle" type="Label" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=9000000004]
+[node name="StudyTestTitle" type="Label" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=410065412]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "研究测试"
 
-[node name="GenCardBtn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=9000000005]
+[node name="GenCardBtn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=410065413]
 layout_mode = 2
 text = "生成4张测试卡片"
 
-[node name="TestSummary" type="RichTextLabel" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=9000000006]
+[node name="TestSummary" type="RichTextLabel" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=410065414]
 layout_mode = 2
 size_flags_vertical = 3
 bbcode_enabled = true
-fit_content = true
 text = "—"
+fit_content = true
 
-[node name="HSeparator1" type="HSeparator" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=9000000007]
+[node name="HSeparator1" type="HSeparator" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=410065415]
 layout_mode = 2
 
-[node name="OffsetLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=9000000008]
+[node name="OffsetLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=410065416]
 layout_mode = 2
 text = "模拟日期偏移"
 
-[node name="OffsetRow" type="HBoxContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=9000000009]
+[node name="OffsetRow" type="HBoxContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=410065417]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="OffsetSpinBox" type="SpinBox" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/OffsetRow" unique_id=9000000010]
+[node name="OffsetSpinBox" type="SpinBox" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/OffsetRow" unique_id=410065418]
 layout_mode = 2
 min_value = -365.0
 max_value = 365.0
-step = 1.0
 value = 1.0
 rounded = true
 
-[node name="ApplyOffsetBtn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/OffsetRow" unique_id=9000000011]
+[node name="ApplyOffsetBtn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/OffsetRow" unique_id=410065419]
 layout_mode = 2
 text = "应用偏移"
 
-[node name="UndoOffsetBtn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/OffsetRow" unique_id=9000000012]
+[node name="UndoOffsetBtn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/OffsetRow" unique_id=410065420]
 layout_mode = 2
 text = "撤销"
 
-[node name="QuickBtnRow" type="HBoxContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=9000000013]
+[node name="QuickBtnRow" type="HBoxContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=410065421]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="Minus1Btn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow" unique_id=9000000014]
+[node name="Minus1Btn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow" unique_id=410065422]
 layout_mode = 2
 text = "-1天"
 
-[node name="TodayBtn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow" unique_id=9000000015]
+[node name="TodayBtn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow" unique_id=410065423]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.7, 1, 1)
 text = "今日"
 
-[node name="Plus1Btn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow" unique_id=9000000016]
+[node name="Plus1Btn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow" unique_id=410065424]
 layout_mode = 2
 text = "+1天"
 
-[node name="Plus7Btn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow" unique_id=9000000017]
+[node name="Plus7Btn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow" unique_id=410065425]
 layout_mode = 2
 text = "+7天"
 
-[node name="Plus30Btn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow" unique_id=9000000018]
+[node name="Plus30Btn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow" unique_id=410065426]
 layout_mode = 2
 text = "+30天"
 
-[node name="EasyAllBtn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=9000000020]
+[node name="EasyAllBtn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=1168996961]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 0.85, 0.3, 1)
 text = "✅ 一键 Easy"
 
-[node name="SimulatedDateLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=9000000019]
+[node name="SimulatedDateLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=410065427]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 0.6, 0.7, 1)
 text = "当前模拟: 未偏移"
