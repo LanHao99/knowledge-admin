@@ -21,6 +21,9 @@ var fields_data: Dictionary = {}
 ## 未来可通过独立 tag 表或逗号分隔字符串扩展。
 var tags: Array[String] = []
 
+## 所属牌组 ID，用于按牌组分组和过滤。对应 deck_id 字段（INTEGER, NOT NULL）。
+var deck_id: int = 0
+
 ## 创建时间的 Unix 时间戳（秒级）。对应 created_at 字段（INTEGER, NOT NULL）。
 var created_at: int = 0
 
@@ -30,6 +33,7 @@ var created_at: int = 0
 func to_dict() -> Dictionary:
 	var d := {
 		"note_type_id": note_type_id,
+		"deck_id": deck_id,
 		"fields_data": fields_to_json(),
 		"created_at": created_at
 	}
@@ -43,6 +47,7 @@ func to_dict() -> Dictionary:
 func from_dict(d: Dictionary) -> void:
 	if d.has("id"): id = int(d.get("id", 0))
 	if d.has("note_type_id"): note_type_id = int(d.get("note_type_id", 0))
+	if d.has("deck_id"): deck_id = int(d.get("deck_id", 0))
 	if d.has("fields_data"): fields_from_json(str(d.get("fields_data", "{}")))
 	if d.has("created_at"): created_at = int(d.get("created_at", 0))
 
