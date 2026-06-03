@@ -66,6 +66,11 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 0.6, 0.7, 1)
 text = "🔧 调试"
 
+[node name="AIDebugButton" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=1000000026]
+custom_minimum_size = Vector2(88, 36)
+layout_mode = 2
+text = "🤖 AI"
+
 [node name="CenterArea" type="CenterContainer" parent="RootMargin/MainVBox" unique_id=1000000009]
 layout_mode = 2
 size_flags_horizontal = 3

@@ -11,6 +11,7 @@ var _card_manager: CardManager = null
 # ── 顶部工具栏 ──
 @onready var _settings_button: Button = $RootMargin/MainVBox/TopBar/SettingsButton
 @onready var _debug_button: Button = $RootMargin/MainVBox/TopBar/DebugButton
+@onready var _ai_debug_button: Button = $RootMargin/MainVBox/TopBar/AIDebugButton
 
 # ── 中央卡片 ──
 @onready var _main_card: PanelContainer = $RootMargin/MainVBox/CenterArea/MainCard
@@ -55,6 +56,8 @@ func _connect_signals() -> void:
 		_settings_button.pressed.connect(_on_settings_pressed)
 	if _debug_button != null:
 		_debug_button.pressed.connect(_on_debug_pressed)
+	if _ai_debug_button != null:
+		_ai_debug_button.pressed.connect(_on_ai_debug_pressed)
 
 
 ## 设置底部状态栏文本（支持 BBCode）。## 输入: text (String) - 状态文本。
@@ -191,6 +194,13 @@ func _on_settings_pressed() -> void:
 func _on_debug_pressed() -> void:
 	_set_status("正在打开调试面板…")
 	_switch_scene("res://scenes/ui/debug_crud_panel.tscn", "调试面板")
+
+
+## 跳转到 AI 调试控制台场景。## 输入: 无。
+## 输出: 无。
+func _on_ai_debug_pressed() -> void:
+	_set_status("正在打开 AI 调试台…")
+	_switch_scene("res://game/ai_debug.tscn", "AI 调试台")
 
 
 ## 加载并执行 FSRS 调度器单元测试（仅编辑器环境）。## 输入: 无。

@@ -724,7 +724,9 @@ func _on_clear_data_confirmed() -> void:
 	deck_db.execute_bind("DELETE FROM cards;", [])
 	deck_db.execute_bind("DELETE FROM notes;", [])
 	deck_db.execute_bind("DELETE FROM decks;", [])
-	_append_log("[清空] 已清空 cards / notes / decks 三张表")
+	# 重置 SQLite autoincrement 序列，让新建的 deck/note/card 重新从 1 开始
+	deck_db.execute_bind("DELETE FROM sqlite_sequence;", [])
+	_append_log("[清空] 已清空 cards / notes / decks 三张表并重置序列")
 	_refresh_deck_list()
 	_refresh_note_list()
 
