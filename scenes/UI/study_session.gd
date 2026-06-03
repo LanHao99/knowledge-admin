@@ -1,23 +1,24 @@
 extends Control
 class_name StudySession
 
-## 学习入口场景，负责牌组选择 → 卡片学习 → 完成统计的完整流程。
-## 状态机：PICKING → LEARNING → DONE → PICKING
-## 自行创建全部 Manager 并注入 CardUI，CardUI 只负责学习渲染。
+## 牌组调度场景，负责牌组选择界面、学习浮层、完成面板。
+## Manager 由父场景 study.gd 注入（通过 set_deck_manager/set_study_manager）。
+## 牌组选择后发射 deck_selected 信号给 study.gd 桥接到 CardUI。
+
+signal deck_selected(deck_id: int)  ## 用户选择了牌组，通知 study.gd 启动学习
+signal learning_exited()            ## 用户在 InStudyBar 点击退出学习，通知 study.gd 隐藏 CardUI
 
 enum StudyState {
 	PICKING,   ## 牌组选择视图
-	LEARNING,  ## 卡片学习中（CardUI 可见）
+	LEARNING,  ## 卡片学习中
 	DONE       ## 学习完成统计面板
 }
 
 
-# ── 数据层 ──
+# ── 注入的 Manager（由 study.gd 注入）──
 var _deck_manager: DeckManager = null
-var _card_manager: CardManager = null
-var _note_manager: NoteManager = null
 var _study_manager: StudyManager = null
-var _scheduler: SimpleScheduler = null
+var _signals_connected: bool = false
 
 var _state: StudyState = StudyState.PICKING
 var _last_stats: Dictionary = {}
@@ -36,119 +37,66 @@ var _studying_deck_name: String = ""
 @onready var _studying_label: Label = $"InStudyBar/DeckNameLabel"
 @onready var _study_progress_label: Label = $"InStudyBar/ProgressLabel"
 
-# ── CardUI 实例 ──
-@onready var _card_ui: CardUI = $"CardUI"
-
 # ── 完成面板 ──
 @onready var _completion_panel: Control = $"CompletionPanel"
 @onready var _completion_stats: RichTextLabel = $"CompletionPanel/CompletionMargin/CompletionCenter/CompletionVBox/CompletionStats"
 @onready var _completion_back_btn: Button = $"CompletionPanel/CompletionMargin/CompletionCenter/CompletionVBox/CompletionBackBtn"
 
 
-## 初始化 Manager、注入 CardUI、构建牌组列表。## 输入: 无。
+## 连接按钮信号，构建牌组列表（等待 Manager 注入后由 study.gd 触发 _build_deck_list）。## 输入: 无。
 ## 输出: 无。
 func _ready() -> void:
-	_setup_managers()
-	_inject_into_card_ui()
-	_connect_signals()
-	_build_deck_list()
+	_bind_actions()
 	_set_state(StudyState.PICKING)
 
 
-## 退出场景时断开信号并释放 Manager 实例。## 输入: 无。
+## 退出场景时断开信号。## 输入: 无。
 ## 输出: 无。
 func _exit_tree() -> void:
-	if _card_ui != null:
-		if _card_ui.study_finished.is_connected(_on_study_finished):
-			_card_ui.study_finished.disconnect(_on_study_finished)
-	if _study_manager != null:
-		_disconnect_study_signals()
-	_cleanup_managers()
+	_disconnect_study_signals()
 
 
-# ──────────────────────────────────────────────────────────────
-# Manager 生命周期
-# ──────────────────────────────────────────────────────────────
-
-
-## 创建并初始化全部 4 个 Manager + Scheduler 实例。
-func _setup_managers() -> void:
-	const db_path: String = "user://knowledge_admin.db"
-
-	_deck_manager = DeckManager.new()
-	add_child(_deck_manager)
-	if not _deck_manager.setup(db_path):
-		push_error("[StudySession] DeckManager 初始化失败")
-		return
-
-	_card_manager = CardManager.new()
-	add_child(_card_manager)
-	if not _card_manager.setup(db_path):
-		push_error("[StudySession] CardManager 初始化失败")
-		return
-
-	_scheduler = SimpleScheduler.new()
-	_card_manager.set_scheduler(_scheduler)
-
-	_note_manager = NoteManager.new()
-	add_child(_note_manager)
-	if not _note_manager.setup(db_path):
-		push_error("[StudySession] NoteManager 初始化失败")
-		return
-
-	_study_manager = StudyManager.new()
-	add_child(_study_manager)
-	_study_manager.set_card_manager(_card_manager)
-	_study_manager.set_note_manager(_note_manager)
-
-
-## 将 Manager 注入 CardUI 实例。
-func _inject_into_card_ui() -> void:
-	if _card_ui == null:
-		return
-	_card_ui.set_managers(_study_manager, _note_manager, _card_manager)
-
-
-## 释放全部 Manager 实例。
-func _cleanup_managers() -> void:
-	if _study_manager != null:
-		_study_manager.queue_free()
-		_study_manager = null
-	if _note_manager != null:
-		_note_manager.queue_free()
-		_note_manager = null
-	if _card_manager != null:
-		_card_manager.queue_free()
-		_card_manager = null
-	if _scheduler != null:
-		_scheduler = null
-	if _deck_manager != null:
-		_deck_manager.queue_free()
-		_deck_manager = null
-
-
-# ──────────────────────────────────────────────────────────────
-# 信号连接
-# ──────────────────────────────────────────────────────────────
-
-
-## 连接按钮信号、CardUI 信号、StudyManager 信号。
-func _connect_signals() -> void:
+## 绑定按钮事件与 Tree 双击信号。## 输入: 无。
+## 输出: 无。
+func _bind_actions() -> void:
 	_back_btn.pressed.connect(_on_back_pressed)
 	_exit_study_btn.pressed.connect(_on_exit_study_pressed)
 	_deck_tree.item_activated.connect(_on_deck_activated)
 	_completion_back_btn.pressed.connect(_on_completion_back_pressed)
-	if _card_ui != null:
-		_card_ui.study_finished.connect(_on_study_finished)
-	if _study_manager != null:
-		_study_manager.session_started.connect(_on_session_started)
-		_study_manager.queue_updated.connect(_on_queue_updated)
-		_study_manager.session_ended.connect(_on_session_ended)
+
+
+# ──────────────────────────────────────────────────────────────
+# Manager 注入（由 study.gd 调用）
+# ──────────────────────────────────────────────────────────────
+
+
+## 注入 DeckManager（用于构建牌组列表）。## 输入: deck_manager (DeckManager)。
+## 输出: 无。
+func set_deck_manager(deck_manager: DeckManager) -> void:
+	_deck_manager = deck_manager
+
+
+## 注入 StudyManager（用于进度信号 + 退出学习）。## 输入: study_manager (StudyManager)。
+## 输出: 无。
+func set_study_manager(study_manager: StudyManager) -> void:
+	_study_manager = study_manager
+	_connect_study_signals()
+
+
+## 连接 StudyManager 信号（InStudyBar 进度更新）。## 输入: 无。
+## 输出: 无。
+func _connect_study_signals() -> void:
+	if _signals_connected or _study_manager == null:
+		return
+	_study_manager.session_started.connect(_on_session_started)
+	_study_manager.queue_updated.connect(_on_queue_updated)
+	_study_manager.session_ended.connect(_on_session_ended)
+	_signals_connected = true
 
 
 ## 断开 StudyManager 信号。
 func _disconnect_study_signals() -> void:
-	if _study_manager == null:
+	if not _signals_connected or _study_manager == null:
 		return
 	if _study_manager.session_started.is_connected(_on_session_started):
 		_study_manager.session_started.disconnect(_on_session_started)
@@ -156,6 +104,7 @@ func _disconnect_study_signals() -> void:
 		_study_manager.queue_updated.disconnect(_on_queue_updated)
 	if _study_manager.session_ended.is_connected(_on_session_ended):
 		_study_manager.session_ended.disconnect(_on_session_ended)
+	_signals_connected = false
 
 
 # ──────────────────────────────────────────────────────────────
@@ -164,7 +113,8 @@ func _disconnect_study_signals() -> void:
 
 
 ## 从 DeckDB 获取全部牌组（不含归档），填充 Tree 控件并附带卡片统计。
-func _build_deck_list() -> void:
+## 由 study.gd 在注入 Manager 后调用。
+func build_deck_list() -> void:
 	_deck_tree.clear()
 	_deck_tree.columns = 4
 	_deck_tree.set_column_title(0, "牌组")
@@ -222,11 +172,11 @@ func _build_deck_list() -> void:
 
 
 # ──────────────────────────────────────────────────────────────
-# 牌组选择 → 开始学习
+# 牌组选择 → 发射信号给 study.gd
 # ──────────────────────────────────────────────────────────────
 
 
-## Tree item_activated 回调：获取选中牌组 ID，切换到学习视图。
+## Tree item_activated 回调：获取选中牌组 ID，发射 deck_selected 信号。
 func _on_deck_activated() -> void:
 	if _state != StudyState.PICKING:
 		return
@@ -240,16 +190,15 @@ func _on_deck_activated() -> void:
 		return
 
 	_studying_deck_name = selected.get_text(0)
-	_start_learning(deck_id)
+	deck_selected.emit(deck_id)
 
 
-## 启动指定牌组的学习会话：隐藏牌组选择器、显示 CardUI 和浮层栏。
-func _start_learning(deck_id: int) -> void:
+## study.gd 回调：切换到学习视图，隐藏牌组选择器，显示浮层栏。## 输入: deck_id (int) - 选中的牌组 ID。
+## 输出: 无。
+func enter_learning(_deck_id: int) -> void:
 	_deck_picker.visible = false
-	_card_ui.visible = true
 	_in_study_bar.visible = true
 	_set_state(StudyState.LEARNING)
-	_card_ui.start_study(deck_id)
 
 
 # ──────────────────────────────────────────────────────────────
@@ -277,20 +226,20 @@ func _on_queue_updated(counts: Dictionary) -> void:
 		_study_progress_label.text = ""
 
 
-## session_ended 回调：清空浮层栏进度（等待 study_finished 切换视图）。
+## session_ended 回调：清空浮层栏进度。
 func _on_session_ended(_stats: Dictionary) -> void:
 	if _study_progress_label != null:
 		_study_progress_label.text = ""
 
 
 # ──────────────────────────────────────────────────────────────
-# 学习结束
+# 学习结束 → 完成面板
 # ──────────────────────────────────────────────────────────────
 
 
-## CardUI.study_finished 回调：显示完成统计面板。
-func _on_study_finished(stats: Dictionary) -> void:
-	_card_ui.visible = false
+## study.gd 回调（由 card_ui.study_finished 桥接）：显示完成统计面板。## 输入: stats (Dictionary) - 学习统计。
+## 输出: 无。
+func show_completion(stats: Dictionary) -> void:
 	_in_study_bar.visible = false
 	_last_stats = stats
 	_show_completion_stats(stats)
@@ -298,7 +247,8 @@ func _on_study_finished(stats: Dictionary) -> void:
 	_set_state(StudyState.DONE)
 
 
-## 渲染完成统计面板。
+## 渲染完成统计面板（BBCode）。## 输入: stats (Dictionary) - 学习统计。
+## 输出: 无。
 func _show_completion_stats(stats: Dictionary) -> void:
 	var done: int = int(stats.get("done", 0))
 	var elapsed_ms: int = int(stats.get("elapsed_ms", 0))
@@ -346,9 +296,10 @@ func _on_back_pressed() -> void:
 func _on_exit_study_pressed() -> void:
 	if _study_manager != null and _study_manager.is_session_active():
 		_study_manager.end_session()
-	_card_ui.visible = false
+	# 通知 study.gd 隐藏 CardUI
+	learning_exited.emit()
 	_in_study_bar.visible = false
-	_build_deck_list()
+	build_deck_list()
 	_deck_picker.visible = true
 	_set_state(StudyState.PICKING)
 
@@ -356,7 +307,7 @@ func _on_exit_study_pressed() -> void:
 ## 完成面板"返回牌组列表" → 刷新并回到牌组选择。
 func _on_completion_back_pressed() -> void:
 	_completion_panel.visible = false
-	_build_deck_list()
+	build_deck_list()
 	_deck_picker.visible = true
 	_set_state(StudyState.PICKING)
 
