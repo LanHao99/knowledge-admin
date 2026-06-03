@@ -1,12 +1,113 @@
 [gd_scene format=3 uid="uid://bvqb37meud3w8"]
 
-[ext_resource type="Script" uid="uid://8ey10lt4270c" path="res://scenes/ui/card_ui.gd" id="1_s55cg"]
+[ext_resource type="Script" uid="uid://8ey10lt4270c" path="res://scenes/ui/card_ui.gd" id="1_script"]
 
-[node name="CardUI" type="Control" unique_id=1375471367]
+[node name="CardUI" type="Control" unique_id=705032705]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_s55cg")
+script = ExtResource("1_script")
+
+[node name="MainVBox" type="VBoxContainer" parent="." unique_id=705032707]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="TopBar" type="HBoxContainer" parent="MainVBox" unique_id=705032708]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TopSpacer" type="Control" parent="MainVBox/TopBar" unique_id=705032710]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ProgressLabel" type="Label" parent="MainVBox/TopBar" unique_id=705032711]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1)
+theme_override_font_sizes/font_size = 16
+text = "— / —"
+horizontal_alignment = 2
+
+[node name="QueueLabel" type="Label" parent="MainVBox/TopBar" unique_id=705032712]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1)
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 2
+
+[node name="CardPanel" type="PanelContainer" parent="MainVBox" unique_id=705032713]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="PanelCenter" type="CenterContainer" parent="MainVBox/CardPanel" unique_id=705032714]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="CardContentVBox" type="VBoxContainer" parent="MainVBox/CardPanel/PanelCenter" unique_id=705032715]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="ContentLabel" type="RichTextLabel" parent="MainVBox/CardPanel/PanelCenter/CardContentVBox" unique_id=705032716]
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 28
+bbcode_enabled = true
+text = "加载中…"
+fit_content = true
+scroll_active = false
+
+[node name="FlipHint" type="Label" parent="MainVBox/CardPanel/PanelCenter/CardContentVBox" unique_id=705032717]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.5, 0.55, 1)
+theme_override_font_sizes/font_size = 14
+text = "点击翻面 →"
+horizontal_alignment = 1
+
+[node name="AnswerBar" type="HBoxContainer" parent="MainVBox" unique_id=705032718]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="AgainBtn" type="Button" parent="MainVBox/AnswerBar" unique_id=705032719]
+custom_minimum_size = Vector2(140, 52)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "重来"
+
+[node name="HardBtn" type="Button" parent="MainVBox/AnswerBar" unique_id=705032720]
+custom_minimum_size = Vector2(140, 52)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.6, 0.1, 1)
+theme_override_font_sizes/font_size = 18
+text = "困难"
+
+[node name="GoodBtn" type="Button" parent="MainVBox/AnswerBar" unique_id=705032721]
+custom_minimum_size = Vector2(140, 52)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.8, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "良好"
+
+[node name="EasyBtn" type="Button" parent="MainVBox/AnswerBar" unique_id=705032722]
+custom_minimum_size = Vector2(140, 52)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.5, 0.95, 1)
+theme_override_font_sizes/font_size = 18
+text = "简单"
+
+[node name="StatusBar" type="HBoxContainer" parent="MainVBox" unique_id=705032723]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="MainVBox/StatusBar" unique_id=705032724]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1)

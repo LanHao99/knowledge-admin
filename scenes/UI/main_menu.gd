@@ -173,7 +173,7 @@ func _on_note_browse_pressed() -> void:
 ## 输出: 无。
 func _on_study_pressed() -> void:
 	_set_status("正在打开学习会话…")
-	_switch_scene("res://scenes/ui/study_session.tscn", "学习会话")
+	_switch_scene("res://scenes/ui/study.tscn", "学习会话")
 
 
 ## 设置按钮（当前占位，弹出提示）。## 输入: 无。
