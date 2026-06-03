@@ -9,8 +9,8 @@
 
 ## 公共方法
 
-### `create_note(note_type_id: int, fields_json: String, tags: String = "") -> Dictionary`
-**输入**: `note_type_id` 笔记类型 ID；`fields_json` 字段 JSON 字符串；`tags` 预留标签字符串，当前 schema 未落库仅保留参数兼容。
+### `create_note(note_type_id: int, fields_json: String, deck_id: int = 0, tags: String = "") -> Dictionary`
+**输入**: `note_type_id` 笔记类型 ID；`fields_json` 字段 JSON 字符串；`deck_id` 所属牌组 ID；`tags` 预留标签字符串，当前 schema 未落库仅保留参数兼容。
 **输出**: 返回标准字典，成功时 `data` 为 `NoteEntity`；失败时 `data` 为错误信息。
 **说明**: 创建一条笔记记录并返回创建后的实体对象。
 

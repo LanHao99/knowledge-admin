@@ -201,7 +201,8 @@ main_menu._ready()
 **已完成**：
 
 - `main_menu.tscn`：Control 根 + MarginContainer + VBoxContainer → TopBar / CenterArea / BottomBar 三段布局
-- `main_menu.gd`：`extends Control`，`_ready()` 中设置 PanelContainer 圆角背景、信号连接、BBCode 颜色覆盖
+- `main_menu.gd`：`extends Control`，`_ready()` 中连接信号、初始化独立 Manager 实例、加载统计面板数据
+- `main_menu.tscn`：PanelContainer 圆角背景（corner_radius=12、半透明深色背景 bg_color=0.08/0.08/0.12/0.92、内边距 32×24）通过 `theme_override_styles/panel` 的 `StyleBoxFlat` 子资源定义，BBCode 颜色覆盖已移入场景层
 - 五个按钮全部就绪：牌组管理 / 笔记浏览 / 开始学习 / 设置(占位) / 调试
 - `_switch_scene()` 安全跳转：`ResourceLoader.exists()` 前置检查，失败时底部状态栏显示 `[color=#FF6666]` 红色提示
 - BBCode 效果：RichTextLabel 用于标题和统计占位符、`font_color` 覆盖用于按钮和状态文本。标题已启用波浪动画：TopBar `[wave amp=6 freq=4]`、Logo `[wave amp=10 freq=5]`
@@ -220,3 +221,4 @@ main_menu._ready()
 - `CardDB` 新增两个全局统计方法：`get_global_due_count(now_day_index, now_timestamp)` 和 `get_today_studied_count(today_start_ts)`，均为 `scalar()` 聚合查询
 - `CardManager` 新增对应包装方法，透传到 CardDB
 - `main_menu.gd` 新增 `_exit_tree()` 释放 Manager 实例
+- **笔记浏览导航**确认已激活：`NoteBrowseBtn` 连接 `_on_note_browse_pressed()`，经 `_switch_scene()` 安全跳转 `res://scenes/ui/note_list.tscn`，`ResourceLoader.exists()` 前置检查，失败时底部状态栏红色提示

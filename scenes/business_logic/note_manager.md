@@ -39,15 +39,16 @@
 
 ---
 
-### `update_note(note_id: int, fields: Dictionary, tags: Array[String] = []) -> Dictionary`
+### `update_note(note_id: int, fields: Dictionary, deck_id: int = -1, tags: Array[String] = []) -> Dictionary`
 **输入**:
 - `note_id` (int) — 笔记 ID。
 - `fields` (Dictionary) — 新字段数据。
+- `deck_id` (int) — 可选，新牌组 ID。传 `-1` 表示不更改。
 - `tags` (Array[String]) — 标签列表（当前仅保留接口）。
 
 **输出**: 返回标准字典。成功时 `data` 为 `NoteEntity`。
 
-**说明**: 更新笔记字段与标签。
+**说明**: 更新笔记字段与标签，可选变更所属牌组。
 
 ---
 
@@ -95,6 +96,15 @@
 **输出**: 返回标准字典。成功时 `data` 为 `Array[NoteEntity]`。
 
 **说明**: 按关键词搜索笔记。
+
+---
+
+### `get_content_for_card(card_id: int) -> Dictionary`
+**输入**: `card_id` (int) — 卡片 ID。
+
+**输出**: 返回标准字典。成功时 `data` 为 `{front, back, fields, card, note}`。
+
+**说明**: 获取渲染卡片所需的内容（卡片 + 关联笔记的字段数据），由 NoteManager 根据笔记字段决定卡片正反面内容。
 
 ## 信号
 > 以下信号均继承自基类 `Manager`。

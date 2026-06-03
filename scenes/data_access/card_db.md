@@ -34,6 +34,11 @@
 **输出**: 返回标准字典。成功时 `data` 为 int（删除数量）。
 **说明**: 删除某个笔记下的全部卡片。
 
+### `update_cards_deck_by_note(note_id: int, new_deck_id: int) -> Dictionary`
+**输入**: note_id（笔记 ID）、new_deck_id（新牌组 ID）。
+**输出**: 返回标准字典。成功时 `data` 为 int（更新数量）。
+**说明**: 批量更新某个笔记下所有卡片的牌组归属。
+
 ### `get_due_cards(deck_id: int, queue_type: int, limit: int = 20) -> Dictionary`
 **输入**: deck_id（牌组 ID）、queue_type（队列类型：0=new, 1=learning, 2=review）、limit（限制条数，≤0 表示不限制，默认 20）。
 **输出**: 返回标准字典。成功时 `data` 为 Array[CardEntity]。
