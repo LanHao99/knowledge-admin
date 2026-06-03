@@ -23,6 +23,7 @@ var _signals_connected: bool = false
 var _state: StudyState = StudyState.PICKING
 var _last_stats: Dictionary = {}
 var _studying_deck_name: String = ""
+var _exiting: bool = false  ## 用户正在退出学习，跳过完成面板
 
 
 # ── 牌组选择视图 ──
@@ -240,6 +241,9 @@ func _on_session_ended(_stats: Dictionary) -> void:
 ## study.gd 回调（由 card_ui.study_finished 桥接）：显示完成统计面板。## 输入: stats (Dictionary) - 学习统计。
 ## 输出: 无。
 func show_completion(stats: Dictionary) -> void:
+	if _exiting:
+		_exiting = false
+		return
 	_in_study_bar.visible = false
 	_last_stats = stats
 	_show_completion_stats(stats)
@@ -294,6 +298,7 @@ func _on_back_pressed() -> void:
 
 ## 学习中退出按钮 → 结束学习，回到牌组选择。
 func _on_exit_study_pressed() -> void:
+	_exiting = true
 	if _study_manager != null and _study_manager.is_session_active():
 		_study_manager.end_session()
 	# 通知 study.gd 隐藏 CardUI

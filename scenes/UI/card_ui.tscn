@@ -4,9 +4,12 @@
 
 [node name="CardUI" type="Control" unique_id=705032705]
 layout_mode = 3
-anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 100.0
+offset_top = 100.0
+offset_right = -100.0
+offset_bottom = -100.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
@@ -19,7 +22,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 16
-theme_override_constants/margin_top = 60
 
 [node name="TopBar" type="HBoxContainer" parent="MainVBox" unique_id=705032708]
 layout_mode = 2
@@ -48,6 +50,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="CardContentVBox" type="VBoxContainer" parent="MainVBox/CardPanel" unique_id=705032715]
+mouse_filter = 2
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
