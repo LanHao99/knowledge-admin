@@ -58,6 +58,11 @@
           "data_type": "TEXT",
           "not_null": true
         },
+        "deck_id": {
+          "data_type": "INTEGER",
+          "not_null": true,
+          "default": 0
+        },
         "created_at": {
           "data_type": "INTEGER",
           "not_null": true

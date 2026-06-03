@@ -274,6 +274,58 @@ func init_schema() -> Dictionary: ## 根据 JSON 动态创建表和索引
 		rollback_transaction()
 		return fail("TX_COMMIT_FAILED", "初始化表结构提交失败")
 
+	# 4) 执行列迁移（给已有数据库补齐新增的列）
+	var migrate_result := _migrate_missing_columns()
+	if not migrate_result.get("success", false):
+		return migrate_result
+
+	return ok()
+
+
+## 对已有数据库执行 ALTER TABLE 补齐 schema JSON 中定义但表中缺失的列。## 输入: 无。
+## 输出: 返回标准字典。
+func _migrate_missing_columns() -> Dictionary:
+	if _schema_config.is_empty():
+		return ok()
+
+	var tables: Dictionary = _schema_config.get("tables", {})
+	for table_name in tables:
+		var table_def: Dictionary = tables[table_name]
+		var columns: Dictionary = table_def.get("columns", {})
+		for col_name in columns:
+			var col_def: Dictionary = columns[col_name]
+			if col_def.get("primary_key", false) or col_def.get("auto_increment", false):
+				continue  # 跳过主键列
+			var check_sql := "PRAGMA table_info('%s');" % table_name
+			_db.query(check_sql)
+			var existing_cols: Array = _db.query_result
+			var exists := false
+			for row in existing_cols:
+				if row is Dictionary and str(row.get("name", "")) == col_name:
+					exists = true
+					break
+			if not exists:
+				var data_type: String = col_def.get("data_type", "TEXT")
+				var not_null: bool = col_def.get("not_null", false)
+				var default_val: String = ""
+				if col_def.has("default"):
+					var dv = col_def["default"]
+					if typeof(dv) == TYPE_STRING:
+						default_val = " DEFAULT '%s'" % dv
+					elif dv == null:
+						default_val = " DEFAULT NULL"
+					else:
+						default_val = " DEFAULT %s" % dv
+				elif not_null:
+					# NOT NULL 列必须有默认值
+					match data_type:
+						"INTEGER": default_val = " DEFAULT 0"
+						"REAL": default_val = " DEFAULT 0.0"
+						"TEXT": default_val = " DEFAULT ''"
+				var alter_sql := "ALTER TABLE %s ADD COLUMN %s %s%s;" % [table_name, col_name, data_type, default_val]
+				if not _db.query(alter_sql):
+					# 忽略"列已存在"错误（多连接竞争情况下可能发生）
+					pass
 	return ok()
 
 
