@@ -54,6 +54,7 @@ var _last_offset: int = 0
 @onready var _plus1_btn: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow/Plus1Btn
 @onready var _plus7_btn: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow/Plus7Btn
 @onready var _plus30_btn: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow/Plus30Btn
+@onready var _easy_all_btn: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/EasyAllBtn
 
 
 ## 初始化调试场景，建立数据库连接、设定默认值、绑定事件。
@@ -133,6 +134,7 @@ func _bind_actions() -> void:
 	_plus1_btn.pressed.connect(func(): _apply_date_offset(1))
 	_plus7_btn.pressed.connect(func(): _apply_date_offset(7))
 	_plus30_btn.pressed.connect(func(): _apply_date_offset(30))
+	_easy_all_btn.pressed.connect(_on_easy_all_pressed)
 
 
 ## 当 Parent OptionButton 切换时，显示/隐藏自定义 SpinBox。
@@ -437,9 +439,9 @@ func _on_gen_test_data_pressed() -> void:
 			CardEntity.QUEUE_REVIEW:   queue_name = "REVIEW"
 		summaries.append("  [color=#55CC55]%s(%s)[/color] → %s, stability=%.2f, lapses=%d" % [rating_name, front, queue_name, card.stability, card.lapses])
 
-	var summary_text: String = "\n".join(summaries)
-	_test_summary.text = summary_text
+	_test_summary.text = "\n".join(summaries)
 	_append_log("[生成测试数据] 4张卡片已就绪 (deck_id=%d)" % deck_id)
+	_refresh_test_summary()
 
 
 ## 确认 Test Deck 牌组存在，若不存在则创建。
@@ -507,6 +509,7 @@ func _on_reset_to_today_pressed() -> void:
 	_date_offset = 0
 	_refresh_simulated_date_label()
 	_append_log("[日期偏移] 重置为今天，影响 %d 张 REVIEW 卡片" % affected)
+	_refresh_test_summary()
 
 
 ## 撤销上次偏移按钮回调。
@@ -536,6 +539,7 @@ func _apply_date_offset(delta_days: int, is_undo: bool = false) -> void:
 
 	_refresh_simulated_date_label()
 	_append_log("[日期偏移] %+d 天，影响 %d 张 REVIEW 卡片" % [delta_days, affected])
+	_refresh_test_summary()
 
 
 ## 刷新日期模拟标签。
@@ -547,6 +551,87 @@ func _refresh_simulated_date_label() -> void:
 		_simulated_date_label.text = "当前模拟: %s（未偏移）" % today
 	else:
 		_simulated_date_label.text = "当前模拟: %s %+d 天" % [today, _date_offset]
+
+
+## 一键 Easy：查询 Test Deck 所有到期卡片，模拟 Easy 评分并更新。## 输入: 无。
+## 输出: 无。
+func _on_easy_all_pressed() -> void:
+	_setup_test_managers()
+	if _test_card_manager == null:
+		return
+	var card_db: CardDB = _test_card_manager.get_card_db()
+	var today: int = int(Time.get_unix_time_from_system() / 86400)
+	var now_ts: int = int(Time.get_unix_time_from_system())
+
+	var rows_result := card_db.fetch_all(
+		"SELECT c.* FROM cards c INNER JOIN decks d ON c.deck_id = d.id WHERE d.name = 'Test Deck' AND c.queue = ? AND c.due <= ? ORDER BY c.id;",
+		[CardEntity.QUEUE_REVIEW, today]
+	)
+	var rows: Array = rows_result.get("data", [])
+	if rows.is_empty():
+		_append_log("[一键 Easy] 无到期卡片")
+		_refresh_test_summary()
+		return
+
+	var count: int = 0
+	for row in rows:
+		if not (row is Dictionary):
+			continue
+		var card := CardEntity.new()
+		card.from_dict(row)
+		var next_state := _test_scheduler.calculate_next_state(card, Scheduler.Rating.EASY, now_ts)
+		card.queue = int(next_state.get("queue", card.queue))
+		card.due = int(next_state.get("due", card.due))
+		card.reps += 1
+		card.stability = float(next_state.get("stability", card.stability))
+		card.difficulty = float(next_state.get("difficulty", card.difficulty))
+		card.last_review_time = now_ts
+		card.last_rating = Scheduler.Rating.EASY
+		card_db.update_card(card)
+		count += 1
+
+	_refresh_test_summary()
+	_append_log("[一键 Easy] 已更新 %d 张到期卡片" % count)
+
+
+## 刷新 TestSummary：查询 Test Deck 所有卡片状态，按到期状态着色。## 输入: 无。
+## 输出: 无。
+func _refresh_test_summary() -> void:
+	if _test_card_manager == null:
+		_test_summary.text = "[color=#FFAA44]请先生成测试数据[/color]"
+		return
+	var card_db: CardDB = _test_card_manager.get_card_db()
+	var today: int = int(Time.get_unix_time_from_system() / 86400)
+
+	var rows_result := card_db.fetch_all(
+		"SELECT c.* FROM cards c INNER JOIN decks d ON c.deck_id = d.id WHERE d.name = 'Test Deck' ORDER BY c.id;", []
+	)
+	var rows: Array = rows_result.get("data", [])
+	if rows.is_empty():
+		_test_summary.text = "[color=#777]暂无测试卡片[/color]"
+		return
+
+	var lines: Array[String] = []
+	lines.append("[b]Test Deck[/b] (%d张)" % rows.size())
+
+	for row in rows:
+		if not (row is Dictionary):
+			continue
+		var card := CardEntity.new()
+		card.from_dict(row)
+		var due_days: int = card.due - today
+
+		var icon: String = "🟢" if due_days > 0 else "🔴"
+		var due_str: String = ("%+dd" % due_days) if due_days != 0 else "今天"
+		var queue_name: String = ""
+		match card.queue:
+			CardEntity.QUEUE_NEW:      queue_name = "NEW"
+			CardEntity.QUEUE_LEARNING: queue_name = "LEARN"
+			CardEntity.QUEUE_REVIEW:   queue_name = "REVIEW"
+
+		lines.append("%s %s due=%s stb=%.1f lapses=%d reps=%d" % [icon, queue_name, due_str, card.stability, card.lapses, card.reps])
+
+	_test_summary.text = "\n".join(lines)
 
 
 # ──────────────────────────────────────────────────────────────
