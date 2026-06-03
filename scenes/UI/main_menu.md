@@ -105,7 +105,7 @@ main_menu 通过 `App` Autoload 单例访问 Manager：
 | 按钮       | 点击行为                                                            | 状态检查    | 失败处理       |
 | -------- | --------------------------------------------------------------- | ------- | ---------- |
 | **牌组管理** | `change_scene_to_file("res://scenes/ui/deck_list.tscn")`        | App 已就绪 | Toast 提示   |
-| **笔记浏览** | `change_scene_to_file("res://scenes/ui/note_list.tscn")`        | App 已就绪 | Toast 提示   |
+| **笔记浏览** | `change_scene_to_file("res://scenes/ui/note_list.tscn")`        | 无需检查 | — （note_list 自建 Manager）  |
 | **开始学习** | `change_scene_to_file("res://scenes/ui/study_session.tscn")`    | 存在待复习卡片 | "无待复习卡片"提示 |
 | **设置**   | 弹出 Popup/Dialog，或跳转设置场景                                         | —       | —          |
 | **调试**   | `change_scene_to_file("res://scenes/ui/debug_crud_panel.tscn")` | —       | —          |
@@ -212,3 +212,8 @@ main_menu._ready()
 - `project.godot` 中将 `run/main_scene` 指向 `main_menu.tscn`
 - Phase 2 统计面板数据接入
 - Phase 3 设置弹窗
+
+**Phase 2 实现记录**：
+
+- `note_list.tscn` + `note_list.gd` 已实现：Tree 按牌组分组展示笔记列表、双击展开内嵌编辑面板、新建笔记 ConfirmationDialog
+- 导航路径 `res://scenes/ui/note_list.tscn` 已在 `_on_note_browse_pressed()` 中激活

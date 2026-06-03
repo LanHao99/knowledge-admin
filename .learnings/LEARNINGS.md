@@ -111,3 +111,49 @@ agent_open 启动的子 agent 返回的结果是自报告（self-report）。必
 - Tags: verification, sub-agent, reliability
 
 ---
+
+## [LRN-20260603-005] knowledge_gap
+
+**Logged**: 2026-06-03T12:00:00+08:00
+**Priority**: high
+**Status**: pending
+**Area**: backend
+
+### Summary
+NoteEntity 缺少 deck_id 字段 —— Entity 类必须与数据库 schema 严格同步
+
+### Details
+在实现 note_list 按牌组分组功能时，发现 NoteEntity 没有 deck_id 字段，但 notes 表明确有 deck_id 列。这是因为 Entity 创建时只映射了部分字段。GDScript 的 Dictionary.has() 不会报错——`from_dict()` 悄悄跳过了未处理的键。教训：Entity 的 to_dict/from_dict 必须覆盖数据表的所有列，否则查询出的数据会静默丢失。
+
+### Suggested Action
+每次修改数据库 schema 后，检查对应 Entity 的 to_dict() 和 from_dict() 是否覆盖了所有列。可以在 Entity 的 from_dict() 中添加未知键的 push_warning 来检测遗漏。
+
+### Metadata
+- Source: conversation
+- Related Files: src/entities/note_entity.gd, data/数据结构.md
+- Tags: entity, schema-sync, data-integrity
+
+---
+
+## [LRN-20260603-006] best_practice
+
+**Logged**: 2026-06-03T12:00:00+08:00
+**Priority**: medium
+**Status**: pending
+**Area**: frontend
+
+### Summary
+UI 场景独立创建 Manager 实例而非依赖 Autoload —— 降级方案
+
+### Details
+项目中 Autoload（app.gd）尚未实现，note_list 模仿 debug_crud_panel 的模式：每个 UI 场景在 _ready() 中创建自己的 NoteManager/DeckManager 实例（new + add_child + setup），在 _exit_tree() 中释放。这确保了场景独立、可测试。代价是每个场景有独立数据库连接。未来若实现 Autoload，应统一通过 App 单例获取 Manager。
+
+### Suggested Action
+实现 Autoload 系统后，将所有 UI 场景的 Manager 创建改为通过 App.get_*_manager() 获取。
+
+### Metadata
+- Source: conversation
+- Related Files: scenes/ui/note_list.gd, scenes/ui/debug_crud_panel.gd
+- Tags: architecture, autoload, manager, dependency-injection
+
+---
