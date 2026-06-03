@@ -1,4 +1,4 @@
-extends Node2D
+extends Control
 ## 学习模块交换机（协调者）。
 ## 职责：创建 Manager → 注入给 StudySession 和 CardUI → 桥接两者信号。
 ## 不负责任何 UI 逻辑，只做数据交换和视图切换协调。
