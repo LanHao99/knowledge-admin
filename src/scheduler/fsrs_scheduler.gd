@@ -95,9 +95,11 @@ func calculate_next_state(card: CardEntity, rating: int, now_timestamp: int) -> 
 
 	match fsrs_state:
 		0:  # Learning (含 NEW 首次学习)
-			next_stability, next_difficulty = _update_learning_stability_difficulty(
+			var sd: Array[float] = _update_learning_stability_difficulty(
 				card, rating, days_since_last_review, now_timestamp
 			)
+			next_stability = sd[0]
+			next_difficulty = sd[1]
 		1:  # Review
 			next_stability = _update_review_stability(
 				card, rating, days_since_last_review, now_timestamp
