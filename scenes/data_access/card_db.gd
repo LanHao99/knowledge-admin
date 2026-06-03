@@ -91,6 +91,18 @@ func delete_cards_by_note(note_id: int) -> Dictionary:
 	return ok(to_delete)
 
 
+## 批量更新某个笔记下所有卡片的牌组归属。## 输入:
+##   note_id (int) - 笔记 ID。
+##   new_deck_id (int) - 新牌组 ID。
+## 输出: 返回标准字典。成功时 `data` 为 int（更新数量）。
+func update_cards_deck_by_note(note_id: int, new_deck_id: int) -> Dictionary:
+	if note_id <= 0:
+		return fail("CARD_NOTE_ID_INVALID", "note_id 必须大于 0")
+	if new_deck_id <= 0:
+		return fail("CARD_DECK_ID_INVALID", "deck_id 必须大于 0")
+	return execute_bind("UPDATE cards SET deck_id = ? WHERE note_id = ?;", [new_deck_id, note_id])
+
+
 ## 查询指定队列的到期卡片。## 输入:
 ##   deck_id (int) - 牌组 ID。
 ##   queue_type (int) - 队列类型（0=new, 1=learning, 2=review）。

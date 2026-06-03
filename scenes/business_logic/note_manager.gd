@@ -129,8 +129,11 @@ func update_note(note_id: int, fields: Dictionary, deck_id: int = -1, tags: Arra
 		return fail("NOTE_NOT_FOUND", "笔记不存在")
 
 	note.fields_data = fields.duplicate(true)
-	if deck_id >= 0:
+	if deck_id >= 0 and note.deck_id != deck_id:
 		note.deck_id = deck_id
+		# 同步更新关联 cards 的 deck_id，确保牌组统计一致
+		if _card_db != null:
+			_card_db.update_cards_deck_by_note(note_id, deck_id)
 	var update_result := _note_db.update_note(note)
 	if not update_result.get("success", false):
 		return update_result
