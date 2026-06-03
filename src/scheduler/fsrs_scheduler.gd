@@ -41,7 +41,7 @@ const _W19: float = 0.0658
 const _DECAY: float = 0.1542
 
 # ── 从 DECAY 推导的公式常数 ──
-const _FACTOR: float = pow(0.9, 1.0 / _DECAY) - 1.0  # ≈ 0.487
+const _FACTOR: float = pow(0.9, -1.0 / _DECAY) - 1.0  # ≈ 0.981（py-fsrs: FACTOR = 0.9^(1/DECAY)-1, DECAY=-w20）
 
 # ── 数值安全边界 ──
 const _STABILITY_MIN: float = 0.001

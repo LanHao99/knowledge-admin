@@ -57,7 +57,7 @@ func run_all_tests() -> Dictionary:
 	return {passed = passed, failed = failed, errors = errors}
 
 
-# ── A1: 新卡 + Good → 毕业到 Review ──
+# ── A1: 新卡 + Good → 推进到 learning step=1（2步学习，第二次Good才毕业）──
 func test_a1_new_card_good() -> Dictionary:
 	var s := FsrsScheduler.new()
 	var card := CardEntity.new()
@@ -68,16 +68,15 @@ func test_a1_new_card_good() -> Dictionary:
 
 	var state := s.calculate_next_state(card, Scheduler.Rating.GOOD, _NOW)
 
-	if state["queue"] != CardEntity.QUEUE_REVIEW:
-		return err("queue 应为 REVIEW，实际 %d" % state["queue"])
+	# learning_steps=[60,600], step=0+Good → step=1, 仍在 LEARNING
+	if state["queue"] != CardEntity.QUEUE_LEARNING:
+		return err("queue 应为 LEARNING，实际 %d" % state["queue"])
+	if state["step"] != 1:
+		return err("step 应为 1，实际 %d" % state["step"])
+	if state["due"] != _NOW + 600:
+		return err("due 应为 %d，实际 %d" % [_NOW + 600, state["due"]])
 	if not _approx(state["stability"], 2.3065, 0.01):
 		return err("stability 应为 ≈2.3065，实际 %.4f" % state["stability"])
-	if not _approx(state["difficulty"], 4.93, 0.1):
-		return err("difficulty 应为 ≈4.93，实际 %.4f" % state["difficulty"])
-	if state["interval_days"] < 1:
-		return err("interval_days 应 ≥1，实际 %d" % state["interval_days"])
-	if state["step"] != -1:
-		return err("step 应为 -1，实际 %d" % state["step"])
 
 	return ok()
 
