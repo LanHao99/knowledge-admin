@@ -25,26 +25,8 @@ extends Control
 ## 初始化 UI 样式与信号连接。## 输入: 无。
 ## 输出: 无。
 func _ready() -> void:
-	_setup_panel_style()
 	_connect_signals()
-	_apply_bbcode_overrides()
 	_set_status("数据库就绪 ✓")
-
-
-## 设置主卡片的 PanelContainer 背景圆角样式。## 输入: 无。
-## 输出: 无。
-func _setup_panel_style() -> void:
-	if _main_card == null:
-		return
-	_main_card.custom_minimum_size = Vector2(520, 0)
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.08, 0.08, 0.12, 0.92)
-	style.set_corner_radius_all(12)
-	style.content_margin_left = 32
-	style.content_margin_top = 24
-	style.content_margin_right = 32
-	style.content_margin_bottom = 24
-	_main_card.add_theme_stylebox_override("panel", style)
 
 
 ## 连接顶部按钮与导航按钮的 pressed 信号。## 输入: 无。
@@ -60,32 +42,6 @@ func _connect_signals() -> void:
 		_settings_button.pressed.connect(_on_settings_pressed)
 	if _debug_button != null:
 		_debug_button.pressed.connect(_on_debug_pressed)
-
-
-## 对需要 BBCode 动态效果的节点做额外样式覆盖，并设置按钮最小尺寸。## 输入: 无。
-## 输出: 无。
-func _apply_bbcode_overrides() -> void:
-	# 高亮"开始学习"按钮
-	if _study_btn != null:
-		_study_btn.add_theme_color_override("font_color", Color(1.0, 0.85, 0.25, 1.0))
-		_study_btn.custom_minimum_size = Vector2(300, 48)
-	# 导航按钮统一高度 + 固定最小宽度
-	if _deck_list_btn != null:
-		_deck_list_btn.custom_minimum_size = Vector2(300, 44)
-	if _note_browse_btn != null:
-		_note_browse_btn.custom_minimum_size = Vector2(300, 44)
-	# 调试按钮用淡色
-	if _debug_button != null:
-		_debug_button.add_theme_color_override("font_color", Color(0.6, 0.6, 0.7, 1.0))
-		_debug_button.custom_minimum_size = Vector2(88, 36)
-	# 设置按钮
-	if _settings_button != null:
-		_settings_button.custom_minimum_size = Vector2(88, 36)
-	# 底部状态用半透明
-	if _status_label != null:
-		_status_label.add_theme_color_override("font_color", Color(0.55, 0.55, 0.6, 1.0))
-	if _version_label != null:
-		_version_label.add_theme_color_override("font_color", Color(0.4, 0.4, 0.45, 1.0))
 
 
 ## 设置底部状态栏文本（支持 BBCode）。## 输入: text (String) - 状态文本。
