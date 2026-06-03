@@ -8,7 +8,19 @@
 script = ExtResource("1_jhonx")
 
 [node name="StudySession" parent="." unique_id=948778194 instance=ExtResource("1_8q8l4")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="CardUI" parent="." unique_id=1375471367 instance=ExtResource("2_x8trg")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1229960436]
