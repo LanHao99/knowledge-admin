@@ -9,7 +9,7 @@ var _deck_manager: DeckManager = null
 var _card_manager: CardManager = null
 var _note_manager: NoteManager = null
 var _study_manager: StudyManager = null
-var _scheduler: SimpleScheduler = null
+var _scheduler: FsrsScheduler = null
 
 # ── 子场景引用 ──
 @onready var _session: StudySession = $StudySession
@@ -48,7 +48,7 @@ func _setup_managers() -> void:
 	add_child(_card_manager)
 	_card_manager.setup(db_path)
 
-	_scheduler = SimpleScheduler.new()
+	_scheduler = FsrsScheduler.new()
 	_card_manager.set_scheduler(_scheduler)
 
 	_note_manager = NoteManager.new()

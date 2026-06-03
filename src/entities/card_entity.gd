@@ -69,6 +69,10 @@ var stability: float = 0.0
 ## FSRS 难度参数（预留算法扩展），表示卡片固有难度（0.0~1.0+）。对应 difficulty 字段（REAL, default 0.0）。
 var difficulty: float = 0.0
 
+## FSRS 学习/重学习步进索引。对应 step 字段（INTEGER, DEFAULT NULL）。
+## NULL/-1 表示 Review 状态（已毕业），0~N 表示 Learning/Relearning 的当前步进。
+var step: int = -1
+
 
 ## 将当前实体序列化为字典，便于传给数据层执行 INSERT/UPDATE。## 输出: Dictionary，键名与数据库 cards 表字段一一对应。
 func to_dict() -> Dictionary:
@@ -85,7 +89,8 @@ func to_dict() -> Dictionary:
 		"last_time_taken": last_time_taken,
 		"review_history_json": review_history_json,
 		"stability": stability,
-		"difficulty": difficulty
+		"difficulty": difficulty,
+		"step": step if step >= 0 else null
 	}
 	if id > 0:
 		d["id"] = id
@@ -108,6 +113,8 @@ func from_dict(d: Dictionary) -> void:
 	if d.has("review_history_json"): review_history_json = str(d.get("review_history_json", "[]"))
 	if d.has("stability"): stability = float(d.get("stability", 0.0))
 	if d.has("difficulty"): difficulty = float(d.get("difficulty", 0.0))
+	if d.has("step") and d.get("step") != null: step = int(d.get("step", -1))
+	else: step = -1
 
 
 ## 判断卡片是否到期，应根据当前时间或天数索引判断。## 输入: now_day_index (int) - 当前天数索引（用于 review 队列）或 Unix 时间戳（用于 learning 队列）。

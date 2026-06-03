@@ -3,15 +3,15 @@
 [ext_resource type="Script" uid="uid://cq2lg4ykcc4xo" path="res://scenes/ui/main_menu.gd" id="1_script"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_maincard"]
-bg_color = Color(0.08, 0.08, 0.12, 0.92)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_left = 12
-corner_radius_bottom_right = 12
 content_margin_left = 32.0
 content_margin_top = 24.0
 content_margin_right = 32.0
 content_margin_bottom = 24.0
+bg_color = Color(0.08, 0.08, 0.12, 0.92)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
 
 [node name="MainMenu" type="Control" unique_id=1000000001]
 layout_mode = 3
@@ -56,14 +56,14 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="SettingsButton" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=1000000007]
-layout_mode = 2
 custom_minimum_size = Vector2(88, 36)
+layout_mode = 2
 text = "⚙ 设置"
 
 [node name="DebugButton" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=1000000008]
-layout_mode = 2
 custom_minimum_size = Vector2(88, 36)
-theme_override_colors/font_color = Color(0.6, 0.6, 0.7, 1.0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.7, 1)
 text = "🔧 调试"
 
 [node name="CenterArea" type="CenterContainer" parent="RootMargin/MainVBox" unique_id=1000000009]
@@ -72,9 +72,9 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="MainCard" type="PanelContainer" parent="RootMargin/MainVBox/CenterArea" unique_id=1000000010]
+custom_minimum_size = Vector2(520, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(520, 0)
 theme_override_styles/panel = SubResource("StyleBoxFlat_maincard")
 
 [node name="CardVBox" type="VBoxContainer" parent="RootMargin/MainVBox/CenterArea/MainCard" unique_id=1000000011]
@@ -123,19 +123,19 @@ scroll_active = false
 layout_mode = 2
 
 [node name="DeckListBtn" type="Button" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000018]
-layout_mode = 2
 custom_minimum_size = Vector2(300, 44)
+layout_mode = 2
 text = "📖 牌组管理"
 
 [node name="NoteBrowseBtn" type="Button" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000019]
-layout_mode = 2
 custom_minimum_size = Vector2(300, 44)
+layout_mode = 2
 text = "📝 笔记浏览"
 
 [node name="StudyBtn" type="Button" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000020]
-layout_mode = 2
 custom_minimum_size = Vector2(300, 48)
-theme_override_colors/font_color = Color(1.0, 0.85, 0.25, 1.0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.25, 1)
 text = "▶ 开始学习"
 
 [node name="Sep2" type="HSeparator" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000021]
@@ -146,7 +146,7 @@ layout_mode = 2
 
 [node name="VersionLabel" type="Label" parent="RootMargin/MainVBox/BottomBar" unique_id=1000000023]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.4, 0.4, 0.45, 1.0)
+theme_override_colors/font_color = Color(0.4, 0.4, 0.45, 1)
 text = "v1.0.0 | Godot 4.6"
 
 [node name="BottomSpacer" type="Control" parent="RootMargin/MainVBox/BottomBar" unique_id=1000000024]
@@ -155,5 +155,5 @@ size_flags_horizontal = 3
 
 [node name="StatusLabel" type="Label" parent="RootMargin/MainVBox/BottomBar" unique_id=1000000025]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1.0)
+theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1)
 text = "就绪 ✓"

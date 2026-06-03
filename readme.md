@@ -109,7 +109,7 @@ res://
 | `StudySessionEntity`      | 实体  | **RefCounted .gd** | **不进入节点树**                                 | 纯数据对象（暂态会话数据）              |
 | `Scheduler`               | 调度  | **RefCounted .gd** | **不进入节点树**                                 | 抽象基类，纯算法                   |
 | `SimpleScheduler`         | 调度  | **RefCounted .gd** | **不进入节点树**                                 | 具体算法实现                     |
-| `FsrsScheduler`           | 调度  | **RefCounted .gd** | **不进入节点树**                                 | 未来预留算法                     |
+| `FsrsScheduler`           | 调度  | **RefCounted .gd** | **不进入节点树**                                 | FSRS 21参数算法（✅ 已实现）      |
 
 ### 2.2 为什么这样设计？
 

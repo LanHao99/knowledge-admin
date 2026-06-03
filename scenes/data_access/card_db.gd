@@ -18,7 +18,7 @@ func create_card(note_id: int, deck_id: int, template_order: int = 0) -> Diction
 
 	var due_day_index: int = int(Time.get_unix_time_from_system() / _SECONDS_PER_DAY)
 	var insert_result := execute_bind(
-		"INSERT INTO cards(note_id, deck_id, template_order, queue, due, reps, lapses, last_review_time, last_rating, last_time_taken, review_history_json, stability, difficulty) VALUES(?, ?, ?, ?, ?, 0, 0, 0, 0, 0, '[]', 0.0, 0.0);",
+		"INSERT INTO cards(note_id, deck_id, template_order, queue, due, reps, lapses, last_review_time, last_rating, last_time_taken, review_history_json, stability, difficulty, step) VALUES(?, ?, ?, ?, ?, 0, 0, 0, 0, 0, '[]', 0.0, 0.0, NULL);",
 		[note_id, deck_id, template_order, CardEntity.QUEUE_NEW, due_day_index]
 	)
 	if not insert_result.get("success", false):
@@ -51,7 +51,7 @@ func update_card(card: CardEntity) -> Dictionary:
 	if card == null or card.id <= 0:
 		return fail("CARD_ID_INVALID", "更新卡片时 card.id 必须大于 0")
 
-	var sql := "UPDATE cards SET note_id = ?, deck_id = ?, template_order = ?, queue = ?, due = ?, reps = ?, lapses = ?, last_review_time = ?, last_rating = ?, last_time_taken = ?, review_history_json = ?, stability = ?, difficulty = ? WHERE id = ?;"
+	var sql := "UPDATE cards SET note_id = ?, deck_id = ?, template_order = ?, queue = ?, due = ?, reps = ?, lapses = ?, last_review_time = ?, last_rating = ?, last_time_taken = ?, review_history_json = ?, stability = ?, difficulty = ?, step = ? WHERE id = ?;"
 	return execute_bind(sql, [
 		card.note_id,
 		card.deck_id,
@@ -66,6 +66,7 @@ func update_card(card: CardEntity) -> Dictionary:
 		card.review_history_json,
 		card.stability,
 		card.difficulty,
+		card.step if card.step >= 0 else null,
 		card.id
 	])
 
@@ -231,10 +232,11 @@ func get_today_studied_count(today_start_ts: int) -> Dictionary:
 ##   stability (float) - 新稳定性。
 ##   difficulty (float) - 新困难度。
 ##   history_json (String) - 新历史 JSON。
+##   new_step (int) - 新步进索引（-1 为 NULL 即 Review 状态）。
 ## 输出: 返回标准字典。成功时 `data` 为 null。
-func record_review(card_id: int, rating: int, time_taken_ms: int, new_due: int, new_queue: int, new_reps: int, new_lapses: int, stability: float, difficulty: float, history_json: String) -> Dictionary:
+func record_review(card_id: int, rating: int, time_taken_ms: int, new_due: int, new_queue: int, new_reps: int, new_lapses: int, stability: float, difficulty: float, history_json: String, new_step: int = -1) -> Dictionary:
 	var now_ts: int = int(Time.get_unix_time_from_system())
-	var sql := "UPDATE cards SET due = ?, queue = ?, reps = ?, lapses = ?, last_review_time = ?, last_rating = ?, last_time_taken = ?, review_history_json = ?, stability = ?, difficulty = ? WHERE id = ?;"
+	var sql := "UPDATE cards SET due = ?, queue = ?, reps = ?, lapses = ?, last_review_time = ?, last_rating = ?, last_time_taken = ?, review_history_json = ?, stability = ?, difficulty = ?, step = ? WHERE id = ?;"
 	return execute_bind(sql, [
 		new_due,
 		new_queue,
@@ -246,6 +248,7 @@ func record_review(card_id: int, rating: int, time_taken_ms: int, new_due: int, 
 		history_json,
 		stability,
 		difficulty,
+		new_step if new_step >= 0 else null,
 		card_id
 	])
 

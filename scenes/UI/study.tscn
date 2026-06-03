@@ -14,5 +14,8 @@ grow_vertical = 2
 script = ExtResource("1_jhonx")
 
 [node name="StudySession" parent="." unique_id=948778194 instance=ExtResource("1_8q8l4")]
+layout_mode = 1
 
 [node name="CardUI" parent="." unique_id=1375471367 instance=ExtResource("2_x8trg")]
+visible = false
+layout_mode = 1

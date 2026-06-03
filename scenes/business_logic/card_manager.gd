@@ -203,6 +203,7 @@ func answer_card(card_id: int, rating: int, time_taken_ms: int) -> Dictionary:
 	card.lapses = int(next_state.get("lapses", card.lapses))
 	card.stability = float(next_state.get("stability", card.stability))
 	card.difficulty = float(next_state.get("difficulty", card.difficulty))
+	card.step = int(next_state.get("step", card.step))
 	card.last_review_time = now_ts
 	card.last_rating = rating
 	card.last_time_taken = max(time_taken_ms, 0)
@@ -218,7 +219,8 @@ func answer_card(card_id: int, rating: int, time_taken_ms: int) -> Dictionary:
 		card.lapses,
 		card.stability,
 		card.difficulty,
-		card.review_history_json
+		card.review_history_json,
+		card.step
 	)
 	if not save_result.get("success", false):
 		return save_result

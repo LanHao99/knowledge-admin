@@ -137,6 +137,10 @@
           "data_type": "REAL",
           "not_null": true,
           "default": 0.0
+        },
+        "step": {
+          "data_type": "INTEGER",
+          "default": null
         }
       },
       "foreign_keys": [
