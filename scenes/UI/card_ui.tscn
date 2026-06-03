@@ -19,10 +19,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 16
-theme_override_constants/margin_left = 48
-theme_override_constants/margin_right = 48
-theme_override_constants/margin_top = 24
-theme_override_constants/margin_bottom = 24
+theme_override_constants/margin_top = 60
 
 [node name="TopBar" type="HBoxContainer" parent="MainVBox" unique_id=705032708]
 layout_mode = 2
@@ -66,6 +63,8 @@ bbcode_enabled = true
 text = "加载中…"
 fit_content = true
 scroll_active = false
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="FlipHint" type="Label" parent="MainVBox/CardPanel/CardContentVBox" unique_id=705032717]
 layout_mode = 2
@@ -73,6 +72,7 @@ theme_override_colors/font_color = Color(0.5, 0.5, 0.55, 1)
 theme_override_font_sizes/font_size = 14
 text = "点击翻面 →"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="AnswerBar" type="HBoxContainer" parent="MainVBox" unique_id=705032718]
 visible = false
