@@ -4,31 +4,35 @@ extends Control
 var _deck_manager: DeckManager = null
 var _note_manager: NoteManager = null
 var _fields_rows: Array = []
+var _test_card_manager: CardManager = null
+var _test_scheduler: SimpleScheduler = null
+var _date_offset: int = 0
+var _last_offset: int = 0
 
-@onready var _deck_name_input: LineEdit = $RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm/DeckNameInput
-@onready var _deck_target_id_input: SpinBox = $RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm/DeckTargetIdInput
-@onready var _deck_parent_option: OptionButton = $RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm/DeckParentOption
-@onready var _deck_parent_custom_spin: SpinBox = $RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm/DeckParentCustomSpin
-@onready var _deck_sort_order_input: SpinBox = $RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm/DeckSortOrderInput
-@onready var _deck_archived_check: CheckBox = $RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm/DeckArchivedCheck
-@onready var _deck_list_view: ItemList = $RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckListView
-@onready var _note_id_input: SpinBox = $RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/NoteIdInput
-@onready var _note_deck_id_input: SpinBox = $RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/NoteTypeInput
-@onready var _fields_editor: VBoxContainer = $RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/FieldsEditorWrapper/FieldsEditor
-@onready var _add_field_button: Button = $RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/FieldsEditorWrapper/AddFieldButton
-@onready var _note_list_view: ItemList = $RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NoteListView
+@onready var _deck_name_input: LineEdit = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm/DeckNameInput
+@onready var _deck_target_id_input: SpinBox = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm/DeckTargetIdInput
+@onready var _deck_parent_option: OptionButton = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm/DeckParentOption
+@onready var _deck_parent_custom_spin: SpinBox = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm/DeckParentCustomSpin
+@onready var _deck_sort_order_input: SpinBox = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm/DeckSortOrderInput
+@onready var _deck_archived_check: CheckBox = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm/DeckArchivedCheck
+@onready var _deck_list_view: ItemList = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckListView
+@onready var _note_id_input: SpinBox = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/NoteIdInput
+@onready var _note_deck_id_input: SpinBox = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/NoteTypeInput
+@onready var _fields_editor: VBoxContainer = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/FieldsEditorWrapper/FieldsEditor
+@onready var _add_field_button: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/FieldsEditorWrapper/AddFieldButton
+@onready var _note_list_view: ItemList = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NoteListView
 @onready var _log_output: TextEdit = $RootMargin/MainVBox/MainHSplit/LogPanel/LogVBox/LogOutput
 
-@onready var _create_deck_button: Button = $RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons/CreateDeckButton
-@onready var _read_deck_button: Button = $RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons/ReadDeckButton
-@onready var _update_deck_button: Button = $RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons/UpdateDeckButton
-@onready var _delete_deck_button: Button = $RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons/DeleteDeckButton
-@onready var _list_deck_button: Button = $RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons/ListDeckButton
-@onready var _create_note_button: Button = $RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons/CreateNoteButton
-@onready var _read_note_button: Button = $RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons/ReadNoteButton
-@onready var _update_note_button: Button = $RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons/UpdateNoteButton
-@onready var _delete_note_button: Button = $RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons/DeleteNoteButton
-@onready var _list_note_button: Button = $RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons/ListNoteButton
+@onready var _create_deck_button: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons/CreateDeckButton
+@onready var _read_deck_button: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons/ReadDeckButton
+@onready var _update_deck_button: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons/UpdateDeckButton
+@onready var _delete_deck_button: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons/DeleteDeckButton
+@onready var _list_deck_button: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons/ListDeckButton
+@onready var _create_note_button: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons/CreateNoteButton
+@onready var _read_note_button: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons/ReadNoteButton
+@onready var _update_note_button: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons/UpdateNoteButton
+@onready var _delete_note_button: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons/DeleteNoteButton
+@onready var _list_note_button: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons/ListNoteButton
 @onready var _clear_all_button: Button = $RootMargin/MainVBox/Toolbar/ClearAllDataButton
 @onready var _refresh_all_button: Button = $RootMargin/MainVBox/Toolbar/RefreshAllButton
 @onready var _back_btn: Button = $RootMargin/MainVBox/Toolbar/BackBtn
@@ -36,6 +40,20 @@ var _fields_rows: Array = []
 @onready var _clear_log_button: Button = $RootMargin/MainVBox/MainHSplit/LogPanel/LogVBox/LogToolbar/ClearLogButton
 @onready var _export_log_button: Button = $RootMargin/MainVBox/MainHSplit/LogPanel/LogVBox/LogToolbar/ExportLogButton
 @onready var _clear_data_confirm: ConfirmationDialog = $ClearDataConfirm
+
+## 研究测试面板控件
+@onready var _gen_test_data_btn: Button = $RootMargin/MainVBox/Toolbar/GenTestDataBtn
+@onready var _gen_card_btn: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/GenCardBtn
+@onready var _test_summary: RichTextLabel = $RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/TestSummary
+@onready var _offset_spin: SpinBox = $RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/OffsetRow/OffsetSpinBox
+@onready var _apply_offset_btn: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/OffsetRow/ApplyOffsetBtn
+@onready var _undo_offset_btn: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/OffsetRow/UndoOffsetBtn
+@onready var _simulated_date_label: Label = $RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/SimulatedDateLabel
+@onready var _minus1_btn: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow/Minus1Btn
+@onready var _today_btn: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow/TodayBtn
+@onready var _plus1_btn: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow/Plus1Btn
+@onready var _plus7_btn: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow/Plus7Btn
+@onready var _plus30_btn: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow/Plus30Btn
 
 
 ## 初始化调试场景，建立数据库连接、设定默认值、绑定事件。
@@ -47,9 +65,10 @@ func _ready() -> void:
 	if init_ok:
 		_refresh_deck_list()
 		_refresh_note_list()
+	_refresh_simulated_date_label()
 
 
-## 退出场景时释放管理器节点（Manager 内部自行管理 DB 子节点）。
+## 退出场景时释放管理器节点。
 func _exit_tree() -> void:
 	_clear_fields_editor()
 	if _deck_manager != null:
@@ -58,6 +77,7 @@ func _exit_tree() -> void:
 	if _note_manager != null:
 		_note_manager.queue_free()
 		_note_manager = null
+	_cleanup_test_managers()
 
 
 ## 设定初始输入值与 fields 默认行。
@@ -103,15 +123,24 @@ func _bind_actions() -> void:
 	_export_log_button.pressed.connect(_on_export_log_pressed)
 	_clear_data_confirm.confirmed.connect(_on_clear_data_confirmed)
 
+	# 研究测试面板
+	_gen_test_data_btn.pressed.connect(_on_gen_test_data_pressed)
+	_gen_card_btn.pressed.connect(_on_gen_test_data_pressed)
+	_apply_offset_btn.pressed.connect(_on_apply_offset_pressed)
+	_undo_offset_btn.pressed.connect(_on_undo_offset_pressed)
+	_minus1_btn.pressed.connect(func(): _apply_date_offset(-1))
+	_today_btn.pressed.connect(_on_reset_to_today_pressed)
+	_plus1_btn.pressed.connect(func(): _apply_date_offset(1))
+	_plus7_btn.pressed.connect(func(): _apply_date_offset(7))
+	_plus30_btn.pressed.connect(func(): _apply_date_offset(30))
 
-## 当 Parent OptionButton 切换时，显示/隐藏自定义 SpinBox。## 输入: index (int) - 选中项索引。
-## 输出: 无。
+
+## 当 Parent OptionButton 切换时，显示/隐藏自定义 SpinBox。
 func _on_parent_option_changed(index: int) -> void:
 	_deck_parent_custom_spin.visible = (_deck_parent_option.get_item_id(index) == -1)
 
 
-## 获取当前选中的 parent_id 值。## 输入: 无。
-## 输出: int - Root 返回 0，Custom 返回 SpinBox 值。
+## 获取当前选中的 parent_id 值。
 func _get_selected_parent_id() -> int:
 	var selected_id: int = _deck_parent_option.get_item_id(_deck_parent_option.selected)
 	if selected_id == -1:
@@ -119,13 +148,11 @@ func _get_selected_parent_id() -> int:
 	return selected_id
 
 
-## 创建并初始化 Manager，由 Manager 自行管理 DB 生命周期。## 输入: 无。
-## 输出: bool - 初始化成功返回 true。
+## 创建并初始化 Manager。
 func _ensure_database_ready() -> bool:
 	if _deck_manager != null and _deck_manager.is_ready() and _note_manager != null and _note_manager.is_ready():
 		return true
 	
-	# 清理旧实例
 	if _deck_manager != null:
 		_deck_manager.queue_free()
 		_deck_manager = null
@@ -135,14 +162,12 @@ func _ensure_database_ready() -> bool:
 	
 	const db_path: String = "user://knowledge_admin.db"
 	
-	# 创建 DeckManager（内部自行创建 DeckDB）
 	_deck_manager = DeckManager.new()
 	add_child(_deck_manager)
 	if not _deck_manager.setup(db_path):
 		_append_log("DeckManager 初始化失败")
 		return false
 	
-	# 创建 NoteManager（内部自行创建 NoteDB + CardDB + DeckDB）
 	_note_manager = NoteManager.new()
 	add_child(_note_manager)
 	if not _note_manager.setup(db_path):
@@ -158,7 +183,6 @@ func _ensure_database_ready() -> bool:
 # ──────────────────────────────────────────────────────────────
 
 
-## 创建牌组，打印完整返回行并自动回填 Target ID。
 func _on_create_deck_pressed() -> void:
 	if not _ensure_database_ready():
 		return
@@ -176,7 +200,6 @@ func _on_create_deck_pressed() -> void:
 	_refresh_deck_list()
 
 
-## 按 Target ID 查询牌组，打印完整行并回填表单。
 func _on_read_deck_pressed() -> void:
 	if not _ensure_database_ready():
 		return
@@ -191,210 +214,86 @@ func _on_read_deck_pressed() -> void:
 			_populate_deck_form(deck)
 		else:
 			_append_log("  data: null (not found)")
-			_append_log("")
 	else:
 		_append_log("")
 
 
-## 按 Target ID 更新牌组（name + is_archived），打印改前/改后完整行。
 func _on_update_deck_pressed() -> void:
 	if not _ensure_database_ready():
 		return
 	var deck_id: int = roundi(_deck_target_id_input.value)
-	var deck_name: String = _deck_name_input.text.strip_edges()
+	var new_name: String = _deck_name_input.text.strip_edges()
 	var is_archived: bool = _deck_archived_check.button_pressed
-	_log_operation_header("update_deck", "id=%d name=%s is_archived=%s" % [deck_id, deck_name, str(is_archived)])
-	var get_result: Dictionary = _deck_manager.get_deck(deck_id)
-	if not get_result.get("success", false):
-		_log_result(get_result)
-		_append_log("")
+	_log_operation_header("update_deck", "id=%d name=%s archived=%s" % [deck_id, new_name, str(is_archived)])
+	var result: Dictionary = _deck_manager.rename_deck(deck_id, new_name)
+	if not result.get("success", false):
+		_log_result(result)
+		_refresh_deck_list()
 		return
-	var deck: DeckEntity = get_result.get("data", null)
-	if deck == null:
-		_append_log("  更新失败: 牌组 id=%d 不存在" % deck_id)
-		_append_log("")
-		return
-	var before_str: String = _stringify_deck(deck)
-	
-	var update_result: Dictionary
-	if deck.name != deck_name:
-		update_result = _deck_manager.rename_deck(deck_id, deck_name)
-	else:
-		update_result = {"success": true}
-	
-	if update_result.get("success", false) and deck.is_archived != is_archived:
-		update_result = _deck_manager.archive_deck(deck_id, is_archived)
-	
-	_log_result(update_result)
-	_append_log("  BEFORE: %s" % before_str)
-	if update_result.get("success", false):
-		var after_result: Dictionary = _deck_manager.get_deck(deck_id)
-		if after_result.get("success", false) and after_result.get("data", null) != null:
-			var after_deck: DeckEntity = after_result.get("data")
-			_append_log("  AFTER:  %s" % _stringify_deck(after_deck))
-	_append_log("")
+	result = _deck_manager.set_deck_archived(deck_id, is_archived)
+	_log_result(result)
+	if result.get("success", false):
+		var deck_result: Dictionary = _deck_manager.get_deck(deck_id)
+		if deck_result.get("success", false):
+			var deck: DeckEntity = deck_result.get("data", null)
+			if deck != null:
+				_log_data(_stringify_deck(deck))
 	_refresh_deck_list()
 
 
-## 删除指定牌组，打印删除前快照与受影响行数。
 func _on_delete_deck_pressed() -> void:
 	if not _ensure_database_ready():
 		return
 	var deck_id: int = roundi(_deck_target_id_input.value)
 	_log_operation_header("delete_deck", "id=%d" % deck_id)
-	var get_result: Dictionary = _deck_manager.get_deck(deck_id)
-	if get_result.get("success", false) and get_result.get("data", null) != null:
-		var deck: DeckEntity = get_result.get("data")
-		_append_log("  BEFORE: %s" % _stringify_deck(deck))
 	var result: Dictionary = _deck_manager.delete_deck(deck_id)
 	_log_result(result)
-	_append_log("")
 	_refresh_deck_list()
 
 
-## 列出全部牌组，日志打印完整表格。
 func _on_list_decks_pressed() -> void:
 	if not _ensure_database_ready():
 		return
+	var deck_db: DeckDB = _deck_manager.get_deck_db()
+	var result: Dictionary = deck_db.get_all_decks(false)
+	_log_operation_header("list_decks", "include_archived=false")
+	_log_result(result)
+	if result.get("success", false):
+		var decks: Array[DeckEntity] = result.get("data", [])
+		_append_log("  count: %d" % decks.size())
+		for deck in decks:
+			_append_log("    " + _stringify_deck(deck))
 	_refresh_deck_list()
 
 
-## 双击牌组列表行→回填表单。## 输入: index (int) - 被双击的列表项索引。
-## 输出: 无。
 func _on_deck_item_double_clicked(index: int) -> void:
-	var deck_id: int = _get_deck_id_from_list_item(_deck_list_view.get_item_text(index))
-	if deck_id <= 0:
-		return
-	if not _ensure_database_ready():
-		return
-	var result: Dictionary = _deck_manager.get_deck(deck_id)
-	if result.get("success", false) and result.get("data", null) != null:
-		_populate_deck_form(result.get("data"))
-
-
-## 从列表行文本中提取牌组 id。## 输入: line (String) - 列表行文本，格式 "id=X | ..."。
-## 输出: int - 提取到的 id，失败返回 0。
-func _get_deck_id_from_list_item(line: String) -> int:
-	var prefix := "id="
-	var start_idx := line.find(prefix)
-	if start_idx == -1:
-		return 0
-	var end_idx := line.find("|", start_idx)
-	if end_idx == -1:
-		end_idx = line.length()
-	var id_str := line.substr(start_idx + prefix.length(), end_idx - start_idx - prefix.length())
-	return id_str.strip_edges().to_int()
-
-
-## 把牌组实体回填到表单。## 输入: deck (DeckEntity) - 牌组实体。
-## 输出: 无。
-func _populate_deck_form(deck: DeckEntity) -> void:
-	_deck_name_input.text = deck.name
-	_deck_target_id_input.value = deck.id
-	_deck_sort_order_input.value = deck.sort_order
-	_deck_archived_check.button_pressed = deck.is_archived
-	if deck.parent_id <= 0:
-		_deck_parent_option.select(0)
-		_deck_parent_custom_spin.visible = false
-	else:
-		_deck_parent_option.select(1)
-		_deck_parent_custom_spin.value = deck.parent_id
-		_deck_parent_custom_spin.visible = true
-
-
-## 刷新牌组 ItemList 并输出完整表格日志。
-func _refresh_deck_list() -> void:
-	if _deck_manager == null:
-		return
-	_deck_list_view.clear()
-	var result: Dictionary = _deck_manager.get_all_decks()
-	if not result.get("success", false):
-		_append_log("刷新牌组列表失败 -> %s" % _format_result(result))
-		_append_log("")
-		return
-	var decks: Array[DeckEntity] = result.get("data", [])
-	_log_operation_header("list_decks", "%d rows" % decks.size())
-	_append_log("  id | name                 | parent_id | sort | archived | created_at    | updated_at")
-	_append_log("  ---+----------------------+-----------+------+----------+---------------+------------")
-	for deck in decks:
-		var parent_text: String = "NULL"
-		if deck.parent_id > 0:
-			parent_text = str(deck.parent_id)
-		var line: String = "  %-3d| %-21s| %-10s| %-5d| %-9s| %-14d| %-12d" % [
-			deck.id,
-			truncate_string(deck.name, 20),
-			parent_text,
-			deck.sort_order,
-			"true" if deck.is_archived else "false",
-			deck.created_at,
-			deck.updated_at
-		]
-		_append_log(line)
-		var item_line: String = "id=%d | name=%s | parent=%s | archived=%s" % [deck.id, deck.name, parent_text, str(deck.is_archived)]
-		_deck_list_view.add_item(item_line)
-	_append_log("")
-
-	# 自动同步 deck_id 输入框到第一个可用牌组（解决 ID 递增后默认值脱节问题）
-	if not decks.is_empty():
-		var first_id: int = decks[0].id
-		_auto_sync_deck_id_input(first_id)
+	var deck_id: int = roundi(_deck_list_view.get_item_metadata(index))
+	_deck_target_id_input.value = deck_id
+	_on_read_deck_pressed()
 
 
 # ──────────────────────────────────────────────────────────────
-# Notes CRUD
+# Note CRUD
 # ──────────────────────────────────────────────────────────────
 
 
-## 创建 notes 记录，打印 full_row 并自动回填 ID。
 func _on_create_note_pressed() -> void:
 	if not _ensure_database_ready():
 		return
-	const FALLBACK_NOTE_TYPE_ID: int = 1
-	var fields_dict: Dictionary = _fields_to_dict()
-	if fields_dict.is_empty():
-		_append_log("创建 note 失败: fields 至少需要一个字段")
-		_append_log("")
-		return
-	var fields_json: String = JSON.stringify(fields_dict)
-
-	# 获取目标牌组 ID，牌组不存在时自动回退到第一个可用牌组
 	var deck_id: int = roundi(_note_deck_id_input.value)
-	var requested_id: int = deck_id
-	var deck_result := _deck_manager.get_deck(deck_id)
-	if not deck_result.get("success", false) or deck_result.get("data", null) == null:
-		var all_decks := _deck_manager.get_all_decks()
-		if all_decks.get("success", false):
-			var decks: Array = all_decks.get("data", [])
-			if not decks.is_empty():
-				var first_deck: DeckEntity = decks[0]
-				deck_id = first_deck.id
-				_note_deck_id_input.value = deck_id
-				if requested_id != deck_id:
-					_append_log("  info: 牌组 id=%d 不存在，自动使用第一个可用牌组 id=%d (%s)" % [requested_id, deck_id, first_deck.name])
-			else:
-				_append_log("创建 note 失败: 没有任何可用牌组，请先创建牌组")
-				_append_log("")
-				return
-		else:
-			_append_log("创建 note 失败: 无法查询牌组列表")
-			_append_log("")
-			return
-
-	_log_operation_header("create_note", "deck_id=%d note_type_id=%d fields=%s" % [deck_id, FALLBACK_NOTE_TYPE_ID, fields_json])
-
-	var result: Dictionary = _note_manager.create_note(FALLBACK_NOTE_TYPE_ID, fields_dict, deck_id, [])
+	var fields: Dictionary = _read_fields_from_editor()
+	var note_type_id: int = 0
+	_log_operation_header("create_note", "deck_id=%d fields=%s" % [deck_id, str(fields)])
+	var result: Dictionary = _note_manager.create_note(note_type_id, fields, deck_id)
 	_log_result(result)
 	if result.get("success", false):
-		var data: Dictionary = result.get("data", {})
-		var note: NoteEntity = data.get("note", null)
+		var note: NoteEntity = result.get("data", null)
 		if note != null:
+			_log_data(_stringify_note(note))
 			_note_id_input.value = note.id
-			_append_log("  full_row: %s" % _stringify_note_entity(note))
-	_append_log("")
 	_refresh_note_list()
 
 
-## 按 Note ID 读取记录，打印完整行并拆分 fields。
 func _on_read_note_pressed() -> void:
 	if not _ensure_database_ready():
 		return
@@ -402,264 +301,302 @@ func _on_read_note_pressed() -> void:
 	_log_operation_header("read_note", "id=%d" % note_id)
 	var result: Dictionary = _note_manager.get_note(note_id)
 	_log_result(result)
-	var note: NoteEntity = result.get("data", null)
-	if note != null:
-		_append_log("  full_row: %s" % _stringify_note_entity(note))
-		_populate_note_form_from_entity(note)
+	if result.get("success", false):
+		var note: NoteEntity = result.get("data", null)
+		if note != null:
+			_log_data(_stringify_note(note))
+			_populate_note_form(note)
+		else:
+			_append_log("  data: null (not found)")
 	else:
-		_append_log("  data: null (not found)")
-	_append_log("")
+		_append_log("")
 
 
-## 更新 notes 记录，打印 BEFORE + AFTER。
 func _on_update_note_pressed() -> void:
 	if not _ensure_database_ready():
 		return
 	var note_id: int = roundi(_note_id_input.value)
-	var fields_dict: Dictionary = _fields_to_dict()
-	if fields_dict.is_empty():
-		_append_log("更新 note 失败: fields 至少需要一个字段")
-		_append_log("")
-		return
-	var fields_json: String = JSON.stringify(fields_dict)
-	_log_operation_header("update_note", "id=%d fields=%s" % [note_id, fields_json])
-	
-	var before_result: Dictionary = _note_manager.get_note(note_id)
-	if before_result.get("success", false) and before_result.get("data", null) != null:
-		_append_log("  BEFORE: %s" % _stringify_note_entity(before_result.get("data")))
-	
-	var update_result: Dictionary = _note_manager.update_note(note_id, fields_dict)
-	_log_result(update_result)
-	if update_result.get("success", false):
-		var after_result: Dictionary = _note_manager.get_note(note_id)
-		if after_result.get("success", false) and after_result.get("data", null) != null:
-			_append_log("  AFTER:  %s" % _stringify_note_entity(after_result.get("data")))
-	_append_log("")
+	var deck_id: int = roundi(_note_deck_id_input.value)
+	var fields: Dictionary = _read_fields_from_editor()
+	var note_type_id: int = 0
+	_log_operation_header("update_note", "id=%d deck_id=%d fields=%s" % [note_id, deck_id, str(fields)])
+	var result: Dictionary = _note_manager.update_note_fields(note_id, note_type_id, fields, deck_id)
+	_log_result(result)
+	if result.get("success", false):
+		var note_result: Dictionary = _note_manager.get_note(note_id)
+		if note_result.get("success", false):
+			var note: NoteEntity = note_result.get("data", null)
+			if note != null:
+				_log_data(_stringify_note(note))
 	_refresh_note_list()
 
 
-## 删除 notes 记录，打印删除前快照与受影响行数。
 func _on_delete_note_pressed() -> void:
 	if not _ensure_database_ready():
 		return
 	var note_id: int = roundi(_note_id_input.value)
 	_log_operation_header("delete_note", "id=%d" % note_id)
-	var before_result: Dictionary = _note_manager.get_note(note_id)
-	if before_result.get("success", false) and before_result.get("data", null) != null:
-		_append_log("  BEFORE: %s" % _stringify_note_entity(before_result.get("data")))
 	var result: Dictionary = _note_manager.delete_note(note_id)
 	_log_result(result)
-	_append_log("")
 	_refresh_note_list()
 
 
-## 列出最近 notes，日志打印完整表格。
 func _on_list_notes_pressed() -> void:
 	if not _ensure_database_ready():
 		return
+	var result: Dictionary = _note_manager.get_all_notes()
+	_log_operation_header("list_notes", "")
+	_log_result(result)
+	if result.get("success", false):
+		var notes: Array = result.get("data", [])
+		_append_log("  count: %d" % notes.size())
+		for note in notes:
+			_append_log("    " + _stringify_note(note))
 	_refresh_note_list()
 
 
-## 双击 notes 列表行→回填表单。## 输入: index (int) - 被双击的列表项索引。
-## 输出: 无。
 func _on_note_item_double_clicked(index: int) -> void:
-	var line: String = _note_list_view.get_item_text(index)
-	var prefix := "id="
-	var start_idx := line.find(prefix)
-	if start_idx == -1:
-		return
-	var end_idx := line.find("|", start_idx)
-	if end_idx == -1:
-		end_idx = line.length()
-	var note_id: int = line.substr(start_idx + prefix.length(), end_idx - start_idx - prefix.length()).strip_edges().to_int()
-	if note_id <= 0:
-		return
+	var note_id: int = roundi(_note_list_view.get_item_metadata(index))
+	_note_id_input.value = note_id
+	_on_read_note_pressed()
+
+
+# ──────────────────────────────────────────────────────────────
+# 研究测试 — 功能 A：生成测试数据
+# ──────────────────────────────────────────────────────────────
+
+
+## 生成4张测试卡片（分别模拟 Again/Hard/Good/Easy 评分历史）。
+func _on_gen_test_data_pressed() -> void:
 	if not _ensure_database_ready():
 		return
-	var result: Dictionary = _note_manager.get_note(note_id)
-	if result.get("success", false) and result.get("data", null) != null:
-		_populate_note_form_from_entity(result.get("data"))
+	_setup_test_managers()
+
+	var db_path: String = "user://knowledge_admin.db"
+	var deck_id: int = _ensure_test_deck(db_path)
+	if deck_id <= 0:
+		_append_log("[生成测试数据] 无法创建 Test Deck")
+		return
+
+	var ratings: Array[Dictionary] = [
+		{front = "问题1: 遗忘型", back = "答案1", rating = Scheduler.Rating.AGAIN},
+		{front = "问题2: 困难型", back = "答案2", rating = Scheduler.Rating.HARD},
+		{front = "问题3: 正常型", back = "答案3", rating = Scheduler.Rating.GOOD},
+		{front = "问题4: 轻松型", back = "答案4", rating = Scheduler.Rating.EASY},
+	]
+
+	var now_ts: int = int(Time.get_unix_time_from_system())
+	var summaries: Array[String] = []
+	summaries.append("[b]Test Deck (id=%d) 已就绪[/b]" % deck_id)
+
+	for info in ratings:
+		var front: String = info["front"]
+		var back: String = info["back"]
+		var rating: int = info["rating"]
+
+		# 创建笔记
+		var fields := {"front": front, "back": back}
+		var note_result := _note_manager.create_note(0, fields, deck_id)
+		if not note_result.get("success", false):
+			summaries.append("  ❌ 笔记创建失败: %s" % str(note_result.get("error", "")))
+			continue
+		var note: NoteEntity = note_result.get("data")
+		if note == null:
+			continue
+
+		# 创建卡片
+		var card_result := _test_card_manager.create_card(note.id, deck_id)
+		if not card_result.get("success", false):
+			summaries.append("  ❌ 卡片创建失败")
+			continue
+		var card: CardEntity = card_result.get("data")
+
+		# 模拟评分
+		var next_state := _test_scheduler.calculate_next_state(card, rating, now_ts)
+		card.queue = int(next_state.get("queue", card.queue))
+		card.due = int(next_state.get("due", card.due))
+		card.reps = int(next_state.get("reps", 1))
+		card.lapses = int(next_state.get("lapses", 0))
+		card.stability = float(next_state.get("stability", 0.0))
+		card.difficulty = float(next_state.get("difficulty", 0.0))
+		card.step = int(next_state.get("step", -1))
+		card.last_review_time = now_ts
+		card.last_rating = rating
+
+		var rating_name: String = ""
+		match rating:
+			Scheduler.Rating.AGAIN: rating_name = "Again"
+			Scheduler.Rating.HARD:  rating_name = "Hard"
+			Scheduler.Rating.GOOD:  rating_name = "Good"
+			Scheduler.Rating.EASY:  rating_name = "Easy"
+
+		# 直接通过 CardDB 写回
+		var card_db: CardDB = _test_card_manager.get_card_db()
+		card_db.update_card(card)
+
+		var queue_name: String = ""
+		match card.queue:
+			CardEntity.QUEUE_LEARNING: queue_name = "LEARNING"
+			CardEntity.QUEUE_REVIEW:   queue_name = "REVIEW"
+		summaries.append("  [color=#55CC55]%s(%s)[/color] → %s, stability=%.2f, lapses=%d" % [rating_name, front, queue_name, card.stability, card.lapses])
+
+	var summary_text: String = "\n".join(summaries)
+	_test_summary.text = summary_text
+	_append_log("[生成测试数据] 4张卡片已就绪 (deck_id=%d)" % deck_id)
 
 
-## 把 NoteEntity 数据回填到表单与 fields 编辑器（不覆盖 Deck ID 输入框，保持用户上次选择）。## 输入: note (NoteEntity) - 笔记实体。
-## 输出: 无。
-func _populate_note_form_from_entity(note: NoteEntity) -> void:
-	_note_id_input.value = note.id
-	_json_to_fields(JSON.stringify(note.fields_data))
+## 确认 Test Deck 牌组存在，若不存在则创建。
+func _ensure_test_deck(db_path: String) -> int:
+	var deck_db := _deck_manager.get_deck_db()
+	var result := deck_db.fetch_all("SELECT id FROM decks WHERE name = 'Test Deck' LIMIT 1;", [])
+	if not result.get("success", false):
+		return -1
+	var rows: Array = result.get("data", [])
+	if rows.size() > 0:
+		return int(rows[0].get("id", -1))
+
+	var create_result := _deck_manager.create_deck("Test Deck", 0)
+	if not create_result.get("success", false):
+		return -1
+	var deck: DeckEntity = create_result.get("data", null)
+	if deck == null:
+		return -1
+	return deck.id
 
 
-## 刷新 notes ItemList 并输出完整表格日志。
+## 初始化测试专用 CardManager + SimpleScheduler。
+func _setup_test_managers() -> void:
+	if _test_card_manager != null:
+		return
+	const db_path: String = "user://knowledge_admin.db"
+	_test_card_manager = CardManager.new()
+	add_child(_test_card_manager)
+	_test_card_manager.setup(db_path)
+	_test_scheduler = SimpleScheduler.new()
+	_test_card_manager.set_scheduler(_test_scheduler)
+
+
+## 释放测试专用 Manager 实例。
+func _cleanup_test_managers() -> void:
+	if _test_card_manager != null:
+		_test_card_manager.queue_free()
+		_test_card_manager = null
+	_test_scheduler = null
+
+
+# ──────────────────────────────────────────────────────────────
+# 研究测试 — 功能 B：日期模拟
+# ──────────────────────────────────────────────────────────────
+
+
+## 应用偏移按钮回调。
+func _on_apply_offset_pressed() -> void:
+	var delta: int = roundi(_offset_spin.value)
+	_apply_date_offset(delta)
+
+
+## 重置为今日按钮回调。
+func _on_reset_to_today_pressed() -> void:
+	_setup_test_managers()
+	var card_db: CardDB = _test_card_manager.get_card_db()
+	var today: int = int(Time.get_unix_time_from_system() / 86400)
+
+	var count_result := card_db.scalar("SELECT COUNT(*) FROM cards WHERE queue = ?", [CardEntity.QUEUE_REVIEW])
+	var affected: int = int(count_result.get("data", 0))
+
+	card_db.execute_bind("UPDATE cards SET due = ? WHERE queue = ?", [today, CardEntity.QUEUE_REVIEW])
+
+	_last_offset = 0
+	_date_offset = 0
+	_refresh_simulated_date_label()
+	_append_log("[日期偏移] 重置为今天，影响 %d 张 REVIEW 卡片" % affected)
+
+
+## 撤销上次偏移按钮回调。
+func _on_undo_offset_pressed() -> void:
+	if _last_offset == 0:
+		_append_log("[撤销] 无上次偏移可撤销")
+		return
+	_apply_date_offset(-_last_offset, true)
+	_append_log("[撤销] 已反向执行偏移")
+
+
+## 执行日期偏移（SQL 层）。
+func _apply_date_offset(delta_days: int, is_undo: bool = false) -> void:
+	_setup_test_managers()
+	var card_db: CardDB = _test_card_manager.get_card_db()
+
+	var count_result := card_db.scalar("SELECT COUNT(*) FROM cards WHERE queue = ?", [CardEntity.QUEUE_REVIEW])
+	var affected: int = int(count_result.get("data", 0))
+
+	card_db.execute_bind("UPDATE cards SET due = due - ? WHERE queue = ?", [delta_days, CardEntity.QUEUE_REVIEW])
+
+	if not is_undo:
+		_date_offset += delta_days
+		_last_offset = delta_days
+	else:
+		_last_offset = 0
+
+	_refresh_simulated_date_label()
+	_append_log("[日期偏移] %+d 天，影响 %d 张 REVIEW 卡片" % [delta_days, affected])
+
+
+## 刷新日期模拟标签。
+func _refresh_simulated_date_label() -> void:
+	if _simulated_date_label == null:
+		return
+	var today := Time.get_date_string_from_system()
+	if _date_offset == 0:
+		_simulated_date_label.text = "当前模拟: %s（未偏移）" % today
+	else:
+		_simulated_date_label.text = "当前模拟: %s %+d 天" % [today, _date_offset]
+
+
+# ──────────────────────────────────────────────────────────────
+# Deck List / Note List 刷新
+# ──────────────────────────────────────────────────────────────
+
+
+func _refresh_deck_list() -> void:
+	if _deck_list_view == null:
+		return
+	_deck_list_view.clear()
+	if _deck_manager == null:
+		return
+	var deck_db: DeckDB = _deck_manager.get_deck_db()
+	if deck_db == null:
+		return
+	var result: Dictionary = deck_db.get_all_decks(false)
+	if not result.get("success", false):
+		return
+	var decks: Array[DeckEntity] = result.get("data", [])
+	for deck in decks:
+		var idx: int = _deck_list_view.add_item(deck.name)
+		_deck_list_view.set_item_metadata(idx, deck.id)
+
+
 func _refresh_note_list() -> void:
-	if _note_manager == null:
+	if _note_list_view == null:
 		return
 	_note_list_view.clear()
+	if _note_manager == null:
+		return
 	var result: Dictionary = _note_manager.get_all_notes()
 	if not result.get("success", false):
-		_append_log("刷新 notes 列表失败 -> %s" % _format_result(result))
-		_append_log("")
 		return
-	var notes: Array[NoteEntity] = result.get("data", [])
-	_log_operation_header("list_notes", "%d rows" % notes.size())
-	_append_log("  id | note_type_id | fields_json                              | created_at")
-	_append_log("  ---+--------------+------------------------------------------+------------")
+	var notes: Array = result.get("data", [])
 	for note in notes:
-		var fields_json: String = JSON.stringify(note.fields_data)
-		_append_log("  %-3d| %-13d| %-41s| %-10d" % [
-			note.id,
-			note.note_type_id,
-			truncate_string(fields_json, 40),
-			note.created_at
-		])
-		var item_line: String = "id=%d | type=%d | fields=%s" % [note.id, note.note_type_id, truncate_string(fields_json, 60)]
-		_note_list_view.add_item(item_line)
-	_append_log("")
-
-
-## 把 NoteEntity 渲染为完整可读字符串（含字段展开）。## 输入: note (NoteEntity) - 笔记实体。
-## 输出: String - 格式化的完整行字符串。
-func _stringify_note_entity(note: NoteEntity) -> String:
-	var base := "id=%d note_type_id=%d created_at=%d" % [note.id, note.note_type_id, note.created_at]
-	var fields_str: String = JSON.stringify(note.fields_data)
-	var parser := JSON.new()
-	if parser.parse(fields_str) == OK and typeof(parser.data) == TYPE_DICTIONARY:
-		var d: Dictionary = parser.data
-		for key in d:
-			base += "  %s=%s" % [str(key), str(d[key])]
-		return base
-	base += "  raw_fields=%s" % fields_str
-	return base
+		var fields: Dictionary = note.fields_data if note is NoteEntity else {}
+		var front: String = str(fields.get("front", fields.get("Front", "?")))
+		var idx: int = _note_list_view.add_item("id=%d %s" % [note.id, front])
+		_note_list_view.set_item_metadata(idx, note.id)
 
 
 # ──────────────────────────────────────────────────────────────
-# Fields Editor
+# Log Helpers
 # ──────────────────────────────────────────────────────────────
 
 
-## 向 fields 编辑器添加一行键值输入。## 输入: key (String) - 字段键名默认值；value (String) - 字段值默认值。
-## 输出: 无。
-func _add_field_row(key: String = "", value: String = "") -> void:
-	var hbox := HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 6)
-	hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-	var key_edit := LineEdit.new()
-	key_edit.size_flags_horizontal = 3
-	key_edit.placeholder_text = "key"
-	if key != "":
-		key_edit.text = key
-
-	var value_edit := LineEdit.new()
-	value_edit.size_flags_horizontal = 3
-	value_edit.placeholder_text = "value"
-	if value != "":
-		value_edit.text = value
-
-	var remove_btn := Button.new()
-	remove_btn.text = "x"
-	remove_btn.custom_minimum_size = Vector2(30, 0)
-	remove_btn.pressed.connect(_on_remove_field_pressed.bind(hbox))
-
-	hbox.add_child(key_edit)
-	hbox.add_child(value_edit)
-	hbox.add_child(remove_btn)
-
-	_fields_editor.add_child(hbox)
-	_fields_rows.append({"container": hbox, "key_edit": key_edit, "value_edit": value_edit})
-
-
-## + Add Field 按钮回调。
-func _on_add_field_pressed() -> void:
-	_add_field_row()
-
-
-## 删除指定 fields 行。## 输入: hbox (HBoxContainer) - 待删除的行容器。
-## 输出: 无。
-func _on_remove_field_pressed(hbox: HBoxContainer) -> void:
-	for i in range(_fields_rows.size()):
-		if _fields_rows[i].get("container") == hbox:
-			_fields_rows.remove_at(i)
-			break
-	hbox.queue_free()
-
-
-## 清空 fields 编辑器所有行。
-func _clear_fields_editor() -> void:
-	for row in _fields_rows:
-		var hbox: HBoxContainer = row.get("container", null)
-		if hbox != null:
-			hbox.queue_free()
-	_fields_rows.clear()
-
-
-## 把当前 fields 行序列化为 Dictionary。## 输入: 无。
-## 输出: Dictionary - 键值对字典，忽略空 key 的行。
-func _fields_to_dict() -> Dictionary:
-	var d := {}
-	for row in _fields_rows:
-		var key: String = (row["key_edit"] as LineEdit).text.strip_edges()
-		var val: String = (row["value_edit"] as LineEdit).text.strip_edges()
-		if key == "":
-			continue
-		d[key] = val
-	return d
-
-
-## 将 JSON 字符串解析后回填到 fields 编辑器。## 输入: json_str (String) - fields_data 的 JSON 字符串。
-## 输出: 无。
-func _json_to_fields(json_str: String) -> void:
-	_clear_fields_editor()
-	var parser := JSON.new()
-	if parser.parse(json_str) != OK or typeof(parser.data) != TYPE_DICTIONARY:
-		_add_field_row("raw", json_str)
-		return
-	var d: Dictionary = parser.data
-	if d.is_empty():
-		return
-	for key in d:
-		_add_field_row(str(key), str(d[key]))
-
-
-# ──────────────────────────────────────────────────────────────
-# Clear All Data
-# ──────────────────────────────────────────────────────────────
-
-
-## 打开确认对话框。
-func _on_clear_all_pressed() -> void:
-	_clear_data_confirm.popup_centered()
-
-
-## 事务内清空 cards/notes/decks 三表数据（保留表结构），打印每表行数。
-func _on_clear_data_confirmed() -> void:
-	if not _ensure_database_ready():
-		return
-	var start_time: int = Time.get_ticks_msec()
-	_log_operation_header("clear_all_data", "truncate cards, notes, decks (schema preserved)")
-	
-	var result: Dictionary = _deck_manager.clear_all_data()
-	if result.get("success", false):
-		var stats: Dictionary = result.get("data", {})
-		_append_log("  DELETE FROM cards    → %d rows" % stats.get("cards", 0))
-		_append_log("  DELETE FROM notes    → %d rows" % stats.get("notes", 0))
-		_append_log("  DELETE FROM decks    → %d rows" % stats.get("decks", 0))
-		var elapsed: int = Time.get_ticks_msec() - start_time
-		_append_log("  OK - committed in %d ms" % elapsed)
-	else:
-		_append_log("  FAIL: %s" % _format_result(result))
-	_append_log("")
-	_setup_default_inputs()
-	_clear_fields_editor()
-	_refresh_deck_list()
-	_refresh_note_list()
-
-
-# ──────────────────────────────────────────────────────────────
-# Log Utilities
-# ──────────────────────────────────────────────────────────────
-
-
-## 打印操作标题头。## 输入: op (String) - 操作名称；input_info (String) - 输入参数描述。
-## 输出: 无。
 func _log_operation_header(op: String, input_info: String) -> void:
 	var timestamp: String = Time.get_time_string_from_system()
 	_log_output.text += "[%s] === %s ===\n" % [timestamp, op]
@@ -667,135 +604,159 @@ func _log_operation_header(op: String, input_info: String) -> void:
 	_scroll_to_bottom()
 
 
-## 打印标准返回字典结果。## 输入: result (Dictionary) - 标准返回字典。
-## 输出: 无。
 func _log_result(result: Dictionary) -> void:
 	if result.get("success", false):
 		_log_output.text += "  result: OK\n"
 	else:
 		var code: String = str(result.get("code", "UNKNOWN"))
 		var error_msg: String = str(result.get("error", "未知错误"))
-		_log_output.text += "  result: FAIL code=%s error=%s\n" % [code, error_msg]
+		_log_output.text += "  result: FAIL (%s) %s\n" % [code, error_msg]
 	_scroll_to_bottom()
 
 
-## 打印数据内容块（支持多行）。## 输入: data_str (String) - 数据字符串，可包含换行。
-## 输出: 无。
-func _log_data(data_str: String) -> void:
-	for line in data_str.split("\n"):
-		_log_output.text += "  %s\n" % line.strip_edges(true, false)
+func _log_data(message: String) -> void:
+	_log_output.text += "  data: " + message + "\n"
 	_scroll_to_bottom()
 
 
-## 向底部日志面板追加一行文本。## 输入: message (String) - 待写入日志。
-## 输出: 无。
 func _append_log(message: String) -> void:
 	_log_output.text += message + "\n"
 	_scroll_to_bottom()
 
 
-## 滚动日志到底部。
 func _scroll_to_bottom() -> void:
-	_log_output.set_caret_line(_log_output.get_line_count())
+	if _log_output != null:
+		_log_output.set_caret_line(_log_output.get_line_count() - 1)
 
 
-## 复制全部日志到剪贴板。
-func _on_copy_log_pressed() -> void:
-	DisplayServer.clipboard_set(_log_output.text)
-	_append_log("[日志已复制到剪贴板]")
+# ──────────────────────────────────────────────────────────────
+# Utility
+# ──────────────────────────────────────────────────────────────
 
 
-## 清空日志面板。
-func _on_clear_log_pressed() -> void:
-	_log_output.text = ""
+func _stringify_deck(deck: DeckEntity) -> String:
+	return "Deck(id=%d, name='%s', parent_id=%d, archived=%s)" % [deck.id, deck.name, deck.parent_id, str(deck.is_archived)]
 
 
-## 导出日志到 user://logs/database/ 目录。
-func _on_export_log_pressed() -> void:
-	var log_dir := "user://logs/database"
-	var dir := DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(log_dir))
-	if dir != OK:
-		_append_log("导出失败: 无法创建目录 %s (error=%d)" % [log_dir, dir])
-		_append_log("")
-		return
-	var now := Time.get_datetime_dict_from_system()
-	var filename := "crud_log_%04d%02d%02d_%02d%02d%02d.txt" % [now["year"], now["month"], now["day"], now["hour"], now["minute"], now["second"]]
-	var file_path := log_dir.path_join(filename)
-	var fa := FileAccess.open(file_path, FileAccess.WRITE)
-	if fa == null:
-		_append_log("导出失败: 无法写入文件 %s" % file_path)
-		_append_log("")
-		return
-	fa.store_string(_log_output.text)
-	fa.close()
-	_append_log("日志已导出到 %s (%d bytes)" % [file_path, _log_output.text.length()])
-	_append_log("")
+func _stringify_note(note: NoteEntity) -> String:
+	var fields: Dictionary = note.fields_data
+	return "Note(id=%d, deck_id=%d, fields=%s)" % [note.id, note.deck_id, str(fields)]
 
 
-## 一键刷新牌组与 notes 列表。
-func _on_refresh_all_pressed() -> void:
+func _read_fields_from_editor() -> Dictionary:
+	var fields: Dictionary = {}
+	for row in _fields_rows:
+		var key_edit: LineEdit = row.get("key_edit", null)
+		var value_edit: LineEdit = row.get("value_edit", null)
+		if key_edit == null or value_edit == null:
+			continue
+		var key: String = key_edit.text.strip_edges()
+		if key.is_empty():
+			continue
+		fields[key] = value_edit.text
+	return fields
+
+
+func _add_field_row(key: String = "", value: String = "") -> void:
+	var row_hbox := HBoxContainer.new()
+	row_hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row_hbox.add_theme_constant_override("separation", 4)
+
+	var key_edit := LineEdit.new()
+	key_edit.size_flags_horizontal = 3
+	key_edit.placeholder_text = "key"
+	key_edit.text = key
+	row_hbox.add_child(key_edit)
+
+	var value_edit := LineEdit.new()
+	value_edit.size_flags_horizontal = 3
+	value_edit.placeholder_text = "value"
+	value_edit.text = value
+	row_hbox.add_child(value_edit)
+
+	var remove_btn := Button.new()
+	remove_btn.text = "✕"
+	remove_btn.pressed.connect(func(): _remove_field_row(row_hbox))
+	row_hbox.add_child(remove_btn)
+
+	_fields_editor.add_child(row_hbox)
+	_fields_rows.append({"row": row_hbox, "key_edit": key_edit, "value_edit": value_edit})
+
+
+func _remove_field_row(row: HBoxContainer) -> void:
+	for i in range(_fields_rows.size() - 1, -1, -1):
+		if _fields_rows[i].get("row") == row:
+			_fields_rows.remove_at(i)
+			break
+	row.queue_free()
+
+
+func _clear_fields_editor() -> void:
+	for row_data in _fields_rows:
+		var row: HBoxContainer = row_data.get("row", null)
+		if row != null:
+			row.queue_free()
+	_fields_rows.clear()
+
+
+func _populate_deck_form(deck: DeckEntity) -> void:
+	_deck_name_input.text = deck.name
+	_deck_archived_check.button_pressed = deck.is_archived
+
+
+func _populate_note_form(note: NoteEntity) -> void:
+	_note_deck_id_input.value = note.deck_id
+	_clear_fields_editor()
+	var fields: Dictionary = note.fields_data
+	for key in fields:
+		_add_field_row(key, str(fields[key]))
+
+
+func _on_add_field_pressed() -> void:
+	_add_field_row()
+
+
+func _on_clear_all_pressed() -> void:
+	_clear_data_confirm.popup_centered()
+
+
+func _on_clear_data_confirmed() -> void:
 	if not _ensure_database_ready():
 		return
+	var deck_db: DeckDB = _deck_manager.get_deck_db()
+	deck_db.execute_bind("DELETE FROM cards;", [])
+	deck_db.execute_bind("DELETE FROM notes;", [])
+	deck_db.execute_bind("DELETE FROM decks;", [])
+	_append_log("[清空] 已清空 cards / notes / decks 三张表")
 	_refresh_deck_list()
 	_refresh_note_list()
 
 
-# ──────────────────────────────────────────────────────────────
-# Helpers
-# ──────────────────────────────────────────────────────────────
+func _on_refresh_all_pressed() -> void:
+	_refresh_deck_list()
+	_refresh_note_list()
+	_append_log("[刷新] 牌组和笔记列表已刷新")
 
 
-## 把 DeckEntity 渲染为单行完整字符串。## 输入: deck (DeckEntity) - 牌组实体。
-## 输出: String - 包含所有列的格式化字符串。
-func _stringify_deck(deck: DeckEntity) -> String:
-	var parent_text: String = "NULL"
-	if deck.parent_id > 0:
-		parent_text = str(deck.parent_id)
-	return "id=%s name=\"%s\" parent_id=%s sort_order=%d is_archived=%s created_at=%d updated_at=%d" % [
-		str(deck.id),
-		deck.name,
-		parent_text,
-		deck.sort_order,
-		"true" if deck.is_archived else "false",
-		deck.created_at,
-		deck.updated_at
-	]
-
-
-## 自动同步 deck_id 输入框到可用牌组。当前值无效时回退到给定 ID。## 输入: fallback_id (int) - 回退的牌组 ID。
-## 输出: 无。
-func _auto_sync_deck_id_input(fallback_id: int) -> void:
-	var target_id: int = roundi(_deck_target_id_input.value)
-	if target_id == fallback_id:
-		return
-	if _deck_manager == null:
-		return
-	var check := _deck_manager.get_deck(target_id)
-	if check.get("success", false) and check.get("data", null) != null:
-		return  # 当前 ID 指向的牌组存在，不覆盖用户选择
-	_deck_target_id_input.value = fallback_id
-	_note_deck_id_input.value = fallback_id
-
-
-## 把标准结果字典格式化为可读字符串。## 输入: result (Dictionary) - 标准返回字典。
-## 输出: String - 简短日志文本。
-func _format_result(result: Dictionary) -> String:
-	if result.get("success", false):
-		return "OK"
-	var code: String = str(result.get("code", "UNKNOWN"))
-	var error_message: String = str(result.get("error", "未知错误"))
-	return "FAIL code=%s error=%s" % [code, error_message]
-
-
-## 截断字符串到指定长度。## 输入: s (String) - 原始字符串；max_len (int) - 最大长度。
-## 输出: String - 截断后字符串，超出部分用 … 替代。
-static func truncate_string(s: String, max_len: int) -> String:
-	if s.length() <= max_len:
-		return s
-	return s.left(max_len - 1) + "…"
-
-
-## 返回主菜单场景。## 输入: 无。
-## 输出: 无。
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
+	_switch_scene("res://scenes/ui/main_menu.tscn", "主菜单")
+
+
+func _on_copy_log_pressed() -> void:
+	DisplayServer.clipboard_set(_log_output.text)
+	_append_log("[日志] 已复制到剪贴板")
+
+
+func _on_clear_log_pressed() -> void:
+	_log_output.text = ""
+
+
+func _on_export_log_pressed() -> void:
+	_append_log("[日志] 导出功能尚未实现")
+
+
+func _switch_scene(path: String, label: String) -> void:
+	if not ResourceLoader.exists(path):
+		_append_log("[color=#FF6666]场景不存在: %s[/color]" % label)
+		return
+	get_tree().change_scene_to_file(path)

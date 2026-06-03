@@ -10,15 +10,15 @@ class_name CardUI
 ## 状态机：LOADING → FRONT → BACK → FRONT → ... → DONE
 
 # ── 信号 ──
-signal study_finished(stats: Dictionary)  ## 学习会话结束，携带统计信息
+signal study_finished(stats: Dictionary) ## 学习会话结束，携带统计信息
 
 
 # ── 状态枚举 ──
 enum UIState {
-	LOADING,  ## 等待信号
-	FRONT,    ## 正面，等待点击翻面
-	BACK,     ## 背面 + 评分按钮
-	DONE      ## 会话结束
+	LOADING, ## 等待信号
+	FRONT, ## 正面，等待点击翻面
+	BACK, ## 背面 + 评分按钮
+	DONE ## 会话结束
 }
 
 
@@ -157,18 +157,13 @@ func _on_card_panel_gui_input(event: InputEvent) -> void:
 		return
 	var mb := event as InputEventMouseButton
 	if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
-		_on_card_clicked()
-
-
-## 点击卡片内容区 → 调用 StudyManager.show_answer() 翻面。
-func _on_card_clicked() -> void:
-	if _state != UIState.FRONT:
-		return
-	if _study_manager == null:
-		return
-	var result := _study_manager.show_answer()
-	if not result.get("success", false):
-		_set_status("[color=#FF6666]翻面失败: %s[/color]" % str(result.get("error", "")))
+		if _state != UIState.FRONT:
+			return
+		if _study_manager == null:
+			return
+		var result := _study_manager.show_answer()
+		if not result.get("success", false):
+			_set_status("[color=#FF6666]翻面失败: %s[/color]" % str(result.get("error", "")))
 
 
 # ──────────────────────────────────────────────────────────────

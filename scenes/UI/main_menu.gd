@@ -37,6 +37,10 @@ func _ready() -> void:
 	else:
 		_set_status("[color=#FF6666]数据库初始化失败[/color]")
 
+	# 编辑器内运行场景时自动执行 FSRS 调度器单元测试
+	if OS.has_feature("editor"):
+		call_deferred("_run_scheduler_tests")
+
 
 ## 连接顶部按钮与导航按钮的 pressed 信号。## 输入: 无。
 ## 输出: 无。
@@ -187,6 +191,18 @@ func _on_settings_pressed() -> void:
 func _on_debug_pressed() -> void:
 	_set_status("正在打开调试面板…")
 	_switch_scene("res://scenes/ui/debug_crud_panel.tscn", "调试面板")
+
+
+## 加载并执行 FSRS 调度器单元测试（仅编辑器环境）。## 输入: 无。
+## 输出: 无。
+func _run_scheduler_tests() -> void:
+	var test_script := load("res://data/test_fsrs_scheduler.gd")
+	if test_script == null:
+		push_error("[MainMenu] 无法加载 test_fsrs_scheduler.gd")
+		return
+	var runner := Node.new()
+	runner.set_script(test_script)
+	runner.run_all_tests()
 
 
 ## 安全切换到目标场景，文件不存在时更新状态提示。## 输入:

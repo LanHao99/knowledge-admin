@@ -38,6 +38,11 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Deck + Notes CRUD Debug Panel"
 
+[node name="GenTestDataBtn" type="Button" parent="RootMargin/MainVBox/Toolbar" unique_id=9000000020]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.8, 0.3, 1)
+text = "生成测试数据"
+
 [node name="ClearAllDataButton" type="Button" parent="RootMargin/MainVBox/Toolbar" unique_id=375271908]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
@@ -57,206 +62,293 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 4
 
-[node name="ContentHBox" type="HBoxContainer" parent="RootMargin/MainVBox/MainHSplit" unique_id=1106400083]
+[node name="LeftVSplit" type="VSplitContainer" parent="RootMargin/MainVBox/MainHSplit" unique_id=9000000001]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+
+[node name="ContentHBox" type="HBoxContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit" unique_id=1106400083]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 10
 
-[node name="DeckPanel" type="PanelContainer" parent="RootMargin/MainVBox/MainHSplit/ContentHBox" unique_id=1273733733]
+[node name="DeckPanel" type="PanelContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox" unique_id=1273733733]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="DeckVBox" type="VBoxContainer" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel" unique_id=362650894]
+[node name="DeckVBox" type="VBoxContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel" unique_id=362650894]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="DeckTitle" type="Label" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox" unique_id=744302527]
+[node name="DeckTitle" type="Label" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox" unique_id=744302527]
 layout_mode = 2
 text = "Deck CRUD"
 
-[node name="DeckForm" type="GridContainer" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox" unique_id=1200538248]
+[node name="DeckForm" type="GridContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox" unique_id=1200538248]
 layout_mode = 2
 theme_override_constants/h_separation = 6
 theme_override_constants/v_separation = 4
 columns = 2
 
-[node name="DeckNameLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=1748021516]
+[node name="DeckNameLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=1748021516]
 layout_mode = 2
 tooltip_text = "Create: new deck name | Update: new name for target deck"
 text = "Name"
 
-[node name="DeckNameInput" type="LineEdit" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=1060100634]
+[node name="DeckNameInput" type="LineEdit" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=1060100634]
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Deck name"
 
-[node name="DeckTargetIdLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=262024126]
+[node name="DeckTargetIdLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=262024126]
 layout_mode = 2
 tooltip_text = "Used for Read / Update / Delete operations"
 text = "Target Deck ID"
 
-[node name="DeckTargetIdInput" type="SpinBox" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=2031941168]
+[node name="DeckTargetIdInput" type="SpinBox" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=2031941168]
 layout_mode = 2
 min_value = 1.0
 max_value = 999999.0
 value = 1.0
 rounded = true
 
-[node name="DeckParentLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=1061748714]
+[node name="DeckParentLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=1061748714]
 layout_mode = 2
 tooltip_text = "Create: parent of new deck | other ops: ignored (0 = root)"
 text = "Parent ID"
 
-[node name="DeckParentOption" type="OptionButton" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=1568219623]
+[node name="DeckParentOption" type="OptionButton" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=1568219623]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="DeckParentCustomSpin" type="SpinBox" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=1897631062]
+[node name="DeckParentCustomSpin" type="SpinBox" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=1897631062]
 visible = false
 layout_mode = 2
 max_value = 999999.0
 rounded = true
 
-[node name="DeckSortOrderLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=1623212784]
+[node name="DeckSortOrderLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=1623212784]
 layout_mode = 2
 tooltip_text = "Create: sort order for new deck | other ops: ignored"
 text = "Sort Order"
 
-[node name="DeckSortOrderInput" type="SpinBox" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=316895609]
+[node name="DeckSortOrderInput" type="SpinBox" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=316895609]
 layout_mode = 2
 max_value = 999999.0
 rounded = true
 
-[node name="DeckArchivedLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=1544279405]
+[node name="DeckArchivedLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=1544279405]
 layout_mode = 2
 tooltip_text = "Update: set archive status | Create: always creates as not archived"
 text = "Archived"
 
-[node name="DeckArchivedCheck" type="CheckBox" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=239853857]
+[node name="DeckArchivedCheck" type="CheckBox" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm" unique_id=239853857]
 layout_mode = 2
 text = "is_archived"
 
-[node name="DeckButtons" type="HBoxContainer" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox" unique_id=1736454442]
+[node name="DeckButtons" type="HBoxContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox" unique_id=1736454442]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="CreateDeckButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons" unique_id=517240266]
+[node name="CreateDeckButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons" unique_id=517240266]
 layout_mode = 2
 text = "Create"
 
-[node name="ReadDeckButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons" unique_id=945016805]
+[node name="ReadDeckButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons" unique_id=945016805]
 layout_mode = 2
 text = "Read"
 
-[node name="UpdateDeckButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons" unique_id=656522302]
+[node name="UpdateDeckButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons" unique_id=656522302]
 layout_mode = 2
 text = "Update"
 
-[node name="DeleteDeckButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons" unique_id=973022518]
+[node name="DeleteDeckButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons" unique_id=973022518]
 layout_mode = 2
 text = "Delete"
 
-[node name="ListDeckButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons" unique_id=589238024]
+[node name="ListDeckButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckButtons" unique_id=589238024]
 layout_mode = 2
 text = "List"
 
-[node name="DeckListView" type="ItemList" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/DeckPanel/DeckVBox" unique_id=328827378]
+[node name="DeckListView" type="ItemList" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox" unique_id=328827378]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="NotesPanel" type="PanelContainer" parent="RootMargin/MainVBox/MainHSplit/ContentHBox" unique_id=1924711454]
+[node name="NotesPanel" type="PanelContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox" unique_id=1924711454]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="NotesVBox" type="VBoxContainer" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel" unique_id=794917733]
+[node name="NotesVBox" type="VBoxContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel" unique_id=794917733]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="NotesTitle" type="Label" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox" unique_id=597457930]
+[node name="NotesTitle" type="Label" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox" unique_id=597457930]
 layout_mode = 2
 text = "Notes Table CRUD"
 
-[node name="NotesForm" type="GridContainer" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox" unique_id=316851676]
+[node name="NotesForm" type="GridContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox" unique_id=316851676]
 layout_mode = 2
 theme_override_constants/h_separation = 6
 theme_override_constants/v_separation = 4
 columns = 2
 
-[node name="NoteIdLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm" unique_id=921823077]
+[node name="NoteIdLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm" unique_id=921823077]
 layout_mode = 2
 tooltip_text = "Target for Read / Update / Delete"
 text = "Note ID"
 
-[node name="NoteIdInput" type="SpinBox" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm" unique_id=2113634644]
+[node name="NoteIdInput" type="SpinBox" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm" unique_id=2113634644]
 layout_mode = 2
 min_value = 1.0
 max_value = 999999.0
 value = 1.0
 rounded = true
 
-[node name="NoteTypeLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm" unique_id=220481207]
+[node name="NoteTypeLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm" unique_id=220481207]
 layout_mode = 2
 tooltip_text = "Used for Create / Update"
 text = "Deck ID"
 
-[node name="NoteTypeInput" type="SpinBox" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm" unique_id=1321406641]
+[node name="NoteTypeInput" type="SpinBox" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm" unique_id=1321406641]
 layout_mode = 2
 min_value = 1.0
 max_value = 999999.0
 value = 1.0
 rounded = true
 
-[node name="FieldsLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm" unique_id=1364964229]
+[node name="FieldsLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm" unique_id=1364964229]
 layout_mode = 2
 tooltip_text = "Key-value pairs auto-serialized to fields_data JSON"
 text = "Fields"
 
-[node name="FieldsEditorWrapper" type="VBoxContainer" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm" unique_id=462452833]
+[node name="FieldsEditorWrapper" type="VBoxContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm" unique_id=462452833]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
-[node name="FieldsEditor" type="VBoxContainer" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/FieldsEditorWrapper" unique_id=1375384323]
+[node name="FieldsEditor" type="VBoxContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/FieldsEditorWrapper" unique_id=1375384323]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 2
 
-[node name="AddFieldButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/FieldsEditorWrapper" unique_id=666382797]
+[node name="AddFieldButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/FieldsEditorWrapper" unique_id=666382797]
 layout_mode = 2
 text = "+ Add Field"
 
-[node name="NotesButtons" type="HBoxContainer" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox" unique_id=1747991763]
+[node name="NotesButtons" type="HBoxContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox" unique_id=1747991763]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="CreateNoteButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons" unique_id=175699568]
+[node name="CreateNoteButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons" unique_id=175699568]
 layout_mode = 2
 text = "Create"
 
-[node name="ReadNoteButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons" unique_id=2080748664]
+[node name="ReadNoteButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons" unique_id=2080748664]
 layout_mode = 2
 text = "Read"
 
-[node name="UpdateNoteButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons" unique_id=1435970742]
+[node name="UpdateNoteButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons" unique_id=1435970742]
 layout_mode = 2
 text = "Update"
 
-[node name="DeleteNoteButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons" unique_id=1354625796]
+[node name="DeleteNoteButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons" unique_id=1354625796]
 layout_mode = 2
 text = "Delete"
 
-[node name="ListNoteButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons" unique_id=297862882]
+[node name="ListNoteButton" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons" unique_id=297862882]
 layout_mode = 2
 text = "List"
 
-[node name="NoteListView" type="ItemList" parent="RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox" unique_id=589809239]
+[node name="NoteListView" type="ItemList" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox" unique_id=589809239]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+
+[node name="StudyTestPanel" type="PanelContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit" unique_id=9000000002]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="StudyTestVBox" type="VBoxContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel" unique_id=9000000003]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="StudyTestTitle" type="Label" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=9000000004]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "研究测试"
+
+[node name="GenCardBtn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=9000000005]
+layout_mode = 2
+text = "生成4张测试卡片"
+
+[node name="TestSummary" type="RichTextLabel" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=9000000006]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+fit_content = true
+text = "—"
+
+[node name="HSeparator1" type="HSeparator" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=9000000007]
+layout_mode = 2
+
+[node name="OffsetLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=9000000008]
+layout_mode = 2
+text = "模拟日期偏移"
+
+[node name="OffsetRow" type="HBoxContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=9000000009]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="OffsetSpinBox" type="SpinBox" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/OffsetRow" unique_id=9000000010]
+layout_mode = 2
+min_value = -365.0
+max_value = 365.0
+step = 1.0
+value = 1.0
+rounded = true
+
+[node name="ApplyOffsetBtn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/OffsetRow" unique_id=9000000011]
+layout_mode = 2
+text = "应用偏移"
+
+[node name="UndoOffsetBtn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/OffsetRow" unique_id=9000000012]
+layout_mode = 2
+text = "撤销"
+
+[node name="QuickBtnRow" type="HBoxContainer" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=9000000013]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Minus1Btn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow" unique_id=9000000014]
+layout_mode = 2
+text = "-1天"
+
+[node name="TodayBtn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow" unique_id=9000000015]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.7, 1, 1)
+text = "今日"
+
+[node name="Plus1Btn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow" unique_id=9000000016]
+layout_mode = 2
+text = "+1天"
+
+[node name="Plus7Btn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow" unique_id=9000000017]
+layout_mode = 2
+text = "+7天"
+
+[node name="Plus30Btn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox/QuickBtnRow" unique_id=9000000018]
+layout_mode = 2
+text = "+30天"
+
+[node name="SimulatedDateLabel" type="Label" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=9000000019]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.7, 1)
+text = "当前模拟: 未偏移"
 
 [node name="LogPanel" type="PanelContainer" parent="RootMargin/MainVBox/MainHSplit" unique_id=1252927083]
 layout_mode = 2
