@@ -5,7 +5,7 @@
 3. 每个函数要求明确注释功能，类似格式：
 4. 及时提交git，并在提交信息中注明修改内容、AI平台
 5. 写md文档时标题前面不要有编号！比如“十一、”、“1.”
-6. 
+6. 每当完成任务时填写.learnings，记录经验和教训
 
 ```gdscript
 ## 解析 JSON 文件并返回 schema_config 字典。## 输入: file_path (String) - JSON 文件的绝对或相对路径（如 "res://data/db_schema.json"）。

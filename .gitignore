@@ -8,6 +8,7 @@
 .vscode/
 .deepseek/
 .codewhale/
+.learnings/
 
 # 排除隐私代码
 .env
