@@ -31,6 +31,7 @@ var _fields_rows: Array = []
 @onready var _list_note_button: Button = $RootMargin/MainVBox/MainHSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons/ListNoteButton
 @onready var _clear_all_button: Button = $RootMargin/MainVBox/Toolbar/ClearAllDataButton
 @onready var _refresh_all_button: Button = $RootMargin/MainVBox/Toolbar/RefreshAllButton
+@onready var _back_btn: Button = $RootMargin/MainVBox/Toolbar/BackBtn
 @onready var _copy_log_button: Button = $RootMargin/MainVBox/MainHSplit/LogPanel/LogVBox/LogToolbar/CopyLogButton
 @onready var _clear_log_button: Button = $RootMargin/MainVBox/MainHSplit/LogPanel/LogVBox/LogToolbar/ClearLogButton
 @onready var _export_log_button: Button = $RootMargin/MainVBox/MainHSplit/LogPanel/LogVBox/LogToolbar/ExportLogButton
@@ -96,6 +97,7 @@ func _bind_actions() -> void:
 	_add_field_button.pressed.connect(_on_add_field_pressed)
 	_clear_all_button.pressed.connect(_on_clear_all_pressed)
 	_refresh_all_button.pressed.connect(_on_refresh_all_pressed)
+	_back_btn.pressed.connect(_on_back_pressed)
 	_copy_log_button.pressed.connect(_on_copy_log_pressed)
 	_clear_log_button.pressed.connect(_on_clear_log_pressed)
 	_export_log_button.pressed.connect(_on_export_log_pressed)
@@ -791,3 +793,9 @@ static func truncate_string(s: String, max_len: int) -> String:
 	if s.length() <= max_len:
 		return s
 	return s.left(max_len - 1) + "…"
+
+
+## 返回主菜单场景。## 输入: 无。
+## 输出: 无。
+func _on_back_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")

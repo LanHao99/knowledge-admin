@@ -47,6 +47,10 @@ text = "Clear All Data"
 layout_mode = 2
 text = "Refresh All"
 
+[node name="BackBtn" type="Button" parent="RootMargin/MainVBox/Toolbar" unique_id=621123750]
+layout_mode = 2
+text = "← 返回主菜单"
+
 [node name="MainHSplit" type="HSplitContainer" parent="RootMargin/MainVBox" unique_id=1139279015]
 layout_mode = 2
 size_flags_horizontal = 3
