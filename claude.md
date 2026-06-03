@@ -4,11 +4,13 @@
 2. 代码必须符合Godot 4.6的规范
 3. 每个函数要求明确注释功能，类似格式：
 4. 及时提交git，并在提交信息中注明修改内容、AI平台
-
+5. 写md文档时标题前面不要有编号！比如“十一、”、“1.”
+6. 
 
 ```gdscript
 ## 解析 JSON 文件并返回 schema_config 字典。## 输入: file_path (String) - JSON 文件的绝对或相对路径（如 "res://data/db_schema.json"）。
 ## 输出: 返回标准字典。成功时 `data` 为解析出来的 Dictionary。
 static func parse_json_file(file_path: String) -> Dictionary:
 ```
+
 

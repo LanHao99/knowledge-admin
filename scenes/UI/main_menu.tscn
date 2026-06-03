@@ -135,13 +135,3 @@ size_flags_horizontal = 3
 [node name="StatusLabel" type="Label" parent="RootMargin/MainVBox/BottomBar" unique_id=1000000025]
 layout_mode = 2
 text = "就绪 ✓"
-
-[node name="Container" type="Container" parent="." unique_id=355516080]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 420.0
-offset_top = 174.0
-offset_right = -420.0
-offset_bottom = -174.0

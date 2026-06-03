@@ -204,7 +204,7 @@ main_menu._ready()
 - `main_menu.gd`：`extends Control`，`_ready()` 中设置 PanelContainer 圆角背景、信号连接、BBCode 颜色覆盖
 - 五个按钮全部就绪：牌组管理 / 笔记浏览 / 开始学习 / 设置(占位) / 调试
 - `_switch_scene()` 安全跳转：`ResourceLoader.exists()` 前置检查，失败时底部状态栏显示 `[color=#FF6666]` 红色提示
-- BBCode 效果：RichTextLabel 用于标题和统计占位符、`font_color` 覆盖用于按钮和状态文本
+- BBCode 效果：RichTextLabel 用于标题和统计占位符、`font_color` 覆盖用于按钮和状态文本。标题已启用波浪动画：TopBar `[wave amp=6 freq=4]`、Logo `[wave amp=10 freq=5]`
 - 统计面板：三列占位符 "—"，待 Phase 2 接入数据源
 
 **待实现**：
