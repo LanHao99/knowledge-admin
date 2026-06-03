@@ -428,7 +428,7 @@ func _on_update_note_pressed() -> void:
 	if before_result.get("success", false) and before_result.get("data", null) != null:
 		_append_log("  BEFORE: %s" % _stringify_note_entity(before_result.get("data")))
 	
-	var update_result: Dictionary = _note_manager.update_note(note_id, fields_dict, [])
+	var update_result: Dictionary = _note_manager.update_note(note_id, fields_dict)
 	_log_result(update_result)
 	if update_result.get("success", false):
 		var after_result: Dictionary = _note_manager.get_note(note_id)
