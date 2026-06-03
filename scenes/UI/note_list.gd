@@ -57,9 +57,9 @@ func _ready() -> void:
 func _exit_tree() -> void:
 	_clear_editor_rows()
 	if _note_manager != null:
-		_note_manager.entity_created.disconnect(_on_note_changed)
-		_note_manager.entity_updated.disconnect(_on_note_changed)
-		_note_manager.entity_deleted.disconnect(_on_note_changed)
+		_note_manager.entity_created.disconnect(_on_note_created)
+		_note_manager.entity_updated.disconnect(_on_note_updated)
+		_note_manager.entity_deleted.disconnect(_on_note_deleted)
 		_note_manager.queue_free()
 		_note_manager = null
 	if _deck_manager != null:
@@ -104,9 +104,9 @@ func _ensure_managers_ready() -> bool:
 	if not _note_manager.setup(db_path):
 		push_error("[NoteList] NoteManager 初始化失败")
 		return false
-	_note_manager.entity_created.connect(_on_note_changed.bind("created"))
-	_note_manager.entity_updated.connect(_on_note_changed.bind("updated"))
-	_note_manager.entity_deleted.connect(_on_note_changed.bind("deleted"))
+	_note_manager.entity_created.connect(_on_note_created)
+	_note_manager.entity_updated.connect(_on_note_updated)
+	_note_manager.entity_deleted.connect(_on_note_deleted)
 
 	_deck_manager = DeckManager.new()
 	add_child(_deck_manager)
@@ -122,12 +122,27 @@ func _ensure_managers_ready() -> bool:
 # ──────────────────────────────────────────────────────────────
 
 
-## 监听 NoteManager 信号，自动刷新列表。## 输入:
-##   event (String) - 事件类型: "created"/"updated"/"deleted"。
+## NoteManager entity_created 信号回调，触发全量刷新。## 输入:
 ##   _entity_type (String) - 实体类型，未使用。
 ##   _entity_id (int) - 实体 ID，未使用。
 ## 输出: 无。
-func _on_note_changed(event: String, _entity_type: String, _entity_id: int) -> void:
+func _on_note_created(_entity_type: String, _entity_id: int) -> void:
+	_refresh_all()
+
+
+## NoteManager entity_updated 信号回调，触发全量刷新。## 输入:
+##   _entity_type (String) - 实体类型，未使用。
+##   _entity_id (int) - 实体 ID，未使用。
+## 输出: 无。
+func _on_note_updated(_entity_type: String, _entity_id: int) -> void:
+	_refresh_all()
+
+
+## NoteManager entity_deleted 信号回调，触发全量刷新。## 输入:
+##   _entity_type (String) - 实体类型，未使用。
+##   _entity_id (int) - 实体 ID，未使用。
+## 输出: 无。
+func _on_note_deleted(_entity_type: String, _entity_id: int) -> void:
 	_refresh_all()
 
 
