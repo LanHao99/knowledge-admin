@@ -38,10 +38,9 @@ var _exiting: bool = false  ## 用户正在退出学习，跳过完成面板
 @onready var _studying_label: Label = $"InStudyBar/DeckNameLabel"
 @onready var _study_progress_label: Label = $"InStudyBar/ProgressLabel"
 
-# ── 剧情进度条（场景内预置节点，不再代码 new）──
-@onready var _story_progress_container: HBoxContainer = $"StoryProgressContainer"
-@onready var _story_progress_bar: ProgressBar = $"StoryProgressContainer/StoryProgressBar"
-@onready var _story_value_label: Label = $"StoryProgressContainer/StoryValueLabel"
+# ── 剧情进度条（位于 InStudyBar 内，不再代码 new）──
+@onready var _story_progress_bar: ProgressBar = $"InStudyBar/StoryProgressBar"
+@onready var _story_value_label: Label = $"InStudyBar/StoryValueLabel"
 
 # ── 剧情进度数据 + 设置 ──
 var _story_progress: StoryProgress = null
@@ -212,7 +211,6 @@ func enter_learning(_deck_id: int) -> void:
 	_exiting = false
 	_deck_picker.visible = false
 	_in_study_bar.visible = true
-	_story_progress_container.visible = true
 	_set_state(StudyState.LEARNING)
 
 
@@ -258,7 +256,6 @@ func show_completion(stats: Dictionary) -> void:
 	if _exiting:
 		return
 	_in_study_bar.visible = false
-	_story_progress_container.visible = false
 	_last_stats = stats
 	_show_completion_stats(stats)
 	_completion_panel.visible = true
@@ -327,7 +324,6 @@ func _on_exit_study_pressed() -> void:
 	# 通知 study.gd 隐藏 CardUI
 	learning_exited.emit()
 	_in_study_bar.visible = false
-	_story_progress_container.visible = false
 	build_deck_list()
 	_deck_picker.visible = true
 	_set_state(StudyState.PICKING)
@@ -373,7 +369,6 @@ func _format_duration(seconds: int) -> String:
 func set_story_progress(progress: StoryProgress, threshold: int = 10) -> void:
 	_story_progress = progress
 	_story_threshold = max(1, threshold)
-	_story_progress_container.visible = true
 	refresh_story_display()
 
 
