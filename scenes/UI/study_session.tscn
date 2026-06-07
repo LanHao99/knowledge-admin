@@ -79,11 +79,10 @@ visible = false
 layout_mode = 1
 
 [node name="InStudyBar" type="HBoxContainer" parent="." unique_id=1705032715]
-visible = false
 layout_mode = 0
 offset_left = 8.0
 offset_top = 8.0
-offset_right = 520.0
+offset_right = 1301.0
 offset_bottom = 44.0
 theme_override_constants/separation = 12
 
@@ -107,29 +106,19 @@ theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1)
 theme_override_font_sizes/font_size = 16
 horizontal_alignment = 2
 
-[node name="StoryProgressContainer" type="HBoxContainer" parent="." unique_id=1705032730]
-visible = false
-layout_mode = 0
-offset_left = 8.0
-offset_top = 56.0
-offset_right = 520.0
-offset_bottom = 80.0
-theme_override_constants/separation = 8
-
-[node name="StoryProgressBar" type="ProgressBar" parent="StoryProgressContainer" unique_id=1705032731]
+[node name="StoryProgressBar" type="ProgressBar" parent="InStudyBar" unique_id=1705032731]
 layout_mode = 2
 size_flags_horizontal = 3
-min_value = 0.0
+size_flags_vertical = 4
 max_value = 10.0
-value = 0.0
 
-[node name="StoryValueLabel" type="Label" parent="StoryProgressContainer" unique_id=1705032732]
+[node name="StoryValueLabel" type="Label" parent="InStudyBar" unique_id=1705032732]
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1)
 theme_override_font_sizes/font_size = 14
-horizontal_alignment = 2
 text = "0/10"
+horizontal_alignment = 2
 
 [node name="CompletionPanel" type="Control" parent="." unique_id=1705032721]
 visible = false

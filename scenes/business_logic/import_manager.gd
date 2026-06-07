@@ -6,9 +6,6 @@ class_name ImportManager
 ## 复用 NoteManager 的 create_note 逻辑（含 cards 自动生成），保证单行失败不影响其他行。
 
 
-# 委托 SchemaParser 进行 JSON 文件解析
-const SchemaParserUtil := preload("res://src/utils/schema_parser.gd")
-
 # 持有引用
 var _note_manager: NoteManager = null
 var _notetype_manager: NoteTypeManager = null
@@ -352,11 +349,23 @@ func _parse_json_file(path: String) -> Dictionary:
 	if not FileAccess.file_exists(path):
 		return fail(ERR_JSON_FILE_NOT_FOUND, "JSON 文件不存在: %s" % path)
 
-	var parse_result: Dictionary = SchemaParserUtil.parse_json_file(path)
-	if not parse_result.get("success", false):
-		return fail(ERR_JSON_PARSE_FAILED, parse_result.get("error", "JSON 解析失败"))
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return fail(ERR_JSON_FILE_NOT_FOUND, "无法打开 JSON 文件: %s" % path)
 
-	return ok(parse_result.get("data"))
+	var text: String = file.get_as_text()
+	file.close()
+
+	var parser := JSON.new()
+	var parse_code: int = parser.parse(text)
+	if parse_code != OK:
+		return fail(ERR_JSON_PARSE_FAILED, "JSON 解析失败: line=%d msg=%s" % [parser.get_error_line(), parser.get_error_message()])
+
+	var raw_data: Variant = parser.data
+	if typeof(raw_data) != TYPE_DICTIONARY and typeof(raw_data) != TYPE_ARRAY:
+		return fail(ERR_JSON_NOT_ARRAY_OR_OBJECT, "JSON 顶层必须是数组或对象")
+
+	return ok(raw_data)
 
 
 ## 归一化：如果顶层是单个 Dictionary → 包装成单元素 Array。## 输入: data (Variant) - 可能是 Dictionary 或 Array。
