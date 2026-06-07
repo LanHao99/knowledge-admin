@@ -21,6 +21,7 @@ extends Control
 # ── API 配置 ──
 const API_URL: String = "https://api.deepseek.com/v1/chat/completions"
 const API_CFG_PATH: String = "res://api.cfg"
+const API_KEY_XOR_KEY: String = "KnowledgeAdminSalt2024"
 const SETTINGS_PATH: String = "user://ai_settings.cfg"
 const MODEL_DEFAULT: String = "deepseek-chat"
 const MAX_HISTORY_TURNS: int = 20
@@ -83,15 +84,28 @@ func _bind_actions() -> void:
 
 # ── API Key ──
 
+
+## 解码 res://api.cfg 中 XOR+hex 混淆存储的 API Key。## 输入: hex_key (String) — hex 编码的混淆密钥。
+## 输出: String — 原始 API Key。
+func _decode_obfuscated_key(hex_key: String) -> String:
+	if hex_key.length() % 2 != 0:
+		return ""
+	var encoded := hex_key.hex_decode()
+	var key_bytes := API_KEY_XOR_KEY.to_utf8_buffer()
+	for i in range(encoded.size()):
+		encoded[i] ^= key_bytes[i % key_bytes.size()]
+	return encoded.get_string_from_utf8()
+
+
 func _load_api_key() -> void:
 	var cfg := ConfigFile.new()
 
 	# 优先读取 user:// 设置（用户个人密钥，不随打包分发）
 	if cfg.load("user://api.cfg") == OK:
 		_api_key = cfg.get_value("api", "key", "")
-	# 回退到 res://api.cfg（打包内置占位符模板）
+	# 回退到 res://api.cfg（打包内置模板，key 为 XOR+hex 混淆存储）
 	if _api_key == "" and cfg.load(API_CFG_PATH) == OK:
-		_api_key = cfg.get_value("api", "key", "")
+		_api_key = _decode_obfuscated_key(cfg.get_value("api", "key", ""))
 
 	_api_key_edit.text = _api_key
 	if _api_key == "" or _api_key.begins_with("sk-your-"):
