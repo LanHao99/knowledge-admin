@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://cmnkwvugqvrmv"
+path="res://.godot/imported/note_list.dialogue-e9423b5edbcb3cb16fd43dfe18991dba.tres"
+
+[deps]
+
+source_file="res://game/tutorial/dialogue/note_list.dialogue"
+dest_files=["res://.godot/imported/note_list.dialogue-e9423b5edbcb3cb16fd43dfe18991dba.tres"]
+
+[params]
+
+defaults=true

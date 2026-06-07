@@ -67,8 +67,8 @@ scroll_active = false
 
 [node name="SettingsPanel" type="PanelContainer" parent="RootMargin/MainVBox" unique_id=705032801]
 visible = false
-layout_mode = 2
 custom_minimum_size = Vector2(0, 180)
+layout_mode = 2
 
 [node name="SettingsMargin" type="MarginContainer" parent="RootMargin/MainVBox/SettingsPanel" unique_id=705032802]
 layout_mode = 2
@@ -119,8 +119,7 @@ text = "📎"
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "输入消息，或说"帮我生成 XX 的学习卡片"…"
-wrap_mode = 1
+placeholder_text = "输入消息，或说"
 
 [node name="SendBtn" type="Button" parent="RootMargin/MainVBox/InputRow" unique_id=705032716]
 custom_minimum_size = Vector2(100, 60)

@@ -10,6 +10,7 @@ script = ExtResource("1_overlay")
 
 [node name="TextAnimationController" type="Node" parent="." unique_id=913841726]
 script = ExtResource("3_anim_ctrl")
+color_system = Color(0.7781014, 0.6339133, 0.22165245, 1)
 
 [node name="StoryDialogueMain" type="Control" parent="." unique_id=786311185]
 layout_mode = 3

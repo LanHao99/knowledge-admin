@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://bg2ftp5x260il"
+path="res://.godot/imported/debug_panel.dialogue-3f99131a856978c3352fdec554d72b87.tres"
+
+[deps]
+
+source_file="res://game/tutorial/dialogue/debug_panel.dialogue"
+dest_files=["res://.godot/imported/debug_panel.dialogue-3f99131a856978c3352fdec554d72b87.tres"]
+
+[params]
+
+defaults=true

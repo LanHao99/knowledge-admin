@@ -275,3 +275,37 @@ FSRS 调度器中 LEARNING 卡片需在 study_manager 层面保留在队列中�
 - Source: code_review (Anki rslib anki/rslib/src/scheduler/)
 - Related Files: scenes/business_logic/study_manager.gd, scenes/ui/study_session.gd
 - Tags: anki, architecture, queue-design, fsrs, learning-queue, congrats-info
+
+## [LRN-20260607-002] best_practice
+
+### Reusing StoryDialogueOverlay for Tutorial System — Dynamic Instantiation Pattern
+
+**Category**: best_practice
+
+**What was done**: Built a tutorial system that reuses the existing `StoryDialogueOverlay` (designed for in-study story dialogues) as the tutorial delivery UI. The overlay is dynamically instantiated from its `.tscn` scene file and added to the scene root via `get_tree().root.add_child()`.
+
+**Key pattern**: Since `StoryDialogueOverlay` has `@onready` vars that need `_ready()` to complete before `start()` can be called, the solution is:
+
+```gdscript
+overlay.ready.connect(func():
+    overlay.start(resource, scene_id)
+, CONNECT_ONE_SHOT)
+parent.get_tree().root.add_child(overlay)
+```
+
+The `ready` signal fires after `_ready()` completes, ensuring `@onready` vars (`_main_control`, `_content_label`, `_text_animator`) are initialized before `start()` accesses them.
+
+**Precautions**:
+1. Signal must be connected BEFORE `add_child()` — otherwise `ready` may fire before the connection exists
+2. `CONNECT_ONE_SHOT` ensures the lambda is cleaned up after firing once
+3. The overlay has `_story_manager` null-guard in `_end_dialogue()` (line 259), so it works without StoryManager
+4. `dialogue_finished` signal is emitted unconditionally (line 264), used for tutorial completion tracking
+
+### Suggested Action
+- Future: If tutorials need character portraits or choice branches, the existing dialogue system can handle it transparently
+- Consider extracting the "overlay instantiation" pattern into a reusable utility if more systems need it
+
+### Metadata
+- Source: implementation
+- Related Files: game/tutorial/tutorial_manager.gd, game/dialogue/story_dialogue_overlay.gd, game/tutorial/tutorial_progress.gd
+- Tags: tutorial, dialogue-manager, autoload, dynamic-instantiation, ready-signal, canvas-layer
