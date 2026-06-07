@@ -84,13 +84,16 @@ func _bind_actions() -> void:
 
 func _load_api_key() -> void:
 	var cfg := ConfigFile.new()
-	var err := cfg.load(API_CFG_PATH)
-	if err != OK:
-		_set_status("[color=#FFAA44]api.cfg 未配置[/color]")
-		return
-	_api_key = cfg.get_value("api", "key", "")
+
+	# 优先读取 user:// 设置（用户个人密钥，不随打包分发）
+	if cfg.load("user://api.cfg") == OK:
+		_api_key = cfg.get_value("api", "key", "")
+	# 回退到 res://api.cfg（打包内置占位符模板）
+	if _api_key == "" and cfg.load(API_CFG_PATH) == OK:
+		_api_key = cfg.get_value("api", "key", "")
+
 	if _api_key == "" or _api_key.begins_with("sk-your-"):
-		_set_status("[color=#FFAA44]请编辑 api.cfg 填入 API Key[/color]")
+		_set_status("[color=#FFAA44]请在 user://api.cfg 中设置 API Key[/color]")
 
 
 # ── 设置 ──
