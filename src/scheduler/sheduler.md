@@ -21,15 +21,15 @@ enum Queue { NEW = 0, LEARNING = 1, REVIEW = 2, SUSPENDED = -1, BURIED = -2 }
 ## 输入：当前 CardEntity + 用户评分 + 当前 Unix 时间戳（秒）
 ## 输出：新的状态字典（不修改原 CardEntity）
 @abstract func calculate_next_state(card: CardEntity, rating: int, now_timestamp: int) -> Dictionary
-    # return {
-    #   "queue": int,
-    #   "due": int,
-    #   "reps": int,
-    #   "lapses": int,
-    #   "stability": float,
-    #   "difficulty": float,
-    #   "interval_days": int     # 仅用于展示/调试
-    # }
+	# return {
+	#   "queue": int,
+	#   "due": int,
+	#   "reps": int,
+	#   "lapses": int,
+	#   "stability": float,
+	#   "difficulty": float,
+	#   "interval_days": int     # 仅用于展示/调试
+	# }
 
 ## 获取卡片当前应归属的队列（用于初始化/恢复）
 @abstract func classify_queue(card: CardEntity, now_day_index: int, now_timestamp: int) -> int

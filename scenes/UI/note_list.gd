@@ -434,7 +434,7 @@ func _on_new_dialog_confirmed() -> void:
 		"背面": _new_back_input.text.strip_edges()
 	}
 
-	var result := _note_manager.create_note(1, fields, deck_id)  # note_type_id=1 默认
+	var result := _note_manager.create_note("__default__", fields, deck_id)
 	if result.get("success", false):
 		_set_status("笔记已创建 ✓")
 	else:
