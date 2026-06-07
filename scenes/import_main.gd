@@ -272,6 +272,18 @@ func _refresh_deck_list() -> void:
 		_deck_select.set_item_metadata(-1, deck.id)
 
 
+## 根据 deck_id 预选牌组下拉项（用于 DeckList 编辑面板入口）。## 输入: deck_id (int) - 牌组 ID。
+## 输出: 无。
+func select_deck_by_id(deck_id: int) -> void:
+	if _deck_select == null:
+		return
+	for i in range(_deck_select.item_count):
+		var meta: Variant = _deck_select.get_item_metadata(i)
+		if typeof(meta) == TYPE_INT and int(meta) == deck_id:
+			_deck_select.select(i)
+			return
+
+
 # ── 文件选择 ──
 
 
