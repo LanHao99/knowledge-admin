@@ -584,7 +584,8 @@ func _on_easy_all_pressed() -> void:
 		var next_state := _test_scheduler.calculate_next_state(card, Scheduler.Rating.EASY, now_ts)
 		card.queue = int(next_state.get("queue", card.queue))
 		card.due = int(next_state.get("due", card.due))
-		card.reps += 1
+		card.reps = int(next_state.get("reps", card.reps))
+		card.lapses = int(next_state.get("lapses", card.lapses))
 		card.stability = float(next_state.get("stability", card.stability))
 		card.difficulty = float(next_state.get("difficulty", card.difficulty))
 		card.last_review_time = now_ts
