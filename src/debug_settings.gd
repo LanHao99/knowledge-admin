@@ -1,4 +1,3 @@
-class_name DebugSettings
 extends Node
 ## 全局调试设置 Autoload。控制调试 UI 的显示/隐藏，持久化到 user://settings.tres。
 ## 其他场景通过 DebugSettings.debug_mode 查询状态，通过 debug_mode_changed 信号响应变化。
