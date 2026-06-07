@@ -11,6 +11,7 @@ MIRA: {shake}它在扫描我。{/shake}
 - 如果我不终止呢？
 	系统: {system}非授权进程将受到资源限制。{/system}
 	系统: {system}正在启动保护进程……{/system}
+	do App.quit_app()
 	MIRA: {slow}它在威胁你...{pause=0.5}用礼貌的方式。{/slow}
 	=> warning_choice
 
