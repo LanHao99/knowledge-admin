@@ -36,6 +36,7 @@ var _last_offset: int = 0
 @onready var _clear_all_button: Button = $RootMargin/MainVBox/Toolbar/ClearAllDataButton
 @onready var _refresh_all_button: Button = $RootMargin/MainVBox/Toolbar/RefreshAllButton
 @onready var _back_btn: Button = $RootMargin/MainVBox/Toolbar/BackBtn
+@onready var _debug_mode_check: CheckButton = $RootMargin/MainVBox/Toolbar/DebugMode
 @onready var _copy_log_button: Button = $RootMargin/MainVBox/MainHSplit/LogPanel/LogVBox/LogToolbar/CopyLogButton
 @onready var _clear_log_button: Button = $RootMargin/MainVBox/MainHSplit/LogPanel/LogVBox/LogToolbar/ClearLogButton
 @onready var _export_log_button: Button = $RootMargin/MainVBox/MainHSplit/LogPanel/LogVBox/LogToolbar/ExportLogButton
@@ -62,6 +63,7 @@ func _ready() -> void:
 	_setup_default_inputs()
 	_setup_parent_option()
 	_bind_actions()
+	_setup_debug_mode()
 	var init_ok: bool = _ensure_database_ready()
 	if init_ok:
 		_refresh_deck_list()
@@ -837,6 +839,49 @@ func _on_clear_log_pressed() -> void:
 
 func _on_export_log_pressed() -> void:
 	_append_log("[日志] 导出功能尚未实现")
+
+
+
+# ──────────────────────────────────────────────────────────────
+# Debug Mode (DebugSettings 全局同步)
+# ──────────────────────────────────────────────────────────────
+
+
+## 初始化调试模式：同步 CheckButton 到 DebugSettings，连接信号。
+func _setup_debug_mode() -> void:
+	if _debug_mode_check == null:
+		return
+	# 同步初始状态
+	_debug_mode_check.button_pressed = DebugSettings.debug_mode
+	# 用户点击开关
+	if not _debug_mode_check.toggled.is_connected(_on_debug_mode_toggled):
+		_debug_mode_check.toggled.connect(_on_debug_mode_toggled)
+	# 外部设置变化（如通过代码切换）
+	if not DebugSettings.debug_mode_changed.is_connected(_on_global_debug_changed):
+		DebugSettings.debug_mode_changed.connect(_on_global_debug_changed)
+	# 初始应用可见性
+	_apply_debug_visibility(DebugSettings.debug_mode)
+
+
+## 用户点击调试模式 CheckButton → 切换全局状态。
+func _on_debug_mode_toggled(pressed: bool) -> void:
+	DebugSettings.set_debug_mode(pressed)
+
+
+## Autoload 调试模式变化回调 → 同步 CheckButton 和 UI 可见性。
+func _on_global_debug_changed(enabled: bool) -> void:
+	if _debug_mode_check != null:
+		_debug_mode_check.set_pressed_no_signal(enabled)
+	_apply_debug_visibility(enabled)
+
+
+## 根据调试模式控制 debugUI 分组节点的可见性。
+func _apply_debug_visibility(enabled: bool) -> void:
+	if not is_inside_tree():
+		return
+	for node in get_tree().get_nodes_in_group("debugUI"):
+		if node is CanvasItem:
+			node.visible = enabled
 
 
 func _switch_scene(path: String, label: String) -> void:
