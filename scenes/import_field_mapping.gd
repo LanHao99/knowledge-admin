@@ -140,9 +140,10 @@ func _can_proceed() -> bool:
 func _build_ui() -> void:
 	var root := VBoxContainer.new()
 	root.name = "RootVBox"
+	root.layout_mode = 1
 	root.anchor_right = 1.0
 	root.anchor_bottom = 1.0
-	root.add_theme_constant_override("separation", 12)
+	root.add_theme_constant_override("separation", 10)
 	add_child(root)
 
 	# 标题
@@ -150,40 +151,42 @@ func _build_ui() -> void:
 	_title_label.name = "TitleLabel"
 	_title_label.text = "字段映射"
 	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_title_label.add_theme_font_size_override("font_size", 20)
+	_title_label.add_theme_font_size_override("font_size", 18)
+	_title_label.custom_minimum_size = Vector2(0, 30)
 	root.add_child(_title_label)
 
 	# 提示
 	var hint := Label.new()
 	hint.name = "HintLabel"
-	hint.text = "请确认 JSON 字段与笔记类型字段的映射关系："
+	hint.text = "确认 JSON 字段与笔记字段的映射关系："
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.add_theme_font_size_override("font_size", 13)
+	hint.add_theme_font_size_override("font_size", 12)
+	hint.custom_minimum_size = Vector2(0, 22)
 	root.add_child(hint)
 
 	# 表头
 	var header := HBoxContainer.new()
 	header.name = "HeaderRow"
 	header.add_theme_constant_override("separation", 8)
+	header.custom_minimum_size = Vector2(0, 24)
 	var left_header := Label.new()
-	left_header.name = "JsonKeyHeader"
 	left_header.text = "JSON 字段"
-	left_header.custom_minimum_size = Vector2(150, 0)
-	left_header.add_theme_font_size_override("font_size", 13)
+	left_header.custom_minimum_size = Vector2(140, 0)
+	left_header.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	left_header.add_theme_font_size_override("font_size", 12)
 	header.add_child(left_header)
 	var arrow_space := Control.new()
-	arrow_space.name = "ArrowSpace"
 	arrow_space.custom_minimum_size = Vector2(30, 0)
 	header.add_child(arrow_space)
 	var right_header := Label.new()
-	right_header.name = "FieldHeader"
-	right_header.text = "笔记类型字段"
+	right_header.text = "笔记字段"
 	right_header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	right_header.add_theme_font_size_override("font_size", 13)
+	right_header.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	right_header.add_theme_font_size_override("font_size", 12)
 	header.add_child(right_header)
 	root.add_child(header)
 
-	# 滚动映射行容器
+	# 滚动映射行
 	_scroll_container = ScrollContainer.new()
 	_scroll_container.name = "ScrollContainer"
 	_scroll_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -192,7 +195,7 @@ func _build_ui() -> void:
 
 	_rows_container = VBoxContainer.new()
 	_rows_container.name = "RowsContainer"
-	_rows_container.add_theme_constant_override("separation", 6)
+	_rows_container.add_theme_constant_override("separation", 4)
 	_scroll_container.add_child(_rows_container)
 
 	# 按钮行
@@ -223,11 +226,11 @@ func _build_ui() -> void:
 	_start_btn.pressed.connect(_on_start_pressed)
 	btn_row.add_child(_start_btn)
 
-	# 状态标签
 	_status_label = Label.new()
 	_status_label.name = "StatusLabel"
 	_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_status_label.add_theme_color_override("font_color", Color.GRAY)
+	_status_label.custom_minimum_size = Vector2(0, 20)
+	_status_label.add_theme_color_override("font_color", Color(0.55, 0.55, 0.6, 1))
 	_status_label.add_theme_font_size_override("font_size", 12)
 	root.add_child(_status_label)
 

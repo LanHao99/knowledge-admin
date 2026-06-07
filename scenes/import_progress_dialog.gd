@@ -38,6 +38,7 @@ func setup(import_manager: ImportManager) -> void:
 func _build_ui() -> void:
 	var root := VBoxContainer.new()
 	root.name = "RootVBox"
+	root.layout_mode = 1
 	root.anchor_right = 1.0
 	root.anchor_bottom = 1.0
 	root.add_theme_constant_override("separation", 12)
@@ -48,7 +49,8 @@ func _build_ui() -> void:
 	title.name = "TitleLabel"
 	title.text = "导入进度"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 20)
+	title.add_theme_font_size_override("font_size", 18)
+	title.custom_minimum_size = Vector2(0, 30)
 	root.add_child(title)
 
 	# 进度条
@@ -58,22 +60,25 @@ func _build_ui() -> void:
 	_progress_bar.max_value = 100
 	_progress_bar.value = 0
 	_progress_bar.size_flags_horizontal = Control.SIZE_FILL
+	_progress_bar.custom_minimum_size = Vector2(0, 28)
 	root.add_child(_progress_bar)
 
-	# 状态标签
+	# 状态
 	_status_label = Label.new()
 	_status_label.name = "StatusLabel"
 	_status_label.text = "正在导入... (0 / 0)"
 	_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_status_label.add_theme_font_size_override("font_size", 14)
+	_status_label.add_theme_font_size_override("font_size", 13)
+	_status_label.custom_minimum_size = Vector2(0, 24)
 	root.add_child(_status_label)
 
-	# 结果摘要标签
+	# 结果摘要
 	_result_label = Label.new()
 	_result_label.name = "ResultLabel"
 	_result_label.text = ""
 	_result_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_result_label.add_theme_font_size_override("font_size", 14)
+	_result_label.custom_minimum_size = Vector2(0, 24)
 	_result_label.visible = false
 	root.add_child(_result_label)
 
