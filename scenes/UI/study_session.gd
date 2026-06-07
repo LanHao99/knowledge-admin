@@ -328,6 +328,13 @@ func _set_status_picker(text: String) -> void:
 	if _status_label != null:
 		_status_label.text = text
 
+## 将剧情进度条添加到 InStudyBar（由 study.gd 在初始化时调用）。## 输入: bar (StoryProgressBar)。
+## 输出: 无。
+func add_story_progress_bar(bar: StoryProgressBar) -> void:
+	if _in_study_bar != null:
+		_in_study_bar.add_child(bar)
+
+
 func _switch_scene(path: String, label: String) -> void:
 	if not ResourceLoader.exists(path):
 		if _status_label != null:

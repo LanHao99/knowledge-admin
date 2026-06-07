@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 App="*res://src/app.tscn"
 MCPRuntimeBridge="*uid://wk2yhw3winuo"
+DialogueManager="*uid://c3rodes2l3gxb"
 
 [display]
 
@@ -28,7 +29,7 @@ window/stretch/mode="canvas_items"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/godot-sqlite/plugin.cfg", "res://addons/godot_dotnet_mcp/plugin.cfg", "res://addons/gut/plugin.cfg", "res://addons/markdownlabel/plugin.cfg")
+enabled=PackedStringArray("res://addons/dialogue_manager/plugin.cfg", "res://addons/godot-sqlite/plugin.cfg", "res://addons/godot_dotnet_mcp/plugin.cfg", "res://addons/gut/plugin.cfg", "res://addons/markdownlabel/plugin.cfg")
 
 [gui]
 
