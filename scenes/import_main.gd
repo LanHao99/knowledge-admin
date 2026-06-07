@@ -63,13 +63,26 @@ func setup(notetype_manager: NoteTypeManager, import_manager: ImportManager, not
 ## 构建顶层 UI 布局。## 输入: 无。
 ## 输出: 无。
 func _build_ui() -> void:
-	# 根容器
+	# 外层 PanelContainer — 提供背景和边距
+	var panel := PanelContainer.new()
+	panel.name = "RootPanel"
+	panel.anchor_right = 1.0
+	panel.anchor_bottom = 1.0
+	panel.add_theme_stylebox_override("panel", _make_panel_style())
+	add_child(panel)
+
+	var root_margin := MarginContainer.new()
+	root_margin.name = "RootMargin"
+	root_margin.add_theme_constant_override("margin_left", 16)
+	root_margin.add_theme_constant_override("margin_top", 12)
+	root_margin.add_theme_constant_override("margin_right", 16)
+	root_margin.add_theme_constant_override("margin_bottom", 12)
+	panel.add_child(root_margin)
+
 	var root := VBoxContainer.new()
 	root.name = "RootVBox"
-	root.anchor_right = 1.0
-	root.anchor_bottom = 1.0
-	root.add_theme_constant_override("separation", 0)
-	add_child(root)
+	root.add_theme_constant_override("separation", 10)
+	root_margin.add_child(root)
 
 	# ── 顶部标题栏 ──
 	var top_bar := HBoxContainer.new()
@@ -80,7 +93,7 @@ func _build_ui() -> void:
 	_back_btn = Button.new()
 	_back_btn.name = "BackBtn"
 	_back_btn.text = "← 返回"
-	_back_btn.custom_minimum_size = Vector2(80, 36)
+	_back_btn.custom_minimum_size = Vector2(72, 34)
 	_back_btn.pressed.connect(_on_back_pressed)
 	top_bar.add_child(_back_btn)
 
@@ -89,26 +102,26 @@ func _build_ui() -> void:
 	_title_label.text = "批量导入"
 	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_title_label.add_theme_font_size_override("font_size", 20)
+	_title_label.add_theme_font_size_override("font_size", 18)
 	top_bar.add_child(_title_label)
 
 	_step_label = Label.new()
 	_step_label.name = "StepLabel"
 	_step_label.text = "步骤 1/3"
 	_step_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_step_label.custom_minimum_size = Vector2(80, 0)
-	_step_label.add_theme_font_size_override("font_size", 13)
-	_step_label.add_theme_color_override("font_color", Color.GRAY)
+	_step_label.custom_minimum_size = Vector2(72, 0)
+	_step_label.add_theme_font_size_override("font_size", 12)
+	_step_label.add_theme_color_override("font_color", Color(0.55, 0.55, 0.6, 1))
 	top_bar.add_child(_step_label)
 
-	# ── 文件/牌组选择行（始终可见） ──
+	# ── 文件/牌组选择行 ──
 	var meta_row := HBoxContainer.new()
 	meta_row.name = "MetaRow"
+	meta_row.custom_minimum_size = Vector2(0, 36)
 	meta_row.add_theme_constant_override("separation", 8)
 	root.add_child(meta_row)
 
 	var file_label := Label.new()
-	file_label.name = "FileLabel"
 	file_label.text = "JSON 文件:"
 	file_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	meta_row.add_child(file_label)
@@ -116,6 +129,7 @@ func _build_ui() -> void:
 	_file_path_input = LineEdit.new()
 	_file_path_input.name = "FilePathInput"
 	_file_path_input.placeholder_text = "选择或输入 JSON 文件路径..."
+	_file_path_input.custom_minimum_size = Vector2(0, 34)
 	_file_path_input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_file_path_input.text_changed.connect(_on_file_path_changed)
 	meta_row.add_child(_file_path_input)
@@ -123,44 +137,67 @@ func _build_ui() -> void:
 	_file_pick_btn = Button.new()
 	_file_pick_btn.name = "FilePickBtn"
 	_file_pick_btn.text = "浏览..."
-	_file_pick_btn.custom_minimum_size = Vector2(70, 0)
+	_file_pick_btn.custom_minimum_size = Vector2(68, 34)
 	_file_pick_btn.pressed.connect(_on_file_pick_pressed)
 	meta_row.add_child(_file_pick_btn)
 
 	var deck_label := Label.new()
-	deck_label.name = "DeckLabel"
 	deck_label.text = "目标牌组:"
 	deck_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	meta_row.add_child(deck_label)
 
 	_deck_select = OptionButton.new()
 	_deck_select.name = "DeckSelect"
-	_deck_select.custom_minimum_size = Vector2(120, 0)
+	_deck_select.custom_minimum_size = Vector2(130, 34)
 	meta_row.add_child(_deck_select)
 
 	# 分隔线
 	var sep := HSeparator.new()
-	sep.name = "Separator"
 	root.add_child(sep)
 
-	# ── 步骤内容容器 ──
+	# ── 步骤内容区域 ──
+	var content_panel := PanelContainer.new()
+	content_panel.name = "ContentPanel"
+	content_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	content_panel.add_theme_stylebox_override("panel", _make_inner_panel_style())
+	root.add_child(content_panel)
+
 	var content_margin := MarginContainer.new()
 	content_margin.name = "ContentMargin"
-	content_margin.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	content_margin.add_theme_constant_override("margin_left", 12)
 	content_margin.add_theme_constant_override("margin_top", 8)
-	content_margin.add_theme_constant_override("margin_left", 4)
-	content_margin.add_theme_constant_override("margin_right", 4)
-	content_margin.add_theme_constant_override("margin_bottom", 8)
-	root.add_child(content_margin)
+	content_margin.add_theme_constant_override("margin_right", 12)
+	content_margin.add_theme_constant_override("margin_bottom", 12)
+	content_panel.add_child(content_margin)
 
 	_step_container = Control.new()
 	_step_container.name = "StepContainer"
 	_step_container.size_flags_horizontal = Control.SIZE_FILL
 	_step_container.size_flags_vertical = Control.SIZE_FILL
+	_step_container.clip_contents = true
 	content_margin.add_child(_step_container)
 
-	# 刷新牌组列表
 	_refresh_deck_list()
+
+
+func _make_panel_style() -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color(0.12, 0.12, 0.14, 1)
+	s.corner_radius_top_left = 8
+	s.corner_radius_top_right = 8
+	s.corner_radius_bottom_left = 8
+	s.corner_radius_bottom_right = 8
+	return s
+
+
+func _make_inner_panel_style() -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color(0.16, 0.16, 0.19, 1)
+	s.corner_radius_top_left = 6
+	s.corner_radius_top_right = 6
+	s.corner_radius_bottom_left = 6
+	s.corner_radius_bottom_right = 6
+	return s
 
 
 ## 创建并注入子组件依赖。## 输入: 无。
@@ -246,7 +283,7 @@ func _set_step_control_fill(ctrl: Control) -> void:
 ## 控制元数据行的可见性。## 输入: show (bool) - 是否可见。
 ## 输出: 无。
 func _meta_row_visible(show: bool) -> void:
-	var meta_row := get_node_or_null("RootVBox/MetaRow")
+	var meta_row := get_node_or_null("RootPanel/RootMargin/RootVBox/MetaRow")
 	if meta_row != null:
 		meta_row.visible = show
 

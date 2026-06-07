@@ -1,0 +1,96 @@
+sequenceDiagram
+    actor U as 用户
+    participant DL as DeckList (UI)
+    participant W as ImportWizard (UI)
+    participant IM as ImportManager
+    participant SP as SchemaParser
+    participant NM as NoteManager
+    participant CM as CardManager
+    participant NTDB as NoteTypeDB
+    participant DDB as DeckDB
+
+    %% ── 入口: Deck 右键菜单 ──
+    U->>DL: 右键 Deck "日语词汇"
+    DL->>DL: 弹出上下文菜单
+    U->>DL: 点击「导入到本牌组」
+    DL->>W: 打开导入向导(deck_id预填)
+    W->>W: 缓存 deck_id, Step2 Deck 显示为只读 Label
+
+    %% ── Step 1: 选择 JSON 文件 ──
+    W->>W: 显示步骤1: 文件选择器
+    U->>W: 浏览并选择 cards.json
+    W->>IM: _parse_json_file(path)
+    IM->>SP: SchemaParser.parse_json_file(path)
+    SP->>SP: FileAccess 读取 + JSON.parse
+    SP-->>IM: ok(parsed_data)
+    IM->>IM: _normalize_to_array()
+    IM->>IM: _validate_flat_structure()
+    alt 嵌套对象/数组
+        IM-->>W: fail("NESTED_OBJECT_DETECTED")
+        W->>U: 红色提示
+    else 校验通过
+        IM-->>W: ok({data: Array, keys: Array[String]})
+    end
+
+    %% ── Step 2: 选择 NoteType + 字段映射 ──
+    W->>W: 显示步骤2: Deck (预填只读) + NoteType下拉
+    W->>NTDB: get_all_notetypes()
+    NTDB-->>W: [NoteTypeEntity, ...]
+    U->>W: 选择 NoteType "基础"
+    W->>IM: _auto_map_fields(json_keys, note_type)
+    IM->>IM: 小写化匹配 field names
+    IM-->>W: mapping {json_key: field_name}
+    W->>U: 显示映射表格
+    U->>W: 手动调整映射（可选）
+    W->>IM: _validate_required_fields(mapping, note_type)
+    alt required 字段缺失
+        IM-->>W: fail("REQUIRED_FIELD_MISSING", missing_list)
+        W->>U: 红色警告 + 禁用"下一步"
+    else 全部 required 已映射
+        IM-->>W: ok()
+    end
+
+    %% ── Step 3: 预览确认 ──
+    W->>W: 显示步骤3: 预览前5条 + 统计("共 N 条")
+    U->>W: 点击"确认导入"
+
+    %% ── Step 4: 逐行导入 ──
+    W->>IM: import_from_dict(data, deck_id, note_type_id, mapping)
+    IM->>IM: _execute_batch_import()
+
+    loop 每一行 i
+        IM->>IM: _build_note_fields(row_i, mapping)
+        IM->>IM: _coerce_to_string() 各value
+        IM->>NM: create_note(note_type_id, fields, deck_id)
+        NM->>NM: _validate_deck_exists(deck_id)
+        NM->>NM: run_in_databases_transaction([note_db, card_db], ...)
+        NM->>NM: note_db.create_note(...) → note
+        NM->>CM: create_card(note.id, deck_id, 0)
+        CM->>CM: card_db.create_card(...) → card
+        CM-->>NM: ok(card)
+        NM-->>IM: ok({note, cards})
+
+        alt create_note 返回 fail
+            IM->>IM: 记录失败: {row: i, error: msg}
+        else 成功
+            IM->>IM: imported_count++
+        end
+
+        opt 每 500 行
+            IM->>W: import_progress(i, total)
+            W->>U: 进度条更新
+        end
+    end
+
+    IM-->>W: import_completed({total_rows, imported, failed, failures})
+    W->>U: 结果弹窗（成功/失败计数 + 可滚动失败明细）
+    W->>W: 关闭向导
+
+    %% ── import_from_dict 路径 ──
+    Note over IM,NM: import_from_dict 路径 (供 AI 调用)
+    rect rgb(240, 248, 255)
+        W->>IM: import_from_dict(data_array, deck_id, note_type_id, mapping)
+        IM->>IM: _validate_flat_structure()
+        IM->>IM: _execute_batch_import(data_array, ...)
+        IM-->>W: ImportResult
+    end

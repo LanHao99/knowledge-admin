@@ -35,9 +35,9 @@ func setup(notetype_manager: NoteTypeManager) -> void:
 ## 构建 UI 布局（纯代码动态创建）。## 输入: 无。
 ## 输出: 无。
 func _build_ui() -> void:
-	# 根容器
 	var root := VBoxContainer.new()
 	root.name = "RootVBox"
+	root.layout_mode = 1
 	root.anchor_right = 1.0
 	root.anchor_bottom = 1.0
 	root.add_theme_constant_override("separation", 12)
@@ -48,30 +48,27 @@ func _build_ui() -> void:
 	_title_label.name = "TitleLabel"
 	_title_label.text = "选择笔记类型"
 	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_title_label.add_theme_font_size_override("font_size", 20)
+	_title_label.add_theme_font_size_override("font_size", 18)
+	_title_label.custom_minimum_size = Vector2(0, 32)
 	root.add_child(_title_label)
 
-	# 提示文字
+	# 提示
 	var hint := Label.new()
 	hint.name = "HintLabel"
 	hint.text = "请选择导入笔记的目标类型："
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.add_theme_font_size_override("font_size", 14)
+	hint.add_theme_font_size_override("font_size", 13)
+	hint.custom_minimum_size = Vector2(0, 24)
 	root.add_child(hint)
 
-	# 笔记类型列表
-	var list_container := MarginContainer.new()
-	list_container.name = "ListContainer"
-	list_container.add_theme_constant_override("margin_left", 20)
-	list_container.add_theme_constant_override("margin_right", 20)
-	list_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	root.add_child(list_container)
-
+	# 列表
 	_type_list = ItemList.new()
 	_type_list.name = "TypeList"
+	_type_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_type_list.allow_reselect = true
 	_type_list.same_column_width = true
-	list_container.add_child(_type_list)
+	_type_list.custom_minimum_size = Vector2(0, 120)
+	root.add_child(_type_list)
 
 	# 按钮行
 	var btn_row := HBoxContainer.new()
@@ -95,15 +92,15 @@ func _build_ui() -> void:
 	_next_btn.pressed.connect(_on_next_pressed)
 	btn_row.add_child(_next_btn)
 
-	# 状态标签
+	# 状态
 	_status_label = Label.new()
 	_status_label.name = "StatusLabel"
 	_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_status_label.add_theme_color_override("font_color", Color.GRAY)
+	_status_label.custom_minimum_size = Vector2(0, 20)
+	_status_label.add_theme_color_override("font_color", Color(0.55, 0.55, 0.6, 1))
 	_status_label.add_theme_font_size_override("font_size", 12)
 	root.add_child(_status_label)
 
-	# 列表选中事件
 	_type_list.item_selected.connect(_on_item_selected)
 
 

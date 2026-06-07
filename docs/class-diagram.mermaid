@@ -1,0 +1,202 @@
+classDiagram
+    direction TB
+
+    %% ── Entity 层 ──
+    class NoteTypeEntity {
+        +String id
+        +String name
+        +Dictionary fields_schema
+        +Array card_templates
+        +String created_at
+        +to_dict() Dictionary
+        +from_dict(d: Dictionary) void
+        +get_field_names() Array~String~
+        +get_template_count() int
+        +is_default() bool
+    }
+
+    class NoteEntity {
+        +int id
+        +String note_type_id
+        +Dictionary fields_data
+        +Array~String~ tags
+        +int deck_id
+        +int created_at
+        +to_dict() Dictionary
+        +from_dict(d: Dictionary) void
+        +get_field(name: String) String
+        +set_field(name: String, value: String) void
+    }
+
+    class CardEntity {
+        +int id
+        +int note_id
+        +int deck_id
+        +int template_order
+        +int queue
+        +int due
+        +to_dict() Dictionary
+        +from_dict(d: Dictionary) void
+    }
+
+    %% ── DB 层 ──
+    class DBManager {
+        +configure(db_path: String) void
+        +open() bool
+        +close() void
+        +init_schema() Dictionary
+        +execute_bind(sql, params) Dictionary
+        +fetch_all(sql, params) Dictionary
+        +fetch_one(sql, params) Dictionary
+        +scalar(sql, params, default) Dictionary
+        +last_insert_rowid() Dictionary
+        +count(table, where, params) Dictionary
+        +begin_transaction() bool
+        +commit_transaction() bool
+        +rollback_transaction() bool
+        +table_exists(name) bool
+        +column_exists(table, column) bool
+        +ok(data, warning) Dictionary
+        +fail(code, msg, data) Dictionary
+    }
+
+    class NoteTypeDB {
+        +create_notetype(name, fields_schema, card_templates) Dictionary
+        +get_notetype_by_id(id: String) Dictionary
+        +get_notetype_by_name(name: String) Dictionary
+        +get_all_notetypes() Dictionary
+        +update_notetype(entity: NoteTypeEntity) Dictionary
+        +delete_notetype(id: String) Dictionary
+        +name_exists(name: String, exclude_id: String) bool
+        +insert_default_notetype() Dictionary
+    }
+
+    class NoteDB {
+        +create_note(note_type_id: String, fields_json, deck_id, tags) Dictionary
+        +get_note_by_id(note_id) Dictionary
+        +update_note(note: NoteEntity) Dictionary
+        +delete_note(note_id) Dictionary
+        +get_notes_by_type(note_type_id: String) Dictionary
+        +get_notes_by_deck(deck_id) Dictionary
+        +search_notes(query, deck_id) Dictionary
+        +get_all_notes() Dictionary
+        +get_notes_count(deck_id) Dictionary
+    }
+
+    class CardDB {
+        +create_card(note_id, deck_id, template_order) Dictionary
+        +get_card_by_id(card_id) Dictionary
+        +update_card(card: CardEntity) Dictionary
+        +delete_card(card_id) Dictionary
+        +delete_cards_by_note(note_id) Dictionary
+        +update_cards_deck_by_note(note_id, new_deck_id) Dictionary
+        +get_due_cards(deck_id, queue_type, limit) Dictionary
+        +record_review(...) Dictionary
+    }
+
+    class DeckDB {
+        +get_deck_by_id(deck_id) Dictionary
+        +get_all_decks() Dictionary
+        +get_deck_tree() Dictionary
+    }
+
+    %% ── 工具类 ──
+    class SchemaParser {
+        +parse_json_file(file_path: String) Dictionary$
+        +build_schema_statements(schema_config) Dictionary$
+        +build_drop_statements(schema_config) Dictionary$
+    }
+
+    %% ── Manager 层 ──
+    class Manager {
+        +set_db_manager(db: DBManager) void
+        +begin_transaction() bool
+        +commit_transaction() bool
+        +rollback_transaction() bool
+        +run_in_transaction(action: Callable) Dictionary
+        +run_in_databases_transaction(dbs: Array, action: Callable) Dictionary
+        +ok(data, warning) Dictionary
+        +fail(code, msg, data) Dictionary
+        <<signal>> entity_created(type, id)
+        <<signal>> entity_updated(type, id)
+        <<signal>> entity_deleted(type, id)
+        <<signal>> batch_operation_completed(type, count)
+    }
+
+    class NoteTypeManager {
+        +setup(db_path: String) bool
+        +is_ready() bool
+        +create_notetype(name, fields, templates) Dictionary
+        +get_notetype(id: String) Dictionary
+        +get_all_notetypes() Dictionary
+        +update_notetype(id, name, fields, templates) Dictionary
+        +delete_notetype(id: String) Dictionary
+        -_is_name_duplicate(name, exclude_id) bool
+        -_is_default_type(id: String) bool
+    }
+
+    class ImportManager {
+        +setup(note_manager, notetype_db, deck_db) void
+        +import_from_file(path, deck_id, note_type_id, mapping) Dictionary
+        +import_from_dict(data_array, deck_id, note_type_id, mapping) Dictionary
+        -_parse_json_file(path: String) Dictionary
+        -_normalize_to_array(data: Variant) Array
+        -_validate_flat_structure(data: Array) Dictionary
+        -_auto_map_fields(json_keys: Array, note_type: NoteTypeEntity) Dictionary
+        -_coerce_to_string(value: Variant) String
+        -_validate_required_fields(mapping, note_type) Dictionary
+        -_build_note_fields(row, mapping) Dictionary
+        -_execute_batch_import(data, mapping, deck_id, note_type_id) Dictionary
+        <<signal>> import_progress(current: int, total: int)
+        <<signal>> import_completed(result: Dictionary)
+        <<signal>> import_failed(error: String)
+    }
+
+    class NoteManager {
+        +create_note(note_type_id: String, fields, deck_id, tags) Dictionary
+        +get_note(note_id) Dictionary
+        +update_note(note_id, fields, deck_id, tags) Dictionary
+        +delete_note(note_id) Dictionary
+        +get_content_for_card(card_id) Dictionary
+        -_generate_cards_for_note(note_id, deck_id, note_type_id: String) Array~CardEntity~
+        -_validate_deck_exists(deck_id) Dictionary
+    }
+
+    class CardManager {
+        +create_card(note_id, deck_id, template_order) Dictionary
+        +delete_cards_by_note(note_id) Dictionary
+        +get_card(card_id) Dictionary
+        +answer_card(card_id, rating, time_taken_ms) Dictionary
+        +get_study_queue(deck_id) Dictionary
+    }
+
+    %% ── 继承关系 ──
+    DBManager <|-- NoteTypeDB
+    DBManager <|-- NoteDB
+    DBManager <|-- CardDB
+    DBManager <|-- DeckDB
+
+    Manager <|-- NoteTypeManager
+    Manager <|-- ImportManager
+    Manager <|-- NoteManager
+    Manager <|-- CardManager
+
+    %% ── 持有/引用关系 ──
+    NoteTypeManager --> NoteTypeDB : 持有
+    ImportManager --> NoteManager : 引用（逐行调create_note）
+    ImportManager --> NoteTypeDB : 引用
+    ImportManager --> DeckDB : 引用
+    NoteManager --> NoteDB : 持有
+    NoteManager --> CardDB : 持有
+    CardManager --> CardDB : 持有
+
+    %% ── 实体创建关系 ──
+    NoteTypeDB ..> NoteTypeEntity : 创建/返回
+    NoteDB ..> NoteEntity : 创建/返回
+    CardDB ..> CardEntity : 创建/返回
+    DeckDB ..> DeckEntity : 查询
+
+    %% ── 委托关系 ──
+    ImportManager ..> SchemaParser : 委托parse_json_file
+    ImportManager ..> NoteEntity : 间接创建(via NoteManager)
+    ImportManager ..> CardEntity : 间接创建(via NoteManager)
