@@ -47,7 +47,6 @@ var _exiting: bool = false  ## 用户正在退出学习，跳过完成面板
 
 # ── 剧情进度数据 + 设置 ──
 var _story_progress: StoryProgress = null
-var _story_threshold: int = 10
 var _story_rating_to_progress: Dictionary = {
 	"1": 0, "2": 1, "3": 2, "4": 3
 }
@@ -370,7 +369,7 @@ func _on_debug_story_pressed() -> void:
 		return
 
 	# 填满进度条
-	_story_progress.total_progress = _story_threshold
+	_story_progress.total_progress = _story_progress.trigger_threshold
 	refresh_story_display()
 
 	# 通知 study.gd 触发剧情
@@ -408,13 +407,11 @@ func _format_duration(seconds: int) -> String:
 	var hours: int = seconds / 3600
 	return "%d小时" % hours
 
-## 注入剧情进度数据，显示进度条（替代原来代码 new StoryProgressBar）。## 输入:
+## 注入剧情进度数据，显示进度条（阈值已在 StoryProgress 中持久化）。## 输入:
 ##   progress (StoryProgress) - 剧情进度数据源。
-##   threshold (int) - 触发阈值，默认 10。
 ## 输出: 无。
-func set_story_progress(progress: StoryProgress, threshold: int = 10) -> void:
+func set_story_progress(progress: StoryProgress) -> void:
 	_story_progress = progress
-	_story_threshold = max(1, threshold)
 	refresh_story_display()
 	# 初始化时不显示进度条，等待 enter_learning 时 InStudyBar 统一控制
 	_story_progress_bar.visible = false
@@ -447,12 +444,13 @@ func consume_story_progress() -> void:
 func refresh_story_display() -> void:
 	if _story_progress == null:
 		return
+	var threshold: int = _story_progress.trigger_threshold
 	var current: int = _story_progress.total_progress
-	_story_progress_bar.max_value = float(_story_threshold)
-	_story_progress_bar.value = float(min(current, _story_threshold))
-	_story_value_label.text = "%d/%d" % [current, _story_threshold]
+	_story_progress_bar.max_value = float(threshold)
+	_story_progress_bar.value = float(min(current, threshold))
+	_story_value_label.text = "%d/%d" % [current, threshold]
 	# 颜色：绿色满 → 橙色接近 → 黄色积累 → 灰色起步
-	var ratio: float = float(current) / float(max(_story_threshold, 1))
+	var ratio: float = float(current) / float(max(threshold, 1))
 	var color: Color
 	if ratio >= 1.0:
 		color = Color(0.2, 0.8, 0.3, 1.0)

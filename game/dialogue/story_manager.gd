@@ -21,9 +21,6 @@ signal progress_updated(current: int, threshold: int)
 ## 默认冷却时间（秒），防止连续触发对话。
 const DEFAULT_COOLDOWN_SECONDS: float = 30.0
 
-## 默认触发阈值。
-const DEFAULT_TRIGGER_THRESHOLD: int = 10
-
 
 # ── 内部状态 ──
 
@@ -41,9 +38,6 @@ var _dialogue_manager = null  # 不声明类型以避免循环依赖
 
 ## 触发冷却时间（秒）。
 var cooldown_seconds: float = DEFAULT_COOLDOWN_SECONDS
-
-## 触发阈值。
-var trigger_threshold: int = DEFAULT_TRIGGER_THRESHOLD
 
 ## 是否正在播放对话（阻止新的触发）。
 var _is_dialogue_active: bool = false
@@ -105,19 +99,20 @@ func on_review_answered(rating: int) -> Dictionary:
 	var triggered: bool = false
 	var key: String = ""
 
-	if story_progress.total_progress >= trigger_threshold:
+	if story_progress.total_progress >= story_progress.trigger_threshold:
 		# 冷却检查
 		if _is_cooldown_passed():
 			key = _pick_dialogue_key()
 			if not key.is_empty():
 				triggered = true
 				story_progress.consume_progress()
+				story_progress.trigger_threshold += 5
 				story_progress.last_triggered_at = Time.get_unix_time_from_system()
 				_is_dialogue_active = true
 				story_progress.save_to_user()
 				story_triggered.emit(key)
 
-	progress_updated.emit(story_progress.total_progress, trigger_threshold)
+	progress_updated.emit(story_progress.total_progress, story_progress.trigger_threshold)
 
 	return {"triggered": triggered, "dialogue_key": key}
 

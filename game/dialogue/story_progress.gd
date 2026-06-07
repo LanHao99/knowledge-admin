@@ -24,6 +24,9 @@ const SAVE_PATH: String = "user://story_progress.tres"
 ## 上次触发对话的 Unix 时间戳（秒级浮点），用于冷却检测。
 @export var last_triggered_at: float = 0.0
 
+## 剧情触发阈值（每次触发后 +5）。达到此值时触发对话。
+@export var trigger_threshold: int = 10
+
 
 # ── 存档读写 ──
 
@@ -146,7 +149,8 @@ func to_dict() -> Dictionary:
 		"current_chapter": current_chapter,
 		"completed_dialogues": completed_dialogues.duplicate(),
 		"flags": flags.duplicate(),
-		"last_triggered_at": last_triggered_at
+		"last_triggered_at": last_triggered_at,
+		"trigger_threshold": trigger_threshold
 	}
 
 
@@ -158,3 +162,4 @@ func reset() -> void:
 	completed_dialogues.clear()
 	flags.clear()
 	last_triggered_at = 0.0
+	trigger_threshold = 10

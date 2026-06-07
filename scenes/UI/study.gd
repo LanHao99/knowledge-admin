@@ -131,7 +131,7 @@ func _setup_story_system() -> void:
 	# 设置初始章节
 	_story_manager.story_progress.current_chapter = "chapter_1"
 
-	# 将剧情进度注入 session（session 内的 ProgressBar 节点直接控制，不再代码 new StoryProgressBar）
+	# 将剧情进度注入 session（阈值已在 StoryProgress 中持久化）
 	if _session != null:
 		_session.set_story_progress(_story_manager.story_progress)
 		_session.inject_story_manager(_story_manager)
