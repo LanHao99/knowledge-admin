@@ -1,16 +1,17 @@
-extends Node
-## 教程管理器（Autoload）。
+class_name TutorialManager
+extends RefCounted
+## 教程管理器。
 ## 负责检测场景首次进入 → 实例化 StoryDialogueOverlay → 播放教程对话 → 记录完成。
-## 各场景在 _ready() 末尾调用 check_and_show("scene_id", self) 即可。
+## 各场景在 _ready() 末尾调用 TutorialManager.check_and_show("scene_id", self) 即可。
+## 改为 RefCounted + static 方法，不再依赖 Autoload。
 
 # ── 常量 ──
 
-## 复用的故事对话覆盖层场景
 const OVERLAY_SCENE: String = "res://game/dialogue/story_dialogue_overlay.tscn"
 
 # ── 教程注册表：scene_id → .dialogue 文件路径 ──
 
-var _tutorials: Dictionary = {
+static var _tutorials: Dictionary = {
 	"main_menu": "res://game/tutorial/dialogue/main_menu.dialogue",
 	"deck_list": "res://game/tutorial/dialogue/deck_list.dialogue",
 	"note_list": "res://game/tutorial/dialogue/note_list.dialogue",
@@ -19,26 +20,29 @@ var _tutorials: Dictionary = {
 	"ai_debug": "res://game/tutorial/dialogue/ai_debug.dialogue",
 }
 
-var _progress: TutorialProgress = null
+static var _progress: TutorialProgress = null
 
 
-## 加载教程进度存档。## 输入: 无。
-## 输出: 无。
-func _ready() -> void:
-	_progress = TutorialProgress.load_from_user()
+## 懒加载教程进度（首次调用时从文件读取）。## 输入: 无。
+## 输出: TutorialProgress。
+static func _get_progress() -> TutorialProgress:
+	if _progress == null:
+		_progress = TutorialProgress.load_from_user()
+	return _progress
 
 
 ## 检查场景教程是否已完成。## 输入: scene_id (String)。
 ## 输出: bool — 已完成返回 true。
-func is_completed(scene_id: String) -> bool:
-	return _progress.is_completed(scene_id) if _progress else true
+static func is_completed(scene_id: String) -> bool:
+	var p := _get_progress()
+	return p.is_completed(scene_id) if p else true
 
 
 ## 场景入口：检查并显示教程（仅首次）。## 输入:
 ##   scene_id (String) — 场景标识，需在 _tutorials 中注册。
 ##   parent (Node) — 场景根节点，用于将 overlay 添加到场景树。
 ## 输出: 无。
-func check_and_show(scene_id: String, parent: Node) -> void:
+static func check_and_show(scene_id: String, parent: Node) -> void:
 	if is_completed(scene_id):
 		return
 	if not _tutorials.has(scene_id):
@@ -65,7 +69,6 @@ func check_and_show(scene_id: String, parent: Node) -> void:
 		return
 
 	overlay.dialogue_key = scene_id
-	# 等待 overlay._ready() 执行完成后启动对话
 	overlay.ready.connect(func():
 		overlay.start(resource, scene_id)
 	, CONNECT_ONE_SHOT)
@@ -78,15 +81,17 @@ func check_and_show(scene_id: String, parent: Node) -> void:
 ##   scene_id (String) — 场景标识。
 ##   overlay (StoryDialogueOverlay) — 要销毁的覆盖层实例。
 ## 输出: 无。
-func _on_tutorial_finished(scene_id: String, overlay: StoryDialogueOverlay) -> void:
-	_progress.mark_completed(scene_id)
-	_progress.save_to_user()
+static func _on_tutorial_finished(scene_id: String, overlay: StoryDialogueOverlay) -> void:
+	var p := _get_progress()
+	p.mark_completed(scene_id)
+	p.save_to_user()
 	if is_instance_valid(overlay):
 		overlay.queue_free()
 
 
 ## 重置所有教程进度（供调试/设置使用）。## 输入: 无。
 ## 输出: 无。
-func reset_all() -> void:
-	_progress.reset()
-	_progress.save_to_user()
+static func reset_all() -> void:
+	var p := _get_progress()
+	p.reset()
+	p.save_to_user()

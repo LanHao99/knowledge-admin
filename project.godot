@@ -21,7 +21,6 @@ App="*res://src/app.tscn"
 MCPRuntimeBridge="*uid://wk2yhw3winuo"
 DialogueManager="*uid://c3rodes2l3gxb"
 DebugSettings="*res://src/debug_settings.gd"
-TutorialManager="*res://game/tutorial/tutorial_manager.gd"
 
 [display]
 
