@@ -121,6 +121,11 @@ scroll_active = false
 [node name="Sep1" type="HSeparator" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000017]
 layout_mode = 2
 
+[node name="StudyBtn" type="Button" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000020]
+custom_minimum_size = Vector2(300, 100)
+layout_mode = 2
+text = "▶ 开始学习"
+
 [node name="DeckListBtn" type="Button" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000018]
 custom_minimum_size = Vector2(300, 44)
 layout_mode = 2
@@ -130,11 +135,6 @@ text = "📖 牌组管理"
 custom_minimum_size = Vector2(300, 44)
 layout_mode = 2
 text = "📝 笔记浏览"
-
-[node name="StudyBtn" type="Button" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000020]
-custom_minimum_size = Vector2(300, 48)
-layout_mode = 2
-text = "▶ 开始学习"
 
 [node name="Sep2" type="HSeparator" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000021]
 layout_mode = 2
