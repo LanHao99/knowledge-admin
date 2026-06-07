@@ -38,6 +38,8 @@ func _ready() -> void:
 	else:
 		_set_status("[color=#FF6666]数据库初始化失败[/color]")
 
+	TutorialManager.check_and_show("main_menu", self)
+
 	# 编辑器内运行场景时自动执行 FSRS 调度器单元测试（测试文件已移除）
 	# if OS.has_feature("editor"):
 	# 	call_deferred("_run_scheduler_tests")

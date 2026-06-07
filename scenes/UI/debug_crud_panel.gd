@@ -74,6 +74,8 @@ func _ready() -> void:
 		_refresh_note_list()
 	_refresh_simulated_date_label()
 
+	TutorialManager.check_and_show("debug_panel", self)
+
 
 ## 退出场景时释放管理器节点。
 func _exit_tree() -> void:

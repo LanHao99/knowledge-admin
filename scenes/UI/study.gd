@@ -29,6 +29,8 @@ func _ready() -> void:
 	_inject_all()
 	_connect_bridge()
 
+	TutorialManager.check_and_show("study", self)
+
 
 ## 退出时释放 Manager 实例和剧情管理器。## 输入: 无。
 ## 输出: 无。

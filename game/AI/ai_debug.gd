@@ -67,6 +67,8 @@ func _ready() -> void:
 	_init_managers()
 	_set_status("就绪。输入消息或点击 📎 上传文档")
 
+	TutorialManager.check_and_show("ai_debug", self)
+
 
 func _bind_actions() -> void:
 	_send_btn.pressed.connect(_on_send_pressed)

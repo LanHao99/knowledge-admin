@@ -56,6 +56,8 @@ func _ready() -> void:
 	else:
 		_set_status("数据库初始化失败")
 
+	TutorialManager.check_and_show("deck_list", self)
+
 
 ## 退出时断开信号、释放 Manager。## 输入: 无。
 ## 输出: 无。

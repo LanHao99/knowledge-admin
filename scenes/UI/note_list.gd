@@ -52,6 +52,8 @@ func _ready() -> void:
 	else:
 		_set_status("数据库初始化失败")
 
+	TutorialManager.check_and_show("note_list", self)
+
 
 ## 退出场景时断开信号并释放 Manager。## 输入: 无。
 ## 输出: 无。
