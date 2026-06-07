@@ -1,5 +1,4 @@
 extends Node
-class_name TutorialManager
 ## 教程管理器（Autoload）。
 ## 负责检测场景首次进入 → 实例化 StoryDialogueOverlay → 播放教程对话 → 记录完成。
 ## 各场景在 _ready() 末尾调用 check_and_show("scene_id", self) 即可。
