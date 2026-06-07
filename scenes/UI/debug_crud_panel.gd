@@ -232,7 +232,7 @@ func _on_update_deck_pressed() -> void:
 		_log_result(result)
 		_refresh_deck_list()
 		return
-	result = _deck_manager.set_deck_archived(deck_id, is_archived)
+	result = _deck_manager.archive_deck(deck_id, is_archived)
 	_log_result(result)
 	if result.get("success", false):
 		var deck_result: Dictionary = _deck_manager.get_deck(deck_id)
@@ -320,9 +320,9 @@ func _on_update_note_pressed() -> void:
 	var note_id: int = roundi(_note_id_input.value)
 	var deck_id: int = roundi(_note_deck_id_input.value)
 	var fields: Dictionary = _read_fields_from_editor()
-	var note_type_id: int = 1
-	_log_operation_header("update_note", "id=%d note_type_id=%d deck_id=%d fields=%s" % [note_id, note_type_id, deck_id, str(fields)])
-	var result: Dictionary = _note_manager.update_note_fields(note_id, note_type_id, fields, deck_id)
+	var note_type_id: String = "__default__"
+	_log_operation_header("update_note", "id=%d note_type_id=%s deck_id=%d fields=%s" % [note_id, note_type_id, deck_id, str(fields)])
+	var result: Dictionary = _note_manager.update_note(note_id, fields, deck_id)
 	_log_result(result)
 	if result.get("success", false):
 		var note_result: Dictionary = _note_manager.get_note(note_id)
