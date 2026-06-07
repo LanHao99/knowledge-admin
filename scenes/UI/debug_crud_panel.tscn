@@ -390,6 +390,8 @@ text = "Export"
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_colors/search_result_color = Color(0.117530085, 0.1175301, 0.117530085, 1)
+theme_override_colors/search_result_border_color = Color(0.09019608, 0.09019608, 0.09019608, 0.8901961)
 editable = false
 wrap_mode = 2
 

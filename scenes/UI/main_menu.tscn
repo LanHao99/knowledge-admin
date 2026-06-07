@@ -153,7 +153,7 @@ layout_mode = 2
 
 [node name="VersionLabel" type="Label" parent="RootMargin/MainVBox/BottomBar" unique_id=1000000023]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.4, 0.4, 0.45, 1)
+theme_override_colors/font_color = Color(0.6809728, 0.6814993, 0.73521966, 1)
 text = "v1.0.0 | Godot 4.6"
 
 [node name="BottomSpacer" type="Control" parent="RootMargin/MainVBox/BottomBar" unique_id=1000000024]
