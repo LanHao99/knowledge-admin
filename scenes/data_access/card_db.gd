@@ -114,8 +114,6 @@ func get_due_cards(deck_id: int, queue_type: int, limit: int = 20) -> Dictionary
 	var now_day_index: int = int(now_ts / _SECONDS_PER_DAY)
 
 	var compare_value: int = now_day_index
-	if queue_type == CardEntity.QUEUE_LEARNING:
-		compare_value = now_ts
 
 	var sql := "SELECT * FROM cards WHERE deck_id = ? AND queue = ? AND due <= ? ORDER BY due ASC, id ASC"
 	var params: Array = [deck_id, queue_type, compare_value]
