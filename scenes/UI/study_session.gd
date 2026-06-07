@@ -220,7 +220,7 @@ func _on_session_started(_deck_id: int, _counts: Dictionary) -> void:
 func _on_queue_updated(counts: Dictionary) -> void:
 	if _study_progress_label == null:
 		return
-	var done: int = int(counts.get("total", 0)) - int(counts.get("remaining", 0))
+	var done: int = int(counts.get("done", 0))
 	var total: int = int(counts.get("total", 0))
 	if total > 0:
 		_study_progress_label.text = "%d / %d" % [done, total]
@@ -251,7 +251,7 @@ func show_completion(stats: Dictionary) -> void:
 	_set_state(StudyState.DONE)
 
 
-## 渲染完成统计面板（BBCode）。## 输入: stats (Dictionary) - 学习统计。
+## 渲染完成统计面板（BBCode），包含学习卡片剩余信息。## 输入: stats (Dictionary) - 学习统计。
 ## 输出: 无。
 func _show_completion_stats(stats: Dictionary) -> void:
 	var done: int = int(stats.get("done", 0))
@@ -274,6 +274,14 @@ func _show_completion_stats(stats: Dictionary) -> void:
 			CardEntity.RATING_GOOD:  good_count += 1
 			CardEntity.RATING_EASY:  easy_count += 1
 
+	var learning_info: String = ""
+	var learning_remaining: int = int(stats.get("learning_remaining", 0))
+	var next_due_secs: int = int(stats.get("next_due_secs", -1))
+	if learning_remaining > 0 and next_due_secs > 0:
+		learning_info = "\n\n还有 [b]%d[/b] 张学习卡片\n将在 [b]%s[/b] 后到期" % [learning_remaining, _format_duration(next_due_secs)]
+	elif learning_remaining > 0:
+		learning_info = "\n\n还有 [b]%d[/b] 张学习卡片" % learning_remaining
+
 	_completion_stats.text = (
 		"[center]"
 		+ "完成卡片数: [b]%d[/b]\n\n" % done
@@ -282,6 +290,7 @@ func _show_completion_stats(stats: Dictionary) -> void:
 		+ "困难: [color=#FF9933]%d[/color]  " % hard_count
 		+ "良好: [color=#33CC55]%d[/color]  " % good_count
 		+ "简单: [color=#3388FF]%d[/color]" % easy_count
+		+ learning_info
 		+ "[/center]"
 	)
 
@@ -327,6 +336,20 @@ func _set_state(new_state: StudyState) -> void:
 func _set_status_picker(text: String) -> void:
 	if _status_label != null:
 		_status_label.text = text
+
+## 将秒数格式化为可读文案（用于学习卡片到期提示）。## 输入: seconds (int) - 秒数。
+## 输出: String - "X分钟Y秒" / "X秒" 等。
+func _format_duration(seconds: int) -> String:
+	if seconds < 60:
+		return "%d秒" % seconds
+	if seconds < 3600:
+		var mins: int = seconds / 60
+		var secs: int = seconds % 60
+		if secs > 0:
+			return "%d分%d秒" % [mins, secs]
+		return "%d分钟" % mins
+	var hours: int = seconds / 3600
+	return "%d小时" % hours
 
 ## 将剧情进度条添加到 InStudyBar（由 study.gd 在初始化时调用）。## 输入: bar (StoryProgressBar)。
 ## 输出: 无。

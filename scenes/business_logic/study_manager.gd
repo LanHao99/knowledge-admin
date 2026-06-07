@@ -20,6 +20,7 @@ var _is_active: bool = false
 var _showing_back: bool = false
 var _question_shown_at_ms: int = 0
 var _done_count: int = 0
+var _initial_total: int = 0
 var _last_answer_stack: Array = []
 
 
@@ -81,6 +82,7 @@ func start_session(deck_id: int, new_limit: int = 20, review_limit: int = 100) -
 	_showing_back = false
 	_question_shown_at_ms = _now_msec()
 	_done_count = 0
+	_initial_total = _current_queue.size()
 	_last_answer_stack.clear()
 
 	var counts := {
@@ -286,7 +288,7 @@ func get_session_progress() -> Dictionary:
 		}
 
 	return {
-		"total": _done_count + _current_queue.size(),
+		"total": _initial_total,
 		"done": _done_count,
 		"remaining": _current_queue.size(),
 		"new_seen": _session.new_cards_seen,
@@ -311,13 +313,14 @@ func _slice_cards(cards: Array[CardEntity], limit: int) -> Array[CardEntity]:
 
 
 ## 计算当前队列分布统计。## 输入: 无。
-## 输出: Dictionary - `{new, learning, review, total, remaining}`。
+## 输出: Dictionary - `{new, learning, review, total, done, remaining}`。
 func _calculate_counts() -> Dictionary:
 	var stats := {
 		"new": 0,
 		"learning": 0,
 		"review": 0,
-		"total": _done_count + _current_queue.size(),
+		"total": _initial_total,
+		"done": _done_count,
 		"remaining": _current_queue.size()
 	}
 	for card in _current_queue:
@@ -331,7 +334,7 @@ func _calculate_counts() -> Dictionary:
 	return stats
 
 
-## 构建会话结束统计。## 输入: 无。
+## 构建会话结束统计，包含学习中卡片的剩余信息。## 输入: 无。
 ## 输出: Dictionary - 会话统计汇总。
 func _build_stats() -> Dictionary:
 	if _session == null:
@@ -339,7 +342,21 @@ func _build_stats() -> Dictionary:
 	var stats: Dictionary = _session.to_stats_dict()
 	stats["done"] = _done_count
 	stats["remaining"] = _current_queue.size()
+	stats["initial_total"] = _initial_total
 	stats["answers"] = _last_answer_stack.duplicate(true)
+
+	var learning_remaining: int = 0
+	var next_due_secs: int = -1
+	var now_ts: int = _now_timestamp()
+	for card in _current_queue:
+		if card.queue == CardEntity.QUEUE_LEARNING:
+			learning_remaining += 1
+			if card.due > now_ts:
+				var wait: int = card.due - now_ts
+				if next_due_secs < 0 or wait < next_due_secs:
+					next_due_secs = wait
+	stats["learning_remaining"] = learning_remaining
+	stats["next_due_secs"] = next_due_secs
 	return stats
 
 
@@ -352,6 +369,7 @@ func _reset_runtime_state() -> void:
 	_showing_back = false
 	_question_shown_at_ms = 0
 	_done_count = 0
+	_initial_total = 0
 	_last_answer_stack.clear()
 
 

@@ -227,7 +227,7 @@ func _on_card_answered(_card: CardEntity, rating: int, next_interval: String) ->
 
 ## queue_updated 回调：刷新顶部进度。
 func _on_queue_updated(counts: Dictionary) -> void:
-	var done: int = int(counts.get("total", 0)) - int(counts.get("remaining", 0))
+	var done: int = int(counts.get("done", 0))
 	var total: int = int(counts.get("total", 0))
 	_progress_label.text = "%d / %d" % [done, total]
 	if _current_card != null:
@@ -281,7 +281,7 @@ func _render_back() -> void:
 	_set_state(UIState.BACK)
 
 
-## 构建进度文本。
+## 构建进度文本（+1 表示当前正在展示的卡片尚未答完）。
 func _build_progress_text() -> String:
 	if _study_manager == null:
 		return "— / —"
