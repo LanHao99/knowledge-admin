@@ -15,3 +15,8 @@
 api.cfg
 .fsrs/
 
+# 排除临时文件
+.temp/
+*.tmp
+*.log
+*.bak
