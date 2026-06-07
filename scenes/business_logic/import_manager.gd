@@ -139,7 +139,7 @@ func _do_import(data_array: Array, mapping: Dictionary, deck_id: String, note_ty
 	# 4) 自动映射（若用户未提供）
 	var final_mapping: Dictionary = mapping
 	if mapping.is_empty():
-		final_mapping = _auto_map_fields(json_keys, note_type)
+		final_mapping = auto_map_fields(json_keys, note_type)
 	# 如果 mapping 是合法字典则直接使用
 	elif mapping is Dictionary and not mapping.is_empty():
 		final_mapping = mapping
@@ -252,7 +252,7 @@ func _validate_flat_structure(data_array: Array) -> Dictionary:
 ##   json_keys (Array[String]) - JSON 数据的键名列表。
 ##   note_type (NoteTypeEntity) - 目标笔记类型，提供 field_names。
 ## 输出: Dictionary - {json_key: note_type_field_name}。
-func _auto_map_fields(json_keys: Array[String], note_type: NoteTypeEntity) -> Dictionary:
+func auto_map_fields(json_keys: Array[String], note_type: NoteTypeEntity) -> Dictionary:
 	var field_names: Array[String] = note_type.get_field_names()
 	var mapping: Dictionary = {}
 	var used_fields: Array[String] = []

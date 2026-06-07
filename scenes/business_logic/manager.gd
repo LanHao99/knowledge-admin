@@ -12,9 +12,9 @@ class_name Manager
 # - 这个基类负责"如何安全地和数据库配合"
 
 signal manager_error(code: String, message: String)
-signal entity_created(entity_type: String, entity_id: int)
-signal entity_updated(entity_type: String, entity_id: int)
-signal entity_deleted(entity_type: String, entity_id: int)
+signal entity_created(entity_type: String, entity_id: Variant)
+signal entity_updated(entity_type: String, entity_id: Variant)
+signal entity_deleted(entity_type: String, entity_id: Variant)
 signal batch_operation_completed(entity_type: String, count: int)
 
 # 初始化数据库应用
@@ -42,26 +42,26 @@ func require_db_manager() -> bool: ## 要求 db_manager 必须存在，否则立
 
 
 ## 发出"实体已创建"通知信号。## 输入:
-##   entity_type (String) - 实体类型，如 "deck"、"note"、"card"。
-##   entity_id (int) - 实体主键 ID。
+##   entity_type (String) - 实体类型，如 "deck"、"note"、"card"、"notetype"。
+##   entity_id (Variant) - 实体主键 ID（int 或 String，兼容 TEXT 主键）。
 ## 输出: 无。
-func _notify_created(entity_type: String, entity_id: int) -> void:
+func _notify_created(entity_type: String, entity_id: Variant) -> void:
 	entity_created.emit(entity_type, entity_id)
 
 
 ## 发出"实体已更新"通知信号。## 输入:
-##   entity_type (String) - 实体类型，如 "deck"、"note"、"card"。
-##   entity_id (int) - 实体主键 ID。
+##   entity_type (String) - 实体类型，如 "deck"、"note"、"card"、"notetype"。
+##   entity_id (Variant) - 实体主键 ID（int 或 String，兼容 TEXT 主键）。
 ## 输出: 无。
-func _notify_updated(entity_type: String, entity_id: int) -> void:
+func _notify_updated(entity_type: String, entity_id: Variant) -> void:
 	entity_updated.emit(entity_type, entity_id)
 
 
 ## 发出"实体已删除"通知信号。## 输入:
-##   entity_type (String) - 实体类型，如 "deck"、"note"、"card"。
-##   entity_id (int) - 实体主键 ID。
+##   entity_type (String) - 实体类型，如 "deck"、"note"、"card"、"notetype"。
+##   entity_id (Variant) - 实体主键 ID（int 或 String，兼容 TEXT 主键）。
 ## 输出: 无。
-func _notify_deleted(entity_type: String, entity_id: int) -> void:
+func _notify_deleted(entity_type: String, entity_id: Variant) -> void:
 	entity_deleted.emit(entity_type, entity_id)
 
 # 数据库修改操作规范化，先检测再提交，若提交失败则回滚

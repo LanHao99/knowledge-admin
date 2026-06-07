@@ -21,6 +21,9 @@ var _done_btn: Button = null
 # 信号
 signal import_finished()
 
+# 防重复标志
+var _has_finished: bool = false
+
 
 ## 注入 ImportManager 依赖，构建 UI 并连接信号。## 输入: import_manager (ImportManager) - 导入管理器。
 ## 输出: 无。
@@ -151,6 +154,9 @@ func _on_import_progress(current: int, total: int) -> void:
 ## 导入完成信号回调——显示结果摘要和失败详情。## 输入: result (Dictionary) - 导入结果数据。
 ## 输出: 无。
 func _on_import_completed(result: Dictionary) -> void:
+	if _has_finished:
+		return
+	_has_finished = true
 	var data: Dictionary = result.get("data", {})
 	var imported: int = data.get("imported", 0)
 	var failed: int = data.get("failed", 0)
@@ -188,6 +194,9 @@ func _on_import_completed(result: Dictionary) -> void:
 ## 导入失败信号回调——显示错误信息。## 输入: error (Dictionary) - 错误数据。
 ## 输出: 无。
 func _on_import_failed(error: Dictionary) -> void:
+	if _has_finished:
+		return
+	_has_finished = true
 	_status_label.text = ""
 	_result_label.text = "❌ 导入失败: %s" % error.get("error", "未知错误")
 	_result_label.visible = true

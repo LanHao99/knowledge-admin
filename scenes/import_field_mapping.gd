@@ -3,7 +3,7 @@ class_name FieldMappingEditor
 
 ## 导入流程第2步——映射 JSON 字段到 NoteType 字段。
 ## 左侧显示 JSON 原始 key（只读），右侧每个 key 对应一个下拉选项（NoteType 字段名）。
-## 自动调用 import_manager._auto_map_fields() 预填充映射。
+## 自动调用 import_manager.auto_map_fields() 预填充映射。
 
 
 # 数据层
@@ -49,7 +49,7 @@ func load_mapping(note_type: NoteTypeEntity, json_keys: Array[String]) -> void:
 	_clear_rows()
 
 	# 自动映射
-	var auto_mapping: Dictionary = _import_manager._auto_map_fields(_json_keys, _note_type)
+	var auto_mapping: Dictionary = _import_manager.auto_map_fields(_json_keys, _note_type)
 
 	# 为每个 json_key 创建映射行
 	for jk in _json_keys:
@@ -255,7 +255,7 @@ func _on_auto_map_pressed() -> void:
 	if _note_type == null or _json_keys.is_empty():
 		return
 
-	var auto_mapping: Dictionary = _import_manager._auto_map_fields(_json_keys, _note_type)
+	var auto_mapping: Dictionary = _import_manager.auto_map_fields(_json_keys, _note_type)
 	for row_data in _mapping_rows:
 		var json_key: String = row_data["json_key"]
 		var option_btn: OptionButton = row_data["option_btn"]
