@@ -1,6 +1,6 @@
 extends Control
 ## AI 制卡助手 — 支持 DeepSeek API 对话制卡、文件上传、JSON Mode 自动导入。
-## System prompt 保存到 user://ai_settings.cfg，API Key 从 res://api.cfg 读取。
+## System prompt 保存到 user://ai_settings.cfg，API Key 优先从 user://api.cfg 读取（回退到 res://api.cfg），保存到 user://api.cfg。
 
 # ── UI 引用 ──
 @onready var _input_edit: TextEdit = $RootMargin/MainVBox/InputRow/InputEdit
@@ -14,6 +14,7 @@ extends Control
 @onready var _request: HTTPRequest = $HTTPRequest
 @onready var _settings_panel: PanelContainer = $RootMargin/MainVBox/SettingsPanel
 @onready var _prompt_edit: TextEdit = $RootMargin/MainVBox/SettingsPanel/SettingsMargin/SettingsVBox/PromptEdit
+@onready var _api_key_edit: LineEdit = $RootMargin/MainVBox/SettingsPanel/SettingsMargin/SettingsVBox/ApiKeyEdit
 @onready var _save_settings_btn: Button = $RootMargin/MainVBox/SettingsPanel/SettingsMargin/SettingsVBox/SettingsBtnRow/SaveSettingsBtn
 @onready var _reset_prompt_btn: Button = $RootMargin/MainVBox/SettingsPanel/SettingsMargin/SettingsVBox/SettingsBtnRow/ResetPromptBtn
 
@@ -92,6 +93,7 @@ func _load_api_key() -> void:
 	if _api_key == "" and cfg.load(API_CFG_PATH) == OK:
 		_api_key = cfg.get_value("api", "key", "")
 
+	_api_key_edit.text = _api_key
 	if _api_key == "" or _api_key.begins_with("sk-your-"):
 		_set_status("[color=#FFAA44]请在 user://api.cfg 中设置 API Key[/color]")
 
@@ -113,10 +115,18 @@ func _load_settings() -> void:
 
 func _on_settings_toggle() -> void:
 	_prompt_edit.text = _system_prompt
+	_api_key_edit.text = _api_key
 	_settings_panel.visible = not _settings_panel.visible
 
 
 func _on_save_settings() -> void:
+	var new_key := _api_key_edit.text.strip_edges()
+	if new_key != _api_key:
+		_api_key = new_key
+		var key_cfg := ConfigFile.new()
+		key_cfg.set_value("api", "key", _api_key)
+		key_cfg.save("user://api.cfg")
+
 	_system_prompt = _prompt_edit.text.strip_edges()
 	if _system_prompt == "":
 		_system_prompt = DEFAULT_SYSTEM_PROMPT
