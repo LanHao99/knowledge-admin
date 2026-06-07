@@ -74,7 +74,7 @@ static func check_and_show(scene_id: String, parent: Node) -> void:
 	, CONNECT_ONE_SHOT)
 	overlay.dialogue_finished.connect(_on_tutorial_finished.bind(scene_id, overlay))
 
-	parent.get_tree().root.add_child.call_deferred(overlay)
+	parent.get_tree().root.call_deferred("add_child", overlay)
 
 
 ## 教程对话结束回调：标记完成、保存、销毁 overlay。## 输入:
