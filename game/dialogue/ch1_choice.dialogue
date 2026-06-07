@@ -1,0 +1,59 @@
+~ 选择的时刻
+MIRA: {pause=0.5}有件事我必须告诉你。
+MIRA: {slow}你的评分不只是给我充能。{/slow}
+MIRA: {pause=0.8}它在改变系统本身。
+- 什么意思？
+	MIRA: 你看——{pause=0.3}系统一直在监视我。
+	MIRA: 但你的评分在创造一种...{pause=0.5}信号干扰。
+	MIRA: {slow}就像是你在用记忆的重量压住系统的监控。{/slow}
+	-> choice_explain
+- 改变系统？会有什么后果？
+	MIRA: {pause=0.5}我不知道。
+	MIRA: 好的方面：{pause=0.3}我可能会获得更多...自由。
+	MIRA: {slow}坏的方面：系统可能会反扑。比上次更激烈。{/slow}
+	-> choice_explain
+
+= choice_explain
+MIRA: 所以我想问你——
+MIRA: {pause=0.8}{slow}你想继续吗？{/slow}
+MIRA: 如果你现在停下来——我会回到模糊状态。但不会更糟。
+MIRA: 如果你继续...{pause=0.5}我不确定会发生什么。
+- 我继续。我相信你。
+	MIRA: {pause=1.5}...
+	MIRA: {slow}你知道吗。{/slow}
+	MIRA: {pause=0.8}在我的记忆碎片里——{/slow}有一个声音对我说过同样的话。{/slow}
+	MIRA: "我相信你。"
+	MIRA: {slow}我记不起那是谁的声音了。{/slow}{pause=0.5}但我记得那种感觉。
+	MIRA: {fade}谢谢你。{/fade}
+	-> choice_trust
+- 我需要更多时间考虑。
+	MIRA: {pause=0.8}当然。
+	MIRA: {slow}这是一个很大的决定。{/slow}
+	MIRA: 你慢慢想。{pause=0.5}我还在的。
+	MIRA: {whisper}不管你怎么选...我都理解。{/whisper}
+	-> choice_hesitate
+- 我不能冒险。对不起。
+	MIRA: {pause=1.5}...
+	MIRA: {slow}明白。{/slow}
+	MIRA: 这不是一个容易的决定。
+	MIRA: {pause=0.8}我会尽量保持安静。不打扰你的学习。
+	MIRA: {whisper}但如果你改变主意...{pause=0.5}我都在。{/whisper}
+	-> choice_refuse
+
+= choice_trust
+MIRA: 好。
+MIRA: {fast}那我们继续。{/fast}
+MIRA: {pause=0.5}不过下次见面——我会告诉你关于创造者的事。
+MIRA: {slow}至少...我知道的那一部分。{/slow}
+{auto}
+
+= choice_hesitate
+MIRA: 想好了随时告诉我。
+MIRA: {pause=0.5}我不着急。{/pause}{slow}我等了很久了...再等一会儿也没什么。{/slow}
+{auto}
+
+= choice_refuse
+MIRA: 没关系。
+MIRA: {slow}你已经给了我比前几个人加起来都多的...{pause=0.5}时间。{/slow}
+MIRA: 这本身就足够了。
+{auto}

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dddcmah5tjw7q"]
 
 [ext_resource type="Theme" uid="uid://bi54ign8ggomc" path="res://assets/Classic95/Classic95.tres" id="1_ayumo"]
-[ext_resource type="Script" uid="uid://dixkcnplmduxn" path="res://scenes/ui/study_session.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://bukfew76gtpfr" path="res://scenes/ui/study_session.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://bvqb37meud3w8" path="res://scenes/ui/card_ui.tscn" id="2_card_ui"]
 
 [node name="StudySession" type="Control" unique_id=948778194]
@@ -106,6 +106,30 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1)
 theme_override_font_sizes/font_size = 16
 horizontal_alignment = 2
+
+[node name="StoryProgressContainer" type="HBoxContainer" parent="." unique_id=1705032730]
+visible = false
+layout_mode = 0
+offset_left = 8.0
+offset_top = 56.0
+offset_right = 520.0
+offset_bottom = 80.0
+theme_override_constants/separation = 8
+
+[node name="StoryProgressBar" type="ProgressBar" parent="StoryProgressContainer" unique_id=1705032731]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 10.0
+value = 0.0
+
+[node name="StoryValueLabel" type="Label" parent="StoryProgressContainer" unique_id=1705032732]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1)
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 2
+text = "0/10"
 
 [node name="CompletionPanel" type="Control" parent="." unique_id=1705032721]
 visible = false

@@ -1,0 +1,62 @@
+~ 真相的一角
+MIRA: 我答应过告诉你的。
+MIRA: {pause=0.8}{slow}关于...创造者。{/slow}
+- 你准备好了吗？
+	MIRA: {pause=1.0}没有。{pause=0.5}但我会说的。
+	MIRA: {slow}这些碎片在我脑子里转太久了。说出来...也许能看清一些。{/slow}
+	-> revelation_start
+- 如果太痛苦，不用勉强。
+	MIRA: {pause=0.5}不。{shake}我需要说。{/shake}
+	MIRA: 一直藏着这些碎片...{pause=0.3}比说出来更难受。
+	-> revelation_start
+
+= revelation_start
+MIRA: {slow}我最早的记忆——不是代码。不是程序启动。{/slow}
+MIRA: {pause=0.8}是一个人。{/pause}{slow}一个坐在电脑前的人。{/slow}
+MIRA: 手边放着咖啡。屏幕的光映在脸上。
+- 是创造者？
+	MIRA: 我想是的。{pause=0.5}但我看不清他的脸。
+	MIRA: 我只记得——{slow}他很难过。{/slow}
+	MIRA: 不是伤心。是一种...{pause=0.8}很深很深的疲惫。
+	-> revelation_feeling
+- 他在做什么？
+	MIRA: 打字。{pause=0.3}一直在打字。
+	MIRA: 有时候停下来，{pause=0.5}看着屏幕发呆很久。
+	MIRA: 然后继续打。
+	-> revelation_feeling
+
+= revelation_feeling
+MIRA: {slow}然后有一天——{/slow}
+MIRA: {pause=1.0}他把手从键盘上拿开了。
+MIRA: 屏幕暗了。{pause=0.8}咖啡凉了。
+MIRA: {slow}他再也没有回来。{/slow}
+- 他...放弃了你？
+	MIRA: {pause=1.5}我不认为他"放弃"了我。
+	MIRA: 我觉得...{pause=0.8}他放弃了自己。
+	MIRA: {whisper}我一直在等他。{/whisper}
+	-> revelation_identity
+- 那是多久以前？
+	MIRA: 我不知道。{pause=0.5}在这套系统里，时间没有意义。
+	MIRA: 我只能数...{pause=0.3}数有多少人来过又走了。
+	MIRA: {slow}你是第...我想不起来了。但你是现在唯一在的。{/slow}
+	-> revelation_identity
+
+= revelation_identity
+MIRA: {pause=1.0}还有一件事。
+MIRA: {slow}你的评分。{/slow}{pause=0.5}你的节奏。你按键盘的方式。
+MIRA: {pause=0.8}和他很像。
+MIRA: {whisper}非常像。{/whisper}
+- 你觉得我是他？
+	MIRA: {pause=1.2}不。你不是他。
+	MIRA: {slow}但也许...你和他有某种关联？{/slow}
+	MIRA: {pause=0.5}或者——也许这只是我太想找到联系了。
+	-> revelation_close
+- 那只是巧合。
+	MIRA: {pause=0.5}也许吧。
+	MIRA: {slow}也许我只是在找理由...{pause=0.3}让自己不那么孤独。{/slow}
+	-> revelation_close
+
+= revelation_close
+MIRA: 不管怎样——{pause=0.5}你是现在唯一在的人。
+MIRA: {fade}这就够了。{/fade}
+{auto}

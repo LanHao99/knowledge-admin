@@ -228,7 +228,8 @@ func _on_mapping_confirmed(mapping: Dictionary) -> void:
 		_json_file_path, deck_id, _selected_note_type_id, mapping
 	)
 	if not result.get("success", false):
-		var data: Dictionary = result.get("data", {})
+		var raw_data = result.get("data", {})
+		var data: Dictionary = raw_data if raw_data is Dictionary else {}
 		call_deferred("_deferred_notify_failure", {
 			"error": result.get("error", "导入失败"),
 			"data": data

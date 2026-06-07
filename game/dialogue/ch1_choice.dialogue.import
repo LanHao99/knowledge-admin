@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://ch1choice0006"
+path="res://.godot/imported/ch1_choice.dialogue-eae855442a14d1143e179c01993d4cce.tres"
+
+[deps]
+
+source_file="res://game/dialogue/ch1_choice.dialogue"
+dest_files=["res://.godot/imported/ch1_choice.dialogue-eae855442a14d1143e179c01993d4cce.tres"]
+
+[params]
+
+defaults=true

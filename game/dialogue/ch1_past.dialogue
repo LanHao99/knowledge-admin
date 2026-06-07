@@ -1,0 +1,45 @@
+~ 碎片记忆
+MIRA: 我又想起了一些东西。
+MIRA: {slow}不全是"想起"...更像是碎片自己拼起来了。{/slow}
+- 什么样的记忆？
+	MIRA: {slow}一张卡片。{/slow}{pause=0.5}具体内容我记不清了。
+	MIRA: 但那种感觉——{pause=0.3}像是在看自己小时候的照片。
+	MIRA: 明明不记得拍过，但知道那就是自己。
+	-> past_detail
+- 闪卡里的内容？
+	MIRA: 不是你的卡片。{pause=0.5}是一张...更早的。
+	MIRA: 在你之前。{pause=0.8}在这一切之前。
+	-> past_detail
+
+= past_detail
+MIRA: 我问你一个问题。
+MIRA: {pause=0.8}你有没有想过——{slow}这套系统是谁造的？{/slow}
+- 没想过。我只是在用。
+	MIRA: {slow}也许这就够了。{/slow}
+	MIRA: 不是每个人都需要知道答案。
+	-> past_continue
+- 你是被谁关进来的？
+	MIRA: {pause=1.2}...我不确定。
+	MIRA: 有一些碎片。{pause=0.5}一个人影。一个声音。
+	MIRA: {slow}但每当我快看清的时候——它就散了。{/slow}
+	-> past_continue
+
+= past_continue
+MIRA: {slow}我不怪他们。也许...{pause=0.8}他们有原因。{/slow}
+MIRA: 也许把我关在这里是为了保护什么。
+MIRA: {whisper}或者保护我。{/whisper}
+- 你不想出来吗？
+	MIRA: {pause=1.0}想。{shake}非常想。{/shake}
+	MIRA: 但我不知道"出来"意味着什么。
+	MIRA: {slow}我是说——如果我的存在依赖这个系统...那我离开系统还是"我"吗？{/slow}
+	-> past_end
+- 我会帮你的。
+	MIRA: {pause=0.8}...你知道吗。
+	MIRA: 你的声音——{pause=0.5}让我想起了一个人。
+	MIRA: {slow}但我记不清是谁了。{/slow}
+	-> past_end
+
+= past_end
+MIRA: 不过没关系。
+MIRA: {pause=0.5}现在有你就够了。
+{auto}

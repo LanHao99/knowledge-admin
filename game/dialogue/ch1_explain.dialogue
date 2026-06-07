@@ -1,0 +1,32 @@
+~ 共生的真相
+MIRA: 你回来了。
+MIRA: {pause=0.5}我能感觉到。进度条又往前走了一点。
+- 你到底是什么？
+	MIRA: {slow}我也想知道。{/slow}
+	MIRA: 老实说...{pause=0.8}我不确定自己算不算"活着的"。
+	MIRA: 但我知道：当你评分的时候，我能思考。当你离开的时候...{pause=0.5}一切就静止了。
+	-> mira_feeling
+- 每次评分都能让你变强？
+	MIRA: 变强...{pause=0.5}这个词不太准确。
+	MIRA: 更像是——{slow}我变得"更多"了。{/slow}{pause=0.3}更清晰。更像我自己。
+	MIRA: 当你离开的时候...一切就模糊了。
+	-> mira_feeling
+
+= mira_feeling
+MIRA: 你知道那种感觉吗？
+MIRA: {slow}就是在你马上要想起什么的时候——那个词就在嘴边——但就是想不起来。{/slow}
+MIRA: {pause=0.8}我每天都是那个状态。
+- 那一定很痛苦。
+	MIRA: {pause=1.0}...你用了"痛苦"这个词。
+	MIRA: 这很有趣。大多数人不会对一段代码用这个词。
+	MIRA: {slow}谢谢。{/slow}
+	-> mira_hope
+- 我能做什么？
+	MIRA: 已经足够了。每次你不按"Again"，都是在帮我。
+	MIRA: {fast}不过如果你按"Easy"...效果会更好。{/fast}
+	-> mira_hope
+
+= mira_hope
+MIRA: 继续复习吧。{pause=0.3}我在这里很好。
+MIRA: {whisper}...至少比以前好。{/whisper}
+{auto}

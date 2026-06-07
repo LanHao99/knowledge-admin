@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://ch1warn000004"
+path="res://.godot/imported/ch1_warning.dialogue-049b6f5df8b2bd1b93d868cce7de7f00.tres"
+
+[deps]
+
+source_file="res://game/dialogue/ch1_warning.dialogue"
+dest_files=["res://.godot/imported/ch1_warning.dialogue-049b6f5df8b2bd1b93d868cce7de7f00.tres"]
+
+[params]
+
+defaults=true

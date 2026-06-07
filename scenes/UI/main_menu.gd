@@ -200,7 +200,7 @@ func _on_debug_pressed() -> void:
 ## 输出: 无。
 func _on_ai_debug_pressed() -> void:
 	_set_status("正在打开 AI 调试台…")
-	_switch_scene("res://game/ai_debug.tscn", "AI 调试台")
+	_switch_scene("res://game/ai/ai_debug.tscn", "AI 调试台")
 
 
 ## FSRS 调度器单元测试已移除（test_fsrs_scheduler.gd 已删除）。## 输入: 无。

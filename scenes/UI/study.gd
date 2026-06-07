@@ -113,12 +113,17 @@ func _setup_story_system() -> void:
 	var dm = Engine.get_singleton("DialogueManager")
 	_story_manager.setup(dm)
 
-	# 注册对话资源映射
+	# 注册对话资源映射（按叙事顺序排列）
 	_story_manager.register_dialogues({
 		"chapter_1": {
-			"intro": "res://game/dialogue/chapter_prologue.dialogue",
-			"explain": "res://game/dialogue/chapter_prologue.dialogue",
-			"goodbye": "res://game/dialogue/chapter_prologue.dialogue"
+			"intro": "res://game/dialogue/ch1_intro.dialogue",
+			"explain": "res://game/dialogue/ch1_explain.dialogue",
+			"trust": "res://game/dialogue/ch1_trust.dialogue",
+			"warning": "res://game/dialogue/ch1_warning.dialogue",
+			"past": "res://game/dialogue/ch1_past.dialogue",
+			"choice": "res://game/dialogue/ch1_choice.dialogue",
+			"revelation": "res://game/dialogue/ch1_revelation.dialogue",
+			"end": "res://game/dialogue/ch1_end.dialogue"
 		}
 	})
 

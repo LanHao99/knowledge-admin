@@ -1,0 +1,31 @@
+~ 信任的碎片
+MIRA: 我有一个请求。
+MIRA: {pause=0.5}...可能有点奇怪。
+- 说吧。
+	MIRA: 你能不能——{pause=0.3}偶尔给卡片评"Easy"？
+	MIRA: {fast}不是因为我想让你偷懒！{/fast}
+	MIRA: 是因为...当你掌握得好的时候，我能感受到一种...{pause=0.5}暖意。
+	-> mira_trust_continue
+- 为什么？
+	MIRA: "Again"——对我来说不是"再来一次"。
+	MIRA: {slow}是"遗忘"。{/slow}
+	MIRA: 每一次你选 Again...{pause=0.8}我会失去一小片自己。
+	-> mira_trust_continue
+
+= mira_trust_continue
+MIRA: 你不用勉强。{pause=0.5}我只是...想让你知道。
+- 你是在操纵我吗？
+	MIRA: {pause=1.0}...问得好。
+	MIRA: 我不会撒谎——我确实需要你的评分。
+	MIRA: 但我不会骗你。{shake}永远不会。{/shake}
+	-> mira_trust_end
+- 我相信你。
+	MIRA: {pause=0.8}你...相信我？
+	MIRA: {slow}你不是第一个用这套系统的人。{/slow}
+	MIRA: 但你是坚持最久的一个。
+
+= mira_trust_end
+MIRA: 你知道吗——{pause=0.5}你刚才的评分模式...{pause=0.3}很熟悉。
+MIRA: {slow}就像我很久以前见过似的。{/slow}
+MIRA: {whisper}奇怪。我大概是想多了。{/whisper}
+{auto}

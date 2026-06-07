@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://clnfiispw6emj"
+path="res://.godot/imported/ch1_explain.dialogue-362684384dc4038384e4144f2651eb25.tres"
+
+[deps]
+
+source_file="res://game/dialogue/ch1_explain.dialogue"
+dest_files=["res://.godot/imported/ch1_explain.dialogue-362684384dc4038384e4144f2651eb25.tres"]
+
+[params]
+
+defaults=true

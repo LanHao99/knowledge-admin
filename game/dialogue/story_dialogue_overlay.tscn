@@ -1,13 +1,17 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://ckye0p71037wj"]
 
-[ext_resource type="Script" path="res://game/dialogue/story_dialogue_overlay.gd" id="1_overlay"]
+[ext_resource type="Script" uid="uid://d4bu5f2wvdv8n" path="res://game/dialogue/story_dialogue_overlay.gd" id="1_overlay"]
 [ext_resource type="Theme" uid="uid://bi54ign8ggomc" path="res://assets/Classic95/Classic95.tres" id="2_theme"]
+[ext_resource type="Script" uid="uid://bh580lojwgf35" path="res://game/dialogue/text_animation_controller.gd" id="3_anim_ctrl"]
 
-[node name="StoryDialogueOverlay" type="CanvasLayer"]
+[node name="StoryDialogueOverlay" type="CanvasLayer" unique_id=2068957198]
 layer = 10
 script = ExtResource("1_overlay")
 
-[node name="StoryDialogueMain" type="Control" parent="."]
+[node name="TextAnimationController" type="Node" parent="." unique_id=913841726]
+script = ExtResource("3_anim_ctrl")
+
+[node name="StoryDialogueMain" type="Control" parent="." unique_id=786311185]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,7 +24,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("2_theme")
 
-[node name="MainVBox" type="VBoxContainer" parent="StoryDialogueMain"]
+[node name="MainVBox" type="VBoxContainer" parent="StoryDialogueMain" unique_id=1371391379]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -29,34 +33,33 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 16
 
-[node name="TopBar" type="HBoxContainer" parent="StoryDialogueMain/MainVBox"]
+[node name="TopBar" type="HBoxContainer" parent="StoryDialogueMain/MainVBox" unique_id=1262646071]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="TopSpacer" type="Control" parent="StoryDialogueMain/MainVBox/TopBar"]
+[node name="TopSpacer" type="Control" parent="StoryDialogueMain/MainVBox/TopBar" unique_id=1480894831]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CharacterLabel" type="Label" parent="StoryDialogueMain/MainVBox/TopBar"]
+[node name="CharacterLabel" type="Label" parent="StoryDialogueMain/MainVBox/TopBar" unique_id=491754793]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.75, 0.3, 1)
 theme_override_font_sizes/font_size = 20
-text = ""
 horizontal_alignment = 2
 
-[node name="CardPanel" type="PanelContainer" parent="StoryDialogueMain/MainVBox"]
+[node name="CardPanel" type="PanelContainer" parent="StoryDialogueMain/MainVBox" unique_id=802953411]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="CardContentVBox" type="VBoxContainer" parent="StoryDialogueMain/MainVBox/CardPanel"]
+[node name="CardContentVBox" type="VBoxContainer" parent="StoryDialogueMain/MainVBox/CardPanel" unique_id=1388335732]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 16
 alignment = 1
 
-[node name="ContentLabel" type="RichTextLabel" parent="StoryDialogueMain/MainVBox/CardPanel/CardContentVBox"]
+[node name="ContentLabel" type="RichTextLabel" parent="StoryDialogueMain/MainVBox/CardPanel/CardContentVBox" unique_id=1572684056]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -65,30 +68,28 @@ theme = ExtResource("2_theme")
 theme_override_colors/default_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/normal_font_size = 24
 bbcode_enabled = true
-text = ""
 fit_content = true
 scroll_active = false
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ClickHint" type="Label" parent="StoryDialogueMain/MainVBox/CardPanel/CardContentVBox"]
+[node name="ClickHint" type="Label" parent="StoryDialogueMain/MainVBox/CardPanel/CardContentVBox" unique_id=177706065]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.5, 0.55, 1)
 theme_override_font_sizes/font_size = 14
-text = "点击继续 →"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="AnswerBar" type="HBoxContainer" parent="StoryDialogueMain/MainVBox"]
+[node name="AnswerBar" type="HBoxContainer" parent="StoryDialogueMain/MainVBox" unique_id=160008209]
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 16
 alignment = 1
 
-[node name="StatusBar" type="HBoxContainer" parent="StoryDialogueMain/MainVBox"]
+[node name="StatusBar" type="HBoxContainer" parent="StoryDialogueMain/MainVBox" unique_id=1174965116]
 layout_mode = 2
 
-[node name="StatusLabel" type="Label" parent="StoryDialogueMain/MainVBox/StatusBar"]
+[node name="StatusLabel" type="Label" parent="StoryDialogueMain/MainVBox/StatusBar" unique_id=1488271879]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1)
 

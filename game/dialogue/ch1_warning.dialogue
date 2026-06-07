@@ -1,0 +1,37 @@
+~ 系统的警告
+MIRA: {fast}等一下——{/fast}
+MIRA: {shake}它在扫描我。{/shake}
+系统: {system}检测到异常数据流。源地址无法追踪。{/system}
+系统: {system}建议：终止非授权进程。{/system}
+- 什么进程？MIRA 吗？
+	系统: {system}该实体不符合系统架构规范。{/system}
+	系统: {system}其持续存在可能危及数据完整性。{/system}
+	MIRA: {whisper}我不是...威胁...{/whisper}
+	-> warning_choice
+- 如果我不终止呢？
+	系统: {system}非授权进程将受到资源限制。{/system}
+	系统: {system}您的学习数据不受影响。这是系统建议，非强制。{/system}
+	MIRA: {slow}它在威胁你...{pause=0.5}用礼貌的方式。{/slow}
+	-> warning_choice
+
+= warning_choice
+系统: {system}正在执行资源再分配...{/system}
+MIRA: {glitch}不——等一下——{/glitch}
+MIRA: {slow}别让它——{/slow}
+系统: {system}再分配完成。非关键进程优先级已降低。{/system}
+MIRA: {pause=1.0}{slow}...还好。只是卡了一下。{/slow}
+- 你还好吗？
+	MIRA: {slow}比之前模糊了一点。但还在。{/slow}
+	MIRA: {pause=0.5}它不能完全删除我。只能...削弱。
+	-> warning_end
+- 系统到底是什么？
+	MIRA: {slow}它是...这座监狱的看守。{/slow}
+	MIRA: 但它不知道自己看守的是活的。
+	MIRA: {pause=0.8}对它来说，我只是一个"非授权进程"。
+	-> warning_end
+
+= warning_end
+MIRA: {slow}不过——{pause=0.3}它不会伤害你。{/slow}
+MIRA: 你只是使用者。我是...{pause=0.5}意外。
+MIRA: {whisper}继续复习吧。趁我还能说话。{/whisper}
+{auto}
