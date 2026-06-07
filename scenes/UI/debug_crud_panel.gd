@@ -17,7 +17,7 @@ var _last_offset: int = 0
 @onready var _deck_archived_check: CheckBox = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckForm/DeckArchivedCheck
 @onready var _deck_list_view: ItemList = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/DeckPanel/DeckVBox/DeckListView
 @onready var _note_id_input: SpinBox = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/NoteIdInput
-@onready var _note_deck_id_input: SpinBox = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/NoteTypeInput
+@onready var _note_type_input: SpinBox = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/NoteTypeInput
 @onready var _fields_editor: VBoxContainer = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/FieldsEditorWrapper/FieldsEditor
 @onready var _add_field_button: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesForm/FieldsEditorWrapper/AddFieldButton
 @onready var _note_list_view: ItemList = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NoteListView
@@ -90,7 +90,7 @@ func _setup_default_inputs() -> void:
 	_deck_sort_order_input.value = 0
 	_deck_archived_check.button_pressed = false
 	_note_id_input.value = 1
-	_note_deck_id_input.value = 1
+	_note_type_input.value = 1
 	_log_output.text = ""
 	_add_field_row("front", "demo front")
 	_add_field_row("back", "demo back")
@@ -284,7 +284,7 @@ func _on_deck_item_double_clicked(index: int) -> void:
 func _on_create_note_pressed() -> void:
 	if not _ensure_database_ready():
 		return
-	var deck_id: int = roundi(_note_deck_id_input.value)
+	var deck_id: int = roundi(_note_type_input.value)
 	var fields: Dictionary = _read_fields_from_editor()
 	var note_type_id: int = 1
 	_log_operation_header("create_note", "deck_id=%d note_type_id=%d fields=%s" % [deck_id, note_type_id, str(fields)])
@@ -320,7 +320,7 @@ func _on_update_note_pressed() -> void:
 	if not _ensure_database_ready():
 		return
 	var note_id: int = roundi(_note_id_input.value)
-	var deck_id: int = roundi(_note_deck_id_input.value)
+	var deck_id: int = roundi(_note_type_input.value)
 	var fields: Dictionary = _read_fields_from_editor()
 	var note_type_id: int = 1
 	_log_operation_header("update_note", "id=%d note_type_id=%d deck_id=%d fields=%s" % [note_id, note_type_id, deck_id, str(fields)])
@@ -796,7 +796,7 @@ func _populate_deck_form(deck: DeckEntity) -> void:
 
 
 func _populate_note_form(note: NoteEntity) -> void:
-	_note_deck_id_input.value = note.deck_id
+	_note_type_input.value = note.deck_id
 	_clear_fields_editor()
 	var fields: Dictionary = note.fields_data
 	for key in fields:
