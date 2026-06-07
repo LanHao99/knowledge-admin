@@ -211,6 +211,8 @@ func enter_learning(_deck_id: int) -> void:
 	_exiting = false
 	_deck_picker.visible = false
 	_in_study_bar.visible = true
+	_story_progress_bar.visible = true
+	_story_value_label.visible = true
 	_set_state(StudyState.LEARNING)
 
 
@@ -370,6 +372,9 @@ func set_story_progress(progress: StoryProgress, threshold: int = 10) -> void:
 	_story_progress = progress
 	_story_threshold = max(1, threshold)
 	refresh_story_display()
+	# 初始化时不显示进度条，等待 enter_learning 时 InStudyBar 统一控制
+	_story_progress_bar.visible = false
+	_story_value_label.visible = false
 
 
 ## 根据评分累加剧情进度。## 输入: rating (int) - 评分值 (1~4)。
