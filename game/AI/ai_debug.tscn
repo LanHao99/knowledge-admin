@@ -47,12 +47,18 @@ text = "🤖 AI 调试控制台"
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="OutputEdit" type="TextEdit" parent="RootMargin/MainVBox" unique_id=705032713]
+[node name="ChatScroll" type="ScrollContainer" parent="RootMargin/MainVBox" unique_id=705032713]
 layout_mode = 2
 size_flags_vertical = 3
-placeholder_text = "AI 响应将显示在这里…"
-editable = false
-wrap_mode = 1
+follow_focus = true
+
+[node name="ChatDisplay" type="RichTextLabel" parent="RootMargin/MainVBox/ChatScroll" unique_id=705032719]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
 
 [node name="InputRow" type="HBoxContainer" parent="RootMargin/MainVBox" unique_id=705032714]
 layout_mode = 2

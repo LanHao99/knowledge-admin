@@ -1,12 +1,13 @@
 extends Control
 ## AI 调试控制台，用于测试 HTTPRequest 调用 DeepSeek API。
-## 用 Godot 内置 HTTPRequest 节点发送 OpenAI 兼容请求。
+## 支持多轮对话滚动显示，完整上下文记忆。
 
 
 # ── UI 引用 ──
 @onready var _input_edit: TextEdit = $RootMargin/MainVBox/InputRow/InputEdit
 @onready var _send_btn: Button = $RootMargin/MainVBox/InputRow/SendBtn
-@onready var _output_edit: TextEdit = $RootMargin/MainVBox/OutputEdit
+@onready var _chat_scroll: ScrollContainer = $RootMargin/MainVBox/ChatScroll
+@onready var _chat_display: RichTextLabel = $RootMargin/MainVBox/ChatScroll/ChatDisplay
 @onready var _status_label: Label = $RootMargin/MainVBox/StatusBar/StatusLabel
 @onready var _back_btn: Button = $RootMargin/MainVBox/TopBar/BackBtn
 @onready var _request: HTTPRequest = $HTTPRequest
@@ -15,8 +16,15 @@ extends Control
 const API_URL: String = "https://api.deepseek.com/v1/chat/completions"
 const API_CFG_PATH: String = "res://api.cfg"
 const MODEL: String = "deepseek-chat"
+const MAX_HISTORY_TURNS: int = 20  ## 每次请求携带的最大对话轮数
 
-var _api_key: String = ""  ## 从 api.cfg 读取的密钥，不在代码中硬编码
+var _api_key: String = ""
+
+## 对话历史数组，元素为 {role: String, content: String}
+var _conversation_history: Array[Dictionary] = []
+
+## 系统提示词
+var _system_prompt: String = "你是一个知识学习助手的调试台。回答简洁。"
 
 
 ## 连接按钮信号和 HTTP 回调。## 输入: 无。
@@ -42,8 +50,7 @@ func _load_api_key() -> void:
 		_set_status("[color=#FFAA44]请编辑 api.cfg 填入 API Key[/color]")
 
 
-## 发送按钮回调：构建 JSON 并通过 HTTPRequest 发送。## 输入: 无。
-## 输出: 无。
+## 发送按钮回调：记录用户消息、构建带上下文的 JSON 并发送。
 func _on_send_pressed() -> void:
 	var user_text := _input_edit.text.strip_edges()
 	if user_text == "":
@@ -51,18 +58,23 @@ func _on_send_pressed() -> void:
 		return
 
 	if _api_key == "":
-		_append_output("[color=#FF6666]请先在 api.cfg 中设置 API Key[/color]")
+		_append_chat_bubble("system", "请先在 api.cfg 中设置 API Key")
+		_render_chat()
 		return
 
 	_send_btn.disabled = true
 	_set_status("正在请求 AI…")
 
+	# 记录用户消息
+	_conversation_history.append({"role": "user", "content": user_text})
+	_render_chat()
+	_input_edit.text = ""
+
+	var messages: Array[Dictionary] = _build_messages(user_text)
+
 	var body := {
 		"model": MODEL,
-		"messages": [
-			{"role": "system", "content": "你是一个知识学习助手的调试台。回答简洁。"},
-			{"role": "user", "content": user_text}
-		],
+		"messages": messages,
 		"max_tokens": 512,
 		"temperature": 0.7
 	}
@@ -89,7 +101,8 @@ func _on_response(_result: int, code: int, _headers: PackedStringArray, body: Pa
 		var raw := body.get_string_from_utf8()
 		if raw.length() > 500:
 			raw = raw.substr(0, 500) + "…"
-		_append_output("[color=#FFAA44]错误响应:[/color]\n" + raw)
+		_append_chat_bubble("error", raw)
+		_render_chat()
 		return
 
 	var json := JSON.new()
@@ -106,19 +119,68 @@ func _on_response(_result: int, code: int, _headers: PackedStringArray, body: Pa
 
 	var message: Dictionary = choices[0].get("message", {})
 	var content: String = message.get("content", "")
-	_append_output("[b]AI:[/b] " + content)
+
+	# 记录 AI 回复
+	_conversation_history.append({"role": "assistant", "content": content})
+	_render_chat()
 	_set_status("就绪")
-	_input_edit.text = ""
 
 
-## 向输出区域追加文本。## 输入: text (String) - 要追加的 BBCode 文本。
+## 构建发送给 API 的 messages 数组（含系统提示词 + 最近 N 轮历史）。## 输入: _unused (无)。
+## 输出: Array[Dictionary]。
+func _build_messages(_unused: String = "") -> Array[Dictionary]:
+	var messages: Array[Dictionary] = []
+	messages.append({"role": "system", "content": _system_prompt})
+
+	var start_idx: int = max(_conversation_history.size() - MAX_HISTORY_TURNS * 2, 0)
+	for i in range(start_idx, _conversation_history.size()):
+		messages.append(_conversation_history[i].duplicate(true))
+
+	return messages
+
+
+## 追加一条对话气泡到聊天显示（仅修改渲染缓冲，不发请求）。## 输入:
+##   role (String) - "user" / "assistant" / "system" / "error"。
+##   content (String) - 对话文本。
 ## 输出: 无。
-func _append_output(text: String) -> void:
-	if _output_edit.text != "":
-		_output_edit.text += "\n\n"
-	_output_edit.text += text
-	# 滚动到底部
-	_output_edit.set_caret_line(_output_edit.get_line_count() - 1)
+func _append_chat_bubble(role: String, content: String) -> void:
+	_conversation_history.append({"role": role, "content": content})
+
+
+## 从 _conversation_history 重新渲染整个聊天区域（BBCode 格式化）。## 输入: 无。
+## 输出: 无。
+func _render_chat() -> void:
+	if _chat_display == null:
+		return
+
+	var bbcode: String = ""
+	for msg in _conversation_history:
+		var role: String = msg.get("role", "")
+		var text: String = msg.get("content", "")
+
+		match role:
+			"user":
+				bbcode += "[right][color=#66AAFF][b]你[/b][/color] %s[/right]\n" % text
+			"assistant":
+				bbcode += "[color=#33CC55][b]AI[/b][/color] %s\n\n" % text
+			"error":
+				bbcode += "[color=#FFAA44][b]错误[/b][/color]\n%s\n\n" % text
+			"system":
+				bbcode += "[color=#FF6666][b]系统[/b][/color] %s\n\n" % text
+
+	_chat_display.text = bbcode
+	_scroll_to_bottom.call_deferred()
+
+
+## 将 ScrollContainer 滚动到底部（deferred 调用确保 RichTextLabel 已更新布局）。## 输入: 无。
+## 输出: 无。
+func _scroll_to_bottom() -> void:
+	if _chat_scroll == null:
+		return
+	var vbar := _chat_scroll.get_v_scroll_bar()
+	if vbar != null:
+		await get_tree().process_frame
+		vbar.value = vbar.max_value
 
 
 ## 返回主菜单。## 输入: 无。
