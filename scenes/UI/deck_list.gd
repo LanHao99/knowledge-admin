@@ -7,6 +7,10 @@ extends Control
 
 # ── 数据层 ──
 var _deck_manager: DeckManager = null
+var _notetype_manager: NoteTypeManager = null
+var _import_manager: ImportManager = null
+var _note_manager: NoteManager = null
+var _deck_db: DeckDB = null
 
 # ── 顶部栏 ──
 @onready var _back_btn: Button = $RootMargin/MainVBox/TopBar/BackBtn
@@ -27,6 +31,7 @@ var _deck_manager: DeckManager = null
 @onready var _archive_check: CheckButton = $RootMargin/MainVBox/EditPanel/EditVBox/ActionBar/ArchiveCheck
 @onready var _save_btn: Button = $RootMargin/MainVBox/EditPanel/EditVBox/ActionBar/SaveBtn
 @onready var _delete_btn: Button = $RootMargin/MainVBox/EditPanel/EditVBox/ActionBar/DeleteBtn
+@onready var _import_btn: Button = $RootMargin/MainVBox/EditPanel/EditVBox/ActionBar/ImportBtn
 
 # ── 新建对话框 ──
 @onready var _new_dialog: ConfirmationDialog = $NewDeckDialog
@@ -72,6 +77,7 @@ func _bind_actions() -> void:
 	_close_edit_btn.pressed.connect(_on_close_edit_pressed)
 	_save_btn.pressed.connect(_on_save_pressed)
 	_delete_btn.pressed.connect(_on_delete_pressed)
+	_import_btn.pressed.connect(_on_import_pressed)
 	_new_dialog.confirmed.connect(_on_new_dialog_confirmed)
 
 
@@ -99,6 +105,23 @@ func _ensure_manager_ready() -> bool:
 	_deck_manager.entity_created.connect(_on_deck_created)
 	_deck_manager.entity_updated.connect(_on_deck_updated)
 	_deck_manager.entity_deleted.connect(_on_deck_deleted)
+
+	_notetype_manager = NoteTypeManager.new()
+	add_child(_notetype_manager)
+	if not _notetype_manager.setup(db_path):
+		push_error("[DeckList] NoteTypeManager 初始化失败")
+		return false
+
+	_note_manager = NoteManager.new()
+	add_child(_note_manager)
+	if not _note_manager.setup(db_path):
+		push_error("[DeckList] NoteManager 初始化失败")
+		return false
+
+	_deck_db = _deck_manager.get_deck_db()
+	_import_manager = ImportManager.new()
+	add_child(_import_manager)
+	_import_manager.setup(_note_manager, _notetype_manager, _deck_db)
 
 	return true
 
@@ -453,6 +476,34 @@ func _switch_scene(path: String, label: String) -> void:
 		_set_status("[color=#FF6666]场景不存在: %s[/color]" % label)
 		return
 	get_tree().change_scene_to_file(path)
+
+
+# ──────────────────────────────────────────────────────────────
+# 导入 JSON
+# ──────────────────────────────────────────────────────────────
+
+
+## "导入 JSON"按钮——打开导入向导并预填当前编辑中的牌组。## 输入: 无。
+## 输出: 无。
+func _on_import_pressed() -> void:
+	if _editing_deck_id <= 0:
+		_set_status("[color=#FF6666]请先双击牌组打开编辑面板[/color]")
+		return
+	if _import_manager == null or _notetype_manager == null or _note_manager == null or _deck_db == null:
+		_set_status("[color=#FF6666]管理器未初始化[/color]")
+		return
+
+	var scene := load("res://scenes/import_main.tscn") as PackedScene
+	if scene == null:
+		_set_status("[color=#FF6666]导入模块加载失败[/color]")
+		return
+	var wizard: ImportMain = scene.instantiate()
+	if wizard == null:
+		_set_status("[color=#FF6666]导入模块实例化失败[/color]")
+		return
+	add_child(wizard)
+	wizard.setup(_notetype_manager, _import_manager, _note_manager, _deck_db)
+	wizard.select_deck_by_id(_editing_deck_id)
 
 
 ## 设置底部状态栏文本（支持 BBCode）。## 输入: text (String)。

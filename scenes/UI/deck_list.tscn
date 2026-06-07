@@ -120,6 +120,11 @@ theme_override_constants/separation = 8
 layout_mode = 2
 text = "归档"
 
+[node name="ImportBtn" type="Button" parent="RootMargin/MainVBox/EditPanel/EditVBox/ActionBar" unique_id=-1294967274]
+custom_minimum_size = Vector2(120, 36)
+layout_mode = 2
+text = "📥 导入 JSON"
+
 [node name="ActionSpacer" type="Control" parent="RootMargin/MainVBox/EditPanel/EditVBox/ActionBar" unique_id=-1294967271]
 layout_mode = 2
 size_flags_horizontal = 3

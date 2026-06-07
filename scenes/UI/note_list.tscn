@@ -61,7 +61,6 @@ allow_reselect = true
 hide_root = true
 
 [node name="EditPanel" type="PanelContainer" parent="RootMargin/MainVBox" unique_id=2000000010]
-visible = false
 layout_mode = 2
 
 [node name="EditVBox" type="VBoxContainer" parent="RootMargin/MainVBox/EditPanel" unique_id=2000000011]
