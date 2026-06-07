@@ -214,3 +214,33 @@ Windows 部分编辑器（记事本、VS Code 某些编码设置）保存 UTF-8 
 - Source: debugging
 - Related Files: scenes/business_logic/manager.gd, scenes/data_access/db_manager.gd, scenes/ui/card_ui.gd
 - Tags: bom, encoding, class_name, godot-parser, cascade-failure, git-hooks
+
+---
+
+## [LRN-20260607-001] insight
+
+**Logged**: 2026-06-07T16:00:00+08:00
+**Priority**: high
+**Status**: pending
+**Area**: backend
+
+### Summary
+FSRS 调度器中 LEARNING 卡片需在 study_manager 层面保留在队列中，而非在非 AGAIN 评分时直接丢弃
+
+### Details
+`study_manager.answer()` 的重入队条件（line 180）仅检查 `rating == AGAIN`，忽略了 FSRS 的关键特性：HARD/GOOD 评分在非最终步进时也保持卡片在 QUEUE_LEARNING，且 `due` 为未来时间戳。当用户对新卡片选"困难"后，调度器正确地将卡片设为 LEARNING（due=now+330s），但 study_manager 将其从队列移除导致队列清空 → 立即触发 `end_session()` → 完成面板弹出。
+
+**教训**：FSRS 的"毕业"定义是 `step=-1, queue=REVIEW`，而非"非 AGAIN 评分"。任何调度后 `queue==LEARNING` 的卡片都应保留在会话队列中，因为它们会在同一天内再次到期。
+
+**修复要点**：
+1. 重入队条件扩展为 `rating==AGAIN or next_queue==QUEUE_LEARNING`
+2. 推进到下一张卡片前检查 `due` 时间戳，LEARNING 卡未到期时跳过
+3. REVIEW 卡的 `due` 是天索引而非秒时间戳，直接比较会产生偏差——但 REVIEW 卡入队条件就是 `due_day <= today`，一律视为已到期即可
+
+### Suggested Action
+后续若实现"等待倒计时"功能（所有卡片都未到期时显示倒计时而非结束会话），可在到期检查的 `not found_due` 分支增加 Timer 逻辑。
+
+### Metadata
+- Source: bug_fix
+- Related Files: scenes/business_logic/study_manager.gd, src/scheduler/fsrs_scheduler.gd
+- Tags: fsrs, scheduler, learning-queue, session-lifecycle, due-timestamp
