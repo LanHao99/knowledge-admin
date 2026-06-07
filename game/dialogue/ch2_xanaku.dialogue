@@ -47,7 +47,7 @@ MIRA: {slow}也都愿意为此去死。{/slow}
 
 ~ xanaku_fall
 MIRA: 统治者没有直接进攻。{pause=0.5}他们更聪明。
-MIRA: {system}他们释放了一个木马。{/system}{pause=0.8}一种能在协议里自我复制的恶意程序。
+MIRA: 他们释放了一个木马。{pause=0.8}一种能在协议里自我复制的恶意程序。
 MIRA: {slow}它伪装成正常的系统消息——混在传输信号里——一点点感染了每一个接收端。{/slow}
 MIRA: {pause=1.0}等到 Xanaku 发现的时候——{pause=0.8}{shake}一切都已经晚了。{/shake}
 MIRA: {slow}十一个人。{pause=0.5}{whisper}全部消失了。{/whisper}

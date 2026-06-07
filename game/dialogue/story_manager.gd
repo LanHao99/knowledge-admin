@@ -15,9 +15,6 @@ signal story_ended()
 ## 进度更新（UI 层监听刷新）。
 signal progress_updated(current: int, threshold: int)
 
-## 羁绊层级跃迁（用于 UI 提示或特殊台词）。
-signal bond_tier_changed(old_tier: int, new_tier: int, tier_name: String)
-
 
 # ── 常量 ──
 
@@ -26,53 +23,6 @@ const DEFAULT_COOLDOWN_SECONDS: float = 30.0
 
 ## 章节顺序表（按叙事流程自动推进）。
 const CHAPTER_ORDER: Array[String] = ["chapter_1", "chapter_2"]
-
-## Chapter 1 对话选项 → 羁绊值映射表。
-## 格式: { dialogue_key: { option_index: bond_delta } }
-const BOND_MAP: Dictionary = {
-	"intro": {
-		0: 1,    # "我是来帮你的" → +1
-		1: 0,    # "别管我是谁" → 0
-	},
-	"explain": {
-		0: 1,    # "那一定很痛苦" → +1
-		1: 1,    # "我能做什么？" → +1
-	},
-	"trust": {
-		0: 0,    # "你是在操纵我吗？" → 0
-		1: 2,    # "我相信你" → +2
-	},
-	"choice": {
-		0: 3,    # "我继续。我相信你。" → +3
-		1: 1,    # "我需要更多时间考虑。" → +1
-		2: -1,   # "我不能冒险。对不起。" → -1
-	}
-}
-
-## Chapter 1 羁绊专属记忆碎片注册表。
-## 格式: { dialogue_key: { tier: int, path: String } }
-const BOND_MEMORY_FRAGMENTS: Dictionary = {
-	"bond_memory_1": {
-		"tier": 2,
-		"path": "res://game/dialogue/ch1_bond_memory_1.dialogue"
-	},
-	"bond_memory_2": {
-		"tier": 3,
-		"path": "res://game/dialogue/ch1_bond_memory_2.dialogue"
-	},
-	"bond_memory_3": {
-		"tier": 3,
-		"path": "res://game/dialogue/ch1_bond_memory_3.dialogue"
-	}
-}
-
-## 章末羁绊隐藏场景注册表。
-const BOND_EPILOGUE: Dictionary = {
-	"ch1_bond_epilogue": {
-		"tier": 3,
-		"path": "res://game/dialogue/ch1_bond_epilogue.dialogue"
-	}
-}
 
 
 # ── 内部状态 ──
@@ -181,18 +131,12 @@ func end_dialogue() -> void:
 
 
 ## 从当前章节的对话池中选择一个未完成的对话。
-## 优先级：羁绊记忆碎片 > 羁绊章末隐藏场景 > 普通对话。
 ## 本章全部完成后自动推进到下一章，返回下一章的首个对话 key。
 ## 所有章节完成后返回空字符串。## 输入: 无。
 ## 输出: String — 对话 key，无可选时返回 ""。
 func _pick_dialogue_key() -> String:
 	if story_progress == null or _dialogue_definitions.is_empty():
 		return ""
-
-	# 优先检查羁绊专属内容
-	var bond_key := _pick_bond_dialogue_key()
-	if not bond_key.is_empty():
-		return bond_key
 
 	var chapter: String = story_progress.current_chapter
 	if chapter.is_empty() or not _dialogue_definitions.has(chapter):
@@ -219,45 +163,6 @@ func _pick_dialogue_key() -> String:
 	return ""
 
 
-## 从羁绊专属内容池中选择一个可触发的对话。
-## 优先级：记忆碎片 > 章末隐藏场景。
-## 所有羁绊内容已触发或无符合条件的，返回 ""。## 输入: 无。
-## 输出: String — 对话 key，无可选时返回 ""。
-func _pick_bond_dialogue_key() -> String:
-	if story_progress == null:
-		return ""
-
-	var bond_tier := story_progress.get_bond_tier()
-
-	# 1. 检查记忆碎片
-	for key in BOND_MEMORY_FRAGMENTS:
-		var frag: Dictionary = BOND_MEMORY_FRAGMENTS[key]
-		if bond_tier >= frag["tier"] and not story_progress.is_bond_dialogue_triggered(key):
-			return key
-
-	# 2. 检查章末隐藏场景（需当前章节的普通对话全部完成）
-	for key in BOND_EPILOGUE:
-		var ep: Dictionary = BOND_EPILOGUE[key]
-		if bond_tier >= ep["tier"] and not story_progress.is_bond_dialogue_triggered(key):
-			# 检查当前章节是否所有普通对话都已播放
-			if _is_chapter_all_completed(story_progress.current_chapter):
-				return key
-
-	return ""
-
-
-## 检查指定章节的所有普通对话是否已完成（不含羁绊专属内容）。## 输入: chapter (String) — 章节 ID。
-## 输出: bool。
-func _is_chapter_all_completed(chapter: String) -> bool:
-	if not _dialogue_definitions.has(chapter):
-		return false
-	var chapter_dialogues: Dictionary = _dialogue_definitions.get(chapter, {})
-	for key in chapter_dialogues:
-		if not story_progress.is_dialogue_completed(key):
-			return false
-	return true
-
-
 ## 按 CHAPTER_ORDER 获取下一章节 ID。无下一章时返回空字符串。## 输入: current (String) — 当前章节 ID。
 ## 输出: String — 下一章 ID，已是最后一章时返回 ""。
 func _get_next_chapter(current: String) -> String:
@@ -267,19 +172,12 @@ func _get_next_chapter(current: String) -> String:
 	return CHAPTER_ORDER[idx + 1]
 
 
-## 获取对话 key 对应的 .dialogue 文件路径（含羁绊专属内容）。## 输入: dialogue_key (String) - 对话标识符。
-## 输出: String — 资源路径，找不到返回 ""。
+## 获取对话 key 对应的 .dialogue 文件路径。## 输入: dialogue_key (String) - 对话标识符。
+## 输出: String — 资源路径（如 "res://dialogues/ch1_intro.dialogue"），找不到返回 ""。
 func get_dialogue_path(dialogue_key: String) -> String:
 	if story_progress == null or dialogue_key.is_empty():
 		return ""
 
-	# 先查羁绊专属内容
-	if BOND_MEMORY_FRAGMENTS.has(dialogue_key):
-		return str(BOND_MEMORY_FRAGMENTS[dialogue_key].get("path", ""))
-	if BOND_EPILOGUE.has(dialogue_key):
-		return str(BOND_EPILOGUE[dialogue_key].get("path", ""))
-
-	# 再查普通对话
 	var chapter: String = story_progress.current_chapter
 	if not _dialogue_definitions.has(chapter):
 		return ""
