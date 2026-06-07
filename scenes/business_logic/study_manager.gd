@@ -177,7 +177,8 @@ func answer(rating: int) -> Dictionary:
 		"queued_again": rating == CardEntity.RATING_AGAIN
 	})
 
-	if rating == CardEntity.RATING_AGAIN:
+	# FSRS: 任何仍在 LEARNING 状态的卡片需继续留在队列中（下次到期可能仍在当天）
+	if rating == CardEntity.RATING_AGAIN or updated_card.queue == CardEntity.QUEUE_LEARNING:
 		_current_queue.append(updated_card)
 
 	if _current_card_index >= 0 and _current_card_index < _current_queue.size():
@@ -199,6 +200,32 @@ func answer(rating: int) -> Dictionary:
 
 	if _current_card_index >= _current_queue.size():
 		_current_card_index = _current_queue.size() - 1
+
+	# 找到下一个已到期的卡片（跳过未来到期的 LEARNING 卡片）
+	var now_ts: int = _now_timestamp()
+	var found_due: bool = false
+	var search_steps: int = _current_queue.size()
+	while search_steps > 0:
+		search_steps -= 1
+		if _current_card_index >= _current_queue.size():
+			_current_card_index = 0
+		var candidate: CardEntity = _current_queue[_current_card_index]
+		# REVIEW/NEW 总是立即到期；LEARNING 需检查 due 秒级时间戳
+		if candidate.queue != CardEntity.QUEUE_LEARNING or candidate.due <= now_ts:
+			found_due = true
+			break
+		_current_card_index += 1
+
+	if not found_due:
+		# 所有剩余卡片都是未来到期的 LEARNING 卡 → 结束会话
+		var end_result := end_session()
+		if not end_result.get("success", false):
+			return end_result
+		return ok({
+			"next_card": null,
+			"counts": counts_after_answer,
+			"interval": interval_text
+		})
 
 	_showing_back = false
 	_question_shown_at_ms = _now_msec()
