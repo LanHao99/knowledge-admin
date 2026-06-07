@@ -53,18 +53,18 @@ func is_ready() -> bool:
 
 
 ## 创建笔记并生成对应卡片。## 输入:
-##   note_type_id (int) - 笔记类型 ID。
+##   note_type_id (String) - 笔记类型 ID（TEXT 主键，如 "__default__" 或 UUID）。
 ##   fields (Dictionary) - 字段数据。
 ##   deck_id (int) - 目标牌组 ID。
 ##   tags (Array[String]) - 标签列表（当前仅保留接口）。
 ## 输出: 返回标准字典。成功时 `data` 为 `{note: NoteEntity, cards: Array[CardEntity]}`。
-func create_note(note_type_id: int, fields: Dictionary, deck_id: int, tags: Array[String] = []) -> Dictionary:
+func create_note(note_type_id: String, fields: Dictionary, deck_id: int, tags: Array[String] = []) -> Dictionary:
 	if _note_db == null:
 		return fail("NOTE_DB_NOT_SET", "note_db 未注入")
 	if _card_db == null:
 		return fail("CARD_DB_NOT_SET", "card_db 未注入")
-	if note_type_id <= 0:
-		return fail("NOTE_TYPE_INVALID", "note_type_id 必须大于 0")
+	if note_type_id.is_empty():
+		return fail("NOTE_TYPE_INVALID", "note_type_id 不能为空")
 	if fields.is_empty():
 		return fail("NOTE_FIELDS_EMPTY", "fields 不能为空")
 	if deck_id <= 0:
@@ -259,9 +259,9 @@ func get_content_for_card(card_id: int) -> Dictionary:
 ## 根据 note_type 生成卡片（V1 每条笔记只生成 1 张卡）。## 输入:
 ##   note_id (int) - 笔记 ID。
 ##   deck_id (int) - 目标牌组 ID。
-##   note_type_id (int) - 笔记类型 ID。
+##   note_type_id (String) - 笔记类型 ID（TEXT 主键）。
 ## 输出: Array[CardEntity] - 创建成功的卡片数组。
-func _generate_cards_for_note(note_id: int, deck_id: int, note_type_id: int) -> Array[CardEntity]:
+func _generate_cards_for_note(note_id: int, deck_id: int, note_type_id: String) -> Array[CardEntity]:
 	_last_generate_error = {}
 	if _card_db == null:
 		_last_generate_error = fail("CARD_DB_NOT_SET", "card_db 未注入")
@@ -272,8 +272,8 @@ func _generate_cards_for_note(note_id: int, deck_id: int, note_type_id: int) -> 
 	if deck_id <= 0:
 		_last_generate_error = fail("DECK_ID_INVALID", "deck_id 必须大于 0")
 		return []
-	if note_type_id <= 0:
-		_last_generate_error = fail("NOTE_TYPE_INVALID", "note_type_id 必须大于 0")
+	if note_type_id.is_empty():
+		_last_generate_error = fail("NOTE_TYPE_INVALID", "note_type_id 不能为空")
 		return []
 
 	var card_result := _card_db.create_card(note_id, deck_id, 0)
