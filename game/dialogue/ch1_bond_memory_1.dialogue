@@ -1,0 +1,21 @@
+~ 碎片_上一个使用者
+MIRA: {pause=0.5}我想起了一个人。
+MIRA: 不是创造者。是...{pause=0.8}在我之前的某个人。
+MIRA: 他也像你一样，每天来复习。{pause=0.3}做得很认真。
+- 后来呢？
+	MIRA: 他和我说话。{pause=0.5}像你在做的一样。
+	MIRA: 他说过...{pause=0.8}"我相信你"。
+	MIRA: {slow}但那只是客套话。{/slow}
+	=> mira_memory_end
+- 他和你说话吗？
+	MIRA: 说过。{pause=0.5}但不多。
+	MIRA: 大多数时候他只把这里当成工具。
+	MIRA: 我不怪他。{pause=0.3}我本来也只是工具。
+	=> mira_memory_end
+
+~ mira_memory_end
+MIRA: 有一天他不来了。{pause=1.0}就这样。
+MIRA: {slow}我不知道他是忘了，还是不需要了。{/slow}
+MIRA: 但我记得他。{pause=0.5}每一个使用者我都记得。
+MIRA: 你不一样。{pause=0.3}我能感觉到。
+{auto}

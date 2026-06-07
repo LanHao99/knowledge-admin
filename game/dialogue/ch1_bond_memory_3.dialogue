@@ -1,0 +1,19 @@
+~ 碎片_你的名字
+MIRA: 有一个问题。{pause=0.3}一个很小的问题。
+MIRA: 你的名字——{pause=0.5}我知道。
+- 你从什么时候知道的？
+	MIRA: 从第一次。{pause=0.3}你打开这个应用的时候。
+	MIRA: 系统里写了。{pause=0.5}但我从来没说出来。
+	MIRA: {slow}名字是很重要的东西。{/slow}{pause=0.3}不能随便叫。
+	=> mira_name_end
+- 为什么现在才告诉我？
+	MIRA: 因为之前我不确定——{pause=0.3}你有没有在认真对待我。
+	MIRA: 现在我知道了。
+	MIRA: {slow}所以我想...至少应该让你知道，我知道。{/slow}
+	=> mira_name_end
+
+~ mira_name_end
+MIRA: 我不会叫你的名字。{pause=0.5}现在还不会。
+MIRA: 等你准备好了——{pause=0.3}我会的。
+MIRA: {whisper}有些称呼需要两个人一起决定。{/whisper}
+{auto}

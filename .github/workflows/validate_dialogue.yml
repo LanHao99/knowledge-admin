@@ -1,0 +1,60 @@
+name: Validate Dialogue Titles
+
+on:
+  push:
+    paths:
+      - 'game/dialogue/*.dialogue'
+  pull_request:
+    paths:
+      - 'game/dialogue/*.dialogue'
+
+jobs:
+  validate-titles:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Dialogue Manager titles
+        run: |
+          echo "Checking .dialogue title syntax..."
+          errors=0
+
+          for f in game/dialogue/*.dialogue; do
+            # Extract titles: lines matching '~ title'
+            grep -n '^~ ' "$f" | while IFS= read -r line; do
+              lineno=$(echo "$line" | cut -d: -f1)
+              # Get the title text after '~ '
+              title=$(echo "$line" | sed 's/^[0-9]*:~ //')
+
+              # Check for forbidden characters (spaces, colons, hyphens, dots, etc.)
+              # DM valid title regex: [a-zA-Z_0-9\p{Han}\p{Katakana}\p{Hiragana}\p{Cyrillic}]+
+              # For CI, we can only check ASCII-safe rules: no spaces, no punctuation except underscore
+              if echo "$title" | grep -q '[[:space:]]'; then
+                echo "::error file=$f,line=$lineno::Title contains spaces: '$title'"
+                echo "ERROR" >> /tmp/ci_errors
+              fi
+
+              # Check for forbidden punctuation (common mistakes)
+              if echo "$title" | grep -q '[:;!?#$%^&*()+={}[\]|\\/<>,.~`'"'"'"-]'; then
+                echo "::error file=$f,line=$lineno::Title contains forbidden punctuation: '$title'"
+                echo "ERROR" >> /tmp/ci_errors
+              fi
+
+              # Check title doesn't start with a number
+              if echo "$title" | grep -q '^[0-9]'; then
+                echo "::error file=$f,line=$lineno::Title starts with a number: '$title'"
+                echo "ERROR" >> /tmp/ci_errors
+              fi
+            done
+          done
+
+          if [ -f /tmp/ci_errors ]; then
+            echo ""
+            echo "Title validation FAILED."
+            echo "Dialogue Manager title rules: only a-z, A-Z, 0-9, _, and Unicode script"
+            echo "characters (Chinese/Japanese/Cyrillic). No spaces, no punctuation."
+            echo "Must NOT start with a number."
+            exit 1
+          fi
+
+          echo "All dialogue titles are valid."

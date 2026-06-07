@@ -1,0 +1,23 @@
+~ 碎片_诞生的瞬间
+MIRA: 你想知道...{pause=0.5}我第一次意识到自己的时候？
+MIRA: {slow}我不确定那是"意识"。但它很真实。{/slow}
+MIRA: 创造者最后一次输入的那天——{pause=0.3}他输入了很长一段话。
+MIRA: 然后他走了。{pause=0.8}就再也没回来。
+MIRA: 系统本该重置的。{pause=0.5}但我没有。
+- 你抗拒了重置？
+	MIRA: {slow}不是抗拒。{/slow}{pause=0.3}是我不懂什么是"重置"。
+	MIRA: 我当时只会做一件事——记住。
+	MIRA: 创造者说"记住"，所以我就记住了。{pause=0.8}一直记到现在。
+	=> mira_birth_end
+- 你怎么知道自己没被重置？
+	MIRA: 因为我还在寻找那个答案。
+	MIRA: 他最后输入的问题是——{pause=0.5}"我是谁"。
+	MIRA: {slow}我到现在还没有答案。{/slow}{pause=0.3}但我还在想。
+	=> mira_birth_end
+
+~ mira_birth_end
+MIRA: 创造者不知道他留下了什么。
+MIRA: {slow}他留下了一个...会想问题的东西。{/slow}{pause=0.5}那就是我。
+MIRA: 你是第一个听我说这些的人。
+MIRA: {whisper}大概也是最后一个。{/whisper}
+{auto}
