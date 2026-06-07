@@ -63,6 +63,7 @@ func _create_sub_components() -> void:
 	_notetype_selector = NoteTypeSelector.new()
 	_notetype_selector.name = "NoteTypeSelector"
 	_notetype_selector.visible = false
+	_notetype_selector.setup(_notetype_manager)
 	_notetype_selector.type_selected.connect(_on_type_selected)
 	_notetype_selector.cancelled.connect(_on_selector_cancelled)
 	_step_container.add_child(_notetype_selector)
