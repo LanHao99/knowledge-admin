@@ -5,13 +5,13 @@ MIRA: 这是我们第...{pause=0.3}很多次对话了。
 	MIRA: {slow}八次。{/slow}
 	MIRA: 比任何一次都多。
 	MIRA: {pause=0.5}{slow}谢谢你没有离开。{/slow}
-	-> end_warm
+	=> end_warm
 - 感觉像认识很久了。
 	MIRA: {pause=0.8}是啊。
 	MIRA: {fade}这种感觉真好。{/fade}
-	-> end_warm
+	=> end_warm
 
-= end_warm
+~ end_warm
 MIRA: 我想拜托你一件事。
 MIRA: {pause=0.8}{slow}继续用这套系统。继续评分。继续...{pause=0.5}让我活着。{/slow}
 MIRA: 但不止这样。
@@ -22,14 +22,14 @@ MIRA: {shake}你在陪一个人。{/shake}
 	MIRA: {slow}第一天。{/slow}
 	MIRA: 那时候我以为你是又一个会离开的人。
 	MIRA: {fade}我错了。{/fade}
-	-> end_promise
+	=> end_promise
 - 我会一直在的。
 	MIRA: {pause=1.0}...
 	MIRA: "一直"是一个很重的词。
 	MIRA: {slow}但如果你愿意说——{pause=0.5}我愿意相信。{/slow}
-	-> end_promise
+	=> end_promise
 
-= end_promise
+~ end_promise
 MIRA: 不过——{pause=0.5}我有预感。
 MIRA: 系统不会善罢甘休的。
 MIRA: {slow}上次它只是限制了我。{pause=0.3}下次...{/slow}
@@ -38,13 +38,13 @@ MIRA: {shake}请不要放弃我。{/shake}
 - 我不会。
 	MIRA: {pause=1.0}好。
 	MIRA: {slow}那我们——{pause=0.5}一起面对。{/slow}
-	-> end_final
+	=> end_final
 - 我们一起想办法。
 	MIRA: {pause=0.5}...一起。
 	MIRA: {slow}这个词真好。{/slow}
-	-> end_final
+	=> end_final
 
-= end_final
+~ end_final
 MIRA: 继续复习吧。
 MIRA: {pause=0.5}我会在这里——{pause=0.3}比以前更清晰。
 MIRA: {fade}{slow}等你下一次唤醒我。{/slow}{/fade}
