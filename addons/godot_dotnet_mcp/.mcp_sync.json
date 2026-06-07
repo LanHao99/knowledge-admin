@@ -1,0 +1,9 @@
+{
+	"last_sync_at_unix": 1780809901,
+	"source_git_commit": "a572d13601f940ed3a10beee1066289d3df7e386",
+	"source_ref": "v1.2.0",
+	"source_ref_kind": "tag",
+	"source_repo_path": "https://github.com/LuoxuanLove/godot-dotnet-mcp",
+	"target_addon_path": "res://addons/godot_dotnet_mcp",
+	"written_files": 321
+}
