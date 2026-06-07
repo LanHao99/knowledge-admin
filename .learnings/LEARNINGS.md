@@ -244,3 +244,34 @@ FSRS 调度器中 LEARNING 卡片需在 study_manager 层面保留在队列中�
 - Source: bug_fix
 - Related Files: scenes/business_logic/study_manager.gd, src/scheduler/fsrs_scheduler.gd
 - Tags: fsrs, scheduler, learning-queue, session-lifecycle, due-timestamp
+
+## [LRN-20260607-001] insight
+
+### Understanding Anki's Queue Architecture Through Rslib Source Code
+
+**Category**: insight
+
+**What was learned**: Reading the Anki rslib (Rust) source code revealed critical design patterns that our knowledge-admin was missing:
+
+1. **Two-level queue (main + intraday learning)**: Anki separates the queue into `main` (review + new + interday learning, interspersed) and `intraday_learning` (learning/relearning cards sorted by due time). Our single `_current_queue` array mixes everything, causing re-appended cards to inflate totals.
+
+2. **`maybe_requeue_learning_card()`**: After answering, only cards that remain in `CardQueue::Learn` AND are due before next day start get re-inserted into intraday_learning at the correct sorted position. Our implementation re-appends ALL AGAIN/LEARNING cards at queue END.
+
+3. **`congrats_info()`**: Anki does NOT rely solely on `get_queued_cards() == empty` for the completion UI. It runs a SEPARATE SQL query (`congrats.sql`) to report: `learn_remaining`, `review_remaining`, `new_remaining`, `secs_until_next_learn`. This is how the user knows WHY the session ended.
+
+4. **Session completion = `get_queued_cards().cards` is empty**: The `_is_finished()` check is simple — no cards available. But the rich user feedback comes from `congrats_info()`.
+
+5. **Live `Counts` mechanism**: Queue counts are updated live (decremented on pop, re-added on re-insertion). Progress is NOT "done/total" as in our implementation — it's "remaining counts" with dynamic learning cutoff advancement.
+
+### What This Means
+- Our phase 1 fix (tracking `_initial_total` separately, adding `learning_remaining`/`next_due_secs` to completion stats) aligns with Anki's approach of separating "what happened" (done count) from "what's left" (remaining + when next due).
+- Phase 2 should consider: splitting `_current_queue` into main + intraday_learning, and implementing a `learn_ahead_secs` mechanism so learning cards due in the next few minutes can still be shown.
+
+### Suggested Action
+- Phase 2: Implement `_queue_entry` struct with sorted re-insertion, and a `_learning_ahead_secs` cutoff.
+- Phase 3: Build `congrats_info()` equivalent — a dedicated method that queries the DB to report remaining card status, rather than relying on runtime queue state.
+
+### Metadata
+- Source: code_review (Anki rslib anki/rslib/src/scheduler/)
+- Related Files: scenes/business_logic/study_manager.gd, scenes/ui/study_session.gd
+- Tags: anki, architecture, queue-design, fsrs, learning-queue, congrats-info
