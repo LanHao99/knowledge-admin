@@ -3,8 +3,7 @@ extends Scheduler
 
 # 基于 SM-2 思路的简化调度器：
 # - 只做纯计算，不触碰数据库。
-# - learning 队列按秒级时间戳调度。
-# - review 队列按天数索引调度。
+# - 所有队列统一按天数索引调度。
 
 const _LEARNING_STEP_SECONDS: int = 10 * 60
 const _SECONDS_PER_DAY: int = 86400
@@ -29,7 +28,7 @@ func calculate_next_state(card: CardEntity, rating: int, now_timestamp: int) -> 
 	match rating:
 		Rating.AGAIN:
 			next_queue = Queue.LEARNING
-			next_due = now_timestamp + _LEARNING_STEP_SECONDS
+			next_due = now_day_index  # 当天可再次复习（不再等固定分钟数）
 			next_lapses += 1
 			next_interval_days = 0
 			next_stability = max(0.1, next_stability * 0.5)
@@ -87,7 +86,7 @@ func classify_queue(card: CardEntity, now_day_index: int, now_timestamp: int) ->
 				return Queue.NEW
 			return Queue.BURIED
 		Queue.LEARNING:
-			if card.due <= now_timestamp:
+			if card.due <= now_day_index:
 				return Queue.LEARNING
 			return Queue.LEARNING
 		Queue.REVIEW:
