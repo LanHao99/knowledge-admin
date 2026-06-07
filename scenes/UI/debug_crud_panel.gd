@@ -471,7 +471,11 @@ func _setup_test_managers() -> void:
 	const db_path: String = "user://knowledge_admin.db"
 	_test_card_manager = CardManager.new()
 	add_child(_test_card_manager)
-	_test_card_manager.setup(db_path)
+	if not _test_card_manager.setup(db_path):
+		push_error("[DebugCrudPanel] CardManager setup 失败")
+		_test_card_manager.queue_free()
+		_test_card_manager = null
+		return
 	_test_scheduler = SimpleScheduler.new()
 	_test_card_manager.set_scheduler(_test_scheduler)
 
