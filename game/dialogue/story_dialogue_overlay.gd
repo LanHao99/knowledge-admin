@@ -103,7 +103,7 @@ func start(resource, key: String = "", start_title: String = "") -> void:
 	_set_status("")
 
 	var title: String = start_title
-	if title.is_empty() and is_instance_valid(source):
+	if title.is_empty() and is_instance_valid(resource):
 		title = resource.first_title if not resource.first_title.is_empty() else ""
 
 	var line = await _dialogue_manager.get_next_dialogue_line(resource, title)

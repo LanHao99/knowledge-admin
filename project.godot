@@ -35,6 +35,10 @@ enabled=PackedStringArray("res://addons/dialogue_manager/plugin.cfg", "res://add
 
 theme/custom_font="uid://c76ct6f0pkvcl"
 
+[internationalization]
+
+locale/translations_pot_files=PackedStringArray("res://game/dialogue/chapter_prologue.dialogue")
+
 [physics]
 
 3d/physics_engine="Jolt Physics"
