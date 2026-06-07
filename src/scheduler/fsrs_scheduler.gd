@@ -129,7 +129,7 @@ func calculate_next_state(card: CardEntity, rating: int, now_timestamp: int) -> 
 				next_step = -1
 			else:
 				next_interval_days = 0
-				next_due = now_timestamp + step_result.get("interval_sec", learning_steps[0])
+				next_due = now_day_index  # 当天可复习（不再等固定秒数）
 
 		1:  # Review
 			match rating:
@@ -145,7 +145,7 @@ func calculate_next_state(card: CardEntity, rating: int, now_timestamp: int) -> 
 						next_queue = CardEntity.QUEUE_LEARNING
 						next_step = 0
 						next_interval_days = 0
-						next_due = now_timestamp + relearning_steps[0]
+						next_due = now_day_index  # 当天可复习
 				_:
 					next_queue = CardEntity.QUEUE_REVIEW
 					next_step = -1
@@ -164,7 +164,7 @@ func calculate_next_state(card: CardEntity, rating: int, now_timestamp: int) -> 
 				next_step = -1
 			else:
 				next_interval_days = 0
-				next_due = now_timestamp + step_result.get("interval_sec", relearning_steps[0])
+				next_due = now_day_index  # 当天可复习
 
 		_:
 			# 未知状态退化为 NEW 逻辑
