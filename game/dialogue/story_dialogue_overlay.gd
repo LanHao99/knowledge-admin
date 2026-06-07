@@ -357,9 +357,11 @@ func _set_character_color(character_name: String) -> void:
 	if _character_label == null:
 		return
 
+	var sys_color: Color = _text_animator.color_system if _text_animator != null else Color(0.788, 0.659, 0.298)
+
 	match character_name:
 		"系统":
-			_character_label.add_theme_color_override("font_color", Color(0.24, 0.86, 0.55, 1.0))  # 终端绿 #3DDB8B
+			_character_label.add_theme_color_override("font_color", sys_color)
 		"MIRA":
 			_character_label.add_theme_color_override("font_color", Color(0.9, 0.75, 0.3, 1.0))  # 金色
 		"???":

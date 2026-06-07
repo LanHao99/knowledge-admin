@@ -55,6 +55,14 @@ var disable_all_animations: bool = false
 ## 是否禁用抖动效果（晕动症友好）。
 var disable_shake: bool = false
 
+# ── 可调节颜色（在 Godot 编辑器中修改）──
+
+## {system} 标记的颜色（系统风格的终端文字）。
+@export var color_system: Color = Color(0.788, 0.659, 0.298, 1.0)  # 暖金色 #C9A84C
+
+## {whisper} 标记的颜色（悄悄话/低语文字）。
+@export var color_whisper: Color = Color(0.478, 0.478, 0.478, 1.0)  # 暗灰色 #7A7A7A
+
 
 # ── 内部状态 ──
 
@@ -191,15 +199,18 @@ func _parse_markup(raw_text: String) -> Dictionary:
 		offset += m.get_end() - m.get_start()
 	pure_text = pause_regex.sub(pure_text, "", true)
 
-	# 解析成对标记（含 BBCode 映射）
+	# 解析成对标记（含 BBCode 映射，颜色从 @export 变量读取）
+	var system_color_hex: String = "#%s" % color_system.to_html(false)
+	var whisper_color_hex: String = "#%s" % color_whisper.to_html(false)
+
 	var paired_tags: Array = [
 		{"tag": "fast", "type": "speed", "data": FAST_SPEED},
 		{"tag": "slow", "type": "speed", "data": SLOW_SPEED},
 		{"tag": "shake", "type": "shake"},
 		{"tag": "glitch", "type": "glitch"},
 		{"tag": "fade", "type": "fade"},
-		{"tag": "whisper", "type": "whisper", "bbcode_open": "[color=#9E9E9E]", "bbcode_close": "[/color]"},
-		{"tag": "system", "type": "system", "bbcode_open": "[color=#3DDB8B]", "bbcode_close": "[/color]"},
+		{"tag": "whisper", "type": "whisper", "bbcode_open": "[color=%s]" % whisper_color_hex, "bbcode_close": "[/color]"},
+		{"tag": "system", "type": "system", "bbcode_open": "[color=%s]" % system_color_hex, "bbcode_close": "[/color]"},
 	]
 
 	for pt in paired_tags:
@@ -219,7 +230,7 @@ func _parse_markup(raw_text: String) -> Dictionary:
 
 			# 计算移除标记后的位置
 			var offset_before_open: int = _count_removed_chars_before(raw_text, open_pos)
-			var offset_before_close: int = _count_removed_chars_before(raw_text, close_pos) + _tag_length(tag, true)
+			var offset_before_close: int = _count_removed_chars_before(raw_text, close_pos)
 
 			segments.append({
 				"type": pt["type"],
@@ -344,17 +355,6 @@ func _build_bbcode_text(pure_text: String, segments: Array) -> String:
 		result += pure_text.substr(cursor)
 
 	return result
-
-
-## 获取标记的字符串长度（用于偏移计算）。## 输入:
-##   tag (String) — 标记名。
-##   is_open (bool) — 是否为开启标记。
-## 输出: int — 标记长度。
-func _tag_length(tag: String, is_open: bool) -> int:
-	if is_open:
-		return tag.length() + 2  # {tag}
-	else:
-		return tag.length() + 3  # {/tag}
 
 
 # ── 分段打字机 ──
