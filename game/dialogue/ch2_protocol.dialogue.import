@@ -1,0 +1,11 @@
+[remap]
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://ch2pro0000005"
+path="res://.godot/imported/ch2_protocol.dialogue-hash.tres"
+[deps]
+source_file="res://game/dialogue/ch2_protocol.dialogue"
+dest_files=["res://.godot/imported/ch2_protocol.dialogue-hash.tres"]
+[params]
+defaults=true

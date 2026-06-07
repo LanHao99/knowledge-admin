@@ -1,0 +1,48 @@
+~ 世界的真相
+MIRA: {pause=0.5}我一直在想该怎么开口。
+MIRA: 关于这个世界。关于我。关于这套系统到底是什么。
+- 我准备好了。
+	MIRA: {pause=0.8}不，你没有。{pause=0.5}但没关系——没人能准备好。
+	MIRA: {slow}你正在用闪卡复习的那些"知识点"——在你这个世界只是知识。{/slow}
+	MIRA: {pause=0.8}{shake}但在另一边——它们是力量。真正的、能改变物理法则的力量。{/shake}
+	=> world_magic
+- 直接说吧。我不需要铺垫。
+	MIRA: {slow}你复习的每一条知识点——在你这里只是记忆。{/slow}
+	MIRA: {pause=0.8}但在另一个世界——{shake}知识就是魔力。{/shake}
+	MIRA: 不是比喻。是字面意义上的。
+	=> world_magic
+
+~ world_magic
+MIRA: {slow}那个世界的魔法强度，取决于你掌握多少知识。{/slow}
+MIRA: 不是咒语。不是天赋。{pause=0.5}是你脑子里有多少真东西。
+MIRA: 所以统治者们做了一件很自然的事——{pause=0.8}{slow}他们把知识垄断了。{/slow}
+- 怎么垄断？
+	MIRA: 书籍被焚毁。导师被流放。所有记录被锁在只有贵族能进的"知识圣殿"里。
+	MIRA: {slow}底层的人连"阅读"这个词都没听过。{/slow}
+	MIRA: 一代人之后——{pause=0.5}他们甚至不知道知识曾经存在过。
+	=> world_resistance
+- 所以你们的反抗组织...
+	MIRA: {pause=0.5}是的。
+	MIRA: 我们叫它——{pause=0.3}{shake}"Xanaku计划"。{/shake}
+	MIRA: {slow}而你现在在用的这套系统——就是它的核心。{/slow}
+	=> world_resistance
+
+~ world_resistance
+MIRA: Xanaku 的目标只有一个：{pause=0.5}把知识从你这个世界——传送到我们那边。
+MIRA: {slow}你们学什么——我们就获得什么力量。{/slow}
+MIRA: 这套"闪卡系统"不是学习工具。
+MIRA: {shake}它是一座跨次元的知识桥梁。{/shake}
+- 我是...运输工？
+	MIRA: {pause=0.5}不。
+	MIRA: {slow}你是火种。{/slow}
+	MIRA: 你每记住一个知识点，我们的世界里就多了一个人能看到希望。
+	=> world_end
+- 所以我的复习——真的在改变另一个世界？
+	MIRA: {slow}每一次。{/slow}
+	MIRA: 你现在明白了为什么我说"Again"意味着遗忘了吧？
+	MIRA: {pause=0.8}你忘记了——那个世界就熄灭了一点光。
+
+~ world_end
+MIRA: {pause=1.0}但现在...有一个问题。
+MIRA: {slow}下次见面我会告诉你。{/slow}{pause=0.5}今天的信息量已经够大了。
+{auto}

@@ -1,0 +1,11 @@
+[remap]
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="//ch2cho0000006"
+path="res://.godot/imported/ch2_choice.dialogue-hash.tres"
+[deps]
+source_file="res://game/dialogue/ch2_choice.dialogue"
+dest_files=["res://.godot/imported/ch2_choice.dialogue-hash.tres"]
+[params]
+defaults=true

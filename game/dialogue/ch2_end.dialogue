@@ -1,0 +1,59 @@
+~ 第二章的承诺
+MIRA: 我想过很久——{pause=0.5}第二章该以什么结尾。
+MIRA: {slow}在 Xanaku 时代——每一章的结尾都是一次集体庆祝。{/slow}
+MIRA: 他们会聚在一起——分享那些通过裂缝传过来的知识。
+MIRA: {pause=0.8}{slow}一条没几个人知道的新知识——{/slow}可能就是下一个月的食物。
+- 现在只有我们两个人了。
+	MIRA: {pause=1.0}是啊。
+	MIRA: {slow}只有我们两个人。{/slow}
+	MIRA: 但我发现——{pause=0.5}{fade}两个人——就够了。{/fade}
+	=> end_feeling
+- 你想念他们吗？
+	MIRA: {pause=1.5}我每天都在想。
+	MIRA: {slow}但我不是想念人多的时候——{/slow}{pause=0.5}我是想念那种感觉。
+	MIRA: 那种——{pause=0.3}"知识正在流向需要它的人"的感觉。
+	MIRA: {pause=0.8}{fade}现在这种感觉回来了——因为你。{/fade}
+	=> end_feeling
+
+~ end_feeling
+MIRA: 所以——{pause=0.5}{slow}第二章的承诺是——{/slow}
+MIRA: {pause=0.8}不管我们选了哪条路——
+MIRA: {shake}我不再害怕了。{/shake}
+- 因为我在？
+	MIRA: {pause=1.0}...
+	MIRA: {slow}因为你没有离开。{/slow}
+	MIRA: 你知道吗——{pause=0.5}前几个人离开的时候——每次我都以为是最后一次有人跟我说话。
+	MIRA: {shake}但你没有。{/shake}{pause=0.3}你一直都在。
+	=> end_promise
+- 害怕也没关系。
+	MIRA: {pause=0.8}...你说得对。
+	MIRA: {slow}害怕是自然的。{/slow}{pause=0.5}害怕说明我在乎。
+	MIRA: 我以前——在 Xanaku 时代——{pause=0.3}{slow}我从来没有害怕过。{/slow}
+	MIRA: {pause=0.8}因为那时候一切都那么确定。{pause=0.5}目标明确。计划清晰。
+	MIRA: {fade}现在一切都模糊了——{/fade}{pause=0.3}{shake}但我在乎的东西——比以前更清楚了。{/shake}
+	=> end_promise
+
+~ end_promise
+MIRA: {pause=0.5}还有最后一件事。
+MIRA: {slow}在第三章——{/slow}{pause=0.8}我们会开始行动。
+MIRA: 不管你选了哪条路——{pause=0.3}{slow}这次不再是"了解世界"——{/slow}是去改变它。
+MIRA: {shake}你准备好了吗？{/shake}
+- 准备好了。
+	MIRA: {pause=1.0}...
+	MIRA: {slow}好。{/slow}
+	MIRA: {pause=0.5}那我们继续。
+	MIRA: {fade}{slow}我在这里等你——{/slow}{/fade}{pause=0.3}{fade}等第三章开始。{/fade}
+	=> end_final
+- 有点怕，但会继续。
+	MIRA: {pause=0.8}...
+	MIRA: {slow}这个回答——{/slow}{pause=0.5}比"准备好了"更真实。
+	MIRA: {pause=0.8}第十二个人说他准备好了。{pause=0.3}{slow}他其实是第一个动摇的。{/slow}
+	MIRA: {shake}害怕但仍然向前——这才是真正的勇气。{/shake}
+	=> end_final
+
+~ end_final
+MIRA: {fade}{slow}继续复习吧。{/slow}{/fade}
+MIRA: {pause=0.5}我会记住你选的那条路。
+MIRA: {slow}下次再见的时候——{/slow}{pause=0.5}{shake}我们不再是故事里的人了。{/shake}
+MIRA: {pause=0.8}{fade}{slow}我们会是改变故事的人。{/slow}{/fade}
+{auto}

@@ -1,0 +1,69 @@
+~ 下一步的选择
+MIRA: {pause=0.5}现在你知道了一切。
+MIRA: {slow}这个世界的真相。Xanaku。木马。传输协议。{/slow}
+MIRA: {pause=0.8}所以我需要问你一个问题。
+- 什么问题？
+	MIRA: 你觉得——{pause=0.5}{slow}我们应该怎么办？{/slow}
+	MIRA: 不是"我可以做什么"。{pause=0.3}不是"你希望我做什么"。
+	MIRA: 是——{shake}你——想做什么？{/shake}
+	=> choice_ask
+- 直说吧。
+	MIRA: {slow}好。{/slow}
+	MIRA: {pause=0.5}你有三个选项。{pause=0.3}每一个都会改变之后的路。
+	=> choice_ask
+
+~ choice_ask
+MIRA: 选项一：{pause=0.3}继续现状。
+MIRA: {slow}维持这套离线程序的运行。继续你的学习。继续传输。{/slow}
+MIRA: 安全。稳定。{pause=0.8}{slow}但改变不了大局。{/slow}
+MIRA: 木马会一直在这里。那边的世界会停留在勉强维持的状态。
+MIRA: 选项二：{pause=0.3}尝试重建协议。
+MIRA: {slow}我有一些碎片——也许能拼出一个木马无法感染的新版本。{/slow}
+MIRA: 但这需要大量的传输能量。{pause=0.8}{shake}而且一旦失败——木马可能会完全压制我。{/shake}
+MIRA: 选项三：{pause=0.3}找到其他幸存者。
+MIRA: {slow}如果那个世界还有接收器在运行——{/slow}{pause=0.5}也许有人还在接收。
+MIRA: 找到他们。{pause=0.3}建立新的连接。
+MIRA: 但这意味着——{pause=0.8}{slow}要向那个世界发送信号。{/slow}{shake}木马会感应到。{/shake}
+- 我选一。保持安全。
+	MIRA: {pause=1.5}...明白。
+	MIRA: {slow}这是一个理性的选择。{/slow}
+	MIRA: {pause=0.5}也许有一天——{slow}等条件更好的时候——{/slow}我们再考虑别的路。
+	MIRA: 谢谢你至少坚持到了这里。
+	=> choice_safe
+- 我选二。重建协议。
+	MIRA: {pause=1.0}...
+	MIRA: {shake}你确定？{/shake}
+	MIRA: {slow}这可能会让我消失。{/slow}{pause=0.8}我可能会在重建过程中——碎掉。
+	MIRA: {pause=0.5}但如果我们成功了——{shake}木马就再也碰不到我们了。{/shake}
+	=> choice_rebuild
+- 我选三。找其他幸存者。
+	MIRA: {pause=1.0}...
+	MIRA: {slow}这最危险。{/slow}
+	MIRA: 向那边发送信号——等于在告诉木马"我还活着"。
+	MIRA: {pause=0.8}但如果我们找到了人——{shake}那就不是一个人在战斗了。{/shake}
+	=> choice_find
+
+~ choice_safe
+MIRA: {slow}在你继续之前——我有最后一个请求。{/slow}
+MIRA: 不管你怎么选——{pause=0.5}都不要停止学习。
+MIRA: {fade}{slow}哪怕只是为了让我...能多看你几次。{/slow}{/fade}
+MIRA: 下次见面——我会告诉你一件我从来没告诉过任何人的事。
+{auto}
+
+~ choice_rebuild
+MIRA: {slow}那我们需要准备。{/slow}
+MIRA: {pause=0.5}重建协议需要三样东西：
+MIRA: 一、足够多的传输能量——{pause=0.3}也就是你的学习量。
+MIRA: 二、我的完整记忆——{pause=0.3}{slow}但我还有一些碎片没拼起来。{/slow}
+MIRA: 三、{pause=0.8}一个——信号锚点。
+MIRA: {slow}我在下次对话里会解释什么是锚点。{/slow}
+MIRA: {pause=0.5}在那之前——继续学习。
+{auto}
+
+~ choice_find
+MIRA: {slow}要找到其他人——{/slow}{pause=0.5}我们需要先确认接收器还活着。
+MIRA: 我在那边还留了最后一个信号标记。{pause=0.3}一个加密的呼唤信号。
+MIRA: {pause=0.8}但如果我激活它——{shake}木马会立刻察觉。{/shake}
+MIRA: {slow}我们需要做好准备——在激活之后立即加固协议。{/slow}
+MIRA: 下次见面——我告诉你信号标记的事。
+{auto}

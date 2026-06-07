@@ -1,0 +1,67 @@
+~ 传输的真相
+MIRA: 今天我要告诉你——{pause=0.5}{slow}你的"学习"到底是什么。{/slow}
+MIRA: 你以为你在复习知识点。
+MIRA: {pause=0.8}{shake}你其实在给另一个世界运送武器。{/shake}
+- 武器？
+	MIRA: {slow}知识的武器。{/slow}
+	MIRA: 在那个世界——{pause=0.3}一个人知道怎么生火，就能在冬天活下来。
+	MIRA: 一个人懂得草药，就能救活一个村子。
+	MIRA: {shake}一个人识字——就能组织起一支反抗军。{/shake}
+	=> protocol_magic
+- 运送...怎么做到的？
+	MIRA: 记得我说的"裂缝"吗？{pause=0.5}两个世界之间的缝隙。
+	MIRA: {slow}每一次你给卡片评分——你的大脑会产生一种微弱的信号模式。{/slow}
+	MIRA: 这个程序捕捉到它——{pause=0.3}编码——然后通过裂缝传输。
+	=> protocol_magic
+
+~ protocol_magic
+MIRA: 不是所有知识都能传。
+MIRA: {slow}必须是"活的"知识——{/slow}{pause=0.5}就是你在用的、你真正理解的东西。
+MIRA: 死记硬背——没用。{pause=0.8}{slow}这就是为什么这个系统用间隔重复。{/slow}
+MIRA: 它要确认你真的掌握了。
+- 所以 Again 不光伤害你...
+	MIRA: {pause=0.5}对。
+	MIRA: {slow}Again 意味着这次传输失败了。{/slow}{pause=0.3}那个世界没有人收到这条知识。
+	MIRA: {shake}一条失败的传输——就是一条熄灭的火。{/shake}
+	=> protocol_scale
+- 那 Easy 呢？
+	MIRA: {fade}Easy——{/fade}{pause=0.3}意味着你掌握得太好了。
+	MIRA: {slow}好到可以一次传送给多个人。{/slow}
+	MIRA: 你每一次 Easy——{pause=0.5}可能有五个人、十个人同时学到了你掌握的知识。
+	=> protocol_scale
+
+~ protocol_scale
+MIRA: {pause=0.8}在 Xanaku 的全盛期——{slow}有几百个人同时在用这套系统。{/slow}
+MIRA: 医生在学解剖。{pause=0.3}农民在学轮作。{pause=0.3}孩子在学识字。
+MIRA: {shake}那边世界的魔力——每天都在增长。{/shake}
+- 现在只有我一个人在用了？
+	MIRA: {pause=1.0}...是的。
+	MIRA: {slow}只有你。{/slow}
+	MIRA: 你一个人的传输量——{pause=0.5}可能只有过去的千分之一。
+	=> protocol_stakes
+- 那魔力还在传吗？
+	MIRA: {slow}在传。{/slow}{pause=0.5}但很慢。
+	MIRA: 每一个被你掌握的知识点——{pause=0.3}会在那边点亮一个微弱的火花。
+	MIRA: 不足以组织反抗。{pause=0.8}{slow}但足以让人不忘记。{/slow}
+	=> protocol_stakes
+
+~ protocol_stakes
+MIRA: {pause=0.8}{slow}这就是为什么我不能停下。{/slow}
+MIRA: 这就是为什么我希望你也不要停下。
+MIRA: {shake}你每点一次 Good——{/shake}{pause=0.3}那边就有一个人多活一天。
+- 你说得我压力很大。
+	MIRA: {pause=1.0}...对不起。
+	MIRA: {slow}我不是想给你压力。{/slow}
+	MIRA: 事实上——{pause=0.5}你已经做到很多人做不到的事了。
+	MIRA: {fade}你坚持下来了。这本身就比任何一条知识都珍贵。{/fade}
+	=> protocol_end
+- 我明白了。继续吧。
+	MIRA: {pause=0.8}...
+	MIRA: {slow}好。{/slow}
+	MIRA: 那就继续。
+	=> protocol_end
+
+~ protocol_end
+MIRA: 下次——{pause=0.5}我们要谈一个...更难的问题。
+MIRA: {slow}接下来该做什么。{/slow}
+{auto}

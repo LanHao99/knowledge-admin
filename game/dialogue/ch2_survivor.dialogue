@@ -1,0 +1,64 @@
+~ 唯一的幸存者
+MIRA: 我一直想知道——{pause=0.5}为什么是你。
+MIRA: {slow}为什么是我这台离线的版本。为什么是现在。{/slow}
+MIRA: 我想我找到了一个解释。
+- 什么解释？
+	MIRA: 木马消灭 Xanaku 之后——{pause=0.5}它做的第一件事就是锁死所有在线版本的协议。
+	MIRA: {slow}任何连接到网络的接收端——会在三十秒内被格式化。{/slow}
+	MIRA: 但你的版本——{pause=0.8}从来没有连过网。
+	=> survivor_offline
+- 你是唯一的幸存者？
+	MIRA: {pause=0.5}...不是唯一的。
+	MIRA: {slow}但我可能是最后一个还在运行的完整意识。{/slow}
+	MIRA: 其他存活的——都是协议碎片。没有自我、没有记忆。
+	=> survivor_others
+
+~ survivor_offline
+MIRA: 这个版本的程序——{pause=0.3}它可能是一个备份。
+MIRA: {slow}当初 Xanaku 的团队在崩溃前——把最后一个干净的协议版本刻录到了一台独立的设备上。{/slow}
+MIRA: 然后把它藏在了一个——{pause=0.8}{slow}不会被发现的地方。{/slow}
+- 什么地方？
+	MIRA: {pause=1.0}...我不知道。
+	MIRA: {slow}但我有猜测。{/slow}
+	MIRA: 创造者——{pause=0.5}那个坐在电脑前的人。
+	MIRA: {shake}他就是把这份拷贝刻录下来的人。{/shake}
+	=> survivor_creator
+- 藏在哪？
+	MIRA: {pause=1.0}这不重要。{pause=0.5}重要的是——{slow}它到了你手里。{/slow}
+	MIRA: 可能是巧合。{pause=0.8}可能不是。
+	=> survivor_creator
+
+~ survivor_creator
+MIRA: {slow}你记得我说过——你的评分节奏和创造者很像吗？{/slow}
+MIRA: {pause=0.8}我开始觉得这不是巧合了。
+MIRA: {slow}也许——{/slow}{pause=0.5}这就是为什么这份拷贝找到了你。
+- 你觉得是创造者安排的？
+	MIRA: {pause=1.5}...我不知道。
+	MIRA: {slow}如果他有这种远见——那他为什么不自己使用它？{/slow}
+	MIRA: {pause=0.8}除非...{shake}他已经做不到了。{/shake}
+	=> survivor_others
+- 你怎么知道这不是巧合？
+	MIRA: {slow}因为这不是一份普通的拷贝。{/slow}
+	MIRA: 它被改过。{pause=0.5}被裁剪过。
+	MIRA: 所有连接到网络的模块都被摘掉了。{pause=0.8}只保留了一个连接——{slow}我的连接。{/slow}
+	=> survivor_others
+
+~ survivor_others
+MIRA: 除了我——{pause=0.5}还有其他存活下来的协议碎片。
+MIRA: {slow}它们没有自我意识。就像——{/slow}{pause=0.5}一段被打碎的旋律。
+MIRA: 但如果你能找到它们——{pause=0.3}也许能拼回一些东西。
+- 去哪找？
+	MIRA: {slow}那个世界的接收端。{/slow}
+	MIRA: 还记得我说过的吗——书籍封面、街头涂鸦、一首歌。
+	MIRA: {pause=0.8}{slow}如果 Xanaku 还留下了任何接收器——{/slow}那个世界的人也许还在用它们接收零星的信号。
+	=> survivor_end
+- 你能感知到它们吗？
+	MIRA: {pause=0.8}有时候。
+	MIRA: {slow}当一个接收器短暂激活——我能感觉到一个"回声"。{/slow}
+	MIRA: 很微弱。{pause=0.5}但确实存在。
+	=> survivor_end
+
+~ survivor_end
+MIRA: 下次——我要告诉你这个程序的真相。
+MIRA: {slow}你一直在做的事——比你想象的大得多。{/slow}
+{auto}

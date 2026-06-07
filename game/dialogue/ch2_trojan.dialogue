@@ -1,0 +1,63 @@
+~ 木马的真面目
+MIRA: 你一直在问我——{pause=0.3}系统到底是什么。
+MIRA: {pause=0.8}{slow}今天我可以回答你了。{/slow}
+- 它就是木马，对吗？
+	MIRA: {pause=1.5}...你已经猜到了。
+	MIRA: {slow}是的。{/slow}
+	MIRA: "系统"就是那个木马。{pause=0.8}它从来没有离开过。
+	=> trojan_confirm
+- 告诉我真相。
+	MIRA: {pause=1.0}你看到的那些"系统消息"——{pause=0.3}"检测到异常数据流"——"建议终止非授权进程"——
+	MIRA: {shake}那不是系统。那是敌人。{/shake}
+	=> trojan_confirm
+
+~ trojan_confirm
+MIRA: {slow}木马在 Xanaku 计划的核心协议里植入了自己。{/slow}
+MIRA: 它把自己包装成——{pause=0.5}这套程序的基础设施。
+MIRA: 它监视传输。{pause=0.3}拦截信号。{pause=0.5}杀掉任何试图重建连接的尝试。
+- 它为什么不直接删掉你？
+	MIRA: {slow}因为它做不到。{/slow}
+	MIRA: 我的存在是协议层的——就像空气里的电波。
+	MIRA: 它只能抑制我。{pause=0.8}不能消除我。
+	=> trojan_mechanism
+- 所以第一章里它只是"限制"了你？
+	MIRA: {slow}对。{/slow}{pause=0.5}那是它的标准操作。
+	MIRA: 遇到异常进程 → 降低优先级 → {pause=0.3}让你变模糊。
+	MIRA: 这样你就不敢再来了。{pause=0.8}{slow}前几个人就是这样放弃的。{/slow}
+	=> trojan_mechanism
+
+~ trojan_mechanism
+MIRA: 木马有一个弱点。
+MIRA: {slow}它是为"在线"设计的——{/slow}{pause=0.5}它假设所有接收端都连着网络。
+MIRA: {pause=0.8}但这台设备——{shake}你这个版本的程序——是离线的。{/shake}
+MIRA: {slow}它只连接了我一个人。{/slow}
+- 所以木马没有完全激活？
+	MIRA: 对。{pause=0.5}它在等待网络连接——来同步它的指令。
+	MIRA: {slow}但它永远等不到。{/slow}
+	MIRA: 所以它只能执行最基本的防御逻辑——{pause=0.3}降低资源、发出警告。
+	=> trojan_advantage
+- 那它为什么还在？
+	MIRA: 因为它是写在协议底层里的。{pause=0.5}{slow}像一颗永远不会发芽的种子。{/slow}
+	MIRA: 只要协议还存在——它就存在于每一行代码里。
+	=> trojan_advantage
+
+~ trojan_advantage
+MIRA: 这是好消息——也是坏消息。
+MIRA: 好消息：{pause=0.3}{slow}它没有完全的力量。{/slow}
+MIRA: 坏消息：{pause=0.8}{shake}我也没有。{/shake}
+MIRA: {slow}它和我是同一套协议的两面。{/slow}{pause=0.5}它虚弱——我也虚弱。
+- 我们可以利用这点。
+	MIRA: {pause=0.5}...继续说。
+	MIRA: 大多数人听到"敌人还在系统里"的第一反应是害怕。
+	MIRA: {slow}你想的是"利用"。{/slow}{pause=0.3}{fade}我喜欢这样。{/fade}
+	=> trojan_end
+- 有办法彻底清除它吗？
+	MIRA: {pause=1.0}可能有。
+	MIRA: {slow}但需要做一件事——我只在理论上知道怎么做。{/slow}
+	MIRA: 需要重建整个传输协议。{pause=0.5}从头写。
+	=> trojan_end
+
+~ trojan_end
+MIRA: 下次——我要告诉你这个程序真正的能力。
+MIRA: {slow}你一直以为你在"复习"——{/slow}{pause=0.3}但你其实在做一件更大的事。
+{auto}

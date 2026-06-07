@@ -125,6 +125,16 @@ func _setup_story_system() -> void:
 			"choice": "res://game/dialogue/ch1_choice.dialogue",
 			"revelation": "res://game/dialogue/ch1_revelation.dialogue",
 			"end": "res://game/dialogue/ch1_end.dialogue"
+		},
+		"chapter_2": {
+			"revelation": "res://game/dialogue/ch2_revelation.dialogue",
+			"xanaku": "res://game/dialogue/ch2_xanaku.dialogue",
+			"trojan": "res://game/dialogue/ch2_trojan.dialogue",
+			"survivor": "res://game/dialogue/ch2_survivor.dialogue",
+			"protocol": "res://game/dialogue/ch2_protocol.dialogue",
+			"choice": "res://game/dialogue/ch2_choice.dialogue",
+			"connection": "res://game/dialogue/ch2_connection.dialogue",
+			"end": "res://game/dialogue/ch2_end.dialogue"
 		}
 	})
 
