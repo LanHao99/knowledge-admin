@@ -27,6 +27,76 @@ const SAVE_PATH: String = "user://story_progress.tres"
 ## 剧情触发阈值（每次触发后 +5）。达到此值时触发对话。
 @export var trigger_threshold: int = 10
 
+## MIRA 对玩家的羁绊值（信任深度）。范围 [0, ∞)，有效区间 [0, 20]。
+@export var bond: int = 0
+
+## 已触发过的羁绊专属对话 ID 列表（防止重复触发）。
+@export var bond_dialogues_triggered: Array[String] = []
+
+
+# ── 羁绊系统 ──
+
+
+## 根据 bond 值返回当前羁绊层级（0~3）。## 输入: 无。
+## 输出: int — 0:陌生人 1:相识 2:信任 3:羁绊。
+func get_bond_tier() -> int:
+	if bond < 4:
+		return 0
+	if bond < 8:
+		return 1
+	if bond < 13:
+		return 2
+	return 3
+
+
+## 获取羁绊层级的文本名称。输入: tier (int, 可选) - 层级编号，默认用当前层级。
+## 输出: String — 如 "陌生人"、"相识"、"信任"、"羁绊"。
+func get_bond_tier_name(tier: int = -1) -> String:
+	var t: int = tier if tier >= 0 else get_bond_tier()
+	match t:
+		1: return "相识"
+		2: return "信任"
+		3: return "羁绊"
+		_: return "陌生人"
+
+
+## 羁绊值改变后同步 flags（供 DialogueManager 条件检测）。## 输入: 无。
+## 输出: 无。
+func _sync_bond_flags() -> void:
+	var tier := get_bond_tier()
+	flags["bond_tier"] = tier
+	flags["bond_tier_1_reached"] = (tier >= 1)
+	flags["bond_tier_2_reached"] = (tier >= 2)
+	flags["bond_tier_3_reached"] = (tier >= 3)
+	flags["bond_value"] = bond
+
+
+## 增加或减少羁绊值，钳位到 [0, INT_MAX)，并同步 flags。## 输入: amount (int) — 变化量，可正可负。
+## 输出: Dictionary — { tier_changed: bool, old_tier: int, new_tier: int }。
+func add_bond(amount: int) -> Dictionary:
+	var old_tier := get_bond_tier()
+	bond = max(0, bond + amount)
+	var new_tier := get_bond_tier()
+	_sync_bond_flags()
+	return {
+		"tier_changed": old_tier != new_tier,
+		"old_tier": old_tier,
+		"new_tier": new_tier
+	}
+
+
+## 检查羁绊专属对话是否已触发过。## 输入: dialogue_key (String) — 对话标识符。
+## 输出: bool，已触发返回 true。
+func is_bond_dialogue_triggered(dialogue_key: String) -> bool:
+	return dialogue_key in bond_dialogues_triggered
+
+
+## 标记羁绊专属对话为已触发（去重）。## 输入: dialogue_key (String) — 对话标识符。
+## 输出: 无。
+func mark_bond_dialogue_triggered(dialogue_key: String) -> void:
+	if not is_bond_dialogue_triggered(dialogue_key):
+		bond_dialogues_triggered.append(dialogue_key)
+
 
 # ── 存档读写 ──
 
@@ -150,7 +220,9 @@ func to_dict() -> Dictionary:
 		"completed_dialogues": completed_dialogues.duplicate(),
 		"flags": flags.duplicate(),
 		"last_triggered_at": last_triggered_at,
-		"trigger_threshold": trigger_threshold
+		"trigger_threshold": trigger_threshold,
+		"bond": bond,
+		"bond_tier": get_bond_tier()
 	}
 
 
@@ -163,3 +235,6 @@ func reset() -> void:
 	flags.clear()
 	last_triggered_at = 0.0
 	trigger_threshold = 10
+	bond = 0
+	bond_dialogues_triggered.clear()
+	_sync_bond_flags()

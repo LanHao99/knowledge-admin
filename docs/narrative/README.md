@@ -28,6 +28,7 @@
 | [传说架构](./lore_architecture.md) | 三层知识体系 + 世界圣经 |
 | [文字表现系统增强](./text_enhancement_design.md) | 打字机效果、情绪标记、动画系统设计 |
 | [叙事-玩法融合矩阵](./gameplay_integration_matrix.md) | 每个叙事节拍的玩法后果 |
+| [羁绊系统设计](./affection_system_design.md) | 长期好感度变量 + 高羁绊专属剧情（设计阶段） |
 | [实施路线图](./implementation_roadmap.md) | Phase 1~5 任务分解 |
 
 ## 剧本文件

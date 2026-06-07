@@ -188,6 +188,8 @@ func _connect_bridge() -> void:
 			_story_manager.story_triggered.connect(_on_story_triggered)
 		if not _story_manager.story_ended.is_connected(_on_story_ended):
 			_story_manager.story_ended.connect(_on_story_ended)
+		if not _story_manager.bond_tier_changed.is_connected(_on_bond_tier_changed):
+			_story_manager.bond_tier_changed.connect(_on_bond_tier_changed)
 
 	# Overlay 对话结束 → 恢复复习
 	if _story_overlay != null:
@@ -287,3 +289,13 @@ func _on_story_force_trigger() -> void:
 
 	# 恢复冷却
 	_story_manager.set_cooldown(saved_cooldown)
+
+
+## StoryManager.bond_tier_changed 回调：羁绊层级跃迁时通知 session 刷新显示。## 输入:
+##   old_tier (int) — 跃迁前层级。
+##   new_tier (int) — 跃迁后层级。
+##   tier_name (String) — 新层级名称。
+## 输出: 无。
+func _on_bond_tier_changed(old_tier: int, new_tier: int, tier_name: String) -> void:
+	if _session != null:
+		_session.refresh_story_display()

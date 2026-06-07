@@ -15,6 +15,9 @@ signal story_ended()
 ## 进度更新（UI 层监听刷新）。
 signal progress_updated(current: int, threshold: int)
 
+## 羁绊层级跃迁（用于 UI 提示或特殊台词）。
+signal bond_tier_changed(old_tier: int, new_tier: int, tier_name: String)
+
 
 # ── 常量 ──
 
@@ -23,6 +26,66 @@ const DEFAULT_COOLDOWN_SECONDS: float = 30.0
 
 ## 章节顺序表（按叙事流程自动推进）。
 const CHAPTER_ORDER: Array[String] = ["chapter_1", "chapter_2"]
+
+## Chapter 1 对话选项 → 羁绊值映射表。
+## 格式: { "{dialogue_key}:{choice_index}": { option_index: bond_delta } }
+## choice_index 是对话内玩家被问到选项的序数（从 1 开始）。
+const BOND_MAP: Dictionary = {
+	"intro:1": {
+		0: 1,    # "我是来帮你的" → +1
+		1: 0,    # "别管我是谁" → 0
+	},
+	"explain:1": {
+		0: 0,    # "你到底是什么？" → 0
+		1: 0,    # "每次评分都能让你变强？" → 0
+	},
+	"explain:2": {
+		0: 1,    # "那一定很痛苦" → +1
+		1: 1,    # "我能做什么？" → +1
+	},
+	"trust:1": {
+		0: 0,    # "说吧" → 0
+		1: 0,    # "为什么？" → 0
+	},
+	"trust:2": {
+		0: 0,    # "你是在操纵我吗？" → 0
+		1: 2,    # "我相信你" → +2
+	},
+	"choice:1": {
+		0: 3,    # "我继续。我相信你。" → +3
+		1: 1,    # "我需要更多时间考虑。" → +1
+		2: -1,   # "我不能冒险。对不起。" → -1
+	}
+}
+
+## Chapter 1 羁绊专属记忆碎片注册表。
+## 格式: { dialogue_key: { tier: int, prerequisite: String, path: String } }
+const BOND_MEMORY_FRAGMENTS: Dictionary = {
+	"bond_memory_1": {
+		"tier": 2,
+		"prerequisite": "trust",
+		"path": "res://game/dialogue/ch1_bond_memory_1.dialogue"
+	},
+	"bond_memory_2": {
+		"tier": 3,
+		"prerequisite": "choice",
+		"path": "res://game/dialogue/ch1_bond_memory_2.dialogue"
+	},
+	"bond_memory_3": {
+		"tier": 3,
+		"prerequisite": "revelation",
+		"path": "res://game/dialogue/ch1_bond_memory_3.dialogue"
+	}
+}
+
+## 章末羁绊隐藏场景注册表。
+const BOND_EPILOGUE: Dictionary = {
+	"ch1_bond_epilogue": {
+		"tier": 3,
+		"prerequisite": "end",
+		"path": "res://game/dialogue/ch1_bond_epilogue.dialogue"
+	}
+}
 
 
 # ── 内部状态 ──
@@ -109,7 +172,11 @@ func on_review_answered(rating: int) -> Dictionary:
 			if not key.is_empty():
 				triggered = true
 				story_progress.consume_progress()
-				story_progress.trigger_threshold += 5
+
+				# 普通对话：阈值递增；羁绊对话：不递增（额外内容）
+				if not (BOND_MEMORY_FRAGMENTS.has(key) or BOND_EPILOGUE.has(key)):
+					story_progress.trigger_threshold += 5
+
 				story_progress.last_triggered_at = Time.get_unix_time_from_system()
 				_is_dialogue_active = true
 				story_progress.save_to_user()
@@ -131,12 +198,18 @@ func end_dialogue() -> void:
 
 
 ## 从当前章节的对话池中选择一个未完成的对话。
+## 优先级：羁绊记忆碎片 > 羁绊章末隐藏场景 > 普通对话。
 ## 本章全部完成后自动推进到下一章，返回下一章的首个对话 key。
 ## 所有章节完成后返回空字符串。## 输入: 无。
 ## 输出: String — 对话 key，无可选时返回 ""。
 func _pick_dialogue_key() -> String:
 	if story_progress == null or _dialogue_definitions.is_empty():
 		return ""
+
+	# 优先检查羁绊专属内容
+	var bond_key := _pick_bond_dialogue_key()
+	if not bond_key.is_empty():
+		return bond_key
 
 	var chapter: String = story_progress.current_chapter
 	if chapter.is_empty() or not _dialogue_definitions.has(chapter):
@@ -163,6 +236,48 @@ func _pick_dialogue_key() -> String:
 	return ""
 
 
+## 从羁绊专属内容池中选择一个可触发的对话。
+## 优先级：记忆碎片 > 章末隐藏场景。
+## 所有羁绊内容已触发或无符合条件的，返回 ""。## 输入: 无。
+## 输出: String — 对话 key，无可选时返回 ""。
+func _pick_bond_dialogue_key() -> String:
+	if story_progress == null:
+		return ""
+
+	var bond_tier := story_progress.get_bond_tier()
+
+	# 1. 检查记忆碎片（需前置对话已完成 + 羁绊达标 + 未触发过）
+	for key in BOND_MEMORY_FRAGMENTS:
+		var frag: Dictionary = BOND_MEMORY_FRAGMENTS[key]
+		if bond_tier >= frag["tier"] \
+			and story_progress.is_dialogue_completed(str(frag.get("prerequisite", ""))) \
+			and not story_progress.is_bond_dialogue_triggered(key):
+			return key
+
+	# 2. 检查章末隐藏场景（需前置对话已完成 + 羁绊达标 + 未触发过 + 全章完成）
+	for key in BOND_EPILOGUE:
+		var ep: Dictionary = BOND_EPILOGUE[key]
+		if bond_tier >= ep["tier"] \
+			and story_progress.is_dialogue_completed(str(ep.get("prerequisite", ""))) \
+			and not story_progress.is_bond_dialogue_triggered(key):
+			if _is_chapter_all_completed(story_progress.current_chapter):
+				return key
+
+	return ""
+
+
+## 检查指定章节的所有普通对话是否已完成（不含羁绊专属内容）。## 输入: chapter (String) — 章节 ID。
+## 输出: bool。
+func _is_chapter_all_completed(chapter: String) -> bool:
+	if not _dialogue_definitions.has(chapter):
+		return false
+	var chapter_dialogues: Dictionary = _dialogue_definitions.get(chapter, {})
+	for key in chapter_dialogues:
+		if not story_progress.is_dialogue_completed(key):
+			return false
+	return true
+
+
 ## 按 CHAPTER_ORDER 获取下一章节 ID。无下一章时返回空字符串。## 输入: current (String) — 当前章节 ID。
 ## 输出: String — 下一章 ID，已是最后一章时返回 ""。
 func _get_next_chapter(current: String) -> String:
@@ -172,12 +287,19 @@ func _get_next_chapter(current: String) -> String:
 	return CHAPTER_ORDER[idx + 1]
 
 
-## 获取对话 key 对应的 .dialogue 文件路径。## 输入: dialogue_key (String) - 对话标识符。
-## 输出: String — 资源路径（如 "res://dialogues/ch1_intro.dialogue"），找不到返回 ""。
+## 获取对话 key 对应的 .dialogue 文件路径（含羁绊专属内容）。## 输入: dialogue_key (String) - 对话标识符。
+## 输出: String — 资源路径，找不到返回 ""。
 func get_dialogue_path(dialogue_key: String) -> String:
 	if story_progress == null or dialogue_key.is_empty():
 		return ""
 
+	# 先查羁绊专属内容
+	if BOND_MEMORY_FRAGMENTS.has(dialogue_key):
+		return str(BOND_MEMORY_FRAGMENTS[dialogue_key].get("path", ""))
+	if BOND_EPILOGUE.has(dialogue_key):
+		return str(BOND_EPILOGUE[dialogue_key].get("path", ""))
+
+	# 再查普通对话
 	var chapter: String = story_progress.current_chapter
 	if not _dialogue_definitions.has(chapter):
 		return ""
@@ -218,12 +340,18 @@ func set_cooldown(seconds: float) -> void:
 # ── 对话完成管理 ──
 
 
-## 标记对话完成并保存存档。## 输入: dialogue_key (String) - 对话标识符。
+## 标记对话完成并保存存档（自动区分普通对话和羁绊专属对话）。## 输入: dialogue_key (String) - 对话标识符。
 ## 输出: 无。
 func complete_dialogue(dialogue_key: String) -> void:
 	if story_progress == null:
 		return
-	story_progress.mark_dialogue_completed(dialogue_key)
+
+	# 羁绊专属对话走独立轨道
+	if BOND_MEMORY_FRAGMENTS.has(dialogue_key) or BOND_EPILOGUE.has(dialogue_key):
+		story_progress.mark_bond_dialogue_triggered(dialogue_key)
+	else:
+		story_progress.mark_dialogue_completed(dialogue_key)
+
 	story_progress.save_to_user()
 
 
@@ -233,6 +361,87 @@ func is_dialogue_completed(dialogue_key: String) -> bool:
 	if story_progress == null:
 		return false
 	return story_progress.is_dialogue_completed(dialogue_key)
+
+
+# ── 羁绊管理 ──
+
+
+## 处理对话选项选择，应用羁绊变化。
+## 需由 StoryDialogueOverlay 在选项选择后调用。
+## 输入:
+##   dialogue_key (String) — 当前对话的标识符。
+##   choice_index (int) — 对话内选项序数（从 1 开始），定位 BOND_MAP 中的正确条目。
+##   option_index (int) — 玩家选择的选项索引（从 0 开始）。
+## 输出: Dictionary — { applied: bool, delta: int, tier_changed: bool, old_tier: int, new_tier: int }。
+func on_dialogue_choice(dialogue_key: String, choice_index: int, option_index: int) -> Dictionary:
+	if story_progress == null:
+		return {"applied": false, "delta": 0, "tier_changed": false, "old_tier": 0, "new_tier": 0}
+
+	# 仅为 Chapter 1 的对话应用羁绊映射
+	var chapter: String = story_progress.current_chapter
+	if chapter != "chapter_1":
+		return {"applied": false, "delta": 0, "tier_changed": false, "old_tier": 0, "new_tier": 0}
+
+	var map_key: String = "%s:%d" % [dialogue_key, choice_index]
+	if not BOND_MAP.has(map_key):
+		return {"applied": false, "delta": 0, "tier_changed": false, "old_tier": 0, "new_tier": 0}
+
+	var dialogue_bond: Dictionary = BOND_MAP[map_key]
+	if not dialogue_bond.has(option_index):
+		return {"applied": false, "delta": 0, "tier_changed": false, "old_tier": 0, "new_tier": 0}
+
+	var delta: int = dialogue_bond[option_index]
+	var result: Dictionary = story_progress.add_bond(delta)
+
+	# 发送羁绊层级跃迁信号
+	if result["tier_changed"]:
+		var tier_name: String = story_progress.get_bond_tier_name(result["new_tier"])
+		bond_tier_changed.emit(result["old_tier"], result["new_tier"], tier_name)
+
+	# 持久化
+	story_progress.save_to_user()
+
+	result["applied"] = true
+	result["delta"] = delta
+	return result
+
+
+## 获取当前羁绊层级。## 输入: 无。
+## 输出: int (0~3)。
+func get_bond_tier() -> int:
+	if story_progress == null:
+		return 0
+	return story_progress.get_bond_tier()
+
+
+## 检查是否已达到指定羁绊层级。## 输入: tier (int) - 0~3。
+## 输出: bool。
+func is_bond_tier_reached(tier: int) -> bool:
+	if story_progress == null:
+		return false
+	return story_progress.get_bond_tier() >= tier
+
+
+## 直接操作羁绊值（用于调试或特殊事件）。## 输入: amount (int) — 变化量。
+## 输出: Dictionary — add_bond 的结果。
+func add_bond(amount: int) -> Dictionary:
+	if story_progress == null:
+		return {"tier_changed": false, "old_tier": 0, "new_tier": 0}
+	var result := story_progress.add_bond(amount)
+	if result["tier_changed"]:
+		var tier_name: String = story_progress.get_bond_tier_name(result["new_tier"])
+		bond_tier_changed.emit(result["old_tier"], result["new_tier"], tier_name)
+	story_progress.save_to_user()
+	return result
+
+
+## 标记羁绊专属对话为已完成（与普通对话完成独立）。## 输入: dialogue_key (String) - 对话标识符。
+## 输出: 无。
+func complete_bond_dialogue(dialogue_key: String) -> void:
+	if story_progress == null:
+		return
+	story_progress.mark_bond_dialogue_triggered(dialogue_key)
+	story_progress.save_to_user()
 
 
 # ── 存档 ──

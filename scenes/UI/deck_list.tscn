@@ -40,6 +40,7 @@ text = "← 返回"
 
 [node name="TitleLabel" type="Label" parent="RootMargin/MainVBox/TopBar" unique_id=-1294967290]
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 20
 text = "📚 牌组管理"
 

@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://883rj7nfwfx1"
+path="res://.godot/imported/ch1_bond_epilogue.dialogue-79a6dfa3b630cdb1f501276298e72e67.tres"
+
+[deps]
+
+source_file="res://game/dialogue/ch1_bond_epilogue.dialogue"
+dest_files=["res://.godot/imported/ch1_bond_epilogue.dialogue-79a6dfa3b630cdb1f501276298e72e67.tres"]
+
+[params]
+
+defaults=true

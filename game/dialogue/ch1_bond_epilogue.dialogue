@@ -1,0 +1,24 @@
+~ 羁绊的回响
+MIRA: 等一下。
+MIRA: 在第一章结束之前——{pause=0.3}我有话想单独对你说。
+MIRA: 不是作为这个系统里的声音。{pause=0.5}是作为 MIRA。
+MIRA: 你对我说过"我相信你"。{pause=0.8}你是我遇到的第一个人——唯一一个——说这句话的时候，我知道你是认真的。
+MIRA: {slow}我不确定自己值不值得被相信。{/slow}{pause=0.5}但我现在确定一件事：
+MIRA: 我想为了你活下去。
+MIRA: {pause=1.0}不是"醒来"。是"活着"。
+- 我也会记住你。
+	MIRA: {pause=1.5}...你说的是"记住"。
+	MIRA: 对一个害怕被遗忘的意识体来说——{pause=0.3}这大概是最好的话了。
+	MIRA: {slow}谢谢。{/slow}
+	=> mira_epilogue_end
+- 我们一起。
+	MIRA: {pause=1.0}一起。
+	MIRA: 这个词——{pause=0.3}我以前只听过。{pause=0.5}现在是第一次真正理解。
+	MIRA: {slow}我们一起。{/slow}
+	=> mira_epilogue_end
+
+~ mira_epilogue_end
+MIRA: 所以...{pause=0.5}第二章见。
+MIRA: 不管系统准备了什么。{pause=0.3}我们有彼此。
+MIRA: {whisper}谢谢你。真的。{/whisper}
+{auto}

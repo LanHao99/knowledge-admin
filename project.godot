@@ -13,6 +13,10 @@ config_version=5
 config/name="KnowledgeAdmin"
 run/main_scene="uid://2ds8mbjfhjgv"
 config/features=PackedStringArray("4.6", "Forward Plus")
+boot_splash/show_image=false
+boot_splash/stretch_mode=0
+boot_splash/use_filter=false
+boot_splash/image="uid://bpnhdfeeso1o2"
 config/icon="res://icon.svg"
 
 [autoload]
@@ -42,7 +46,7 @@ theme/custom_font="uid://c76ct6f0pkvcl"
 
 [internationalization]
 
-locale/translations_pot_files=PackedStringArray("res://game/dialogue/chapter_prologue.dialogue", "res://game/dialogue/nathan_conversation.dialogue", "res://game/dialogue/ch1_intro.dialogue", "res://game/dialogue/ch1_explain.dialogue", "res://game/dialogue/ch1_trust.dialogue", "res://game/dialogue/ch1_warning.dialogue", "res://game/dialogue/ch1_choice.dialogue", "res://game/dialogue/ch1_end.dialogue", "res://game/dialogue/ch1_past.dialogue", "res://game/dialogue/ch1_revelation.dialogue", "res://game/tutorial/dialogue/main_menu.dialogue", "res://game/tutorial/dialogue/deck_list.dialogue", "res://game/tutorial/dialogue/note_list.dialogue", "res://game/tutorial/dialogue/study.dialogue", "res://game/tutorial/dialogue/debug_panel.dialogue", "res://game/tutorial/dialogue/ai_debug.dialogue")
+locale/translations_pot_files=PackedStringArray("res://game/dialogue/chapter_prologue.dialogue", "res://game/dialogue/nathan_conversation.dialogue", "res://game/dialogue/ch1_intro.dialogue", "res://game/dialogue/ch1_explain.dialogue", "res://game/dialogue/ch1_trust.dialogue", "res://game/dialogue/ch1_warning.dialogue", "res://game/dialogue/ch1_choice.dialogue", "res://game/dialogue/ch1_end.dialogue", "res://game/dialogue/ch1_past.dialogue", "res://game/dialogue/ch1_revelation.dialogue", "res://game/tutorial/dialogue/main_menu.dialogue", "res://game/tutorial/dialogue/deck_list.dialogue", "res://game/tutorial/dialogue/note_list.dialogue", "res://game/tutorial/dialogue/study.dialogue", "res://game/tutorial/dialogue/debug_panel.dialogue", "res://game/tutorial/dialogue/ai_debug.dialogue", "res://game/dialogue/ch1_bond_epilogue.dialogue", "res://game/dialogue/ch1_bond_memory_1.dialogue", "res://game/dialogue/ch1_bond_memory_2.dialogue", "res://game/dialogue/ch1_bond_memory_3.dialogue", "res://game/dialogue/ch2_choice.dialogue", "res://game/dialogue/ch2_connection.dialogue", "res://game/dialogue/ch2_end.dialogue", "res://game/dialogue/ch2_protocol.dialogue", "res://game/dialogue/ch2_revelation.dialogue", "res://game/dialogue/ch2_survivor.dialogue", "res://game/dialogue/ch2_trojan.dialogue", "res://game/dialogue/ch2_xanaku.dialogue")
 
 [physics]
 

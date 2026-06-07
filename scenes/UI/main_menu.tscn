@@ -54,7 +54,7 @@ text = "⚙ 设置"
 [node name="DebugButton" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=1000000008]
 custom_minimum_size = Vector2(88, 36)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.6, 0.6, 0.7, 1)
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "🔧 调试"
 
 [node name="AIDebugButton" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=1000000026]

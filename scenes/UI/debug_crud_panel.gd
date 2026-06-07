@@ -821,11 +821,29 @@ func _on_clear_data_confirmed() -> void:
 	# 重置 SQLite autoincrement 序列，让新建的 deck/note/card 重新从 1 开始
 	deck_db.execute_bind("DELETE FROM sqlite_sequence;", [])
 	_append_log("[清空] 已清空 cards / notes / decks 三张表并重置序列")
+
+	# 清空剧情进度（StoryProgress）
+	_clear_story_progress()
+
 	_date_offset = 0
 	_last_offset = 0
 	_refresh_simulated_date_label()
 	_refresh_deck_list()
 	_refresh_note_list()
+
+
+## 清空 StoryProgress 剧情数据：重置章节、已完成对话、触发阈值和羁绊值。## 输入: 无。
+## 输出: 无。
+func _clear_story_progress() -> void:
+	var sp := StoryProgress.load_from_user()
+	sp.current_chapter = ""
+	sp.completed_dialogues.clear()
+	sp.bond_dialogues_triggered.clear()
+	sp.trigger_threshold = 10
+	sp.bond = 0
+	sp.flags.clear()
+	sp.save_to_user()
+	_append_log("[清空] 已重置 StoryProgress（章节、对话记录、羁绊、标记、阈值）")
 
 
 func _on_refresh_all_pressed() -> void:

@@ -50,6 +50,9 @@ var _is_waiting_for_choice: bool = false
 ## 打字机是否正在播放中。
 var _is_animating: bool = false
 
+## 羁绊选项计数：当前对话中玩家已做出的选择次数（从 1 开始），用于 BOND_MAP 索引。
+var _bond_choice_index: int = 0
+
 
 # ── 节点引用 ──
 
@@ -119,6 +122,7 @@ func start(resource, key: String = "", start_title: String = "") -> void:
 
 	dialogue_key = key
 	_current_resource = resource
+	_bond_choice_index = 0  # 重置羁绊选项计数
 	_main_control.show()
 	_answer_bar.hide()
 	_set_status("")
@@ -216,7 +220,7 @@ func _build_response_buttons(responses: Array) -> void:
 		_answer_bar.add_child(btn)
 
 
-## 选项选择回调：获取下一行对话。## 输入: index (int) - 选项索引。
+## 选项选择回调：获取下一行对话，同时通知 StoryManager 应用羁绊变化。## 输入: index (int) - 选项索引。
 ## 输出: 无。
 func _on_option_selected(index: int) -> void:
 	if _current_line == null:
@@ -225,6 +229,13 @@ func _on_option_selected(index: int) -> void:
 	var responses: Array = _current_line.responses
 	if index < 0 or index >= responses.size():
 		return
+
+	# 羁绊选择计数递增
+	_bond_choice_index += 1
+
+	# 通知 StoryManager 应用羁绊变化（使用选择序数而非绝对选项索引）
+	if _story_manager != null and not dialogue_key.is_empty():
+		_story_manager.on_dialogue_choice(dialogue_key, _bond_choice_index, index)
 
 	var response = responses[index]
 	var next_id: String = response.next_id
