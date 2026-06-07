@@ -85,8 +85,8 @@ func _bind_actions() -> void:
 ## 初始化调试模式：监听全局开关，同步 debugUI 组可见性。## 输入: 无。
 ## 输出: 无。
 func _setup_debug_mode() -> void:
-	# 初始可见性
-	_apply_debug_visibility(DebugSettings.debug_mode)
+	# 直接控制调试按钮可见性
+	_debug_story_btn.visible = DebugSettings.debug_mode
 	# 监听变化
 	if not DebugSettings.debug_mode_changed.is_connected(_on_global_debug_changed):
 		DebugSettings.debug_mode_changed.connect(_on_global_debug_changed)
@@ -380,15 +380,7 @@ func _on_debug_story_pressed() -> void:
 ## Autoload 调试模式变化回调 → 同步 debugUI 组可见性。## 输入: enabled (bool)。
 ## 输出: 无。
 func _on_global_debug_changed(enabled: bool) -> void:
-	_apply_debug_visibility(enabled)
-
-
-## 根据调试模式控制 debugUI 分组节点的可见性。## 输入: enabled (bool)。
-## 输出: 无。
-func _apply_debug_visibility(enabled: bool) -> void:
-	for node in get_tree().get_nodes_in_group("debugUI"):
-		if node is CanvasItem:
-			node.visible = enabled
+	_debug_story_btn.visible = enabled
 
 
 # ──────────────────────────────────────────────────────────────

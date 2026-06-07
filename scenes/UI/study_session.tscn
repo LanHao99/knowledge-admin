@@ -121,7 +121,9 @@ text = "0/10"
 horizontal_alignment = 2
 
 [node name="DebugStory" type="Button" parent="InStudyBar" unique_id=26876540]
+group = "debugUI"
 layout_mode = 2
+visible = false
 text = "一键触发剧情"
 
 [node name="CompletionPanel" type="Control" parent="." unique_id=1705032721]
