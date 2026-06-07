@@ -82,7 +82,7 @@ layout_mode = 1
 layout_mode = 0
 offset_left = 8.0
 offset_top = 8.0
-offset_right = 1301.0
+offset_right = 1894.0
 offset_bottom = 44.0
 theme_override_constants/separation = 12
 
@@ -119,6 +119,10 @@ theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1)
 theme_override_font_sizes/font_size = 14
 text = "0/10"
 horizontal_alignment = 2
+
+[node name="DebugStory" type="Button" parent="InStudyBar" unique_id=26876540]
+layout_mode = 2
+text = "一键触发剧情"
 
 [node name="CompletionPanel" type="Control" parent="." unique_id=1705032721]
 visible = false

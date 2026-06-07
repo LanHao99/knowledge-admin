@@ -7,6 +7,7 @@ class_name StudySession
 
 signal deck_selected(deck_id: int)  ## 用户选择了牌组，通知 study.gd 启动学习
 signal learning_exited()            ## 用户在 InStudyBar 点击退出学习，通知 study.gd 隐藏 CardUI
+signal story_force_trigger()        ## 调试按钮触发：强制填满进度条并请求触发剧情
 
 enum StudyState {
 	PICKING,   ## 牌组选择视图
@@ -18,6 +19,7 @@ enum StudyState {
 # ── 注入的 Manager（由 study.gd 注入）──
 var _deck_manager: DeckManager = null
 var _study_manager: StudyManager = null
+var _story_manager: StoryManager = null  ## 剧情管理器引用（供调试按钮使用）
 var _signals_connected: bool = false
 
 var _state: StudyState = StudyState.PICKING
@@ -38,9 +40,10 @@ var _exiting: bool = false  ## 用户正在退出学习，跳过完成面板
 @onready var _studying_label: Label = $"InStudyBar/DeckNameLabel"
 @onready var _study_progress_label: Label = $"InStudyBar/ProgressLabel"
 
-# ── 剧情进度条（位于 InStudyBar 内，不再代码 new）──
+# ── 剧情进度条（位于 InStudyBar 内）──
 @onready var _story_progress_bar: ProgressBar = $"InStudyBar/StoryProgressBar"
 @onready var _story_value_label: Label = $"InStudyBar/StoryValueLabel"
+@onready var _debug_story_btn: Button = $"InStudyBar/DebugStory"
 
 # ── 剧情进度数据 + 设置 ──
 var _story_progress: StoryProgress = null
@@ -60,6 +63,7 @@ var _story_rating_to_progress: Dictionary = {
 func _ready() -> void:
 	_bind_actions()
 	_set_state(StudyState.PICKING)
+	_setup_debug_mode()
 
 
 ## 退出场景时断开信号。## 输入: 无。
@@ -75,6 +79,17 @@ func _bind_actions() -> void:
 	_exit_study_btn.pressed.connect(_on_exit_study_pressed)
 	_deck_tree.item_activated.connect(_on_deck_activated)
 	_completion_back_btn.pressed.connect(_on_completion_back_pressed)
+	_debug_story_btn.pressed.connect(_on_debug_story_pressed)
+
+
+## 初始化调试模式：监听全局开关，同步 debugUI 组可见性。## 输入: 无。
+## 输出: 无。
+func _setup_debug_mode() -> void:
+	# 初始可见性
+	_apply_debug_visibility(DebugSettings.debug_mode)
+	# 监听变化
+	if not DebugSettings.debug_mode_changed.is_connected(_on_global_debug_changed):
+		DebugSettings.debug_mode_changed.connect(_on_global_debug_changed)
 
 
 # ──────────────────────────────────────────────────────────────
@@ -93,6 +108,12 @@ func set_deck_manager(deck_manager: DeckManager) -> void:
 func set_study_manager(study_manager: StudyManager) -> void:
 	_study_manager = study_manager
 	_connect_study_signals()
+
+
+## 注入 StoryManager（供调试按钮直接触发剧情）。## 输入: manager (StoryManager)。
+## 输出: 无。
+func inject_story_manager(manager: StoryManager) -> void:
+	_story_manager = manager
 
 
 ## 连接 StudyManager 信号（InStudyBar 进度更新）。## 输入: 无。
@@ -337,6 +358,37 @@ func _on_completion_back_pressed() -> void:
 	build_deck_list()
 	_deck_picker.visible = true
 	_set_state(StudyState.PICKING)
+
+
+## 调试按钮"一键触发剧情" → 填满进度条并发射信号。## 输入: 无。
+## 输出: 无。
+func _on_debug_story_pressed() -> void:
+	if not DebugSettings.debug_mode:
+		return
+
+	if _story_progress == null:
+		return
+
+	# 填满进度条
+	_story_progress.total_progress = _story_threshold
+	refresh_story_display()
+
+	# 通知 study.gd 触发剧情
+	story_force_trigger.emit()
+
+
+## Autoload 调试模式变化回调 → 同步 debugUI 组可见性。## 输入: enabled (bool)。
+## 输出: 无。
+func _on_global_debug_changed(enabled: bool) -> void:
+	_apply_debug_visibility(enabled)
+
+
+## 根据调试模式控制 debugUI 分组节点的可见性。## 输入: enabled (bool)。
+## 输出: 无。
+func _apply_debug_visibility(enabled: bool) -> void:
+	for node in get_tree().get_nodes_in_group("debugUI"):
+		if node is CanvasItem:
+			node.visible = enabled
 
 
 # ──────────────────────────────────────────────────────────────

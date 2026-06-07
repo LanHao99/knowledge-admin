@@ -132,6 +132,7 @@ func _setup_story_system() -> void:
 	# 将剧情进度注入 session（session 内的 ProgressBar 节点直接控制，不再代码 new StoryProgressBar）
 	if _session != null:
 		_session.set_story_progress(_story_manager.story_progress)
+		_session.inject_story_manager(_story_manager)
 
 	# 注入 StoryManager 到 Overlay
 	if _story_overlay != null:
@@ -158,6 +159,8 @@ func _connect_bridge() -> void:
 			_session.deck_selected.connect(_on_deck_selected)
 		if not _session.learning_exited.is_connected(_on_learning_exited):
 			_session.learning_exited.connect(_on_learning_exited)
+		if not _session.story_force_trigger.is_connected(_on_story_force_trigger):
+			_session.story_force_trigger.connect(_on_story_force_trigger)
 	if _card_ui != null:
 		if not _card_ui.study_finished.is_connected(_on_study_finished):
 			_card_ui.study_finished.connect(_on_study_finished)
@@ -255,3 +258,20 @@ func _on_story_ended() -> void:
 func _on_story_dialogue_finished() -> void:
 	if _card_ui != null:
 		_card_ui.visible = true
+
+
+## StudySession.story_force_trigger 回调：调试按钮触发，强制填充进度并触发对话。## 输入: 无。
+## 输出: 无。
+func _on_story_force_trigger() -> void:
+	if _story_manager == null:
+		return
+
+	# 临时关闭冷却，确保能触发
+	var saved_cooldown: float = _story_manager.cooldown_seconds
+	_story_manager.set_cooldown(0.0)
+
+	# 以 Easy 评分触发对话（贡献 3 进度，已由 session 填满进度条）
+	_story_manager.on_review_answered(4)
+
+	# 恢复冷却
+	_story_manager.set_cooldown(saved_cooldown)

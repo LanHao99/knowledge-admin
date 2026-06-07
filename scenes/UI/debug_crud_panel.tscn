@@ -58,6 +58,11 @@ text = "Refresh All"
 layout_mode = 2
 text = "← 返回主菜单"
 
+[node name="DebugMode" type="CheckButton" parent="RootMargin/MainVBox/Toolbar" unique_id=1443765783]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "调试模式"
+
 [node name="MainHSplit" type="HSplitContainer" parent="RootMargin/MainVBox" unique_id=1139279015]
 layout_mode = 2
 size_flags_horizontal = 3
