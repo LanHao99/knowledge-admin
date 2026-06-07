@@ -9,9 +9,9 @@ extends RefCounted
 ## 唯一标识符（自增主键）。0 表示尚未写入数据库的临时对象。
 var id: int = 0
 
-## 笔记类型 ID，用于决定该笔记使用哪种模板生成卡片。对应 note_type_id 字段（INTEGER, NOT NULL）。
-## 当前 schema 中 note_types 表尚未创建，此字段为预留，默认 0。
-var note_type_id: int = 0
+## 笔记类型 ID，用于决定该笔记使用哪种模板生成卡片。对应 note_type_id 字段（TEXT, NOT NULL）。
+## 默认为空字符串；关联 note_types 表的 TEXT 主键（如 "__default__" 或 UUID）。
+var note_type_id: String = ""
 
 ## 字段数据字典，键为字段名，值为字段内容。对应数据库中 JSON 序列化后的 fields_data（TEXT）。
 ## 示例: {"正面": "你好", "背面": "Hello"}
@@ -46,7 +46,7 @@ func to_dict() -> Dictionary:
 ## 会自动调用 fields_from_json() 将 JSON 字符串解析为 fields_data 字典。## 输入: d (Dictionary) - 数据库查询返回的行字典，键名应与 notes 表字段对应。
 func from_dict(d: Dictionary) -> void:
 	if d.has("id"): id = int(d.get("id", 0))
-	if d.has("note_type_id"): note_type_id = int(d.get("note_type_id", 0))
+	if d.has("note_type_id"): note_type_id = str(d.get("note_type_id", ""))
 	if d.has("deck_id"): deck_id = int(d.get("deck_id", 0))
 	if d.has("fields_data"): fields_from_json(str(d.get("fields_data", "{}")))
 	if d.has("created_at"): created_at = int(d.get("created_at", 0))

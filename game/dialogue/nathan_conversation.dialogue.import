@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://d0k8n7v3pwi2"
+path="res://.godot/imported/nathan_conversation.dialogue-04fd808cade7359e9b6bb1a27a9a1b0c.tres"
+
+[deps]
+
+source_file="res://game/dialogue/nathan_conversation.dialogue"
+dest_files=["res://.godot/imported/nathan_conversation.dialogue-04fd808cade7359e9b6bb1a27a9a1b0c.tres"]
+
+[params]
+
+defaults=true

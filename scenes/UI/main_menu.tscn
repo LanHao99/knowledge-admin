@@ -3,17 +3,6 @@
 [ext_resource type="Theme" uid="uid://bi54ign8ggomc" path="res://assets/Classic95/Classic95.tres" id="1_fe2o3"]
 [ext_resource type="Script" uid="uid://cq2lg4ykcc4xo" path="res://scenes/ui/main_menu.gd" id="1_script"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_maincard"]
-content_margin_left = 32.0
-content_margin_top = 24.0
-content_margin_right = 32.0
-content_margin_bottom = 24.0
-bg_color = Color(0.08, 0.08, 0.12, 0.92)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-
 [node name="MainMenu" type="Control" unique_id=1000000001]
 layout_mode = 3
 anchors_preset = 15
@@ -82,7 +71,6 @@ size_flags_vertical = 3
 custom_minimum_size = Vector2(520, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("StyleBoxFlat_maincard")
 
 [node name="CardVBox" type="VBoxContainer" parent="RootMargin/MainVBox/CenterArea/MainCard" unique_id=1000000011]
 layout_mode = 2
@@ -90,6 +78,7 @@ theme_override_constants/separation = 18
 
 [node name="LogoLabel" type="RichTextLabel" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000012]
 layout_mode = 2
+theme_override_colors/default_color = Color(0, 0, 0, 1)
 bbcode_enabled = true
 text = "[center][font_size=36][wave amp=10 freq=5]📚 Knowledge Admin[/wave][/font_size][/center]"
 fit_content = true
@@ -102,6 +91,7 @@ columns = 3
 [node name="DeckStat" type="RichTextLabel" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox/StatsGrid" unique_id=1000000014]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/default_color = Color(0, 0, 0, 1)
 bbcode_enabled = true
 text = "[center]牌组
 [font_size=26]—[/font_size][/center]"
@@ -111,6 +101,7 @@ scroll_active = false
 [node name="DueStat" type="RichTextLabel" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox/StatsGrid" unique_id=1000000015]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/default_color = Color(0, 0, 0, 1)
 bbcode_enabled = true
 text = "[center]待复习
 [font_size=26]—[/font_size][/center]"
@@ -120,6 +111,7 @@ scroll_active = false
 [node name="TodayStat" type="RichTextLabel" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox/StatsGrid" unique_id=1000000016]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/default_color = Color(0, 0, 0, 1)
 bbcode_enabled = true
 text = "[center]今日
 [font_size=26]—[/font_size][/center]"
@@ -142,7 +134,6 @@ text = "📝 笔记浏览"
 [node name="StudyBtn" type="Button" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000020]
 custom_minimum_size = Vector2(300, 48)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.25, 1)
 text = "▶ 开始学习"
 
 [node name="Sep2" type="HSeparator" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000021]

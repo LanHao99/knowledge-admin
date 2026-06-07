@@ -43,6 +43,31 @@
         }
       ]
     },
+    "note_types": {
+      "columns": {
+        "id": {
+          "data_type": "TEXT",
+          "primary_key": true
+        },
+        "name": {
+          "data_type": "TEXT",
+          "not_null": true,
+          "unique": true
+        },
+        "fields_schema": {
+          "data_type": "TEXT",
+          "not_null": true
+        },
+        "card_templates": {
+          "data_type": "TEXT",
+          "not_null": true
+        },
+        "created_at": {
+          "data_type": "TEXT",
+          "not_null": true
+        }
+      }
+    },
     "notes": {
       "columns": {
         "id": {
@@ -51,7 +76,7 @@
           "auto_increment": true
         },
         "note_type_id": {
-          "data_type": "INTEGER",
+          "data_type": "TEXT",
           "not_null": true
         },
         "fields_data": {
@@ -170,6 +195,14 @@
       "unique": true
     },
     {
+      "name": "idx_notetypes_name",
+      "table": "note_types",
+      "columns": [
+        "name"
+      ],
+      "unique": true
+    },
+    {
       "name": "idx_cards_deck_queue_due",
       "table": "cards",
       "columns": [
@@ -191,6 +224,7 @@
   "drop_tables_order": [
     "cards",
     "notes",
+    "note_types",
     "decks"
   ]
 }

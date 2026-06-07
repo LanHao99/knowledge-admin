@@ -3,14 +3,14 @@ class_name NoteDB
 
 
 ## 创建一条笔记记录并返回创建后的实体对象。## 输入:
-##   note_type_id (int) - 笔记类型 ID。
+##   note_type_id (String) - 笔记类型 ID（TEXT 主键，如 "__default__" 或 UUID）。
 ##   fields_json (String) - 字段 JSON 字符串。
 ##   deck_id (int) - 所属牌组 ID。
 ##   tags (String) - 预留标签字符串，当前 schema 未落库，仅保留参数兼容。
 ## 输出: 返回标准字典。成功时 `data` 为 NoteEntity。
-func create_note(note_type_id: int, fields_json: String, deck_id: int = 0, tags: String = "") -> Dictionary:
-	if note_type_id <= 0:
-		return fail("NOTE_TYPE_INVALID", "note_type_id 必须大于 0")
+func create_note(note_type_id: String, fields_json: String, deck_id: int = 0, tags: String = "") -> Dictionary:
+	if note_type_id.is_empty():
+		return fail("NOTE_TYPE_INVALID", "note_type_id 不能为空")
 
 	if tags != "":
 		# 当前 schema 暂无 tags 列，仅保留接口兼容；标签由上层决定是否另行落库。
@@ -83,9 +83,9 @@ func get_notes_by_deck(deck_id: int, limit: int = 0, offset: int = 0) -> Diction
 	return ok(_rows_to_note_entities(result.get("data", [])))
 
 
-## 根据笔记类型查询笔记列表。## 输入: note_type_id (int) - 笔记类型 ID。
+## 根据笔记类型查询笔记列表。## 输入: note_type_id (String) - 笔记类型 ID（TEXT 主键）。
 ## 输出: 返回标准字典。成功时 `data` 为 Array[NoteEntity]。
-func get_notes_by_type(note_type_id: int) -> Dictionary:
+func get_notes_by_type(note_type_id: String) -> Dictionary:
 	var result := fetch_all("SELECT * FROM notes WHERE note_type_id = ? ORDER BY id DESC;", [note_type_id])
 	if not result.get("success", false):
 		return result
