@@ -1,0 +1,171 @@
+[gd_scene format=3 uid="uid://k6t7vxys4iwb"]
+
+[ext_resource type="Theme" uid="uid://bi54ign8ggomc" path="res://assets/Classic95/Classic95.tres" id="1_theme"]
+[ext_resource type="Script" uid="uid://bemusywvmtdfk" path="res://scenes/ui/settings.gd" id="1_script"]
+
+[node name="Settings" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_theme")
+script = ExtResource("1_script")
+
+[node name="RootMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 16
+
+[node name="MainVBox" type="VBoxContainer" parent="RootMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="TopBar" type="HBoxContainer" parent="RootMargin/MainVBox"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="RootMargin/MainVBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+text = "设置"
+
+[node name="TopSpacer" type="Control" parent="RootMargin/MainVBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BackButton" type="Button" parent="RootMargin/MainVBox/TopBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 36)
+layout_mode = 2
+text = "← 返回"
+
+[node name="ContentScroll" type="ScrollContainer" parent="RootMargin/MainVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="SectionsVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="GeneralSection" type="PanelContainer" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox"]
+layout_mode = 2
+
+[node name="GeneralVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/GeneralSection"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SectionLabel" type="Label" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/GeneralSection/GeneralVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "通用"
+
+[node name="Sep1" type="HSeparator" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/GeneralSection/GeneralVBox"]
+layout_mode = 2
+
+[node name="DebugRow" type="HBoxContainer" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/GeneralSection/GeneralVBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="DebugLabel" type="Label" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/GeneralSection/GeneralVBox/DebugRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "调试模式：控制调试面板和调试功能的显示"
+
+[node name="DebugCheck" type="CheckButton" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/GeneralSection/GeneralVBox/DebugRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "开启调试模式"
+
+[node name="DataSection" type="PanelContainer" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox"]
+layout_mode = 2
+
+[node name="DataVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/DataSection"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SectionLabel2" type="Label" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/DataSection/DataVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "数据"
+
+[node name="Sep2" type="HSeparator" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/DataSection/DataVBox"]
+layout_mode = 2
+
+[node name="TutorialRow" type="HBoxContainer" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/DataSection/DataVBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TutorialLabel" type="Label" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/DataSection/DataVBox/TutorialRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "教程进度：重置后将重新显示所有场景的引导教程"
+
+[node name="ResetTutorialBtn" type="Button" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/DataSection/DataVBox/TutorialRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 36)
+layout_mode = 2
+text = "重置教程进度"
+
+[node name="AboutSection" type="PanelContainer" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox"]
+layout_mode = 2
+
+[node name="AboutVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/AboutSection"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SectionLabel3" type="Label" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/AboutSection/AboutVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "关于"
+
+[node name="Sep3" type="HSeparator" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/AboutSection/AboutVBox"]
+layout_mode = 2
+
+[node name="AppNameLabel" type="Label" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/AboutSection/AboutVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Knowledge Admin"
+
+[node name="DescLabel" type="RichTextLabel" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/AboutSection/AboutVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+text = "基于间隔重复算法的知识管理系统。使用 SM-2 和 FSRS 调度算法管理卡片复习。使用 Godot 4.6 构建。"
+fit_content = true
+scroll_active = false
+
+[node name="BottomBar" type="HBoxContainer" parent="RootMargin/MainVBox"]
+clip_contents = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="RootMargin/MainVBox/BottomBar"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1)
+theme_override_font_sizes/font_size = 20
+
+[node name="BottomSpacer" type="Control" parent="RootMargin/MainVBox/BottomBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ResetTutorialConfirm" type="ConfirmationDialog" parent="."]
+unique_name_in_owner = true
+title = "确认重置"
+dialog_text = "确定要重置所有教程进度吗？\n这会让所有场景的引导教程重新出现。"

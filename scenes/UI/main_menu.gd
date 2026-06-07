@@ -185,10 +185,11 @@ func _on_study_pressed() -> void:
 	_switch_scene("res://scenes/ui/study.tscn", "学习会话")
 
 
-## 设置按钮（当前占位，弹出提示）。## 输入: 无。
+## 跳转到设置场景。## 输入: 无。
 ## 输出: 无。
 func _on_settings_pressed() -> void:
-	_set_status("设置功能尚未实现")
+	_set_status("正在打开设置…")
+	_switch_scene("res://scenes/ui/settings.tscn", "设置")
 
 
 ## 跳转到调试面板场景。## 输入: 无。
