@@ -79,6 +79,9 @@ var _skip_requested: bool = false
 ## 原始文本（含标记）。
 var _raw_text: String = ""
 
+## 当前 pure_text 缓存（用于后续 BBCode 构造）。
+var _pure_text: String = ""
+
 
 # ── 初始化 ──
 
@@ -115,17 +118,18 @@ func play_line(raw_text: String, on_complete: Callable = Callable()) -> void:
 
 	_is_playing = true
 
-	# 解析标记，获取纯文本 + 标记段列表
+	# 解析标记，获取纯文本 + BBCode 渲染文本 + 标记段列表
 	var parsed := _parse_markup(raw_text)
-	var pure_text: String = parsed["pure_text"]
+	_pure_text = parsed["pure_text"]
+	var bbcoded_text: String = parsed["bbcoded_text"]
 	var segments: Array = parsed["segments"]
 
-	# 设置 RichTextLabel 的完整 BBCode 文本（但隐藏）
+	# 设置 RichTextLabel 的 BBCode 渲染文本（但隐藏）
 	_label.visible_characters = 0
-	_label.text = pure_text
+	_label.text = bbcoded_text
 
-	# 启动分段打字机
-	_start_segmented_typewriter(segments, pure_text)
+	# 启动分段打字机（使用 pure_text 长度作为可见字符目标）
+	_start_segmented_typewriter(segments, _pure_text)
 
 
 ## 立即完成当前动画（跳过打字机，显示全部文字）。## 输入: 无。
@@ -165,8 +169,8 @@ func clear() -> void:
 # ── 标记解析 ──
 
 
-## 解析文本中的自定义标记，返回纯文本和标记段数组。## 输入: raw_text (String) — 包含标记的原始文本。
-## 输出: Dictionary — { pure_text: String, segments: Array[Dictionary] }。
+## 解析文本中的自定义标记，返回纯文本、BBCode渲染文本和标记段数组。## 输入: raw_text (String) — 包含标记的原始文本。
+## 输出: Dictionary — { pure_text: String, bbcoded_text: String, segments: Array[Dictionary] }。
 func _parse_markup(raw_text: String) -> Dictionary:
 	var segments: Array = []  # 每段: { start: int, end: int, type: String, data: Variant }
 	var pure_text: String = raw_text
@@ -187,15 +191,15 @@ func _parse_markup(raw_text: String) -> Dictionary:
 		offset += m.get_end() - m.get_start()
 	pure_text = pause_regex.sub(pure_text, "", true)
 
-	# 解析成对标记
+	# 解析成对标记（含 BBCode 映射）
 	var paired_tags: Array = [
 		{"tag": "fast", "type": "speed", "data": FAST_SPEED},
 		{"tag": "slow", "type": "speed", "data": SLOW_SPEED},
 		{"tag": "shake", "type": "shake"},
 		{"tag": "glitch", "type": "glitch"},
 		{"tag": "fade", "type": "fade"},
-		{"tag": "whisper", "type": "whisper"},
-		{"tag": "system", "type": "system"},
+		{"tag": "whisper", "type": "whisper", "bbcode_open": "[color=#9E9E9E]", "bbcode_close": "[/color]"},
+		{"tag": "system", "type": "system", "bbcode_open": "[color=#3DDB8B]", "bbcode_close": "[/color]"},
 	]
 
 	for pt in paired_tags:
@@ -221,10 +225,19 @@ func _parse_markup(raw_text: String) -> Dictionary:
 				"type": pt["type"],
 				"start": open_pos - offset_before_open,
 				"end": close_pos - offset_before_close,
-				"data": pt.get("data", null)
+				"data": pt.get("data", null),
+				"bbcode_open": pt.get("bbcode_open", ""),
+				"bbcode_close": pt.get("bbcode_close", "")
 			})
 
-	# 移除所有成对标记
+	# 移除所有成对标记（同时记录各标记的 BBCode 映射用于后续构造）
+	var _tag_bbcode_map: Dictionary = {}
+	for pt in paired_tags:
+		_tag_bbcode_map[pt["tag"]] = {
+			"open": pt.get("bbcode_open", ""),
+			"close": pt.get("bbcode_close", "")
+		}
+
 	for pt in paired_tags:
 		var tag: String = pt["tag"]
 		var open_regex := RegEx.new()
@@ -249,7 +262,10 @@ func _parse_markup(raw_text: String) -> Dictionary:
 	# 按位置排序
 	segments.sort_custom(func(a, b): return a.get("position", a.get("start", 0)) < b.get("position", b.get("start", 0)))
 
-	return {"pure_text": pure_text, "segments": segments}
+	# 构造 BBCode 渲染文本：在 pure_text 的视觉段位置插入 BBCode
+	var bbcoded_text: String = _build_bbcode_text(pure_text, segments)
+
+	return {"pure_text": pure_text, "bbcoded_text": bbcoded_text, "segments": segments}
 
 
 ## 计算在 raw_text 中某个位置之前已被移除的标记总长度。## 输入:
@@ -271,6 +287,63 @@ func _count_removed_chars_before(raw_text: String, pos: int) -> int:
 				count += m.get_end() - m.get_start()
 
 	return count
+
+
+## 在 pure_text 的视觉段位置插入 BBCode 标签，构造 RichTextLabel 用渲染文本。## 输入:
+##   pure_text (String) — 去除所有自定义标记后的纯文本。
+##   segments (Array[Dictionary]) — 标记段数组（含 bbcode_open/bbcode_close）。
+## 输出: String — 带 BBCode 的渲染文本。
+func _build_bbcode_text(pure_text: String, segments: Array) -> String:
+	if segments.is_empty():
+		return pure_text
+
+	# 收集所有需要插入 BBCode 的位置点（sorted by position）
+	var insertions: Array = []  # [{pos, bbcode}]
+
+	for seg in segments:
+		var bb_open: String = seg.get("bbcode_open", "")
+		var bb_close: String = seg.get("bbcode_close", "")
+		if bb_open.is_empty() and bb_close.is_empty():
+			continue
+
+		var seg_type: String = seg.get("type", "")
+		var start_pos: int = seg.get("start", seg.get("position", 0))
+		var end_pos: int = seg.get("end", seg.get("position", 0))
+
+		# 对于 pause/auto 类型的段，它们只有 position，没有 start/end，跳过
+		if seg_type in ["pause", "auto"]:
+			continue
+
+		if not bb_open.is_empty():
+			insertions.append({"pos": start_pos, "bbcode": bb_open})
+		if not bb_close.is_empty():
+			insertions.append({"pos": end_pos, "bbcode": bb_close, "is_close": true})
+
+	# 按位置排序（同位置时，开启标签在前，关闭标签在后）
+	insertions.sort_custom(func(a, b):
+		if a["pos"] != b["pos"]:
+			return a["pos"] < b["pos"]
+		# 同位置：open 在前，close 在后
+		var a_close: bool = a.get("is_close", false)
+		var b_close: bool = b.get("is_close", false)
+		return not a_close and b_close
+	)
+
+	# 构建渲染文本
+	var result: String = ""
+	var cursor: int = 0
+	for ins in insertions:
+		var pos: int = ins["pos"]
+		if pos > cursor:
+			result += pure_text.substr(cursor, pos - cursor)
+		result += ins["bbcode"]
+		cursor = pos
+
+	# 追加剩余文本
+	if cursor < pure_text.length():
+		result += pure_text.substr(cursor)
+
+	return result
 
 
 ## 获取标记的字符串长度（用于偏移计算）。## 输入:
@@ -419,7 +492,7 @@ func _show_instant(raw_text: String) -> void:
 	if _label == null:
 		return
 	var parsed := _parse_markup(raw_text)
-	_label.text = parsed["pure_text"]
+	_label.text = parsed["bbcoded_text"]
 	_label.visible_characters = -1
 
 	if _on_complete.is_valid():

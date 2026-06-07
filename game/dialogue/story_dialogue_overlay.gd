@@ -143,8 +143,10 @@ func _show_line(line) -> void:
 
 	_current_line = line
 
-	# 角色名
-	_character_label.text = tr(line.character, "dialogue") if not line.character.is_empty() else ""
+	# 角色名（含颜色区分）
+	var character_name: String = tr(line.character, "dialogue") if not line.character.is_empty() else ""
+	_character_label.text = character_name
+	_set_character_color(character_name)
 
 	# 选项或继续 — 先决定是否有选项（在打字机之前确定布局）
 	_clear_answer_buttons()
@@ -347,3 +349,20 @@ func _set_click_hint(text: String) -> void:
 	if _click_hint != null:
 		_click_hint.text = text
 		_click_hint.visible = not text.is_empty()
+
+
+## 根据角色名设置 CharacterLabel 颜色。## 输入: name (String) — 角色名。
+## 输出: 无。
+func _set_character_color(character_name: String) -> void:
+	if _character_label == null:
+		return
+
+	match character_name:
+		"系统":
+			_character_label.add_theme_color_override("font_color", Color(0.24, 0.86, 0.55, 1.0))  # 终端绿 #3DDB8B
+		"MIRA":
+			_character_label.add_theme_color_override("font_color", Color(0.9, 0.75, 0.3, 1.0))  # 金色
+		"???":
+			_character_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.75, 1.0))  # 灰色（未揭示身份）
+		_:
+			_character_label.add_theme_color_override("font_color", Color(0.9, 0.75, 0.3, 1.0))  # 默认金色
