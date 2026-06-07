@@ -77,6 +77,33 @@ func _ready() -> void:
 	TutorialManager.check_and_show("debug_panel", self)
 
 
+## 确保数据库管理器已初始化（创建 DeckManager + NoteManager）。## 输入: 无。
+## 输出: bool — 初始化成功返回 true。
+func _ensure_database_ready() -> bool:
+	if _deck_manager != null and _deck_manager.is_ready() and _note_manager != null and _note_manager.is_ready():
+		return true
+
+	if _deck_manager != null:
+		_deck_manager.queue_free()
+		_deck_manager = null
+	if _note_manager != null:
+		_note_manager.queue_free()
+		_note_manager = null
+
+	const db_path: String = "user://knowledge_admin.db"
+	_deck_manager = DeckManager.new()
+	add_child(_deck_manager)
+	if not _deck_manager.setup(db_path):
+		push_error("[DebugCrudPanel] DeckManager 初始化失败")
+		return false
+
+	_note_manager = NoteManager.new()
+	add_child(_note_manager)
+	_note_manager.setup(db_path)
+
+	return true
+
+
 ## 退出场景时释放管理器节点。
 func _exit_tree() -> void:
 	_clear_fields_editor()
@@ -87,6 +114,42 @@ func _exit_tree() -> void:
 		_note_manager.queue_free()
 		_note_manager = null
 	_cleanup_test_managers()
+
+
+## 释放测试用 CardManager 和 Scheduler。## 输入: 无。
+## 输出: 无。
+func _cleanup_test_managers() -> void:
+	if _test_card_manager != null:
+		_test_card_manager.queue_free()
+		_test_card_manager = null
+	_test_scheduler = null
+
+
+## 清空 fields 编辑器中的动态行。## 输入: 无。
+## 输出: 无。
+func _clear_fields_editor() -> void:
+	for row in _fields_rows:
+		if is_instance_valid(row):
+			row.queue_free()
+	_fields_rows.clear()
+
+
+## 刷新牌组列表显示。## 输入: 无。
+## 输出: 无。
+func _refresh_deck_list() -> void:
+	pass  # TODO: 实现牌组列表刷新
+
+
+## 刷新笔记列表显示。## 输入: 无。
+## 输出: 无。
+func _refresh_note_list() -> void:
+	pass  # TODO: 实现笔记列表刷新
+
+
+## 更新模拟日期标签显示。## 输入: 无。
+## 输出: 无。
+func _refresh_simulated_date_label() -> void:
+	pass  # TODO: 显示当前模拟日期
 
 
 ## 设定初始输入值与 fields 默认行。
