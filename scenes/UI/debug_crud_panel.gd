@@ -603,6 +603,9 @@ func _refresh_test_summary() -> void:
 		_test_summary.text = "[color=#FFAA44]请先生成测试数据[/color]"
 		return
 	var card_db: CardDB = _test_card_manager.get_card_db()
+	if card_db == null:
+		_test_summary.text = "[color=#FF6666]CardDB 未初始化[/color]"
+		return
 	var today: int = int(Time.get_unix_time_from_system() / 86400)
 
 	var rows_result := card_db.fetch_all(
