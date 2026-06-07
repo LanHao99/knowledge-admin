@@ -286,12 +286,13 @@ func _on_create_note_pressed() -> void:
 		return
 	var deck_id: int = roundi(_note_type_input.value)
 	var fields: Dictionary = _read_fields_from_editor()
-	var note_type_id: int = 1
-	_log_operation_header("create_note", "deck_id=%d note_type_id=%d fields=%s" % [deck_id, note_type_id, str(fields)])
+	var note_type_id: String = "1"
+	_log_operation_header("create_note", "deck_id=%d note_type_id=%s fields=%s" % [deck_id, note_type_id, str(fields)])
 	var result: Dictionary = _note_manager.create_note(note_type_id, fields, deck_id)
 	_log_result(result)
 	if result.get("success", false):
-		var note: NoteEntity = result.get("data", null)
+		var data: Dictionary = result.get("data", {})
+		var note: NoteEntity = data.get("note", null)
 		if note != null:
 			_log_data(_stringify_note(note))
 			_note_id_input.value = note.id
@@ -322,9 +323,8 @@ func _on_update_note_pressed() -> void:
 	var note_id: int = roundi(_note_id_input.value)
 	var deck_id: int = roundi(_note_type_input.value)
 	var fields: Dictionary = _read_fields_from_editor()
-	var note_type_id: int = 1
-	_log_operation_header("update_note", "id=%d note_type_id=%d deck_id=%d fields=%s" % [note_id, note_type_id, deck_id, str(fields)])
-	var result: Dictionary = _note_manager.update_note_fields(note_id, note_type_id, fields, deck_id)
+	_log_operation_header("update_note", "id=%d deck_id=%d fields=%s" % [note_id, deck_id, str(fields)])
+	var result: Dictionary = _note_manager.update_note(note_id, fields, deck_id)
 	_log_result(result)
 	if result.get("success", false):
 		var note_result: Dictionary = _note_manager.get_note(note_id)
@@ -399,7 +399,7 @@ func _on_gen_test_data_pressed() -> void:
 
 		# 创建笔记（note_type_id=1 占位；create_note 内部自动生成卡片）
 		var fields := {"front": front, "back": back}
-		var note_result := _note_manager.create_note(1, fields, deck_id)
+		var note_result := _note_manager.create_note("1", fields, deck_id)
 		if not note_result.get("success", false):
 			summaries.append("  ❌ 笔记创建失败: %s" % str(note_result.get("error", "")))
 			continue
