@@ -31,7 +31,7 @@ const DEFAULT_TRIGGER_THRESHOLD: int = 10
 var story_progress: StoryProgress = null
 
 ## 进度条 UI 组件引用（可选，支持无 UI 模式）。
-var progress_bar: StoryProgressBar = null
+var progress_bar: StoryProgressBar = null  # 已弃用，session 内 ProgressBar 节点替代
 
 ## 对话资源映射表: { chapter_id: { dialogue_key: "res://path.dialogue", ... }, ... }
 var _dialogue_definitions: Dictionary = {}
@@ -59,7 +59,7 @@ func setup(dialogue_manager = null) -> void:
 	story_progress = StoryProgress.load_from_user()
 	_dialogue_manager = dialogue_manager
 
-	if progress_bar != null:
+	if progress_bar != null:  # 兼容旧引用，实际不注入
 		progress_bar.set_story_progress(story_progress)
 
 
@@ -92,7 +92,7 @@ func on_review_answered(rating: int) -> Dictionary:
 		return {"triggered": false, "dialogue_key": ""}
 
 	# 通过进度条累加
-	if progress_bar != null:
+	if progress_bar != null:  # 兼容旧引用，实际不注入
 		progress_bar.add_progress_from_rating(rating)
 	else:
 		var add_value := _rating_to_progress(rating)

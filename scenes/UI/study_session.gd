@@ -371,7 +371,7 @@ func set_story_progress(progress: StoryProgress, threshold: int = 10) -> void:
 	_story_progress = progress
 	_story_threshold = max(1, threshold)
 	_story_progress_container.visible = true
-	_refresh_story_display()
+	refresh_story_display()
 
 
 ## 根据评分累加剧情进度。## 输入: rating (int) - 评分值 (1~4)。
@@ -383,7 +383,7 @@ func add_story_progress(rating: int) -> void:
 	if add_value == 0:
 		return
 	_story_progress.add_progress(add_value)
-	_refresh_story_display()
+	refresh_story_display()
 
 
 ## 消耗剧情进度（触发对话后归零）。## 输入: 无。
@@ -392,12 +392,12 @@ func consume_story_progress() -> void:
 	if _story_progress == null:
 		return
 	_story_progress.consume_progress()
-	_refresh_story_display()
+	refresh_story_display()
 
 
-## 刷新剧情进度条显示。## 输入: 无。
+## 刷新剧情进度条显示（供 study.gd 在 StoryManager 更新数据后调用）。## 输入: 无。
 ## 输出: 无。
-func _refresh_story_display() -> void:
+func refresh_story_display() -> void:
 	if _story_progress == null:
 		return
 	var current: int = _story_progress.total_progress

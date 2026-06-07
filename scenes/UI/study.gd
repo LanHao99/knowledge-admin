@@ -14,7 +14,6 @@ var _scheduler: FsrsScheduler = null
 
 # ── 剧情系统 ──
 var _story_manager: StoryManager = null
-var _story_progress_bar: StoryProgressBar = null
 
 # ── 子场景引用 ──
 @onready var _session: StudySession = $StudySession
@@ -130,13 +129,9 @@ func _setup_story_system() -> void:
 	# 设置初始章节
 	_story_manager.story_progress.current_chapter = "chapter_1"
 
-	# 创建进度条并注入到 session 的 InStudyBar
+	# 将剧情进度注入 session（session 内的 ProgressBar 节点直接控制，不再代码 new StoryProgressBar）
 	if _session != null:
-		_story_progress_bar = StoryProgressBar.new()
-		_story_progress_bar.name = "StoryProgressBar"
-		_story_progress_bar.set_story_progress(_story_manager.story_progress)
-		_story_manager.set_progress_bar(_story_progress_bar)
-		_session.add_story_progress_bar(_story_progress_bar)
+		_session.set_story_progress(_story_manager.story_progress)
 
 	# 注入 StoryManager 到 Overlay
 	if _story_overlay != null:
@@ -146,9 +141,6 @@ func _setup_story_system() -> void:
 ## 清理剧情系统。## 输入: 无。
 ## 输出: 无。
 func _cleanup_story_system() -> void:
-	if _story_progress_bar != null:
-		_story_progress_bar.queue_free()
-		_story_progress_bar = null
 	_story_manager = null
 
 
@@ -227,8 +219,10 @@ func _on_study_finished(stats: Dictionary) -> void:
 func _on_story_card_answered(_card: CardEntity, rating: int, _next_interval: String) -> void:
 	if _story_manager == null:
 		return
-	var result := _story_manager.on_review_answered(rating)
-	# 注意：触发逻辑由 story_triggered 信号异步处理，此处不阻塞
+	_story_manager.on_review_answered(rating)
+	# 同步刷新 session 内的剧情进度条（数据已在 StoryProgress 中更新）
+	if _session != null:
+		_session.refresh_story_display()
 
 
 ## StoryManager.story_triggered 回调：暂停复习，显示对话覆盖层。## 输入: dialogue_key (String) - 对话标识符。
