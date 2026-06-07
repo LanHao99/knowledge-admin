@@ -376,8 +376,7 @@ func _on_gen_test_data_pressed() -> void:
 		return
 	_setup_test_managers()
 
-	var db_path: String = "user://knowledge_admin.db"
-	var deck_id: int = _ensure_test_deck(db_path)
+	var deck_id: int = _ensure_test_deck()
 	if deck_id <= 0:
 		_append_log("[生成测试数据] 无法创建 Test Deck")
 		return
@@ -447,7 +446,7 @@ func _on_gen_test_data_pressed() -> void:
 
 
 ## 确认 Test Deck 牌组存在，若不存在则创建。
-func _ensure_test_deck(db_path: String) -> int:
+func _ensure_test_deck() -> int:
 	var deck_db := _deck_manager.get_deck_db()
 	var result := deck_db.fetch_all("SELECT id FROM decks WHERE name = 'Test Deck' LIMIT 1;", [])
 	if not result.get("success", false):
