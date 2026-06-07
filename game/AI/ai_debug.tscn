@@ -41,11 +41,16 @@ text = "← 返回主菜单"
 [node name="TitleLabel" type="Label" parent="RootMargin/MainVBox/TopBar" unique_id=705032711]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-text = "🤖 AI 调试控制台"
+text = "🤖 AI 制卡助手"
 
 [node name="TopSpacer" type="Control" parent="RootMargin/MainVBox/TopBar" unique_id=705032712]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="SettingsBtn" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=705032800]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+text = "⚙ 设置"
 
 [node name="ChatScroll" type="ScrollContainer" parent="RootMargin/MainVBox" unique_id=705032713]
 layout_mode = 2
@@ -60,15 +65,61 @@ bbcode_enabled = true
 fit_content = true
 scroll_active = false
 
+[node name="SettingsPanel" type="PanelContainer" parent="RootMargin/MainVBox" unique_id=705032801]
+visible = false
+layout_mode = 2
+custom_minimum_size = Vector2(0, 180)
+
+[node name="SettingsMargin" type="MarginContainer" parent="RootMargin/MainVBox/SettingsPanel" unique_id=705032802]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="SettingsVBox" type="VBoxContainer" parent="RootMargin/MainVBox/SettingsPanel/SettingsMargin" unique_id=705032803]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="PromptLabel" type="Label" parent="RootMargin/MainVBox/SettingsPanel/SettingsMargin/SettingsVBox" unique_id=705032804]
+layout_mode = 2
+text = "系统提示词 (System Prompt):"
+
+[node name="PromptEdit" type="TextEdit" parent="RootMargin/MainVBox/SettingsPanel/SettingsMargin/SettingsVBox" unique_id=705032805]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+wrap_mode = 1
+
+[node name="SettingsBtnRow" type="HBoxContainer" parent="RootMargin/MainVBox/SettingsPanel/SettingsMargin/SettingsVBox" unique_id=705032806]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SaveSettingsBtn" type="Button" parent="RootMargin/MainVBox/SettingsPanel/SettingsMargin/SettingsVBox/SettingsBtnRow" unique_id=705032807]
+custom_minimum_size = Vector2(100, 34)
+layout_mode = 2
+text = "💾 保存设置"
+
+[node name="ResetPromptBtn" type="Button" parent="RootMargin/MainVBox/SettingsPanel/SettingsMargin/SettingsVBox/SettingsBtnRow" unique_id=705032808]
+custom_minimum_size = Vector2(100, 34)
+layout_mode = 2
+text = "🔄 恢复默认"
+
 [node name="InputRow" type="HBoxContainer" parent="RootMargin/MainVBox" unique_id=705032714]
 layout_mode = 2
 theme_override_constants/separation = 8
+
+[node name="UploadBtn" type="Button" parent="RootMargin/MainVBox/InputRow" unique_id=705032809]
+custom_minimum_size = Vector2(44, 60)
+layout_mode = 2
+text = "📎"
 
 [node name="InputEdit" type="TextEdit" parent="RootMargin/MainVBox/InputRow" unique_id=705032715]
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "输入消息…"
+placeholder_text = "输入消息，或说"帮我生成 XX 的学习卡片"…"
 wrap_mode = 1
 
 [node name="SendBtn" type="Button" parent="RootMargin/MainVBox/InputRow" unique_id=705032716]
