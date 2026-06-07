@@ -212,6 +212,7 @@ func enter_learning(_deck_id: int) -> void:
 	_exiting = false
 	_deck_picker.visible = false
 	_in_study_bar.visible = true
+	_story_progress_container.visible = true
 	_set_state(StudyState.LEARNING)
 
 
@@ -257,6 +258,7 @@ func show_completion(stats: Dictionary) -> void:
 	if _exiting:
 		return
 	_in_study_bar.visible = false
+	_story_progress_container.visible = false
 	_last_stats = stats
 	_show_completion_stats(stats)
 	_completion_panel.visible = true
@@ -325,6 +327,7 @@ func _on_exit_study_pressed() -> void:
 	# 通知 study.gd 隐藏 CardUI
 	learning_exited.emit()
 	_in_study_bar.visible = false
+	_story_progress_container.visible = false
 	build_deck_list()
 	_deck_picker.visible = true
 	_set_state(StudyState.PICKING)
