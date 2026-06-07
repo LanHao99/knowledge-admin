@@ -27,6 +27,7 @@ var _deck_names: Dictionary = {}  # deck_id → deck_name 缓存
 @onready var _created_label: Label = $RootMargin/MainVBox/EditPanel/EditVBox/MetaInfo/CreatedLabel
 @onready var _save_btn: Button = $RootMargin/MainVBox/EditPanel/EditVBox/ActionBar/SaveBtn
 @onready var _delete_btn: Button = $RootMargin/MainVBox/EditPanel/EditVBox/ActionBar/DeleteBtn
+@onready var _ai_card_btn: Button = $RootMargin/MainVBox/EditPanel/EditVBox/ActionBar/AICardBtn
 
 # ── 新建对话框 ──
 @onready var _new_dialog: ConfirmationDialog = $NewNoteDialog
@@ -79,6 +80,7 @@ func _bind_actions() -> void:
 	_close_edit_btn.pressed.connect(_on_close_edit_pressed)
 	_save_btn.pressed.connect(_on_save_pressed)
 	_delete_btn.pressed.connect(_on_delete_pressed)
+	_ai_card_btn.pressed.connect(_on_ai_card_pressed)
 	_new_dialog.confirmed.connect(_on_new_dialog_confirmed)
 
 
@@ -493,3 +495,10 @@ func _refill_deck_select(option: OptionButton, current_deck_id: int) -> void:
 func _set_status(text: String) -> void:
 	if _status_label != null:
 		_status_label.text = text
+
+
+func _on_ai_card_pressed() -> void:
+	if not ResourceLoader.exists("res://game/AI/ai_debug.tscn"):
+		_set_status("[color=#FF6666]AI 模块不存在[/color]")
+		return
+	get_tree().change_scene_to_file("res://game/AI/ai_debug.tscn")

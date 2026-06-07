@@ -32,6 +32,7 @@ var _deck_db: DeckDB = null
 @onready var _save_btn: Button = $RootMargin/MainVBox/EditPanel/EditVBox/ActionBar/SaveBtn
 @onready var _delete_btn: Button = $RootMargin/MainVBox/EditPanel/EditVBox/ActionBar/DeleteBtn
 @onready var _import_btn: Button = $RootMargin/MainVBox/EditPanel/EditVBox/ActionBar/ImportBtn
+@onready var _ai_card_btn: Button = $RootMargin/MainVBox/EditPanel/EditVBox/ActionBar/AICardBtn
 
 # ── 新建对话框 ──
 @onready var _new_dialog: ConfirmationDialog = $NewDeckDialog
@@ -80,6 +81,7 @@ func _bind_actions() -> void:
 	_save_btn.pressed.connect(_on_save_pressed)
 	_delete_btn.pressed.connect(_on_delete_pressed)
 	_import_btn.pressed.connect(_on_import_pressed)
+	_ai_card_btn.pressed.connect(_on_ai_card_pressed)
 	_new_dialog.confirmed.connect(_on_new_dialog_confirmed)
 
 
@@ -506,6 +508,13 @@ func _on_import_pressed() -> void:
 	add_child(wizard)
 	wizard.setup(_notetype_manager, _import_manager, _note_manager, _deck_db)
 	wizard.select_deck_by_id(_editing_deck_id)
+
+
+func _on_ai_card_pressed() -> void:
+	if not ResourceLoader.exists("res://game/AI/ai_debug.tscn"):
+		_set_status("[color=#FF6666]AI 模块不存在[/color]")
+		return
+	get_tree().change_scene_to_file("res://game/AI/ai_debug.tscn")
 
 
 ## 设置底部状态栏文本（支持 BBCode）。## 输入: text (String)。

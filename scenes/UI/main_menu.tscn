@@ -140,12 +140,15 @@ text = "📝 笔记浏览"
 layout_mode = 2
 
 [node name="BottomBar" type="HBoxContainer" parent="RootMargin/MainVBox" unique_id=1000000022]
+clip_contents = true
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 
 [node name="VersionLabel" type="Label" parent="RootMargin/MainVBox/BottomBar" unique_id=1000000023]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.6809728, 0.6814993, 0.73521966, 1)
-text = "v1.0.0 | Godot 4.6"
+theme_override_font_sizes/font_size = 20
+text = "v0.0.0.1 | powered by Godot"
 
 [node name="BottomSpacer" type="Control" parent="RootMargin/MainVBox/BottomBar" unique_id=1000000024]
 layout_mode = 2
@@ -154,4 +157,5 @@ size_flags_horizontal = 3
 [node name="StatusLabel" type="Label" parent="RootMargin/MainVBox/BottomBar" unique_id=1000000025]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1)
+theme_override_font_sizes/font_size = 20
 text = "就绪 ✓"

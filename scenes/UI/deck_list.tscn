@@ -120,10 +120,15 @@ theme_override_constants/separation = 8
 layout_mode = 2
 text = "归档"
 
-[node name="ImportBtn" type="Button" parent="RootMargin/MainVBox/EditPanel/EditVBox/ActionBar" unique_id=-1294967274]
+[node name="ImportBtn" type="Button" parent="RootMargin/MainVBox/EditPanel/EditVBox/ActionBar" unique_id=1172074883]
 custom_minimum_size = Vector2(120, 36)
 layout_mode = 2
 text = "📥 导入 JSON"
+
+[node name="AICardBtn" type="Button" parent="RootMargin/MainVBox/EditPanel/EditVBox/ActionBar" unique_id=1868809005]
+custom_minimum_size = Vector2(110, 36)
+layout_mode = 2
+text = "🤖 AI 制卡"
 
 [node name="ActionSpacer" type="Control" parent="RootMargin/MainVBox/EditPanel/EditVBox/ActionBar" unique_id=-1294967271]
 layout_mode = 2
