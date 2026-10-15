@@ -9,6 +9,7 @@ Classic98 伪桌面体验。游戏从启动画面进入桌面，所有应用在�
 - 主场景：`res://scenes/desktop/boot_screen.tscn`
   - 启动时播放约 2 秒，单击或按键跳过
   - 直接跳转 `res://scenes/desktop/desktop.tscn`
+  - 动态着色器能量核心与“正在启动系统”文字，具体设计及参数见 [启动封面](../boot_screen.md)
 
 ## 桌面场景
 
