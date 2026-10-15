@@ -1,161 +1,341 @@
 [gd_scene format=3 uid="uid://2ds8mbjfhjgv"]
 
-[ext_resource type="Theme" uid="uid://bi54ign8ggomc" path="res://assets/Classic95/Classic95.tres" id="1_fe2o3"]
-[ext_resource type="Script" uid="uid://cq2lg4ykcc4xo" path="res://scenes/ui/main_menu.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/UI/app_theme.tres" id="theme"]
+[ext_resource type="Script" path="res://scenes/ui/main_menu.gd" id="script"]
+[ext_resource type="Script" path="res://src/ui/adaptive_row.gd" id="row"]
+[ext_resource type="Texture2D" path="res://assets/desktop_themes/Classic95/Styles/Window/CloseBtn.png" id="close_icon"]
 
-[node name="MainMenu" type="Control" unique_id=1000000001]
+[ext_resource type="Texture2D" path="res://assets/desktop_themes/Classic95/Styles/Window/Window.png" id="window_texture"]
+
+[sub_resource type="AtlasTexture" id="title_atlas"]
+atlas = ExtResource("window_texture")
+region = Rect2(4, 3, 2, 18)
+filter_clip = true
+
+[node name="MainMenu" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme = ExtResource("1_fe2o3")
-script = ExtResource("1_script")
+theme = ExtResource("theme")
+script = ExtResource("script")
 
-[node name="RootMargin" type="MarginContainer" parent="." unique_id=1000000002]
+
+[node name="DesktopBackground" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 24
+mouse_filter = 2
+color = Color(0.431373, 0.737255, 0.72549, 1)
+
+
+[node name="RootMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_bottom = 40
+
+
+[node name="MainVBox" type="VBoxContainer" parent="RootMargin"]
+layout_mode = 2
+
+
+[node name="ContentScroll" type="ScrollContainer" parent="RootMargin/MainVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 1
+
+
+[node name="CenterArea" type="MarginContainer" parent="RootMargin/MainVBox/ContentScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+
+[node name="MainCard" type="PanelContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DesktopFrame"
+
+
+[node name="FrameVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+
+[node name="TitleBar" type="PanelContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox"]
+layout_mode = 2
+
+
+[node name="BlueTitle" type="TextureRect" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/TitleBar"]
+layout_mode = 2
+texture_filter = 2
+texture = SubResource("title_atlas")
+expand_mode = 1
+mouse_filter = 2
+
+
+[node name="TitleMargin" type="MarginContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/TitleBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 3
+
+
+[node name="TitleRow" type="HBoxContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/TitleBar/TitleMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+
+[node name="WindowTitle" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/TitleBar/TitleMargin/TitleRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"UiWindowTitle"
+text = "Knowledge Admin"
+vertical_alignment = 1
+
+
+[node name="CloseButton" type="Button" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/TitleBar/TitleMargin/TitleRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(32, 0)
+icon = ExtResource("close_icon")
+expand_icon = true
+tooltip_text = "关闭"
+
+
+[node name="ToolbarMargin" type="MarginContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_bottom = 6
+
+
+[node name="Toolbar" type="HBoxContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/ToolbarMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+
+[node name="Caption" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/ToolbarMargin/Toolbar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "知识管理"
+vertical_alignment = 1
+
+
+[node name="AICardButton" type="Button" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/ToolbarMargin/Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(160, 40)
+text = "AI 制卡"
+
+[node name="SettingsButton" type="Button" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/ToolbarMargin/Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(144, 40)
+text = "设置"
+
+
+[node name="ToolsButton" type="MenuButton" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/ToolbarMargin/Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(144, 40)
+text = "工具"
+flat = false
+
+
+[node name="BodyMargin" type="MarginContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_top = 8
 theme_override_constants/margin_bottom = 16
 
-[node name="MainVBox" type="VBoxContainer" parent="RootMargin" unique_id=1000000003]
+
+[node name="NavigationTabs" type="TabContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin"]
+unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
+
+
+[node name="学习" type="MarginContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 20
+
+
+[node name="LearningVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习"]
+layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="TopBar" type="HBoxContainer" parent="RootMargin/MainVBox" unique_id=1000000004]
-layout_mode = 2
 
-[node name="AppTitle" type="RichTextLabel" parent="RootMargin/MainVBox/TopBar" unique_id=1000000005]
+[node name="OverviewRow" type="GridContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 16
+script = ExtResource("row")
+preferred_columns = 2
+minimum_column_width = 380.0
+
+
+[node name="OverviewVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-bbcode_enabled = true
-text = "[font_size=26][wave amp=6 freq=4]📚 Knowledge Admin[/wave][/font_size]"
-fit_content = true
-scroll_active = false
+theme_override_constants/separation = 12
 
-[node name="TopSpacer" type="Control" parent="RootMargin/MainVBox/TopBar" unique_id=1000000006]
-layout_mode = 2
-size_flags_horizontal = 3
 
-[node name="SettingsButton" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=1000000007]
-custom_minimum_size = Vector2(88, 36)
+[node name="OverviewLabel" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/OverviewVBox"]
 layout_mode = 2
-text = "⚙ 设置"
+text = "学习概况"
 
-[node name="DebugButton" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=1000000008]
-custom_minimum_size = Vector2(88, 36)
-layout_mode = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-text = "🔧 调试"
 
-[node name="AIDebugButton" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=1000000026]
-custom_minimum_size = Vector2(88, 36)
+[node name="StatisticsBox" type="PanelContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/OverviewVBox"]
 layout_mode = 2
-text = "🤖 AI"
-
-[node name="CenterArea" type="CenterContainer" parent="RootMargin/MainVBox" unique_id=1000000009]
-layout_mode = 2
-size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_type_variation = &"DesktopInset"
 
-[node name="MainCard" type="PanelContainer" parent="RootMargin/MainVBox/CenterArea" unique_id=1000000010]
-custom_minimum_size = Vector2(520, 0)
+
+[node name="StatisticsMargin" type="MarginContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_bottom = 16
+
+
+[node name="Statistics" type="GridContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 16
+
+
+[node name="DeckCaption" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
 layout_mode = 2
 size_flags_horizontal = 3
+text = "牌组总数："
 
-[node name="CardVBox" type="VBoxContainer" parent="RootMargin/MainVBox/CenterArea/MainCard" unique_id=1000000011]
+
+[node name="DeckValue" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
+unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 18
+text = "—"
+horizontal_alignment = 2
 
-[node name="LogoLabel" type="RichTextLabel" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000012]
-layout_mode = 2
-theme_override_colors/default_color = Color(0, 0, 0, 1)
-bbcode_enabled = true
-text = "[center][font_size=36][wave amp=10 freq=5]📚 Knowledge Admin[/wave][/font_size][/center]"
-fit_content = true
-scroll_active = false
 
-[node name="StatsGrid" type="GridContainer" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000013]
-layout_mode = 2
-columns = 3
-
-[node name="DeckStat" type="RichTextLabel" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox/StatsGrid" unique_id=1000000014]
+[node name="DueCaption" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/default_color = Color(0, 0, 0, 1)
-bbcode_enabled = true
-text = "[center]牌组
-[font_size=26]—[/font_size][/center]"
-fit_content = true
-scroll_active = false
+text = "待复习："
 
-[node name="DueStat" type="RichTextLabel" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox/StatsGrid" unique_id=1000000015]
+
+[node name="DueValue" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "—"
+horizontal_alignment = 2
+
+
+[node name="TodayCaption" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/default_color = Color(0, 0, 0, 1)
-bbcode_enabled = true
-text = "[center]待复习
-[font_size=26]—[/font_size][/center]"
-fit_content = true
-scroll_active = false
+text = "今日已学："
 
-[node name="TodayStat" type="RichTextLabel" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox/StatsGrid" unique_id=1000000016]
+
+[node name="TodayValue" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "—"
+horizontal_alignment = 2
+
+
+[node name="Actions" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/default_color = Color(0, 0, 0, 1)
-bbcode_enabled = true
-text = "[center]今日
-[font_size=26]—[/font_size][/center]"
-fit_content = true
-scroll_active = false
+theme_override_constants/separation = 12
 
-[node name="Sep1" type="HSeparator" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000017]
+
+[node name="ActionsLabel" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/Actions"]
+layout_mode = 2
+text = "操作"
+
+
+[node name="StudyBtn" type="Button" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(280, 48)
+text = "开始学习"
+disabled = true
+
+
+[node name="DeckListBtn" type="Button" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(280, 48)
+text = "牌组管理"
+
+
+[node name="NoteBrowseBtn" type="Button" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(280, 48)
+text = "笔记浏览"
+
+
+[node name="EmptyHint" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"UiMuted"
+text = "暂无牌组，请先新建或导入牌组。"
+autowrap_mode = 3
+
+
+[node name="牌组" type="Control" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs"]
 layout_mode = 2
 
-[node name="StudyBtn" type="Button" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000020]
-custom_minimum_size = Vector2(300, 100)
-layout_mode = 2
-text = "▶ 开始学习"
 
-[node name="DeckListBtn" type="Button" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000018]
-custom_minimum_size = Vector2(300, 44)
-layout_mode = 2
-text = "📖 牌组管理"
-
-[node name="NoteBrowseBtn" type="Button" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000019]
-custom_minimum_size = Vector2(300, 44)
-layout_mode = 2
-text = "📝 笔记浏览"
-
-[node name="Sep2" type="HSeparator" parent="RootMargin/MainVBox/CenterArea/MainCard/CardVBox" unique_id=1000000021]
+[node name="笔记" type="Control" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs"]
 layout_mode = 2
 
-[node name="BottomBar" type="HBoxContainer" parent="RootMargin/MainVBox" unique_id=1000000022]
-clip_contents = true
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
 
-[node name="VersionLabel" type="Label" parent="RootMargin/MainVBox/BottomBar" unique_id=1000000023]
+[node name="StatusInset" type="PanelContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.6809728, 0.6814993, 0.73521966, 1)
-theme_override_font_sizes/font_size = 20
-text = "v0.0.0.1 | powered by Godot"
+theme_type_variation = &"DesktopStatus"
 
-[node name="BottomSpacer" type="Control" parent="RootMargin/MainVBox/BottomBar" unique_id=1000000024]
+
+[node name="StatusRow" type="HBoxContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/StatusInset"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+
+[node name="StatusLabel" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/StatusInset/StatusRow"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+theme_type_variation = &"UiMuted"
+text = "正在读取统计…"
+autowrap_mode = 3
 
-[node name="StatusLabel" type="Label" parent="RootMargin/MainVBox/BottomBar" unique_id=1000000025]
+
+[node name="VersionLabel" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/StatusInset/StatusRow"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1)
-theme_override_font_sizes/font_size = 20
-text = "就绪 ✓"
+theme_type_variation = &"UiMuted"
+text = "v0.0.0.1"

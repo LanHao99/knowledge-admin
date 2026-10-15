@@ -188,6 +188,7 @@ func answer(rating: int) -> Dictionary:
 
 	var counts_after_answer: Dictionary = _calculate_counts()
 	card_answered.emit(updated_card, rating, interval_text)
+	App.notify_card_answered(rating)
 	queue_updated.emit(counts_after_answer)
 
 	if _current_queue.is_empty():

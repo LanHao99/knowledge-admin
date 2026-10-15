@@ -1,6 +1,8 @@
 extends Control
 ## 学习桌面入口。展示统计、导航和受调试开关控制的工具菜单。
 
+const WindowContext: GDScript = preload("res://src/ui/window_context.gd")
+
 @export_group("布局")
 @export var content_max_width: float = 1120.0
 
@@ -11,7 +13,7 @@ var _card_manager: CardManager = null
 @onready var _ai_card_button: Button = %AICardButton
 @onready var _tools_button: MenuButton = %ToolsButton
 @onready var _main_card: PanelContainer = %MainCard
-@onready var _center_area: CenterContainer = %CenterArea
+@onready var _center_area: Container = %CenterArea
 @onready var _content_scroll: ScrollContainer = %ContentScroll
 @onready var _deck_stat: Label = %DeckValue
 @onready var _due_stat: Label = %DueValue
@@ -26,6 +28,7 @@ var _card_manager: CardManager = null
 ## 连接导航、初始化统计并准备可滚动布局。## 输入: 无。
 ## 输出: 无。
 func _ready() -> void:
+	WindowContext.adapt_content(self, _main_card)
 	%CloseButton.pressed.connect(_on_close_pressed)
 	%NavigationTabs.tab_changed.connect(_on_navigation_tab_changed)
 	_settings_button.pressed.connect(_on_settings_pressed)
@@ -58,6 +61,8 @@ func _update_layout() -> void:
 	if not is_inside_tree():
 		return
 	_main_card.custom_minimum_size.x = minf(content_max_width, _content_scroll.size.x)
+	if WindowContext.find_host(self) != null:
+		_main_card.custom_minimum_size = _content_scroll.size
 	_center_area.custom_minimum_size.y = _content_scroll.size.y
 
 
@@ -170,9 +175,11 @@ func _on_settings_pressed() -> void:
 ## 打开 AI 制卡助手。## 输入: 无。
 ## 输出: 无。
 func _on_ai_card_pressed() -> void:
-	var result: int = App.open_ai_cards()
-	if result != OK:
-		_set_status("打开 AI 制卡助手失败（%d）" % result, true)
+	var manager: Node = get_node_or_null("/root/WindowManager")
+	if WindowContext.find_host(self) != null and manager != null and manager.has_method("open_app"):
+		if bool(manager.call("open_app", "ai_cards")):
+			return
+	_switch_scene("res://game/AI/ai_debug.tscn", "AI 制卡助手")
 
 
 ## 处理 AI 助手及调试面板工具项。## 输入: id (int) - 菜单项标识。
@@ -190,7 +197,7 @@ func _switch_scene(path: String, label: String) -> void:
 	if not ResourceLoader.exists(path):
 		_set_status("场景不存在：%s" % label, true)
 		return
-	var result: Error = App.goto_scene(path)
+	var result: int = WindowContext.navigate(self, path)
 	if result != OK:
 		_set_status("打开%s失败（%d）" % [label, result], true)
 
@@ -216,4 +223,14 @@ func _on_navigation_tab_changed(index: int) -> void:
 ## 关闭应用窗体并保存待写入的设置。## 输入: 无。
 ## 输出: 无。
 func _on_close_pressed() -> void:
-	get_tree().quit()
+	var host: Node = WindowContext.find_host(self)
+	if host != null:
+		host.emit_signal("close_requested")
+	else:
+		get_tree().quit()
+
+
+## 窗口重新激活时刷新只读统计。## 输入: 无。输出: 无。
+func desktop_refresh() -> void:
+	if _deck_manager != null and _card_manager != null:
+		_refresh_stats()

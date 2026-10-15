@@ -14,12 +14,12 @@ border_width_right = 2
 border_width_bottom = 2
 border_color = Color(1, 1, 1, 1)
 
-[node name="StartMenu" type="Panel" parent="."]
+[node name="StartMenu" type="Panel"]
 layout_mode = 0
 anchor_left = 0.0
 anchor_top = 0.0
-offset_right = 200.0
-offset_bottom = 240.0
+offset_right = 330.0
+offset_bottom = 440.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_menu")
 script = ExtResource("1")
 
@@ -31,4 +31,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+offset_left = 6.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = -6.0
 theme_override_constants/separation = 0

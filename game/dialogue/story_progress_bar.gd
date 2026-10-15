@@ -1,32 +1,23 @@
 class_name StoryProgressBar
 extends HBoxContainer
-## 剧情进度条 UI 组件，包含 ProgressBar 和数值 Label。
-## 监听评分事件，根据 rating 累加进度，达到阈值时发出 progress_reached 信号。
-## 由 study.gd 实例化并注入 StoryProgress 数据引用。
+## 剧情进度条显示组件。只根据已有 StoryProgress 刷新进度条和数字。
+## 评分换进度由 StoryManager 负责，本组件不累加进度。
 
 # ── 信号 ──
 
-## 进度值达到或超过阈值时触发。
+## 保留的显示信号。评分累加已移到 StoryManager，本组件不再发出它。
 signal progress_reached(threshold: int)
 
 
 # ── 导出属性 ──
 
-## 触发对话所需的最小进度值。
+## 触发对话所需的最小进度值，仅用于本组件自己的显示上限。
 @export var threshold: int = 10
-
-## 不同评分对应的进度值映射（key 为 rating int 的字符串形式）。
-@export var rating_to_progress: Dictionary = {
-	"1": 0,   # Again
-	"2": 1,   # Hard
-	"3": 2,   # Good
-	"4": 3    # Easy
-}
 
 
 # ── 内部引用 ──
 
-## 剧情进度数据引用（由 study.gd 或 StoryManager 注入）。
+## 剧情进度数据引用。显示层只读这份数据，不在这里累加评分。
 var story_progress: StoryProgress = null
 
 ## 内部 ProgressBar 子节点。
@@ -76,34 +67,6 @@ func _create_ui() -> void:
 ## 输出: 无。
 func set_story_progress(progress: StoryProgress) -> void:
 	story_progress = progress
-	_refresh_display()
-
-
-## 根据评分累加进度。先调用 story_progress.add_progress()，再刷新 UI。## 输入: rating (int) - 评分值 (1=Again, 2=Hard, 3=Good, 4=Easy)。
-## 输出: 无。
-func add_progress_from_rating(rating: int) -> void:
-	if story_progress == null:
-		return
-
-	var add_value: int = int(rating_to_progress.get(str(rating), 0))
-	if add_value == 0:
-		return
-
-	var old_progress: int = story_progress.total_progress
-	story_progress.add_progress(add_value)
-	_refresh_display()
-
-	# 检测是否跨过阈值
-	if old_progress < threshold and story_progress.total_progress >= threshold:
-		progress_reached.emit(threshold)
-
-
-## 触发对话后消耗进度（归零）。## 输入: 无。
-## 输出: 无。
-func consume() -> void:
-	if story_progress == null:
-		return
-	story_progress.consume_progress()
 	_refresh_display()
 
 

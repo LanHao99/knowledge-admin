@@ -31,6 +31,8 @@ var _card_manager: CardManager = null
 var _state: UIState = UIState.LOADING
 var _cached_front: String = ""
 var _cached_back: String = ""
+var _raw_front: String = ""
+var _raw_back: String = ""
 var _current_card: CardEntity = null
 var _managers_injected: bool = false
 var _signals_connected: bool = false
@@ -46,7 +48,7 @@ var _signals_connected: bool = false
 @onready var _flip_hint: Label = $"MainVBox/CardPanel/CardContentVBox/FlipHint"
 
 # ── 评分按钮 ──
-@onready var _answer_bar: HBoxContainer = $"MainVBox/AnswerBar"
+@onready var _answer_bar: HFlowContainer = $"MainVBox/AnswerBar"
 @onready var _again_btn: Button = $"MainVBox/AnswerBar/AgainBtn"
 @onready var _hard_btn: Button = $"MainVBox/AnswerBar/HardBtn"
 @onready var _good_btn: Button = $"MainVBox/AnswerBar/GoodBtn"
@@ -178,7 +180,7 @@ func _on_card_panel_gui_input(event: InputEvent) -> void:
 func _on_session_started(_deck_id: int, counts: Dictionary) -> void:
 	var total: int = int(counts.get("total", 0))
 	if total == 0:
-		_content_label.text = "[center]该牌组暂无待学习的卡片[/center]"
+		UiSettings.set_rich_text(_content_label, "[center]该牌组暂无待学习的卡片[/center]")
 		_set_state(UIState.DONE)
 		return
 	_set_status("开始学习，共 %d 张卡片" % total)
@@ -244,25 +246,29 @@ func _render_front(card: CardEntity) -> void:
 	_current_card = card
 	_cached_front = ""
 	_cached_back = ""
+	_raw_front = ""
+	_raw_back = ""
 
 	if _note_manager == null:
-		_content_label.text = "[center]笔记管理器未初始化[/center]"
+		UiSettings.set_rich_text(_content_label, "[center]笔记管理器未初始化[/center]")
 		_set_state(UIState.FRONT)
 		return
 
 	var content_result := _note_manager.get_content_for_card(card.id)
 	if not content_result.get("success", false):
-		_content_label.text = "[center]无法加载卡片内容[/center]"
+		UiSettings.set_rich_text(_content_label, "[center]无法加载卡片内容[/center]")
 		_set_state(UIState.FRONT)
 		return
 
 	var data: Dictionary = content_result.get("data", {})
-	_cached_front = str(data.get("front", ""))
-	_cached_back = str(data.get("back", ""))
+	_raw_front = str(data.get("front", ""))
+	_raw_back = str(data.get("back", ""))
+	_cached_front = App.present_card_text(card.id, "front", _raw_front)
+	_cached_back = _raw_back
 	if _cached_front == "":
 		_cached_front = "（无正面内容）"
 
-	_content_label.text = "[center]%s[/center]" % _cached_front
+	UiSettings.set_rich_text(_content_label, "[center]%s[/center]" % _cached_front)
 	_answer_bar.visible = false
 	_flip_hint.visible = true
 	_progress_label.text = _build_progress_text()
@@ -271,11 +277,13 @@ func _render_front(card: CardEntity) -> void:
 	_set_status("点击卡片翻面查看答案")
 
 
-## 渲染背面：使用缓存的 _cached_back。
+## 渲染背面：显示前再经过主逻辑过滤，不改数据库原文。
 func _render_back() -> void:
+	var card_id := _current_card.id if _current_card != null else 0
+	_cached_back = App.present_card_text(card_id, "back", _raw_back)
 	if _cached_back == "":
 		_cached_back = "（无背面内容）"
-	_content_label.text = "[center]%s[/center]" % _cached_back
+	UiSettings.set_rich_text(_content_label, "[center]%s[/center]" % _cached_back)
 	_flip_hint.visible = false
 	_answer_bar.visible = true
 	_set_state(UIState.BACK)

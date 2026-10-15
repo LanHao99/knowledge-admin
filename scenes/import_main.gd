@@ -32,6 +32,7 @@ var _field_mapping: FieldMappingEditor = null
 var _progress_dialog: ImportProgressDialog = null
 
 # 状态
+var _writing: bool = false
 var _current_step: int = 1
 var _selected_note_type_id: String = ""
 var _selected_note_type_entity: NoteTypeEntity = null
@@ -224,9 +225,11 @@ func _on_mapping_confirmed(mapping: Dictionary) -> void:
 	_progress_dialog.setup(_import_manager)
 	_show_step(3)
 
+	_writing = true
 	var result: Dictionary = _import_manager.import_from_file(
 		_json_file_path, deck_id, _selected_note_type_id, mapping
 	)
+	_writing = false
 	if not result.get("success", false):
 		var raw_data = result.get("data", {})
 		var data: Dictionary = raw_data if raw_data is Dictionary else {}
@@ -308,3 +311,8 @@ func _show_error(message: String) -> void:
 	dialog.close_requested.connect(dialog.queue_free)
 	add_child(dialog)
 	dialog.popup_centered()
+
+
+## 查询导入事务是否正在执行。## 输入: 无。输出: bool。
+func is_importing() -> bool:
+	return _writing

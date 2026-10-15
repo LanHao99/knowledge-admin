@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bs7ylhcyyh8m0"]
 
 [ext_resource type="Script" uid="uid://bsqx806wmtqeu" path="res://scenes/ui/deck_list.gd" id="1_script"]
-[ext_resource type="Theme" uid="uid://bi54ign8ggomc" path="res://assets/Classic95/Classic95.tres" id="1_wt2bv"]
+[ext_resource type="Theme" path="res://assets/UI/app_theme.tres" id="1_wt2bv"]
 
 [node name="DeckList" type="Control" unique_id=738797820]
 layout_mode = 3
@@ -39,14 +39,18 @@ layout_mode = 2
 text = "← 返回"
 
 [node name="TitleLabel" type="Label" parent="RootMargin/MainVBox/TopBar" unique_id=-1294967290]
+theme_type_variation = &"UiTitle"
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 20
 text = "📚 牌组管理"
 
 [node name="TopSpacer" type="Control" parent="RootMargin/MainVBox/TopBar" unique_id=-1294967289]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="AICardBtn" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=1868809006]
+layout_mode = 2
+text = "AI 制卡"
 
 [node name="NewDeckBtn" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=-1294967288]
 layout_mode = 2
@@ -72,8 +76,8 @@ theme_override_constants/separation = 12
 layout_mode = 2
 
 [node name="EditTitle" type="Label" parent="RootMargin/MainVBox/EditPanel/EditVBox/EditHeader" unique_id=-1294967283]
+theme_type_variation = &"UiHeading"
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
 text = "编辑牌组"
 
 [node name="EditHeaderSpacer" type="Control" parent="RootMargin/MainVBox/EditPanel/EditVBox/EditHeader" unique_id=-1294967282]

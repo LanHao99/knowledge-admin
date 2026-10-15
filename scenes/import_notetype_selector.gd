@@ -48,7 +48,7 @@ func _build_ui() -> void:
 	_title_label.name = "TitleLabel"
 	_title_label.text = "选择笔记类型"
 	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_title_label.add_theme_font_size_override("font_size", 18)
+	_title_label.theme_type_variation = &"UiHeading"
 	_title_label.custom_minimum_size = Vector2(0, 32)
 	root.add_child(_title_label)
 
@@ -57,7 +57,7 @@ func _build_ui() -> void:
 	hint.name = "HintLabel"
 	hint.text = "请选择导入笔记的目标类型："
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.add_theme_font_size_override("font_size", 13)
+	hint.theme_type_variation = &"UiCaption"
 	hint.custom_minimum_size = Vector2(0, 24)
 	root.add_child(hint)
 
@@ -98,7 +98,7 @@ func _build_ui() -> void:
 	_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_status_label.custom_minimum_size = Vector2(0, 20)
 	_status_label.add_theme_color_override("font_color", Color(0.55, 0.55, 0.6, 1))
-	_status_label.add_theme_font_size_override("font_size", 12)
+	_status_label.theme_type_variation = &"UiCaption"
 	root.add_child(_status_label)
 
 	_type_list.item_selected.connect(_on_item_selected)

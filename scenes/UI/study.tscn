@@ -2,9 +2,8 @@
 
 [ext_resource type="PackedScene" uid="uid://dddcmah5tjw7q" path="res://scenes/ui/study_session.tscn" id="1_8q8l4"]
 [ext_resource type="Script" uid="uid://dqtr8vf8mgn3u" path="res://scenes/ui/study.gd" id="1_jhonx"]
-[ext_resource type="Theme" uid="uid://bcdy573t5vjck" path="res://default_theme.tres" id="1_l4e01"]
+[ext_resource type="Theme" path="res://assets/UI/app_theme.tres" id="1_l4e01"]
 [ext_resource type="PackedScene" uid="uid://bvqb37meud3w8" path="res://scenes/ui/card_ui.tscn" id="2_x8trg"]
-[ext_resource type="PackedScene" path="res://game/dialogue/story_dialogue_overlay.tscn" id="3_story"]
 
 [node name="Study" type="Control" unique_id=1293919655]
 layout_mode = 3
@@ -22,5 +21,3 @@ layout_mode = 1
 [node name="CardUI" parent="." unique_id=1375471367 instance=ExtResource("2_x8trg")]
 visible = false
 layout_mode = 1
-
-[node name="StoryDialogueOverlay" parent="." unique_id=1202223289 instance=ExtResource("3_story")]

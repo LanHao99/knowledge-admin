@@ -1,0 +1,85 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [C:/Users/pc/AppData/Roaming/Godot/app_userdata/KnowledgeAdminDesktopVerification] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+[4m
+
+res://tests/unit/test_desktop_window.gd
+[0m* test_minimize_retains_content
+* test_maximize_restore_and_minimize
+* test_locked_controls_do_not_close_or_minimize
+* test_smaller_work_area_clamps_bounds
+* test_resize_all_eight_directions
+[1m5/5 passed.
+[0m[4m
+
+res://tests/unit/test_ui_settings.gd
+[0m* test_default_typography
+* test_scale_bounds_and_step
+* test_repeated_scaling_preserves_baseline_and_resource_identity
+* test_all_rich_text_faces_scale_together
+* test_configuration_round_trip
+* test_missing_configuration_uses_default
+* test_corrupt_configuration_uses_default
+ERROR: ConfigFile parse error at user://ui_test_1603605.cfg:0: Unexpected EOF while parsing simple tag.
+   at: _parse (core/io/config_file.cpp:293)
+   GDScript backtrace (most recent call first):
+       [0] load_settings (res://src/ui_settings.gd:89)
+       [1] test_corrupt_configuration_uses_default (res://tests/unit/test_ui_settings.gd:84)
+       [2] _run_test (res://addons/gut/gut.gd:622)
+       [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+       [4] test_scripts (res://addons/gut/gut.gd:1047)
+       [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+       [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+       [7] main (res://addons/gut/cli/gut_cli.gd:297)
+       [8] _init (res://addons/gut/gut_cmdln.gd:39)
+[34m[ExpectedError][0m
+* test_configuration_type_and_range
+* test_save_failure_keeps_current_scale
+* test_control_and_window_share_runtime_theme
+* test_window_titlebar_fits_scaled_font
+* test_bbcode_sizes_and_formatting
+* test_rich_text_refresh_preserves_visible_characters
+* test_unchanged_scale_and_freed_rich_text
+[34m[ExpectedError][0m
+[1m14/14 passed.
+[0m[4m
+
+res://tests/unit/test_window_context.gd
+[0m* test_standalone_has_no_host
+* test_nested_page_navigates_in_its_host
+* test_embedded_page_removes_duplicate_chrome
+[1m3/3 passed.
+[0m[4m
+
+res://tests/unit/test_window_manager.gd
+[0m* test_registry_has_expected_apps
+* test_visible_apps_excludes_hidden
+* test_initial_state_no_active_window
+* test_open_unknown_app_returns_false
+* test_close_never_opened_app_is_safe
+* test_navigate_without_active_window_returns_error
+* test_get_window_for_closed_app_returns_null
+* test_open_app_with_missing_scene_does_not_emit_opened
+[1m8/8 passed.
+[0m
+
+
+
+[33m==============================================
+[0m[33m= Run Summary
+[0m[33m==============================================
+[0m
+Totals
+------
+Scripts               4
+Tests                30
+Passing Tests        30
+Asserts             139
+Time              0.441s
+
+
+[32m---- All tests passed! ----
+[0m

@@ -468,6 +468,9 @@ func _scroll_to_bottom() -> void:
 # ── 导航 ──
 
 func _on_back_pressed() -> void:
+	if WindowManager.is_available():
+		App.close_app("ai_cards")
+		return
 	App.goto_scene("res://scenes/ui/main_menu.tscn")
 
 

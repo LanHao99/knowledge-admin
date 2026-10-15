@@ -1,13 +1,8 @@
 class_name TutorialManager
 extends RefCounted
 ## 教程管理器。
-## 负责检测场景首次进入 → 实例化 StoryDialogueOverlay → 播放教程对话 → 记录完成。
-## 各场景在 _ready() 末尾调用 TutorialManager.check_and_show("scene_id", self) 即可。
-## 改为 RefCounted + static 方法，不再依赖 Autoload。
-
-# ── 常量 ──
-
-const OVERLAY_SCENE: String = "res://game/dialogue/story_dialogue_overlay.tscn"
+## 检测场景首次进入后，通过 App.request_dialogue 播放教程。
+## 不自己创建对话窗。各场景在 _ready() 末尾调用 check_and_show 即可。
 
 # ── 教程注册表：scene_id → .dialogue 文件路径 ──
 
@@ -21,6 +16,7 @@ static var _tutorials: Dictionary = {
 }
 
 static var _progress: TutorialProgress = null
+static var _pending_scene_ids: Dictionary = {}
 
 
 ## 懒加载教程进度（首次调用时从文件读取）。## 输入: 无。
@@ -40,10 +36,12 @@ static func is_completed(scene_id: String) -> bool:
 
 ## 场景入口：检查并显示教程（仅首次）。## 输入:
 ##   scene_id (String) — 场景标识，需在 _tutorials 中注册。
-##   parent (Node) — 场景根节点，用于将 overlay 添加到场景树。
+##   parent (Node) — 当前场景根节点。场景不在树上时不播放。
 ## 输出: 无。
 static func check_and_show(scene_id: String, parent: Node) -> void:
-	if is_completed(scene_id):
+	if parent == null or not parent.is_inside_tree():
+		return
+	if is_completed(scene_id) or _pending_scene_ids.has(scene_id):
 		return
 	if not _tutorials.has(scene_id):
 		return
@@ -58,35 +56,23 @@ static func check_and_show(scene_id: String, parent: Node) -> void:
 		push_warning("[TutorialManager] 教程资源加载失败: %s" % path)
 		return
 
-	var overlay_scene := load(OVERLAY_SCENE) as PackedScene
-	if overlay_scene == null:
-		push_warning("[TutorialManager] 覆盖层场景加载失败")
-		return
-
-	var overlay := overlay_scene.instantiate() as StoryDialogueOverlay
-	if overlay == null:
-		push_warning("[TutorialManager] 覆盖层实例化失败")
-		return
-
-	overlay.dialogue_key = scene_id
-	overlay.ready.connect(func():
-		overlay.start(resource, scene_id)
-	, CONNECT_ONE_SHOT)
-	overlay.dialogue_finished.connect(_on_tutorial_finished.bind(scene_id, overlay))
-
-	parent.get_tree().root.call_deferred("add_child", overlay)
+	_pending_scene_ids[scene_id] = true
+	if not App.dialogue_closed.is_connected(_on_dialogue_closed):
+		App.dialogue_closed.connect(_on_dialogue_closed)
+	if not App.request_dialogue(resource, scene_id, false, parent):
+		_pending_scene_ids.erase(scene_id)
 
 
-## 教程对话结束回调：标记完成、保存、销毁 overlay。## 输入:
-##   scene_id (String) — 场景标识。
-##   overlay (StoryDialogueOverlay) — 要销毁的覆盖层实例。
+## 教程对话结束：只记录对应场景，不销毁主逻辑的对话窗。## 输入: closed_key (String) — 刚关闭的对话标识。
 ## 输出: 无。
-static func _on_tutorial_finished(scene_id: String, overlay: StoryDialogueOverlay) -> void:
+static func _on_dialogue_closed(closed_key: String) -> void:
+	if not _pending_scene_ids.has(closed_key):
+		return
+	var scene_id: String = closed_key
+	_pending_scene_ids.erase(scene_id)
 	var p := _get_progress()
 	p.mark_completed(scene_id)
 	p.save_to_user()
-	if is_instance_valid(overlay):
-		overlay.queue_free()
 
 
 ## 重置所有教程进度（供调试/设置使用）。## 输入: 无。

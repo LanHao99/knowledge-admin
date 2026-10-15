@@ -1,8 +1,7 @@
 class_name StoryManager
 extends RefCounted
-## 剧情管理器（逻辑层），协调 StoryProgress、StoryProgressBar 和 DialogueManager。
-## 负责评分驱动进度累加、对话触发判定、冷却管理、条件检测和进度存档。
-## 由 study.gd 创建和管理生命周期。
+## AVG 引擎。负责评分驱动进度、对话触发、冷却、选项羁绊和进度存档。
+## 由 App 创建。不修改卡片数据库，也不改设置界面。
 
 # ── 信号 ──
 
@@ -26,37 +25,6 @@ const DEFAULT_COOLDOWN_SECONDS: float = 30.0
 
 ## 章节顺序表（按叙事流程自动推进）。
 const CHAPTER_ORDER: Array[String] = ["chapter_1", "chapter_2"]
-
-## Chapter 1 对话选项 → 羁绊值映射表。
-## 格式: { "{dialogue_key}:{choice_index}": { option_index: bond_delta } }
-## choice_index 是对话内玩家被问到选项的序数（从 1 开始）。
-const BOND_MAP: Dictionary = {
-	"intro:1": {
-		0: 1,    # "我是来帮你的" → +1
-		1: 0,    # "别管我是谁" → 0
-	},
-	"explain:1": {
-		0: 0,    # "你到底是什么？" → 0
-		1: 0,    # "每次评分都能让你变强？" → 0
-	},
-	"explain:2": {
-		0: 1,    # "那一定很痛苦" → +1
-		1: 1,    # "我能做什么？" → +1
-	},
-	"trust:1": {
-		0: 0,    # "说吧" → 0
-		1: 0,    # "为什么？" → 0
-	},
-	"trust:2": {
-		0: 0,    # "你是在操纵我吗？" → 0
-		1: 2,    # "我相信你" → +2
-	},
-	"choice:1": {
-		0: 3,    # "我继续。我相信你。" → +3
-		1: 1,    # "我需要更多时间考虑。" → +1
-		2: -1,   # "我不能冒险。对不起。" → -1
-	}
-}
 
 ## Chapter 1 羁绊专属记忆碎片注册表。
 ## 格式: { dialogue_key: { tier: int, prerequisite: String, path: String } }
@@ -112,18 +80,47 @@ var _is_dialogue_active: bool = false
 # ── 初始化 ──
 
 
-## 初始化 StoryManager：加载存档、设置 DialogueManager 引用。## 输入:
+## 初始化 StoryManager：加载存档、注册默认对话表、设置 DialogueManager 引用。## 输入:
 ##   dialogue_manager - Engine.get_singleton("DialogueManager") 的引用。
 ## 输出: 无。
 func setup(dialogue_manager = null) -> void:
 	story_progress = StoryProgress.load_from_user()
 	_dialogue_manager = dialogue_manager
+	if _dialogue_definitions.is_empty():
+		register_dialogues(_default_dialogue_definitions())
 
 	if progress_bar != null:  # 兼容旧引用，实际不注入
 		progress_bar.set_story_progress(story_progress)
 
 
-## 注册对话资源映射表（通常在 study.gd 中调用）。## 输入:
+## AVG 自带的章节对话路径。学习场景不再登记这些文件。## 输入: 无。
+## 输出: Dictionary - { chapter_id: { dialogue_key: path } }。
+func _default_dialogue_definitions() -> Dictionary:
+	return {
+		"chapter_1": {
+			"intro": "res://game/dialogue/ch1_intro.dialogue",
+			"explain": "res://game/dialogue/ch1_explain.dialogue",
+			"trust": "res://game/dialogue/ch1_trust.dialogue",
+			"warning": "res://game/dialogue/ch1_warning.dialogue",
+			"past": "res://game/dialogue/ch1_past.dialogue",
+			"choice": "res://game/dialogue/ch1_choice.dialogue",
+			"revelation": "res://game/dialogue/ch1_revelation.dialogue",
+			"end": "res://game/dialogue/ch1_end.dialogue",
+		},
+		"chapter_2": {
+			"revelation": "res://game/dialogue/ch2_revelation.dialogue",
+			"xanaku": "res://game/dialogue/ch2_xanaku.dialogue",
+			"trojan": "res://game/dialogue/ch2_trojan.dialogue",
+			"survivor": "res://game/dialogue/ch2_survivor.dialogue",
+			"protocol": "res://game/dialogue/ch2_protocol.dialogue",
+			"choice": "res://game/dialogue/ch2_choice.dialogue",
+			"connection": "res://game/dialogue/ch2_connection.dialogue",
+			"end": "res://game/dialogue/ch2_end.dialogue",
+		},
+	}
+
+
+## 注册对话资源映射表。setup() 会先登记默认章节表，外部可再覆盖。## 输入:
 ##   definitions (Dictionary) - 格式: { "chapter_1": { "intro": "res://dialogues/ch1_intro.dialogue", ... } }
 ## 输出: 无。
 func register_dialogues(definitions: Dictionary) -> void:
@@ -151,12 +148,8 @@ func on_review_answered(rating: int) -> Dictionary:
 	if _is_dialogue_active:
 		return {"triggered": false, "dialogue_key": ""}
 
-	# 通过进度条累加
-	if progress_bar != null:  # 兼容旧引用，实际不注入
-		progress_bar.add_progress_from_rating(rating)
-	else:
-		var add_value := _rating_to_progress(rating)
-		story_progress.add_progress(add_value)
+	var add_value := _rating_to_progress(rating)
+	story_progress.add_progress(add_value)
 
 	# 保存（每次评分后持久化）
 	story_progress.save_to_user()
@@ -366,44 +359,13 @@ func is_dialogue_completed(dialogue_key: String) -> bool:
 # ── 羁绊管理 ──
 
 
-## 处理对话选项选择，应用羁绊变化。
-## 需由 StoryDialogueOverlay 在选项选择后调用。
-## 输入:
-##   dialogue_key (String) — 当前对话的标识符。
-##   choice_index (int) — 对话内选项序数（从 1 开始），定位 BOND_MAP 中的正确条目。
-##   option_index (int) — 玩家选择的选项索引（从 0 开始）。
-## 输出: Dictionary — { applied: bool, delta: int, tier_changed: bool, old_tier: int, new_tier: int }。
-func on_dialogue_choice(dialogue_key: String, choice_index: int, option_index: int) -> Dictionary:
-	if story_progress == null:
-		return {"applied": false, "delta": 0, "tier_changed": false, "old_tier": 0, "new_tier": 0}
-
-	# 仅为 Chapter 1 的对话应用羁绊映射
-	var chapter: String = story_progress.current_chapter
-	if chapter != "chapter_1":
-		return {"applied": false, "delta": 0, "tier_changed": false, "old_tier": 0, "new_tier": 0}
-
-	var map_key: String = "%s:%d" % [dialogue_key, choice_index]
-	if not BOND_MAP.has(map_key):
-		return {"applied": false, "delta": 0, "tier_changed": false, "old_tier": 0, "new_tier": 0}
-
-	var dialogue_bond: Dictionary = BOND_MAP[map_key]
-	if not dialogue_bond.has(option_index):
-		return {"applied": false, "delta": 0, "tier_changed": false, "old_tier": 0, "new_tier": 0}
-
-	var delta: int = dialogue_bond[option_index]
-	var result: Dictionary = story_progress.add_bond(delta)
-
-	# 发送羁绊层级跃迁信号
-	if result["tier_changed"]:
-		var tier_name: String = story_progress.get_bond_tier_name(result["new_tier"])
-		bond_tier_changed.emit(result["old_tier"], result["new_tier"], tier_name)
-
-	# 持久化
-	story_progress.save_to_user()
-
-	result["applied"] = true
-	result["delta"] = delta
-	return result
+## 对话选项不再在这里改好感度。增量写在 .dialogue 的 do App.add_bond 里。## 输入:
+##   _dialogue_key (String) — 当前对话标识，未使用。
+##   _choice_index (int) — 对话内选项序数，未使用。
+##   _option_index (int) — 玩家选择的选项索引，未使用。
+## 输出: Dictionary — 始终 applied=false，避免和对话脚本重复加分。
+func on_dialogue_choice(_dialogue_key: String, _choice_index: int, _option_index: int) -> Dictionary:
+	return {"applied": false, "delta": 0, "tier_changed": false, "old_tier": 0, "new_tier": 0}
 
 
 ## 获取当前羁绊层级。## 输入: 无。

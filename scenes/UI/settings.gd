@@ -1,6 +1,8 @@
 extends Control
 ## 设置场景。管理调试模式开关、教程重置、应用信息展示。
 
+const WindowContext: GDScript = preload("res://src/ui/window_context.gd")
+
 
 # ── 节点引用 ──
 
@@ -23,6 +25,7 @@ extends Control
 ## 初始化信号连接、加载当前设置、检查教程。## 输入: 无。
 ## 输出: 无。
 func _ready() -> void:
+	WindowContext.adapt_content(self, %SettingsFrame)
 	%CloseSettingsButton.pressed.connect(_on_back_pressed)
 	%SettingsCenter.resized.connect(_schedule_settings_layout)
 	_schedule_settings_layout()
@@ -77,6 +80,9 @@ func _load_current_settings() -> void:
 ## 返回主菜单按钮回调。## 输入: 无。
 ## 输出: 无。
 func _on_back_pressed() -> void:
+	if WindowManager.is_available():
+		App.close_app("control_panel")
+		return
 	_set_status("正在返回主菜单…")
 	_switch_scene("res://scenes/ui/main_menu.tscn", "主菜单")
 
@@ -161,7 +167,7 @@ func _switch_scene(path: String, label: String) -> void:
 	if not ResourceLoader.exists(path):
 		_set_status("场景不存在: %s" % label)
 		return
-	var result: int = App.goto_scene(path)
+	var result: int = WindowContext.navigate(self, path)
 	if result != OK:
 		_set_status("跳转 %s 失败 (err=%d)" % [label, result])
 
@@ -226,6 +232,8 @@ func _schedule_settings_layout() -> void:
 func _update_settings_layout() -> void:
 	if not is_inside_tree():
 		return
-	var center: CenterContainer = %SettingsCenter
+	var center: Container = %SettingsCenter
 	var frame: PanelContainer = %SettingsFrame
 	frame.custom_minimum_size = Vector2(minf(1120.0, center.size.x), minf(760.0, center.size.y))
+	if WindowContext.find_host(self) != null:
+		frame.custom_minimum_size = Vector2(maxf(600, size.x - 16), maxf(380, size.y - 16))

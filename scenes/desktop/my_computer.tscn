@@ -27,15 +27,23 @@ offset_bottom = -8.0
 [node name="TitleLabel" type="Label" parent="VBox"]
 layout_mode = 2
 text = "我的电脑"
-theme_override_font_sizes/font_size = 16
 
 [node name="InfoLabel" type="Label" parent="VBox"]
 layout_mode = 2
-text = "演示模式 — 仅显示预设目录，不支持文件操作"
-theme_override_font_sizes/font_size = 12
+text = "系统盘 (C:)    /    预设文件"
 autowrap_mode = 3
 
-[node name="DirList" type="ItemList" parent="VBox"]
-unique_name_in_owner = true
+[node name="Files" type="HSplitContainer" parent="VBox"]
 layout_mode = 2
 size_flags_vertical = 3
+split_offset = 280
+[node name="DirList" type="Tree" parent="VBox/Files"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(240, 0)
+[node name="FileContent" type="RichTextLabel" parent="VBox/Files"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+scroll_active = true
+text = ""

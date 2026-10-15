@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://cglj62q2tor3i" path="res://game/AI/ai_debug.gd" id="1_kxa8i"]
 
+[ext_resource type="Theme" path="res://assets/UI/app_theme.tres" id="ui_theme"]
+
 [node name="AIDebug" type="Control" unique_id=705032705]
 layout_mode = 3
 anchors_preset = 15
@@ -9,6 +11,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("ui_theme")
 script = ExtResource("1_kxa8i")
 
 [node name="HTTPRequest" type="HTTPRequest" parent="." unique_id=705032706]
@@ -39,8 +42,8 @@ layout_mode = 2
 text = "← 返回主菜单"
 
 [node name="TitleLabel" type="Label" parent="RootMargin/MainVBox/TopBar" unique_id=705032711]
+theme_type_variation = &"UiTitle"
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
 text = "🤖 AI 制卡助手"
 
 [node name="TopSpacer" type="Control" parent="RootMargin/MainVBox/TopBar" unique_id=705032712]
@@ -66,6 +69,7 @@ fit_content = true
 scroll_active = false
 
 [node name="SettingsPanel" type="PanelContainer" parent="RootMargin/MainVBox" unique_id=705032801]
+visible = false
 custom_minimum_size = Vector2(0, 240)
 layout_mode = 2
 
@@ -93,12 +97,13 @@ wrap_mode = 1
 
 [node name="ApiKeyLabel" type="Label" parent="RootMargin/MainVBox/SettingsPanel/SettingsMargin/SettingsVBox" unique_id=705032810]
 layout_mode = 2
-text = "API Key:"
+text = "自定义API Key:"
 
 [node name="ApiKeyEdit" type="LineEdit" parent="RootMargin/MainVBox/SettingsPanel/SettingsMargin/SettingsVBox" unique_id=705032811]
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "仅支持deepseek官网，sk-..."
+clear_button_enabled = true
 secret = true
 
 [node name="SettingsBtnRow" type="HBoxContainer" parent="RootMargin/MainVBox/SettingsPanel/SettingsMargin/SettingsVBox" unique_id=705032806]

@@ -49,7 +49,7 @@ func _build_ui() -> void:
 	title.name = "TitleLabel"
 	title.text = "导入进度"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 18)
+	title.theme_type_variation = &"UiHeading"
 	title.custom_minimum_size = Vector2(0, 30)
 	root.add_child(title)
 
@@ -68,7 +68,7 @@ func _build_ui() -> void:
 	_status_label.name = "StatusLabel"
 	_status_label.text = "正在导入... (0 / 0)"
 	_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_status_label.add_theme_font_size_override("font_size", 13)
+	_status_label.theme_type_variation = &"UiCaption"
 	_status_label.custom_minimum_size = Vector2(0, 24)
 	root.add_child(_status_label)
 
@@ -77,7 +77,7 @@ func _build_ui() -> void:
 	_result_label.name = "ResultLabel"
 	_result_label.text = ""
 	_result_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_result_label.add_theme_font_size_override("font_size", 14)
+	_result_label.theme_type_variation = &"UiCaption"
 	_result_label.custom_minimum_size = Vector2(0, 24)
 	_result_label.visible = false
 	root.add_child(_result_label)
@@ -86,7 +86,7 @@ func _build_ui() -> void:
 	_failures_label = Label.new()
 	_failures_label.name = "FailuresLabel"
 	_failures_label.text = "失败详情："
-	_failures_label.add_theme_font_size_override("font_size", 13)
+	_failures_label.theme_type_variation = &"UiCaption"
 	_failures_label.visible = false
 	root.add_child(_failures_label)
 

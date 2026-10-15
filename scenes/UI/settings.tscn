@@ -1,7 +1,16 @@
 [gd_scene format=3 uid="uid://k6t7vxys4iwb"]
 
-[ext_resource type="Theme" uid="uid://bi54ign8ggomc" path="res://assets/Classic95/Classic95.tres" id="1_theme"]
-[ext_resource type="Script" uid="uid://bemusywvmtdfk" path="res://scenes/ui/settings.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/UI/app_theme.tres" id="theme"]
+[ext_resource type="Script" path="res://scenes/ui/settings.gd" id="script"]
+[ext_resource type="Script" path="res://src/ui/adaptive_row.gd" id="row"]
+[ext_resource type="Texture2D" path="res://assets/desktop_themes/Classic95/Styles/Window/CloseBtn.png" id="close_icon"]
+
+[ext_resource type="Texture2D" path="res://assets/desktop_themes/Classic95/Styles/Window/Window.png" id="window_texture"]
+
+[sub_resource type="AtlasTexture" id="title_atlas"]
+atlas = ExtResource("window_texture")
+region = Rect2(4, 3, 2, 18)
+filter_clip = true
 
 [node name="Settings" type="Control"]
 layout_mode = 3
@@ -10,162 +19,389 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme = ExtResource("1_theme")
-script = ExtResource("1_script")
+theme = ExtResource("theme")
+script = ExtResource("script")
 
-[node name="RootMargin" type="MarginContainer" parent="."]
+
+[node name="DesktopBackground" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 24
+mouse_filter = 2
+color = Color(0.431373, 0.737255, 0.72549, 1)
+
+
+[node name="PageScroll" type="ScrollContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="RootMargin" type="MarginContainer" parent="PageScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_bottom = 40
+
+
+[node name="SettingsCenter" type="MarginContainer" parent="PageScroll/RootMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+
+
+[node name="SettingsFrame" type="PanelContainer" parent="PageScroll/RootMargin/SettingsCenter"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(1120, 760)
+layout_mode = 2
+theme_type_variation = &"DesktopFrame"
+
+
+[node name="FrameVBox" type="VBoxContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+
+[node name="TitleBar" type="PanelContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox"]
+layout_mode = 2
+
+
+[node name="BlueTitle" type="TextureRect" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/TitleBar"]
+layout_mode = 2
+texture_filter = 2
+texture = SubResource("title_atlas")
+expand_mode = 1
+mouse_filter = 2
+
+
+[node name="TitleMargin" type="MarginContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/TitleBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 3
+
+
+[node name="TitleRow" type="HBoxContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/TitleBar/TitleMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+
+[node name="WindowTitle" type="Label" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/TitleBar/TitleMargin/TitleRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"UiWindowTitle"
+text = "设置"
+vertical_alignment = 1
+
+
+[node name="CloseSettingsButton" type="Button" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/TitleBar/TitleMargin/TitleRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(32, 0)
+icon = ExtResource("close_icon")
+expand_icon = true
+tooltip_text = "关闭"
+
+
+[node name="BodyMargin" type="MarginContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_bottom = 12
+
+
+[node name="SettingsTabs" type="TabContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin"]
+layout_mode = 2
+size_flags_vertical = 3
+
+
+[node name="显示" type="ScrollContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+
+[node name="PageMargin" type="MarginContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/显示"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+
+[node name="PageVBox" type="VBoxContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/显示/PageMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+
+[node name="通用" type="ScrollContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+
+[node name="PageMargin" type="MarginContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/通用"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+
+[node name="PageVBox" type="VBoxContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/通用/PageMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+
+[node name="数据" type="ScrollContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+
+[node name="PageMargin" type="MarginContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/数据"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+
+[node name="PageVBox" type="VBoxContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/数据/PageMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+
+[node name="关于" type="ScrollContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+
+[node name="PageMargin" type="MarginContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/关于"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+
+[node name="PageVBox" type="VBoxContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/关于/PageMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+
+[node name="FontScaleLabel" type="Label" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/显示/PageMargin/PageVBox"]
+layout_mode = 2
+text = "字体大小"
+
+
+[node name="FontScaleRow" type="HBoxContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/显示/PageMargin/PageVBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+
+[node name="DecreaseFontButton" type="Button" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/显示/PageMargin/PageVBox/FontScaleRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(48, 40)
+text = "−"
+tooltip_text = "缩小字号（5%）"
+
+
+[node name="FontScaleSlider" type="HSlider" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/显示/PageMargin/PageVBox/FontScaleRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+custom_minimum_size = Vector2(200, 36)
+min_value = 0.8
+max_value = 1.5
+step = 0.05
+value = 1.0
+focus_mode = 2
+
+
+[node name="IncreaseFontButton" type="Button" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/显示/PageMargin/PageVBox/FontScaleRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(48, 40)
+text = "+"
+tooltip_text = "放大字号（5%）"
+
+
+[node name="FontScaleValue" type="Label" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/显示/PageMargin/PageVBox/FontScaleRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(112, 0)
+text = "100%"
+vertical_alignment = 1
+horizontal_alignment = 2
+
+
+[node name="RangeCaption" type="Label" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/显示/PageMargin/PageVBox"]
+layout_mode = 2
+theme_type_variation = &"UiMuted"
+text = "范围：80%–150%"
+
+
+[node name="PreviewCaption" type="Label" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/显示/PageMargin/PageVBox"]
+layout_mode = 2
+text = "预览"
+
+
+[node name="PreviewInset" type="PanelContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/显示/PageMargin/PageVBox"]
+layout_mode = 2
+theme_type_variation = &"DesktopInset"
+
+
+[node name="PreviewMargin" type="MarginContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/显示/PageMargin/PageVBox/PreviewInset"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
 theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 16
 
-[node name="MainVBox" type="VBoxContainer" parent="RootMargin"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme_override_constants/separation = 16
 
-[node name="TopBar" type="HBoxContainer" parent="RootMargin/MainVBox"]
-layout_mode = 2
-
-[node name="TitleLabel" type="Label" parent="RootMargin/MainVBox/TopBar"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 24
-text = "设置"
-
-[node name="TopSpacer" type="Control" parent="RootMargin/MainVBox/TopBar"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="BackButton" type="Button" parent="RootMargin/MainVBox/TopBar"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 36)
-layout_mode = 2
-text = "← 返回"
-
-[node name="ContentScroll" type="ScrollContainer" parent="RootMargin/MainVBox"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="SectionsVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme_override_constants/separation = 20
-
-[node name="GeneralSection" type="PanelContainer" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox"]
-layout_mode = 2
-
-[node name="GeneralVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/GeneralSection"]
+[node name="PreviewVBox" type="VBoxContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/显示/PageMargin/PageVBox/PreviewInset/PreviewMargin"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="SectionLabel" type="Label" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/GeneralSection/GeneralVBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "通用"
 
-[node name="Sep1" type="HSeparator" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/GeneralSection/GeneralVBox"]
+[node name="PreviewTitle" type="Label" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/显示/PageMargin/PageVBox/PreviewInset/PreviewMargin/PreviewVBox"]
 layout_mode = 2
+theme_type_variation = &"UiTitle"
+text = "标题文字"
+autowrap_mode = 3
 
-[node name="DebugRow" type="HBoxContainer" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/GeneralSection/GeneralVBox"]
+
+[node name="PreviewBody" type="Label" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/显示/PageMargin/PageVBox/PreviewInset/PreviewMargin/PreviewVBox"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_type_variation = &"UiBody"
+text = "正文文字：中文、标点和 123 ABC"
+autowrap_mode = 3
 
-[node name="DebugLabel" type="Label" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/GeneralSection/GeneralVBox/DebugRow"]
+
+[node name="PreviewCaption" type="Label" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/显示/PageMargin/PageVBox/PreviewInset/PreviewMargin/PreviewVBox"]
 layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 16
-text = "调试模式：控制调试面板和调试功能的显示"
+theme_type_variation = &"UiCaption"
+text = "辅助说明文字"
+autowrap_mode = 3
 
-[node name="DebugCheck" type="CheckButton" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/GeneralSection/GeneralVBox/DebugRow"]
+
+[node name="ResetFontButton" type="Button" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/显示/PageMargin/PageVBox"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "开启调试模式"
+size_flags_horizontal = 0
+custom_minimum_size = Vector2(192, 44)
+text = "恢复默认字号"
 
-[node name="DataSection" type="PanelContainer" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox"]
+
+[node name="SaveCaption" type="Label" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/显示/PageMargin/PageVBox"]
 layout_mode = 2
+theme_type_variation = &"UiMuted"
+text = "调整后即时生效，自动保存。"
+autowrap_mode = 3
 
-[node name="DataVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/DataSection"]
+
+[node name="DebugLabel" type="Label" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/通用/PageMargin/PageVBox"]
+layout_mode = 2
+text = "调试模式"
+
+
+[node name="DebugCheck" type="CheckButton" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/通用/PageMargin/PageVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "开启调试功能"
+
+
+[node name="DebugHint" type="Label" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/通用/PageMargin/PageVBox"]
+layout_mode = 2
+theme_type_variation = &"UiMuted"
+text = "控制调试面板和调试功能的显示。"
+autowrap_mode = 3
+
+
+[node name="MetaExtras" type="VBoxContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/通用/PageMargin/PageVBox"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="SectionLabel2" type="Label" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/DataSection/DataVBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "数据"
 
-[node name="Sep2" type="HSeparator" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/DataSection/DataVBox"]
+[node name="TutorialLabel" type="Label" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/数据/PageMargin/PageVBox"]
 layout_mode = 2
+text = "教程进度"
 
-[node name="TutorialRow" type="HBoxContainer" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/DataSection/DataVBox"]
+
+[node name="TutorialHint" type="Label" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/数据/PageMargin/PageVBox"]
 layout_mode = 2
-theme_override_constants/separation = 16
+text = "重置后将重新显示各场景的引导教程。"
+autowrap_mode = 3
 
-[node name="TutorialLabel" type="Label" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/DataSection/DataVBox/TutorialRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 16
-text = "教程进度：重置后将重新显示所有场景的引导教程"
 
-[node name="ResetTutorialBtn" type="Button" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/DataSection/DataVBox/TutorialRow"]
+[node name="ResetTutorialBtn" type="Button" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/数据/PageMargin/PageVBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(140, 36)
 layout_mode = 2
+size_flags_horizontal = 0
+custom_minimum_size = Vector2(224, 44)
 text = "重置教程进度"
 
-[node name="AboutSection" type="PanelContainer" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox"]
-layout_mode = 2
 
-[node name="AboutVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/AboutSection"]
+[node name="AppNameLabel" type="Label" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/关于/PageMargin/PageVBox"]
+layout_mode = 2
+text = "Knowledge Admin"
+
+
+[node name="DescLabel" type="Label" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/关于/PageMargin/PageVBox"]
+layout_mode = 2
+text = "使用间隔重复算法管理知识卡片。支持 SM-2 与 FSRS 调度，基于 Godot 4.7 构建。"
+autowrap_mode = 3
+
+
+[node name="FooterMargin" type="MarginContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_bottom = 12
+
+
+[node name="FooterRow" type="HBoxContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/FooterMargin"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="SectionLabel3" type="Label" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/AboutSection/AboutVBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "关于"
 
-[node name="Sep3" type="HSeparator" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/AboutSection/AboutVBox"]
-layout_mode = 2
-
-[node name="AppNameLabel" type="Label" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/AboutSection/AboutVBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Knowledge Admin"
-
-[node name="DescLabel" type="RichTextLabel" parent="RootMargin/MainVBox/ContentScroll/SectionsVBox/AboutSection/AboutVBox"]
-layout_mode = 2
-size_flags_horizontal = 3
-bbcode_enabled = true
-text = "基于间隔重复算法的知识管理系统。使用 SM-2 和 FSRS 调度算法管理卡片复习。使用 Godot 4.6 构建。"
-fit_content = true
-scroll_active = false
-
-[node name="BottomBar" type="HBoxContainer" parent="RootMargin/MainVBox"]
-clip_contents = true
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
-
-[node name="StatusLabel" type="Label" parent="RootMargin/MainVBox/BottomBar"]
+[node name="StatusLabel" type="Label" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/FooterMargin/FooterRow"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1)
-theme_override_font_sizes/font_size = 20
-
-[node name="BottomSpacer" type="Control" parent="RootMargin/MainVBox/BottomBar"]
-layout_mode = 2
 size_flags_horizontal = 3
+theme_type_variation = &"UiMuted"
+autowrap_mode = 3
+
+
+[node name="BackButton" type="Button" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/FooterMargin/FooterRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(160, 44)
+text = "返回"
+
 
 [node name="ResetTutorialConfirm" type="ConfirmationDialog" parent="."]
 unique_name_in_owner = true
 title = "确认重置"
-dialog_text = "确定要重置所有教程进度吗？\n这会让所有场景的引导教程重新出现。"
+dialog_text = "确定要重置教程进度吗？\n所有场景的引导教程将重新出现。"

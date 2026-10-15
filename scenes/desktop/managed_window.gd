@@ -1,376 +1,212 @@
-extends Control
 class_name ManagedWindow
-## 可拖拽、可缩放的伪窗口控件。提供标题栏、内容区和 8 方向缩放把手。
-## 通过 initialize() 加载内容场景；通过 navigate_to() 切换内容。
+extends Control
+## 场景组成的游戏内窗口，负责拖动、八向缩放和内容页生命周期。
 
-## 请求关闭该窗口（由 WindowManager 响应）。
 signal close_requested
-## 用户点击了窗口（需要提升 Z 轴）。
 signal window_clicked
-## 窗口被最小化。
 signal minimized
-## 窗口从最小化恢复。
 signal restored
 
-## 缩放方向枚举
-enum ResizeDir {
-	NONE,
-	TOP, BOTTOM, LEFT, RIGHT,
-	TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT
-}
-
-const RESIZE_MARGIN: float = 6.0
-const TITLE_BAR_HEIGHT: int = 26
-const TITLE_COLOR_ACTIVE: Color = Color(0.0, 0.0, 0.5, 1.0)
-const TITLE_COLOR_INACTIVE: Color = Color(0.49, 0.49, 0.49, 1.0)
-
-## 打开时的默认窗口大小（由 WindowManager 在 initialize 前写入）。
-@export var default_size: Vector2 = Vector2(800, 600)
-## 可缩放的最小尺寸。
-@export var min_window_size: Vector2 = Vector2(200, 120)
-## 任务栏高度（用于最大化时留出底部空间）。
-@export var taskbar_height: float = 32.0
+enum ResizeDir { NONE, TOP, BOTTOM, LEFT, RIGHT, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT }
+@export var default_size: Vector2 = Vector2(1200, 820)
+@export var min_window_size: Vector2 = Vector2(720, 500)
+@export var taskbar_height: float = 48.0
 
 var _app_id: String = ""
 var _is_maximized: bool = false
+var _is_minimized: bool = false
 var _close_locked: bool = false
 var _minimize_locked: bool = false
-var _pre_max_rect: Rect2 = Rect2()
-var _is_dragging: bool = false
-var _drag_offset: Vector2 = Vector2.ZERO
-var _is_resizing: bool = false
-var _resize_dir: ResizeDir = ResizeDir.NONE
-var _resize_start_rect: Rect2 = Rect2()
-var _resize_start_mouse: Vector2 = Vector2.ZERO
-var _is_minimized: bool = false
-var _is_active: bool = false
+var _pre_max_rect: Rect2
 var _current_scene_path: String = ""
-
+var _is_dragging: bool = false
+var _resize_dir: int = ResizeDir.NONE
+var _gesture_rect: Rect2
+var _gesture_mouse: Vector2
+var _last_focus: WeakRef
 @onready var _title_label: Label = %TitleLabel
-@onready var _close_btn: Button = %CloseButton
-@onready var _minimize_btn: Button = %MinimizeButton
-@onready var _maximize_btn: Button = %MaximizeButton
-@onready var _title_bar: Control = %TitleBar
 @onready var _title_bar_panel: Panel = %TitleBarPanel
 @onready var _content_area: Control = %ContentArea
 
-
-## 初始化后连接按钮信号。
-## 输入: 无。
-## 输出: 无。
+## 连接标题栏、按钮和场景中的八个缩放区域。## 输入: 无。输出: 无。
 func _ready() -> void:
-	mouse_filter = MOUSE_FILTER_STOP
-	clip_contents = true
-	_close_btn.pressed.connect(_on_close_pressed)
-	_minimize_btn.pressed.connect(_on_minimize_pressed)
-	_maximize_btn.pressed.connect(_on_maximize_pressed)
-	_title_bar.gui_input.connect(_on_title_bar_gui_input)
-	_update_title_bar_color()
+	%CloseButton.pressed.connect(_on_close_pressed)
+	%MinimizeButton.pressed.connect(_on_minimize_pressed)
+	%MaximizeButton.pressed.connect(_on_maximize_pressed)
+	%TitleBar.gui_input.connect(_on_title_bar_gui_input)
+	for handle: Control in $ResizeHandles.get_children():
+		handle.gui_input.connect(_on_resize_input.bind(int(handle.get_meta("direction"))))
+	get_parent().resized.connect(fit_work_area)
+	UiSettings.font_scale_changed.connect(_update_typography)
+	_update_typography(UiSettings.font_scale)
 
-
-## 设置应用 ID、标题并加载内容场景。由 WindowManager 在 add_child 后立即调用。
-## 输入: app_id (String), title (String), scene_path (String)。
-## 输出: 无。
+## 装载起始页并居中。## 输入: 应用 ID、标题、场景路径。输出: 无。
 func initialize(app_id: String, title_text: String, scene_path: String) -> void:
 	_app_id = app_id
 	_title_label.text = title_text
-	size = default_size
-	_center_on_parent()
+	size = default_size.min((get_parent() as Control).size)
+	position = (((get_parent() as Control).size - size) * 0.5).round()
 	navigate_to(scene_path)
+	fit_work_area()
 
-
-## 在内容区加载新场景（in-window 页面导航）。
-## 输入: path (String) - 场景 res:// 路径。
-## 输出: int - OK 或错误码。
+## 加载新内容，加载失败时保留原页面。## 输入: path。输出: Godot 错误码。
 func navigate_to(path: String) -> int:
 	if not ResourceLoader.exists(path):
-		push_warning("[ManagedWindow] 场景不存在: %s" % path)
 		return ERR_FILE_NOT_FOUND
-	for child: Node in _content_area.get_children():
-		child.queue_free()
 	var packed: PackedScene = load(path) as PackedScene
 	if packed == null:
-		push_warning("[ManagedWindow] 场景加载失败: %s" % path)
 		return ERR_FILE_CANT_OPEN
-	var instance: Node = packed.instantiate()
-	if instance is Control:
-		var ctrl: Control = instance as Control
-		ctrl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_content_area.add_child(instance)
+	var instance: Control = packed.instantiate() as Control
+	if instance == null:
+		return ERR_INVALID_DATA
+	for child: Node in _content_area.get_children():
+		_content_area.remove_child(child)
+		child.queue_free()
 	_current_scene_path = path
+	_content_area.add_child(instance)
+	instance.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	return OK
 
+## 读取当前页面。## 输入: 无。输出: 内容 Control 或 null。
+func get_content() -> Control:
+	return _content_area.get_child(0) as Control if _content_area.get_child_count() > 0 else null
 
-## 设置窗口激活状态（影响标题栏颜色）。
-## 输入: active (bool)。
-## 输出: 无。
+## 切换标题色并保存或恢复实际键盘焦点。## 输入: active。输出: 无。
 func set_window_active(active: bool) -> void:
-	_is_active = active
-	_update_title_bar_color()
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = Color("000080") if active else Color("808080")
+	_title_bar_panel.add_theme_stylebox_override("panel", style)
+	var focused: Control = get_viewport().gui_get_focus_owner()
+	if not active and focused != null and is_ancestor_of(focused):
+		_last_focus = weakref(focused)
+		focused.release_focus()
+	if active and _last_focus != null:
+		var previous: Control = _last_focus.get_ref() as Control
+		if is_instance_valid(previous) and previous.is_visible_in_tree():
+			previous.grab_focus()
 
-
-## 返回窗口是否处于最小化状态。
-## 输入: 无。
-## 输出: bool。
+## 查询最小化状态。## 输入: 无。输出: bool。
 func is_minimized() -> bool:
 	return _is_minimized
 
-
-## 设置关闭按钮锁定（剧情进行时禁止关闭）。
-## 输入: locked (bool)。
-## 输出: 无。
+## 锁定关闭按钮。## 输入: locked。输出: 无。
 func set_close_locked(locked: bool) -> void:
 	_close_locked = locked
-	if _close_btn != null:
-		_close_btn.modulate = Color(0.5, 0.5, 0.5, 1.0) if locked else Color.WHITE
+	%CloseButton.disabled = locked
 
-
-## 设置最小化按钮锁定（剧情进行时禁止最小化）。
-## 输入: locked (bool)。
-## 输出: 无。
+## 锁定最小化按钮。## 输入: locked。输出: 无。
 func set_minimize_locked(locked: bool) -> void:
 	_minimize_locked = locked
-	if _minimize_btn != null:
-		_minimize_btn.modulate = Color(0.5, 0.5, 0.5, 1.0) if locked else Color.WHITE
+	%MinimizeButton.disabled = locked
 
-
-## 从最小化恢复，或从最大化恢复到原始大小。
-## 输入: 无。
-## 输出: 无。
+## 恢复隐藏的窗口，保留内容和最大化状态。## 输入: 无。输出: 无。
 func restore() -> void:
-	if _is_minimized:
-		visible = true
-		_is_minimized = false
-		restored.emit()
-	elif _is_maximized:
-		_do_restore()
+	_is_minimized = false
+	show()
+	fit_work_area()
+	restored.emit()
 
-
-## ────────────── 标题栏交互 ──────────────
-
-## 处理标题栏上的鼠标输入（拖拽、双击最大化）。
-## 输入: event (InputEvent)。
-## 输出: 无。
-func _on_title_bar_gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		var mb: InputEventMouseButton = event as InputEventMouseButton
-		if mb.button_index == MOUSE_BUTTON_LEFT:
-			if mb.double_click:
-				_on_maximize_pressed()
-				accept_event()
-				return
-			if mb.pressed:
-				window_clicked.emit()
-				if not _is_maximized:
-					_is_dragging = true
-					_drag_offset = global_position - get_global_mouse_position()
-				accept_event()
-			else:
-				_is_dragging = false
-	elif event is InputEventMouseMotion and _is_dragging:
-		var new_pos: Vector2 = get_global_mouse_position() + _drag_offset
-		_clamp_position(new_pos)
-		accept_event()
-
-
-## ────────────── 整体 GUI 输入（缩放） ──────────────
-
-## 处理窗口边缘的缩放输入。
-## 输入: event (InputEvent)。
-## 输出: 无。
-func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		var mb: InputEventMouseButton = event as InputEventMouseButton
-		if mb.button_index == MOUSE_BUTTON_LEFT:
-			window_clicked.emit()
-			if mb.pressed and not _is_maximized:
-				var dir: ResizeDir = _get_resize_dir(mb.position)
-				if dir != ResizeDir.NONE:
-					_is_resizing = true
-					_resize_dir = dir
-					_resize_start_rect = Rect2(position, size)
-					_resize_start_mouse = get_global_mouse_position()
-					accept_event()
-			elif not mb.pressed:
-				_is_resizing = false
-				_is_dragging = false
-				_resize_dir = ResizeDir.NONE
-	elif event is InputEventMouseMotion:
-		if _is_resizing:
-			_do_resize()
-			accept_event()
-		else:
-			var dir: ResizeDir = _get_resize_dir(event.position)
-			_set_resize_cursor(dir)
-
-
-## 全局鼠标释放时停止拖拽和缩放。
-## 输入: event (InputEvent)。
-## 输出: 无。
-func _input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		var mb: InputEventMouseButton = event as InputEventMouseButton
-		if mb.button_index == MOUSE_BUTTON_LEFT and not mb.pressed:
-			if _is_dragging or _is_resizing:
-				_is_dragging = false
-				_is_resizing = false
-				_resize_dir = ResizeDir.NONE
-
-
-## ────────────── 关闭 / 最小化 / 最大化 ──────────────
-
-func _on_close_pressed() -> void:
-	if _close_locked:
-		return
-	close_requested.emit()
-
-
+## 最小化而不释放内容。## 输入: 无。输出: 无。
 func _on_minimize_pressed() -> void:
 	if _minimize_locked:
 		return
 	_is_minimized = true
-	visible = false
+	hide()
 	minimized.emit()
 
+## 请求管理器检查会话和导入状态后关闭。## 输入: 无。输出: 无。
+func _on_close_pressed() -> void:
+	if not _close_locked:
+		close_requested.emit()
 
+## 切换最大化及原始矩形。## 输入: 无。输出: 无。
 func _on_maximize_pressed() -> void:
 	if _is_maximized:
-		_do_restore()
+		_is_maximized = false
+		position = _pre_max_rect.position
+		size = _pre_max_rect.size
 	else:
-		_do_maximize()
+		_pre_max_rect = Rect2(position, size)
+		_is_maximized = true
+	%MaximizeButton.text = "▣" if _is_maximized else "□"
+	$ResizeHandles.visible = not _is_maximized
+	fit_work_area()
 
-
-func _do_maximize() -> void:
-	_pre_max_rect = Rect2(position, size)
-	_is_maximized = true
-	var parent_ctrl: Control = get_parent() as Control
-	if parent_ctrl == null:
+## 根据已扣除任务栏的父容器限制尺寸和位置。## 输入: 无。输出: 无。
+func fit_work_area() -> void:
+	if not is_node_ready():
 		return
-	position = Vector2.ZERO
-	var parent_h: float = parent_ctrl.size.y
-	size = Vector2(parent_ctrl.size.x, parent_h - taskbar_height)
-
-
-func _do_restore() -> void:
-	_is_maximized = false
-	position = _pre_max_rect.position
-	size = _pre_max_rect.size
-
-
-## ────────────── 辅助函数 ──────────────
-
-func _center_on_parent() -> void:
-	var parent_ctrl: Control = get_parent() as Control
-	if parent_ctrl == null:
-		return
-	var parent_size: Vector2 = parent_ctrl.size
-	position = ((parent_size - size) * 0.5).round()
-	position.y = maxf(0.0, position.y)
-
-
-## 限制窗口位置，保证标题栏始终可见。
-## 输入: new_pos (Vector2) - 期望的新位置。
-## 输出: 无。
-func _clamp_position(new_pos: Vector2) -> void:
-	var parent_ctrl: Control = get_parent() as Control
-	if parent_ctrl == null:
-		position = new_pos
-		return
-	var parent_size: Vector2 = parent_ctrl.size
-	# 标题栏至少保留 60px 宽可见，顶部不超出桌面
-	new_pos.x = clampf(new_pos.x, -(size.x - 60.0), parent_size.x - 60.0)
-	new_pos.y = clampf(new_pos.y, 0.0, parent_size.y - float(TITLE_BAR_HEIGHT))
-	position = new_pos.round()
-
-
-func _update_title_bar_color() -> void:
-	if _title_bar_panel == null:
-		return
-	var col: Color = TITLE_COLOR_ACTIVE if _is_active else TITLE_COLOR_INACTIVE
-	var sb: StyleBoxFlat = StyleBoxFlat.new()
-	sb.bg_color = col
-	_title_bar_panel.add_theme_stylebox_override("panel", sb)
-
-
-func _get_resize_dir(local_pos: Vector2) -> ResizeDir:
+	var area: Vector2 = (get_parent() as Control).size.max(Vector2.ONE)
 	if _is_maximized:
-		return ResizeDir.NONE
-	var m: float = RESIZE_MARGIN
-	var s: Vector2 = size
-	var on_l: bool = local_pos.x < m
-	var on_r: bool = local_pos.x > s.x - m
-	var on_t: bool = local_pos.y < m
-	var on_b: bool = local_pos.y > s.y - m
-	# 内容区域不响应缩放
-	if local_pos.y > float(TITLE_BAR_HEIGHT) and not on_l and not on_r and not on_b:
-		return ResizeDir.NONE
-	if on_t and on_l: return ResizeDir.TOP_LEFT
-	if on_t and on_r: return ResizeDir.TOP_RIGHT
-	if on_b and on_l: return ResizeDir.BOTTOM_LEFT
-	if on_b and on_r: return ResizeDir.BOTTOM_RIGHT
-	if on_l: return ResizeDir.LEFT
-	if on_r: return ResizeDir.RIGHT
-	if on_t: return ResizeDir.TOP
-	if on_b: return ResizeDir.BOTTOM
-	return ResizeDir.NONE
+		position = Vector2.ZERO
+		size = area
+	else:
+		size = size.clamp(min_window_size.min(area), area)
+		position = position.clamp(Vector2.ZERO, (area - size).max(Vector2.ZERO)).round()
 
+## 标题栏拖动或双击最大化。## 输入: event。输出: 无。
+func _on_title_bar_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		window_clicked.emit()
+		if event.double_click:
+			_on_maximize_pressed()
+		elif not _is_maximized:
+			_is_dragging = true
+			_gesture_rect = Rect2(position, size)
+			_gesture_mouse = event.global_position
+		accept_event()
 
-func _set_resize_cursor(dir: ResizeDir) -> void:
-	match dir:
-		ResizeDir.LEFT, ResizeDir.RIGHT:
-			mouse_default_cursor_shape = CURSOR_HSIZE
-		ResizeDir.TOP, ResizeDir.BOTTOM:
-			mouse_default_cursor_shape = CURSOR_VSIZE
-		ResizeDir.TOP_LEFT, ResizeDir.BOTTOM_RIGHT:
-			mouse_default_cursor_shape = CURSOR_FDIAGSIZE
-		ResizeDir.TOP_RIGHT, ResizeDir.BOTTOM_LEFT:
-			mouse_default_cursor_shape = CURSOR_BDIAGSIZE
-		_:
-			mouse_default_cursor_shape = CURSOR_ARROW
+## 缩放把手开始手势。## 输入: event、direction。输出: 无。
+func _on_resize_input(event: InputEvent, direction: int) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		window_clicked.emit()
+		_resize_dir = direction
+		_gesture_rect = Rect2(position, size)
+		_gesture_mouse = event.global_position
+		accept_event()
 
+## 跟踪越出把手的拖动和释放，内容区点击同步激活。## 输入: event。输出: 无。
+func _input(event: InputEvent) -> void:
+	if not is_visible_in_tree():
+		return
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if not event.pressed:
+			_is_dragging = false
+			_resize_dir = ResizeDir.NONE
+		else:
+			var hovered: Control = get_viewport().gui_get_hovered_control()
+			if hovered == self or (hovered != null and is_ancestor_of(hovered)):
+				window_clicked.emit()
+	if event is InputEventMouseMotion and (_is_dragging or _resize_dir != ResizeDir.NONE):
+		var movement: Vector2 = event.position - _gesture_mouse
+		if _is_dragging:
+			position = _gesture_rect.position + movement
+		else:
+			var next_rect: Rect2 = resized_rect(_gesture_rect, movement, _resize_dir, min_window_size)
+			position = next_rect.position
+			size = next_rect.size
+		fit_work_area()
+		get_viewport().set_input_as_handled()
 
-## 根据缩放方向和鼠标位移更新窗口位置与大小。
-## 输入: 无（读取 _resize_start_rect 和当前鼠标位置）。
-## 输出: 无。
-func _do_resize() -> void:
-	var delta: Vector2 = get_global_mouse_position() - _resize_start_mouse
-	var r: Rect2 = _resize_start_rect
-	var min_w: float = min_window_size.x
-	var min_h: float = min_window_size.y
+## 计算八向缩放，达到最小值时保持对边固定。## 输入: 矩形、位移、方向、下限。输出: Rect2。
+static func resized_rect(rect: Rect2, movement: Vector2, direction: int, minimum: Vector2) -> Rect2:
+	var result: Rect2 = rect
+	if direction in [ResizeDir.RIGHT, ResizeDir.TOP_RIGHT, ResizeDir.BOTTOM_RIGHT]:
+		result.size.x = maxf(minimum.x, rect.size.x + movement.x)
+	if direction in [ResizeDir.BOTTOM, ResizeDir.BOTTOM_LEFT, ResizeDir.BOTTOM_RIGHT]:
+		result.size.y = maxf(minimum.y, rect.size.y + movement.y)
+	if direction in [ResizeDir.LEFT, ResizeDir.TOP_LEFT, ResizeDir.BOTTOM_LEFT]:
+		result.size.x = maxf(minimum.x, rect.size.x - movement.x)
+		result.position.x = rect.end.x - result.size.x
+	if direction in [ResizeDir.TOP, ResizeDir.TOP_LEFT, ResizeDir.TOP_RIGHT]:
+		result.size.y = maxf(minimum.y, rect.size.y - movement.y)
+		result.position.y = rect.end.y - result.size.y
+	return result
 
-	match _resize_dir:
-		ResizeDir.RIGHT:
-			r.size.x = maxf(min_w, r.size.x + delta.x)
-		ResizeDir.BOTTOM:
-			r.size.y = maxf(min_h, r.size.y + delta.y)
-		ResizeDir.LEFT:
-			var nw: float = maxf(min_w, r.size.x - delta.x)
-			r.position.x = r.end.x - nw
-			r.size.x = nw
-		ResizeDir.TOP:
-			var nh: float = maxf(min_h, r.size.y - delta.y)
-			r.position.y = r.end.y - nh
-			r.size.y = nh
-		ResizeDir.BOTTOM_RIGHT:
-			r.size.x = maxf(min_w, r.size.x + delta.x)
-			r.size.y = maxf(min_h, r.size.y + delta.y)
-		ResizeDir.BOTTOM_LEFT:
-			var nw: float = maxf(min_w, r.size.x - delta.x)
-			r.position.x = r.end.x - nw
-			r.size.x = nw
-			r.size.y = maxf(min_h, r.size.y + delta.y)
-		ResizeDir.TOP_RIGHT:
-			r.size.x = maxf(min_w, r.size.x + delta.x)
-			var nh: float = maxf(min_h, r.size.y - delta.y)
-			r.position.y = r.end.y - nh
-			r.size.y = nh
-		ResizeDir.TOP_LEFT:
-			var nw: float = maxf(min_w, r.size.x - delta.x)
-			r.position.x = r.end.x - nw
-			r.size.x = nw
-			var nh: float = maxf(min_h, r.size.y - delta.y)
-			r.position.y = r.end.y - nh
-			r.size.y = nh
-
-	position = r.position.round()
-	size = r.size.round()
+## 标题和按钮随字体倍率变化。## 输入: scale_value。输出: 无。
+func _update_typography(scale_value: float) -> void:
+	_title_bar_panel.custom_minimum_size.y = roundf(38.0 * scale_value)
+	_title_label.add_theme_font_size_override("font_size", roundi(22.0 * scale_value))
+	for button: Button in [%MinimizeButton, %MaximizeButton, %CloseButton]:
+		button.custom_minimum_size = Vector2(32, 28) * scale_value
+		button.add_theme_font_size_override("font_size", roundi(18.0 * scale_value))

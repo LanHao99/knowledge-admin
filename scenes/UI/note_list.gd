@@ -503,3 +503,9 @@ func _on_ai_card_pressed() -> void:
 	var result: int = App.open_ai_cards()
 	if result != OK:
 		_set_status("[color=#FF6666]打开 AI 制卡失败（%d）[/color]" % result)
+
+
+## 恢复焦点时刷新只读列表，不覆盖编辑中的表单。## 输入: 无。输出: 无。
+func desktop_refresh() -> void:
+	if not _edit_panel.visible:
+		_refresh_all()

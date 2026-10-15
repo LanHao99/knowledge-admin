@@ -29,13 +29,14 @@ const DEFAULT_CHAPTER: String = "chapter_1"
 var _story_manager: StoryManager = null
 var _overlay: StoryDialogueOverlay = null
 var _active_dialogue_key: String = ""
+var _dialogue_queue: Array[Dictionary] = []
+var _active_tracks_story: bool = false
 
 
 ## 启动 AVG，并准备唯一的对话窗。## 输入: 无。
 ## 输出: 无。
 func _ready() -> void:
 	_setup_story()
-	_ensure_overlay()
 
 
 ## 创建剧情管理器并接上它的信号。章节只在存档为空时写成第一章。## 输入: 无。
@@ -68,7 +69,7 @@ func _ensure_overlay() -> void:
 	if _overlay == null:
 		push_error("[App] 对话覆盖层实例化失败")
 		return
-	_overlay.layer = 20
+	_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(_overlay)
 	if not _overlay.dialogue_finished.is_connected(_on_overlay_finished):
 		_overlay.dialogue_finished.connect(_on_overlay_finished)
@@ -168,46 +169,61 @@ func get_setting_extras() -> Array[Dictionary]:
 	return extras
 
 
-## 打开唯一对话窗。剧情和教程都走这里。## 输入:
-##   resource - DialogueResource。为空则不打开。
-##   key (String) - 对话标识。
-##   track_story (bool) - 为 true 时结束对话会写入剧情完成记录。教程传 false。
-## 输出: bool。成功开始播放返回 true。
-func request_dialogue(resource, key: String, track_story: bool = true) -> bool:
+## 请求播放对话，正式剧情排在尚未开始的教程之前。## 输入: 资源、标识、是否剧情、来源节点。输出: 是否接受请求。
+func request_dialogue(resource, key: String, track_story: bool = true, source: Node = null) -> bool:
 	if resource == null:
-		push_warning("[App] 对话资源为空: %s" % key)
 		return false
-	_ensure_overlay()
-	if _overlay == null:
-		return false
-	_active_dialogue_key = key
-	_overlay.set_story_manager(_story_manager if track_story else null)
-	dialogue_opened.emit(key)
-	_overlay.start(resource, key)
+	var request: Dictionary = {"resource": resource, "key": key, "story": track_story, "source": weakref(source) if source != null else null}
+	if track_story:
+		var insertion: int = 0
+		while insertion < _dialogue_queue.size() and _dialogue_queue[insertion].story:
+			insertion += 1
+		_dialogue_queue.insert(insertion, request)
+	else:
+		_dialogue_queue.append(request)
+	_play_next_dialogue.call_deferred()
 	return true
+
+
+## 串行打开正文视图，来源已释放的教程不再播放。## 输入: 无。输出: 无。
+func _play_next_dialogue() -> void:
+	if not _active_dialogue_key.is_empty() or _dialogue_queue.is_empty():
+		return
+	var request: Dictionary = _dialogue_queue.pop_front()
+	var source: Node = request.source.get_ref() if request.source != null else null
+	if not request.story and request.source != null and not is_instance_valid(source):
+		TutorialManager._pending_scene_ids.erase(request.key)
+		_play_next_dialogue.call_deferred()
+		return
+	_active_dialogue_key = request.key
+	_active_tracks_story = request.story
+	if WindowManager.is_available():
+		_overlay = WindowManager.begin_dialogue(request.story, source) as StoryDialogueOverlay
+	else:
+		_ensure_overlay()
+	if _overlay == null:
+		_active_dialogue_key = ""
+		_play_next_dialogue.call_deferred()
+		return
+	if not _overlay.dialogue_finished.is_connected(_on_overlay_finished):
+		_overlay.dialogue_finished.connect(_on_overlay_finished)
+	_overlay.set_story_manager(_story_manager if request.story else null)
+	dialogue_opened.emit(request.key)
+	_overlay.start(request.resource, request.key)
 
 
 ## 打开指定应用（通过 WindowManager 注册表）。
 ## 输入: app_id (String) - 注册表中的应用 ID。
 ## 输出: bool - 成功返回 true。
 func open_app(app_id: String) -> bool:
-	if Engine.has_singleton("WindowManager"):
-		var wm = Engine.get_singleton("WindowManager")
-		if wm != null and wm.has_method("open_app"):
-			return wm.open_app(app_id)
-	# 降级：如果 WindowManager 未就绪，使用注册表中的场景路径
-	push_warning("[App] WindowManager 未就绪，无法打开应用: %s" % app_id)
-	return false
+	return WindowManager.open_app(app_id)
 
 
 ## 关闭指定应用。
 ## 输入: app_id (String) - 注册表中的应用 ID。
 ## 输出: 无。
 func close_app(app_id: String) -> void:
-	if Engine.has_singleton("WindowManager"):
-		var wm = Engine.get_singleton("WindowManager")
-		if wm != null and wm.has_method("close_app"):
-			wm.close_app(app_id)
+	WindowManager.close_app(app_id)
 
 
 ## 打开 AI 制卡应用。保留向后兼容的调用接口。
@@ -223,13 +239,9 @@ func open_ai_cards() -> int:
 ## 输出: int - Godot 错误码。文件不存在时返回 ERR_FILE_NOT_FOUND。
 func goto_scene(path: String) -> int:
 	if not ResourceLoader.exists(path):
-		push_warning("[App] 场景不存在: %s" % path)
 		return ERR_FILE_NOT_FOUND
-	# 优先在活动窗口内导航
-	var wm_node: Node = get_node_or_null("/root/WindowManager")
-	if wm_node != null and wm_node.has_method("has_active_window") and wm_node.has_active_window():
-		return wm_node.navigate_in_active(path)
-	# 降级：全屏场景切换
+	if WindowManager.is_available():
+		return WindowManager.navigate_in_active(path)
 	return get_tree().change_scene_to_file(path)
 
 
@@ -322,9 +334,13 @@ func _on_bond_tier_changed(_old_tier: int, _new_tier: int, _tier_name: String) -
 ## 对话窗关闭。## 输入: 无。
 ## 输出: 无。
 func _on_overlay_finished() -> void:
-	var key := _active_dialogue_key
+	var key: String = _active_dialogue_key
 	_active_dialogue_key = ""
+	if WindowManager.is_available():
+		WindowManager.end_dialogue(_active_tracks_story)
+		_overlay = null
 	dialogue_closed.emit(key)
+	_play_next_dialogue.call_deferred()
 
 
 ## 退出应用程序（由剧情/教程触发）。包含短暂延迟让玩家看到最后的信息。## 输入: 无。

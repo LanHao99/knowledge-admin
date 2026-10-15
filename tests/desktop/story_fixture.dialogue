@@ -1,0 +1,6 @@
+~ start
+???: 连接已经建立。
+- 继续
+	do App.set_flag("desktop_choice_verified", true)
+	???: 连接结束。
+=> END

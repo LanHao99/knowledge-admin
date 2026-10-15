@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bo3fq8wqe6mpx"]
 
 [ext_resource type="Script" uid="uid://du4uyfhe10oc3" path="res://scenes/ui/debug_crud_panel.gd" id="1_dbg"]
-[ext_resource type="Theme" uid="uid://bi54ign8ggomc" path="res://assets/Classic95/Classic95.tres" id="1_o5hv5"]
+[ext_resource type="Theme" path="res://assets/UI/app_theme.tres" id="1_o5hv5"]
 
 [node name="DebugCrudPanel" type="Control" unique_id=1707544301]
 layout_mode = 3
@@ -49,6 +49,11 @@ text = "生成测试数据"
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
 text = "Clear All Data"
+
+[node name="ResetSaveButton" type="Button" parent="RootMargin/MainVBox/Toolbar" unique_id=375271909]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.75, 0.3, 1)
+text = "一键重置存档"
 
 [node name="RefreshAllButton" type="Button" parent="RootMargin/MainVBox/Toolbar" unique_id=621123743]
 layout_mode = 2
@@ -285,8 +290,8 @@ layout_mode = 2
 theme_override_constants/separation = 6
 
 [node name="StudyTestTitle" type="Label" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=410065412]
+theme_type_variation = &"UiMuted"
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
 text = "研究测试"
 
 [node name="GenCardBtn" type="Button" parent="RootMargin/MainVBox/MainHSplit/LeftVSplit/StudyTestPanel/StudyTestVBox" unique_id=410065413]
@@ -406,3 +411,8 @@ wrap_mode = 2
 title = "清空测试数据"
 ok_button_text = "清空"
 dialog_text = "将清空 cards / notes / decks 三张表的所有数据。表结构保留不变。此操作不可撤销，确定继续？"
+
+[node name="ResetSaveConfirm" type="ConfirmationDialog" parent="." unique_id=72959685]
+title = "重置全局存档"
+ok_button_text = "重置"
+dialog_text = "将重置剧情进度、好感度、标记和教程。牌组、笔记和卡片不会删除。确定继续？"

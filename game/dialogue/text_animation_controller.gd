@@ -134,7 +134,7 @@ func play_line(raw_text: String, on_complete: Callable = Callable()) -> void:
 
 	# 设置 RichTextLabel 的 BBCode 渲染文本（但隐藏）
 	_label.visible_characters = 0
-	_label.text = bbcoded_text
+	UiSettings.set_rich_text(_label, bbcoded_text)
 
 	# 启动分段打字机（使用 pure_text 长度作为可见字符目标）
 	_start_segmented_typewriter(segments, _pure_text)
@@ -169,8 +169,9 @@ func is_playing() -> bool:
 ## 输出: 无。
 func clear() -> void:
 	_stop_current_animation()
+	_on_complete = Callable()
 	if _label != null:
-		_label.text = ""
+		UiSettings.set_rich_text(_label, "")
 		_label.visible_characters = -1
 
 
@@ -492,7 +493,7 @@ func _show_instant(raw_text: String) -> void:
 	if _label == null:
 		return
 	var parsed := _parse_markup(raw_text)
-	_label.text = parsed["bbcoded_text"]
+	UiSettings.set_rich_text(_label, parsed["bbcoded_text"])
 	_label.visible_characters = -1
 
 	if _on_complete.is_valid():
@@ -555,7 +556,7 @@ func _on_glitch_tick() -> void:
 	if _label == null:
 		return
 
-	var text: String = _label.text
+	var text: String = str(_label.get_meta("ui_source_bbcode", _label.text))
 	if text.is_empty():
 		return
 
@@ -567,7 +568,7 @@ func _on_glitch_tick() -> void:
 		var glitch_char: String = GLITCH_CHARS[randi() % GLITCH_CHARS.length()]
 		text[pos] = glitch_char
 
-	_label.text = text
+	UiSettings.set_rich_text(_label, text)
 
 
 # ── 工具 ──

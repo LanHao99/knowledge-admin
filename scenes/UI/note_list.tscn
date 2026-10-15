@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://c6qm842csuitm"]
 
 [ext_resource type="Script" uid="uid://bhmupko5l8v" path="res://scenes/ui/note_list.gd" id="1_script"]
-[ext_resource type="Theme" uid="uid://bi54ign8ggomc" path="res://assets/Classic95/Classic95.tres" id="1_v0n6d"]
+[ext_resource type="Theme" path="res://assets/UI/app_theme.tres" id="1_v0n6d"]
 
 [node name="NoteList" type="Control" unique_id=2000000001]
 layout_mode = 3
@@ -39,14 +39,18 @@ layout_mode = 2
 text = "← 返回"
 
 [node name="TitleLabel" type="Label" parent="RootMargin/MainVBox/TopBar" unique_id=2000000006]
+theme_type_variation = &"UiTitle"
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 20
 text = "📝 笔记列表"
 
 [node name="TopSpacer" type="Control" parent="RootMargin/MainVBox/TopBar" unique_id=2000000007]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="AICardBtn" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=2000000040]
+layout_mode = 2
+text = "AI 制卡"
 
 [node name="NewNoteBtn" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=2000000008]
 layout_mode = 2
@@ -71,8 +75,8 @@ theme_override_constants/separation = 12
 layout_mode = 2
 
 [node name="EditTitle" type="Label" parent="RootMargin/MainVBox/EditPanel/EditVBox/EditHeader" unique_id=2000000013]
+theme_type_variation = &"UiHeading"
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
 text = "编辑笔记"
 
 [node name="EditHeaderSpacer" type="Control" parent="RootMargin/MainVBox/EditPanel/EditVBox/EditHeader" unique_id=2000000014]

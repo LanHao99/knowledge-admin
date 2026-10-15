@@ -1,8 +1,7 @@
 extends Control
-## 学习模块交换机（协调者）。
-## 职责：创建 Manager → 注入给 StudySession 和 CardUI → 桥接两者信号。
-## 同时管理 StoryManager（剧情系统）和 StoryDialogueOverlay（对话覆盖层）。
-## 不负责任何 UI 逻辑，只做数据交换和视图切换协调。
+## 闪卡学习组装者。
+## 创建牌组、笔记、卡片和学习会话，并注入给 StudySession 与 CardUI。
+## 不创建剧情管理器，也不实例化对话窗。对话打开时只负责藏起卡片。
 
 
 # ── Manager 实例 ──
@@ -10,41 +9,36 @@ var _deck_manager: DeckManager = null
 var _card_manager: CardManager = null
 var _note_manager: NoteManager = null
 var _study_manager: StudyManager = null
-var _scheduler: FsrsScheduler = null
-
-# ── 剧情系统 ──
-var _story_manager: StoryManager = null
 
 # ── 子场景引用 ──
 @onready var _session: StudySession = $StudySession
 @onready var _card_ui: CardUI = $CardUI
-@onready var _story_overlay: StoryDialogueOverlay = $StoryDialogueOverlay
 
 
-## 创建 Manager → 注入 → 桥接信号 → 初始化剧情系统。## 输入: 无。
+## 创建 Manager、注入子场景，并监听主逻辑的对话开关。## 输入: 无。
 ## 输出: 无。
 func _ready() -> void:
 	_setup_managers()
-	_setup_story_system()
 	_inject_all()
 	_connect_bridge()
+	if not App.dialogue_opened.is_connected(_on_dialogue_opened):
+		App.dialogue_opened.connect(_on_dialogue_opened)
+	if not App.dialogue_closed.is_connected(_on_dialogue_closed):
+		App.dialogue_closed.connect(_on_dialogue_closed)
+	TutorialManager.check_and_show("study", self)
 
-	TutorialManager.check_and_show("study", self )
 
-
-## 退出时释放 Manager 实例和剧情管理器。## 输入: 无。
+## 退出时断开主逻辑信号并释放 Manager。## 输入: 无。
 ## 输出: 无。
 func _exit_tree() -> void:
-	_cleanup_story_system()
+	if App.dialogue_opened.is_connected(_on_dialogue_opened):
+		App.dialogue_opened.disconnect(_on_dialogue_opened)
+	if App.dialogue_closed.is_connected(_on_dialogue_closed):
+		App.dialogue_closed.disconnect(_on_dialogue_closed)
 	_cleanup_managers()
 
 
-# ──────────────────────────────────────────────────────────────
-# Manager 生命周期
-# ──────────────────────────────────────────────────────────────
-
-
-## 创建全部 Manager + Scheduler 实例（study.gd 是唯一创建者）。## 输入: 无。
+## 创建闪卡引擎使用的 Manager。调度器由 CardManager 自己创建。## 输入: 无。
 ## 输出: 无。
 func _setup_managers() -> void:
 	const db_path: String = "user://knowledge_admin.db"
@@ -56,9 +50,6 @@ func _setup_managers() -> void:
 	_card_manager = CardManager.new()
 	add_child(_card_manager)
 	_card_manager.setup(db_path)
-
-	_scheduler = FsrsScheduler.new()
-	_card_manager.set_scheduler(_scheduler)
 
 	_note_manager = NoteManager.new()
 	add_child(_note_manager)
@@ -94,110 +85,25 @@ func _cleanup_managers() -> void:
 	if _card_manager != null:
 		_card_manager.queue_free()
 		_card_manager = null
-	if _scheduler != null:
-		_scheduler = null
 	if _deck_manager != null:
 		_deck_manager.queue_free()
 		_deck_manager = null
 
 
-# ──────────────────────────────────────────────────────────────
-# 剧情系统生命周期
-# ──────────────────────────────────────────────────────────────
-
-
-## 初始化 StoryManager、进度条 UI 和对话覆盖层。## 输入: 无。
-## 输出: 无。
-func _setup_story_system() -> void:
-	# 创建 StoryManager（RefCounted，不加入节点树）
-	_story_manager = StoryManager.new()
-	var dm = Engine.get_singleton("DialogueManager")
-	_story_manager.setup(dm)
-
-	# 注册对话资源映射（按叙事顺序排列）
-	_story_manager.register_dialogues({
-		"chapter_1": {
-			"intro": "res://game/dialogue/ch1_intro.dialogue",
-			"explain": "res://game/dialogue/ch1_explain.dialogue",
-			"trust": "res://game/dialogue/ch1_trust.dialogue",
-			"warning": "res://game/dialogue/ch1_warning.dialogue",
-			"past": "res://game/dialogue/ch1_past.dialogue",
-			"choice": "res://game/dialogue/ch1_choice.dialogue",
-			"revelation": "res://game/dialogue/ch1_revelation.dialogue",
-			"end": "res://game/dialogue/ch1_end.dialogue"
-		},
-		"chapter_2": {
-			"revelation": "res://game/dialogue/ch2_revelation.dialogue",
-			"xanaku": "res://game/dialogue/ch2_xanaku.dialogue",
-			"trojan": "res://game/dialogue/ch2_trojan.dialogue",
-			"survivor": "res://game/dialogue/ch2_survivor.dialogue",
-			"protocol": "res://game/dialogue/ch2_protocol.dialogue",
-			"choice": "res://game/dialogue/ch2_choice.dialogue",
-			"connection": "res://game/dialogue/ch2_connection.dialogue",
-			"end": "res://game/dialogue/ch2_end.dialogue"
-		}
-	})
-
-	# 设置初始章节
-	_story_manager.story_progress.current_chapter = "chapter_1"
-
-	# 将剧情进度注入 session（阈值已在 StoryProgress 中持久化）
-	if _session != null:
-		_session.set_story_progress(_story_manager.story_progress)
-		_session.inject_story_manager(_story_manager)
-
-	# 注入 StoryManager 到 Overlay
-	if _story_overlay != null:
-		_story_overlay.set_story_manager(_story_manager)
-
-
-## 清理剧情系统。## 输入: 无。
-## 输出: 无。
-func _cleanup_story_system() -> void:
-	_story_manager = null
-
-
-# ──────────────────────────────────────────────────────────────
-# 信号桥接
-# ──────────────────────────────────────────────────────────────
-
-
-## 连接 StudySession.deck_selected 和 CardUI.study_finished 信号，以及剧情系统信号。## 输入: 无。
+## 连接牌组选择和学习结束信号。## 输入: 无。
 ## 输出: 无。
 func _connect_bridge() -> void:
-	# 现有桥接
 	if _session != null:
 		if not _session.deck_selected.is_connected(_on_deck_selected):
 			_session.deck_selected.connect(_on_deck_selected)
 		if not _session.learning_exited.is_connected(_on_learning_exited):
 			_session.learning_exited.connect(_on_learning_exited)
-		if not _session.story_force_trigger.is_connected(_on_story_force_trigger):
-			_session.story_force_trigger.connect(_on_story_force_trigger)
 	if _card_ui != null:
 		if not _card_ui.study_finished.is_connected(_on_study_finished):
 			_card_ui.study_finished.connect(_on_study_finished)
 
-	# 剧情系统桥接：评分后通知 StoryManager
-	if _study_manager != null:
-		if not _study_manager.card_answered.is_connected(_on_story_card_answered):
-			_study_manager.card_answered.connect(_on_story_card_answered)
 
-	# StoryManager 触发对话
-	if _story_manager != null:
-		if not _story_manager.story_triggered.is_connected(_on_story_triggered):
-			_story_manager.story_triggered.connect(_on_story_triggered)
-		if not _story_manager.story_ended.is_connected(_on_story_ended):
-			_story_manager.story_ended.connect(_on_story_ended)
-		if not _story_manager.bond_tier_changed.is_connected(_on_bond_tier_changed):
-			_story_manager.bond_tier_changed.connect(_on_bond_tier_changed)
-
-	# Overlay 对话结束 → 恢复复习
-	if _story_overlay != null:
-		if not _story_overlay.dialogue_finished.is_connected(_on_story_dialogue_finished):
-			_story_overlay.dialogue_finished.connect(_on_story_dialogue_finished)
-
-
-## StudySession.deck_selected 回调：显示 CardUI 并启动学习，通知 session 切换视图。## 输入: deck_id (int) - 选中的牌组 ID。
+## 用户选中牌组后显示卡片并进入学习。## 输入: deck_id (int) - 选中的牌组 ID。
 ## 输出: 无。
 func _on_deck_selected(deck_id: int) -> void:
 	if _card_ui != null:
@@ -207,14 +113,14 @@ func _on_deck_selected(deck_id: int) -> void:
 		_session.enter_learning(deck_id)
 
 
-## StudySession.learning_exited 回调：用户中途退出学习，隐藏 CardUI。## 输入: 无。
+## 用户中途退出学习时隐藏卡片。## 输入: 无。
 ## 输出: 无。
 func _on_learning_exited() -> void:
 	if _card_ui != null:
 		_card_ui.visible = false
 
 
-## CardUI.study_finished 回调：隐藏 CardUI，通知 session 显示完成面板。## 输入: stats (Dictionary) - 学习统计。
+## 学习会话结束时隐藏卡片并显示完成面板。## 输入: stats (Dictionary) - 学习统计。
 ## 输出: 无。
 func _on_study_finished(stats: Dictionary) -> void:
 	if _card_ui != null:
@@ -223,79 +129,26 @@ func _on_study_finished(stats: Dictionary) -> void:
 		_session.show_completion(stats)
 
 
-# ──────────────────────────────────────────────────────────────
-# 剧情系统信号回调
-# ──────────────────────────────────────────────────────────────
-
-
-## 评分后桥接到 StoryManager（不阻塞复习流程）。## 输入:
-##   _card (CardEntity) - 已评分卡片（未使用）。
-##   rating (int) - 评分值。
-##   _next_interval (String) - 下次间隔（未使用）。
+## 主逻辑打开对话时藏起卡片。## 输入: _dialogue_key (String) - 对话标识。
 ## 输出: 无。
-func _on_story_card_answered(_card: CardEntity, rating: int, _next_interval: String) -> void:
-	if _story_manager == null:
-		return
-	_story_manager.on_review_answered(rating)
-	# 同步刷新 session 内的剧情进度条（数据已在 StoryProgress 中更新）
-	if _session != null:
-		_session.refresh_story_display()
-
-
-## StoryManager.story_triggered 回调：暂停复习，显示对话覆盖层。## 输入: dialogue_key (String) - 对话标识符。
-## 输出: 无。
-func _on_story_triggered(dialogue_key: String) -> void:
-	if _story_overlay == null or _story_manager == null:
-		return
-
-	var resource = _story_manager.load_dialogue_resource(dialogue_key)
-	if resource == null:
-		return
-
-	# 暂停 CardUI（隐藏复习界面）
+func _on_dialogue_opened(_dialogue_key: String) -> void:
 	if _card_ui != null:
 		_card_ui.visible = false
 
-	# 显示对话覆盖层
-	_story_overlay.start(resource, dialogue_key)
 
-
-## StoryManager.story_ended 回调：恢复复习界面的可见性。## 输入: 无。
+## 对话结束后，仅在仍处于学习中时恢复卡片。## 输入: _dialogue_key (String) - 对话标识。
 ## 输出: 无。
-func _on_story_ended() -> void:
-	if _card_ui != null:
+func _on_dialogue_closed(_dialogue_key: String) -> void:
+	if _card_ui != null and _session != null and _session.is_learning():
 		_card_ui.visible = true
 
 
-## StoryDialogueOverlay.dialogue_finished 回调：对话播放完毕，恢复复习界面。## 输入: 无。
-## 输出: 无。
-func _on_story_dialogue_finished() -> void:
-	if _card_ui != null:
-		_card_ui.visible = true
+## 查询当前学习是否需要关闭确认。## 输入: 无。输出: bool。
+func desktop_has_active_session() -> bool:
+	return _study_manager != null and _study_manager.is_session_active()
 
 
-## StudySession.story_force_trigger 回调：调试按钮触发，强制填充进度并触发对话。## 输入: 无。
-## 输出: 无。
-func _on_story_force_trigger() -> void:
-	if _story_manager == null:
-		return
-
-	# 临时关闭冷却，确保能触发
-	var saved_cooldown: float = _story_manager.cooldown_seconds
-	_story_manager.set_cooldown(0.0)
-
-	# 以 Easy 评分触发对话（贡献 3 进度，已由 session 填满进度条）
-	_story_manager.on_review_answered(4)
-
-	# 恢复冷却
-	_story_manager.set_cooldown(saved_cooldown)
-
-
-## StoryManager.bond_tier_changed 回调：羁绊层级跃迁时通知 session 刷新显示。## 输入:
-##   old_tier (int) — 跃迁前层级。
-##   new_tier (int) — 跃迁后层级。
-##   tier_name (String) — 新层级名称。
-## 输出: 无。
-func _on_bond_tier_changed(old_tier: int, new_tier: int, tier_name: String) -> void:
-	if _session != null:
-		_session.refresh_story_display()
+## 关闭窗口前结束会话并保存已有评分。## 输入: 无。输出: 无。
+func desktop_end_session() -> void:
+	if desktop_has_active_session():
+		_study_manager.end_session()

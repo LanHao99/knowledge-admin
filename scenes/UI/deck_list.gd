@@ -523,3 +523,9 @@ func _on_ai_card_pressed() -> void:
 func _set_status(text: String) -> void:
 	if _status_label != null:
 		_status_label.text = text
+
+
+## 恢复焦点时刷新只读列表，不覆盖编辑中的表单。## 输入: 无。输出: 无。
+func desktop_refresh() -> void:
+	if not _edit_panel.visible:
+		_refresh_all()

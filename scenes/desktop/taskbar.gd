@@ -1,21 +1,12 @@
 extends Panel
-## 任务栏控件。管理开始菜单按钮、应用任务栏按钮和时钟。
+## 任务栏、开始菜单和本机时钟。
 
-@export var taskbar_height: float = 32.0
-
-var _start_menu: Control = null
-
-@onready var _start_button: Button = $TaskbarHBox/StartButton
-@onready var _task_buttons: HBoxContainer = $TaskbarHBox/TaskButtons
-@onready var _clock_label: Label = $TaskbarHBox/RightArea/ClockLabel
-
-## 应用任务栏按钮字典：app_id -> Button
+var _start_menu: Control
 var _app_buttons: Dictionary = {}
+@onready var _start_button: Button = $TaskbarHBox/StartButton
+@onready var _task_buttons: HBoxContainer = $TaskbarHBox/TaskScroll/TaskButtons
 
-
-## 初始化时钟定时器并连接开始菜单。
-## 输入: 无。
-## 输出: 无。
+## 连接开始按钮并定时刷新时钟。## 输入: 无。输出: 无。
 func _ready() -> void:
 	_update_clock()
 	var timer: Timer = Timer.new()
@@ -23,99 +14,73 @@ func _ready() -> void:
 	timer.timeout.connect(_update_clock)
 	add_child(timer)
 	timer.start()
-	_start_button.pressed.connect(_on_start_pressed)
+	_start_button.pressed.connect(_toggle_start_menu)
 
-
-## 添加指定应用的任务栏按钮。
-## 输入: app_id (String), title (String) - 应用 ID 和显示名称。
-## 输出: 无。
-func add_app_button(app_id: String, title: String) -> void:
+## 新建单个可切换的任务按钮。## 输入: 应用 ID、标题。输出: 无。
+func add_app_button(app_id: String, title_text: String) -> void:
 	if _app_buttons.has(app_id):
 		return
-	var btn: Button = Button.new()
-	btn.text = title
-	btn.custom_minimum_size = Vector2(120.0, 24.0)
-	btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	btn.pressed.connect(_on_task_button_pressed.bind(app_id))
-	_task_buttons.add_child(btn)
-	_app_buttons[app_id] = btn
+	var button: Button = Button.new()
+	button.text = title_text
+	button.tooltip_text = title_text
+	button.toggle_mode = true
+	button.custom_minimum_size.x = 170
+	button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	button.pressed.connect(_on_task_button_pressed.bind(app_id))
+	_task_buttons.add_child(button)
+	_app_buttons[app_id] = button
 
-
-## 移除指定应用的任务栏按钮。
-## 输入: app_id (String) - 应用 ID。
-## 输出: 无。
+## 删除任务按钮。## 输入: app_id。输出: 无。
 func remove_app_button(app_id: String) -> void:
-	if not _app_buttons.has(app_id):
-		return
-	var btn: Button = _app_buttons[app_id]
+	var button: Button = _app_buttons.get(app_id) as Button
+	if is_instance_valid(button):
+		_task_buttons.remove_child(button)
+		button.queue_free()
 	_app_buttons.erase(app_id)
-	if is_instance_valid(btn):
-		btn.queue_free()
 
-
-## 设置活动（按下状态）的按钮。
-## 输入: app_id (String) - 应用 ID，空字符串清除所有激活状态。
-## 输出: 无。
+## 同步任务按钮的按下状态。## 输入: app_id。输出: 无。
 func set_active_button(app_id: String) -> void:
-	for aid: String in _app_buttons:
-		var btn: Button = _app_buttons[aid]
-		if is_instance_valid(btn):
-			btn.button_pressed = (aid == app_id)
+	for entry: String in _app_buttons:
+		(_app_buttons[entry] as Button).set_pressed_no_signal(entry == app_id)
 
-
-## 更新时钟标签为当前系统时间。
-## 输入: 无。
-## 输出: 无。
+## 刷新时钟及日期提示。## 输入: 无。输出: 无。
 func _update_clock() -> void:
-	if _clock_label == null:
-		return
-	var t: Dictionary = Time.get_time_dict_from_system()
-	_clock_label.text = "%02d:%02d" % [t.hour, t.minute]
+	var now: Dictionary = Time.get_time_dict_from_system()
+	$TaskbarHBox/RightArea/ClockLabel.text = "  %02d:%02d  " % [now.hour, now.minute]
+	$TaskbarHBox/RightArea/ClockLabel.tooltip_text = Time.get_date_string_from_system()
 
-
-## 开始菜单按钮点击处理。
-## 输入: 无。
-## 输出: 无。
-func _on_start_pressed() -> void:
-	_toggle_start_menu()
-
-
-## 切换开始菜单的显示状态。
-## 输入: 无。
-## 输出: 无。
-func _toggle_start_menu() -> void:
-	if _start_menu != null and is_instance_valid(_start_menu):
+## 安全关闭当前开始菜单。## 输入: 无。输出: 无。
+func dismiss_start_menu() -> void:
+	if is_instance_valid(_start_menu):
+		_start_menu.hide()
 		_start_menu.queue_free()
-		_start_menu = null
-		return
-	var scene_path: String = "res://scenes/desktop/start_menu.tscn"
-	if not ResourceLoader.exists(scene_path):
-		push_warning("[Taskbar] 开始菜单场景不存在")
-		return
-	var packed: PackedScene = load(scene_path) as PackedScene
-	if packed == null:
-		return
-	_start_menu = packed.instantiate() as Control
-	if _start_menu == null:
-		return
-	# 挂到桌面根节点
-	get_tree().root.get_child(get_tree().root.get_child_count() - 1).add_child(_start_menu)
-	# 定位到开始按钮上方
-	var btn_global: Vector2 = _start_button.global_position
-	_start_menu.global_position = Vector2(btn_global.x, btn_global.y - _start_menu.size.y - 4.0)
-	_start_menu.tree_exited.connect(func() -> void: _start_menu = null)
+	_start_menu = null
 
+## 切换开始菜单，定位在开始按钮上方。## 输入: 无。输出: 无。
+func _toggle_start_menu() -> void:
+	if WindowManager._story_locked:
+		return
+	if is_instance_valid(_start_menu):
+		dismiss_start_menu()
+		return
+	_start_menu = preload("res://scenes/desktop/start_menu.tscn").instantiate() as Control
+	get_parent().add_child(_start_menu)
+	_start_menu.position = Vector2(4, position.y - _start_menu.size.y)
+	_start_menu.tree_exited.connect(_on_start_menu_exited)
 
-## 任务栏应用按钮被点击时，激活或最小化对应窗口。
-## 输入: app_id (String) - 应用 ID。
-## 输出: 无。
+## 清理已释放菜单引用。## 输入: 无。输出: 无。
+func _on_start_menu_exited() -> void:
+	_start_menu = null
+
+## 点击当前任务可最小化，其他任务切到前台。## 输入: app_id。输出: 无。
 func _on_task_button_pressed(app_id: String) -> void:
+	if WindowManager._story_locked:
+		set_active_button("unknown_program")
+		return
 	var window: ManagedWindow = WindowManager.get_app_window(app_id)
-	if window == null or not is_instance_valid(window):
+	if window == null:
 		return
 	if WindowManager.get_active_app_id() == app_id and not window.is_minimized():
-		window.call("_on_minimize_pressed")
-	elif window.is_minimized():
-		window.restore()
+		window._on_minimize_pressed()
 	else:
 		WindowManager.open_app(app_id)

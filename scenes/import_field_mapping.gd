@@ -151,7 +151,7 @@ func _build_ui() -> void:
 	_title_label.name = "TitleLabel"
 	_title_label.text = "字段映射"
 	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_title_label.add_theme_font_size_override("font_size", 18)
+	_title_label.theme_type_variation = &"UiHeading"
 	_title_label.custom_minimum_size = Vector2(0, 30)
 	root.add_child(_title_label)
 
@@ -160,7 +160,7 @@ func _build_ui() -> void:
 	hint.name = "HintLabel"
 	hint.text = "确认 JSON 字段与笔记字段的映射关系："
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.add_theme_font_size_override("font_size", 12)
+	hint.theme_type_variation = &"UiCaption"
 	hint.custom_minimum_size = Vector2(0, 22)
 	root.add_child(hint)
 
@@ -173,7 +173,7 @@ func _build_ui() -> void:
 	left_header.text = "JSON 字段"
 	left_header.custom_minimum_size = Vector2(140, 0)
 	left_header.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	left_header.add_theme_font_size_override("font_size", 12)
+	left_header.theme_type_variation = &"UiCaption"
 	header.add_child(left_header)
 	var arrow_space := Control.new()
 	arrow_space.custom_minimum_size = Vector2(30, 0)
@@ -182,7 +182,7 @@ func _build_ui() -> void:
 	right_header.text = "笔记字段"
 	right_header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	right_header.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	right_header.add_theme_font_size_override("font_size", 12)
+	right_header.theme_type_variation = &"UiCaption"
 	header.add_child(right_header)
 	root.add_child(header)
 
@@ -231,7 +231,7 @@ func _build_ui() -> void:
 	_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_status_label.custom_minimum_size = Vector2(0, 20)
 	_status_label.add_theme_color_override("font_color", Color(0.55, 0.55, 0.6, 1))
-	_status_label.add_theme_font_size_override("font_size", 12)
+	_status_label.theme_type_variation = &"UiCaption"
 	root.add_child(_status_label)
 
 

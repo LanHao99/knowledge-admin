@@ -21,6 +21,8 @@ func setup(db_path: String) -> bool:
 	if not _card_db.init_schema():
 		push_error("[CardManager] CardDB Schema 初始化失败")
 		return false
+	if _scheduler == null:
+		_scheduler = FsrsScheduler.new()
 
 	return true
 

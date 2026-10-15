@@ -1,5 +1,5 @@
 class_name StoryDialogueOverlay
-extends CanvasLayer
+extends Control
 ## 剧情对话覆盖层 UI，匹配 CardUI 的视觉尺寸和布局。
 ## 暂停复习时接管屏幕，显示角色名 + 对话文本 + 对话选项（替换评分按钮）。
 ## 使用 DialogueManager 单例驱动对话流程。
@@ -50,9 +50,6 @@ var _is_waiting_for_choice: bool = false
 ## 打字机是否正在播放中。
 var _is_animating: bool = false
 
-## 羁绊选项计数：当前对话中玩家已做出的选择次数（从 1 开始），用于 BOND_MAP 索引。
-var _bond_choice_index: int = 0
-
 
 # ── 节点引用 ──
 
@@ -60,7 +57,7 @@ var _bond_choice_index: int = 0
 @onready var _character_label: Label = $StoryDialogueMain/MainVBox/TopBar/CharacterLabel
 @onready var _content_label: RichTextLabel = $StoryDialogueMain/MainVBox/CardPanel/CardContentVBox/ContentLabel
 @onready var _click_hint: Label = $StoryDialogueMain/MainVBox/CardPanel/CardContentVBox/ClickHint
-@onready var _answer_bar: HBoxContainer = $StoryDialogueMain/MainVBox/AnswerBar
+@onready var _answer_bar: HFlowContainer = $StoryDialogueMain/MainVBox/AnswerBar
 @onready var _status_label: Label = $StoryDialogueMain/MainVBox/StatusBar/StatusLabel
 @onready var _text_animator: TextAnimationController = $TextAnimationController
 
@@ -85,7 +82,7 @@ func _ready() -> void:
 ## 处理输入：跳过/阻止。## 输入: event (InputEvent)。
 ## 输出: 无。
 func _unhandled_input(event: InputEvent) -> void:
-	if not _main_control.visible:
+	if not _main_control.is_visible_in_tree():
 		return
 
 	if block_input:
@@ -96,9 +93,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_skip_typewriter()
 		return
 
-	# 在等待选项时，按跳过键结束对话
-	if _is_waiting_for_choice and event.is_action_pressed(skip_action):
-		_end_dialogue()
+	# 等待选项时必须明确选择，Esc 不能结束剧情。
 
 
 # ── 公共接口 ──
@@ -110,7 +105,7 @@ func set_story_manager(manager: StoryManager) -> void:
 	_story_manager = manager
 
 
-## 开始播放对话（由 study.gd 或 StoryManager 调用）。## 输入:
+## 开始播放对话（由 App.request_dialogue 调用）。## 输入:
 ##   resource (DialogueResource) - 已加载的对话资源。
 ##   key (String) - 对话标识符（用于标记完成）。
 ##   start_title (String) - 起始标题/ID。
@@ -122,7 +117,6 @@ func start(resource, key: String = "", start_title: String = "") -> void:
 
 	dialogue_key = key
 	_current_resource = resource
-	_bond_choice_index = 0  # 重置羁绊选项计数
 	_main_control.show()
 	_answer_bar.hide()
 	_set_status("")
@@ -214,13 +208,14 @@ func _build_response_buttons(responses: Array) -> void:
 		var btn := Button.new()
 		btn.name = "OptionBtn%d" % i
 		btn.custom_minimum_size = Vector2(140, 52)
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		btn.text = tr(response.text, "dialogue")
-		btn.add_theme_font_size_override("font_size", 16)
+		btn.theme_type_variation = &"UiSecondaryButton"
 		btn.pressed.connect(_on_option_selected.bind(i))
 		_answer_bar.add_child(btn)
 
 
-## 选项选择回调：获取下一行对话，同时通知 StoryManager 应用羁绊变化。## 输入: index (int) - 选项索引。
+## 选项选择回调：进入被选中的分支。好感度由该分支里的 do App.add_bond 写入。## 输入: index (int) - 选项索引。
 ## 输出: 无。
 func _on_option_selected(index: int) -> void:
 	if _current_line == null:
@@ -229,13 +224,6 @@ func _on_option_selected(index: int) -> void:
 	var responses: Array = _current_line.responses
 	if index < 0 or index >= responses.size():
 		return
-
-	# 羁绊选择计数递增
-	_bond_choice_index += 1
-
-	# 通知 StoryManager 应用羁绊变化（使用选择序数而非绝对选项索引）
-	if _story_manager != null and not dialogue_key.is_empty():
-		_story_manager.on_dialogue_choice(dialogue_key, _bond_choice_index, index)
 
 	var response = responses[index]
 	var next_id: String = response.next_id
@@ -262,6 +250,7 @@ func _end_dialogue() -> void:
 
 	_main_control.hide()
 	_current_line = null
+	_release_line_context()
 	_current_resource = null
 	_is_waiting_for_choice = false
 	_set_status("")
@@ -285,7 +274,7 @@ func _end_dialogue() -> void:
 func _start_typewriter(text: String, line) -> void:
 	if _text_animator == null:
 		# 无动画控制器：直接显示
-		_content_label.text = "[center]%s[/center]" % text
+		UiSettings.set_rich_text(_content_label, "[center]%s[/center]" % text)
 		_on_typewriter_finished()
 		return
 
@@ -379,3 +368,12 @@ func _set_character_color(character_name: String) -> void:
 			_character_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.75, 1.0))  # 灰色（未揭示身份）
 		_:
 			_character_label.add_theme_color_override("font_color", Color(0.9, 0.75, 0.3, 1.0))  # 默认金色
+
+
+## 移除 DialogueManager 在行字典中附加的临时资源引用，避免资源自引用。## 输入: 无。输出: 无。
+func _release_line_context() -> void:
+	if _current_resource == null:
+		return
+	for row: Variant in _current_resource.lines.values():
+		if row is Dictionary:
+			row.erase("resource")
