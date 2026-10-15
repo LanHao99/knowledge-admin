@@ -1,83 +1,86 @@
 extends Control
-## Knowledge Admin 主菜单入口场景。
-## 提供牌组管理 / 笔记浏览 / 开始学习 三大导航入口，
-## 以及设置和调试按钮。统计面板展示实时牌组/待复习/今日已学数据。
+## 学习桌面入口。展示统计、导航和受调试开关控制的工具菜单。
 
+@export_group("布局")
+@export var content_max_width: float = 1120.0
 
-# ── 数据层（场景独立实例，_exit_tree 时释放）──
 var _deck_manager: DeckManager = null
 var _card_manager: CardManager = null
 
-# ── 顶部工具栏 ──
-@onready var _settings_button: Button = $RootMargin/MainVBox/TopBar/SettingsButton
-@onready var _debug_button: Button = $RootMargin/MainVBox/TopBar/DebugButton
-@onready var _ai_debug_button: Button = $RootMargin/MainVBox/TopBar/AIDebugButton
-
-# ── 中央卡片 ──
-@onready var _main_card: PanelContainer = $RootMargin/MainVBox/CenterArea/MainCard
-@onready var _deck_stat: RichTextLabel = $RootMargin/MainVBox/CenterArea/MainCard/CardVBox/StatsGrid/DeckStat
-@onready var _due_stat: RichTextLabel = $RootMargin/MainVBox/CenterArea/MainCard/CardVBox/StatsGrid/DueStat
-@onready var _today_stat: RichTextLabel = $RootMargin/MainVBox/CenterArea/MainCard/CardVBox/StatsGrid/TodayStat
-@onready var _deck_list_btn: Button = $RootMargin/MainVBox/CenterArea/MainCard/CardVBox/DeckListBtn
-@onready var _note_browse_btn: Button = $RootMargin/MainVBox/CenterArea/MainCard/CardVBox/NoteBrowseBtn
-@onready var _study_btn: Button = $RootMargin/MainVBox/CenterArea/MainCard/CardVBox/StudyBtn
-
-# ── 底部状态栏 ──
-@onready var _version_label: Label = $RootMargin/MainVBox/BottomBar/VersionLabel
-@onready var _status_label: Label = $RootMargin/MainVBox/BottomBar/StatusLabel
+@onready var _settings_button: Button = %SettingsButton
+@onready var _ai_card_button: Button = %AICardButton
+@onready var _tools_button: MenuButton = %ToolsButton
+@onready var _main_card: PanelContainer = %MainCard
+@onready var _center_area: CenterContainer = %CenterArea
+@onready var _content_scroll: ScrollContainer = %ContentScroll
+@onready var _deck_stat: Label = %DeckValue
+@onready var _due_stat: Label = %DueValue
+@onready var _today_stat: Label = %TodayValue
+@onready var _deck_list_btn: Button = %DeckListBtn
+@onready var _note_browse_btn: Button = %NoteBrowseBtn
+@onready var _study_btn: Button = %StudyBtn
+@onready var _empty_hint: Label = %EmptyHint
+@onready var _status_label: Label = %StatusLabel
 
 
-## 初始化 Manager、信号连接与统计数据加载。## 输入: 无。
+## 连接导航、初始化统计并准备可滚动布局。## 输入: 无。
 ## 输出: 无。
 func _ready() -> void:
-	_connect_signals()
-	var init_ok: bool = _ensure_managers_ready()
-	if init_ok:
+	%CloseButton.pressed.connect(_on_close_pressed)
+	%NavigationTabs.tab_changed.connect(_on_navigation_tab_changed)
+	_settings_button.pressed.connect(_on_settings_pressed)
+	_ai_card_button.pressed.connect(_on_ai_card_pressed)
+	_deck_list_btn.pressed.connect(_on_deck_list_pressed)
+	_note_browse_btn.pressed.connect(_on_note_browse_pressed)
+	_study_btn.pressed.connect(_on_study_pressed)
+	_tools_button.get_popup().id_pressed.connect(_on_tool_pressed)
+	DebugSettings.debug_mode_changed.connect(_rebuild_tools)
+	_rebuild_tools()
+	_content_scroll.resized.connect(_schedule_layout)
+	_center_area.resized.connect(_schedule_layout)
+	_schedule_layout()
+	if _ensure_managers_ready():
 		_refresh_stats()
-		_set_status("数据库就绪 ✓")
 	else:
-		_set_status("[color=#FF6666]数据库初始化失败[/color]")
-
+		_set_status("数据库初始化失败", true)
 	TutorialManager.check_and_show("main_menu", self)
 
-	# 编辑器内运行场景时自动执行 FSRS 调度器单元测试（测试文件已移除）
-	# if OS.has_feature("editor"):
-	# 	call_deferred("_run_scheduler_tests")
 
-
-## 连接顶部按钮与导航按钮的 pressed 信号。## 输入: 无。
+## 延迟更新中央面板布局，避免干扰容器排序。## 输入: 无。
 ## 输出: 无。
-func _connect_signals() -> void:
-	if _deck_list_btn != null:
-		_deck_list_btn.pressed.connect(_on_deck_list_pressed)
-	if _note_browse_btn != null:
-		_note_browse_btn.pressed.connect(_on_note_browse_pressed)
-	if _study_btn != null:
-		_study_btn.pressed.connect(_on_study_pressed)
-	if _settings_button != null:
-		_settings_button.pressed.connect(_on_settings_pressed)
-	if _debug_button != null:
-		_debug_button.pressed.connect(_on_debug_pressed)
-	if _ai_debug_button != null:
-		_ai_debug_button.pressed.connect(_on_ai_debug_pressed)
+func _schedule_layout() -> void:
+	_update_layout.call_deferred()
 
 
-## 设置底部状态栏文本（支持 BBCode）。## 输入: text (String) - 状态文本。
+## 限制中央面板宽度，内容过高时保留滚动空间。## 输入: 无。
 ## 输出: 无。
-func _set_status(text: String) -> void:
-	if _status_label != null:
-		_status_label.text = text
+func _update_layout() -> void:
+	if not is_inside_tree():
+		return
+	_main_card.custom_minimum_size.x = minf(content_max_width, _content_scroll.size.x)
+	_center_area.custom_minimum_size.y = _content_scroll.size.y
 
 
-## 退出场景时释放独立创建的 Manager 实例。## 输入: 无。
+## 刷新工具菜单，调试模式关闭时保留 AI 助手入口。## 输入: _enabled (bool) - 调试开关通知值。
+## 输出: 无。
+func _rebuild_tools(_enabled: bool = false) -> void:
+	var popup: PopupMenu = _tools_button.get_popup()
+	popup.clear()
+	popup.add_item("AI 制卡助手", 0)
+	if DebugSettings.debug_mode:
+		popup.add_separator()
+		popup.add_item("调试面板", 1)
+
+
+## 退出时断开调试通知并释放本场景的数据管理器。## 输入: 无。
 ## 输出: 无。
 func _exit_tree() -> void:
+	if DebugSettings.debug_mode_changed.is_connected(_rebuild_tools):
+		DebugSettings.debug_mode_changed.disconnect(_rebuild_tools)
 	if _deck_manager != null:
 		_deck_manager.queue_free()
-		_deck_manager = null
 	if _card_manager != null:
 		_card_manager.queue_free()
-		_card_manager = null
 
 
 ## 创建并初始化 DeckManager 和 CardManager（每个场景独立实例）。## 输入: 无。
@@ -110,116 +113,107 @@ func _ensure_managers_ready() -> bool:
 	return true
 
 
-## 从 Manager 拉取统计数据并更新三个 RichTextLabel 面板。## 输入: 无。
+## 按现有口径读取统计；读取失败显示占位符，不把失败视作零。## 输入: 无。
 ## 输出: 无。
 func _refresh_stats() -> void:
-	if _deck_manager == null or _card_manager == null:
-		return
-
-	# 牌组数
-	var deck_result := _deck_manager.get_all_decks()
-	var deck_count: int = 0
-	if deck_result.get("success", false):
-		var decks: Array = deck_result.get("data", [])
-		deck_count = decks.size()
-	_update_stat_label(_deck_stat, "牌组", deck_count)
-
-	# 待复习数
+	var decks: Dictionary = _deck_manager.get_all_decks()
+	var deck_count: int = (decks.get("data", []) as Array).size() if decks.get("success", false) else -1
 	var now_ts: int = int(Time.get_unix_time_from_system())
 	var now_day: int = int(now_ts / CardDB._SECONDS_PER_DAY)
-	var due_result := _card_manager.get_global_due_count(now_day, now_ts)
-	var due_count: int = 0
-	if due_result.get("success", false):
-		due_count = int(due_result.get("data", 0))
-	_update_stat_label(_due_stat, "待复习", due_count)
-
-	# 今日已学数
-	var today_start: int = _get_today_start_ts(now_ts)
-	var today_result := _card_manager.get_today_studied_count(today_start)
-	var today_count: int = 0
-	if today_result.get("success", false):
-		today_count = int(today_result.get("data", 0))
-	_update_stat_label(_today_stat, "今日已学", today_count)
+	var due: Dictionary = _card_manager.get_global_due_count(now_day, now_ts)
+	var today: Dictionary = _card_manager.get_today_studied_count(_get_today_start_ts(now_ts))
+	_update_stat_label(_deck_stat, deck_count)
+	_update_stat_label(_due_stat, int(due.get("data", 0)) if due.get("success", false) else -1)
+	_update_stat_label(_today_stat, int(today.get("data", 0)) if today.get("success", false) else -1)
+	_study_btn.disabled = deck_count <= 0
+	_empty_hint.visible = deck_count == 0
+	var failed: bool = deck_count < 0 or not due.get("success", false) or not today.get("success", false)
+	_set_status("统计暂时不可用，请稍后重试" if failed else "数据库就绪", failed)
 
 
-## 用 BBCode 更新单个统计标签的文本（标题 + 数字）。## 输入:
-##   label (RichTextLabel) - 目标标签控件。
-##   title (String) - 统计项标题。
-##   value (int) - 统计数字。
+## 显示统计数字或读取失败占位符。## 输入: label (Label) - 数字控件；value (int) - 统计值，负数表示失败。
 ## 输出: 无。
-func _update_stat_label(label: RichTextLabel, title: String, value: int) -> void:
-	if label == null:
-		return
-	label.text = "[center]%s\n[font_size=26]%d[/font_size][/center]" % [title, value]
+func _update_stat_label(label: Label, value: int) -> void:
+	label.text = str(value) if value >= 0 else "—"
 
 
-## 计算今天零点的 Unix 时间戳（秒）。## 输入: now_ts (int) - 当前时间戳。
-## 输出: int - 今天零点的时间戳。
+## 保持现有今日统计的零点计算口径。## 输入: now_ts (int) - Unix 时间戳。
+## 输出: int - 今日起始时间戳。
 func _get_today_start_ts(now_ts: int) -> int:
 	return int(now_ts / CardDB._SECONDS_PER_DAY) * CardDB._SECONDS_PER_DAY
 
 
-# ──────────────────────────────────────────────────────────────
-# 按钮回调
-# ──────────────────────────────────────────────────────────────
-
-
-## 跳转到牌组列表场景。## 输入: 无。
+## 打开牌组管理。## 输入: 无。
 ## 输出: 无。
 func _on_deck_list_pressed() -> void:
-	_set_status("正在打开牌组管理…")
 	_switch_scene("res://scenes/ui/deck_list.tscn", "牌组管理")
 
 
-## 跳转到笔记浏览场景。## 输入: 无。
+## 打开笔记浏览。## 输入: 无。
 ## 输出: 无。
 func _on_note_browse_pressed() -> void:
-	_set_status("正在打开笔记浏览…")
 	_switch_scene("res://scenes/ui/note_list.tscn", "笔记浏览")
 
 
-## 跳转到学习会话场景。## 输入: 无。
+## 进入现有的学习组装场景。## 输入: 无。
 ## 输出: 无。
 func _on_study_pressed() -> void:
-	_set_status("正在打开学习会话…")
 	_switch_scene("res://scenes/ui/study.tscn", "学习会话")
 
 
-## 跳转到设置场景。## 输入: 无。
+## 打开设置。## 输入: 无。
 ## 输出: 无。
 func _on_settings_pressed() -> void:
-	_set_status("正在打开设置…")
 	_switch_scene("res://scenes/ui/settings.tscn", "设置")
 
 
-## 跳转到调试面板场景。## 输入: 无。
+## 打开 AI 制卡助手。## 输入: 无。
 ## 输出: 无。
-func _on_debug_pressed() -> void:
-	_set_status("正在打开调试面板…")
-	_switch_scene("res://scenes/ui/debug_crud_panel.tscn", "调试面板")
+func _on_ai_card_pressed() -> void:
+	var result: int = App.open_ai_cards()
+	if result != OK:
+		_set_status("打开 AI 制卡助手失败（%d）" % result, true)
 
 
-## 跳转到 AI 调试控制台场景。## 输入: 无。
+## 处理 AI 助手及调试面板工具项。## 输入: id (int) - 菜单项标识。
 ## 输出: 无。
-func _on_ai_debug_pressed() -> void:
-	_set_status("正在打开 AI 调试台…")
-	_switch_scene("res://game/ai/ai_debug.tscn", "AI 调试台")
+func _on_tool_pressed(id: int) -> void:
+	if id == 0:
+		_on_ai_card_pressed()
+	elif id == 1 and DebugSettings.debug_mode:
+		_switch_scene("res://scenes/ui/debug_crud_panel.tscn", "调试面板")
 
 
-## FSRS 调度器单元测试已移除（test_fsrs_scheduler.gd 已删除）。## 输入: 无。
-## 输出: 无。
-func _run_scheduler_tests() -> void:
-	pass
-
-
-## 安全切换到目标场景，文件不存在时更新状态提示。## 输入:
-##   path (String) - 场景文件路径。
-##   label (String) - 场景名称用于提示。
+## 安全切换场景并反馈文件或加载错误。## 输入: path (String) - 场景路径；label (String) - 场景名称。
 ## 输出: 无。
 func _switch_scene(path: String, label: String) -> void:
 	if not ResourceLoader.exists(path):
-		_set_status("[color=#FF6666]场景不存在: %s[/color]" % label)
+		_set_status("场景不存在：%s" % label, true)
 		return
-	var result: int = get_tree().change_scene_to_file(path)
+	var result: Error = App.goto_scene(path)
 	if result != OK:
-		_set_status("[color=#FF6666]跳转 %s 失败 (err=%d)[/color]" % [label, result])
+		_set_status("打开%s失败（%d）" % [label, result], true)
+
+
+## 显示纯文本状态，并通过语义样式表达错误。## 输入: text (String) - 状态；is_error (bool) - 是否错误。
+## 输出: 无。
+func _set_status(text: String, is_error: bool = false) -> void:
+	_status_label.text = text
+	_status_label.theme_type_variation = &"UiError" if is_error else &"UiMuted"
+
+
+## 使用标签页进入现有的牌组或笔记管理场景。## 输入: index (int) - 标签索引。
+## 输出: 无。
+func _on_navigation_tab_changed(index: int) -> void:
+	if index == 1:
+		_on_deck_list_pressed()
+	elif index == 2:
+		_on_note_browse_pressed()
+	if index > 0 and is_inside_tree():
+		(%NavigationTabs as TabContainer).current_tab = 0
+
+
+## 关闭应用窗体并保存待写入的设置。## 输入: 无。
+## 输出: 无。
+func _on_close_pressed() -> void:
+	get_tree().quit()

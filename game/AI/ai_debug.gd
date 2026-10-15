@@ -452,7 +452,7 @@ func _render_chat() -> void:
 			"system":
 				bbcode += "[color=#888888][b]·[/b][/color] %s\n\n" % display
 
-	_chat_display.text = bbcode
+	UiSettings.set_rich_text(_chat_display, bbcode)
 	_scroll_to_bottom.call_deferred()
 
 
@@ -468,7 +468,7 @@ func _scroll_to_bottom() -> void:
 # ── 导航 ──
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
+	App.goto_scene("res://scenes/ui/main_menu.tscn")
 
 
 func _set_status(text: String) -> void:

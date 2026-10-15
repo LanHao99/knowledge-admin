@@ -7,7 +7,6 @@ class_name StudySession
 
 signal deck_selected(deck_id: int)  ## 用户选择了牌组，通知 study.gd 启动学习
 signal learning_exited()            ## 用户在 InStudyBar 点击退出学习，通知 study.gd 隐藏 CardUI
-signal story_force_trigger()        ## 调试按钮触发：强制填满进度条并请求触发剧情
 
 enum StudyState {
 	PICKING,   ## 牌组选择视图
@@ -19,7 +18,6 @@ enum StudyState {
 # ── 注入的 Manager（由 study.gd 注入）──
 var _deck_manager: DeckManager = null
 var _study_manager: StudyManager = null
-var _story_manager: StoryManager = null  ## 剧情管理器引用（供调试按钮使用）
 var _signals_connected: bool = false
 
 var _state: StudyState = StudyState.PICKING
@@ -47,9 +45,6 @@ var _exiting: bool = false  ## 用户正在退出学习，跳过完成面板
 
 # ── 剧情进度数据 + 设置 ──
 var _story_progress: StoryProgress = null
-var _story_rating_to_progress: Dictionary = {
-	"1": 0, "2": 1, "3": 2, "4": 3
-}
 
 # ── 完成面板 ──
 @onready var _completion_panel: Control = $"CompletionPanel"
@@ -63,11 +58,14 @@ func _ready() -> void:
 	_bind_actions()
 	_set_state(StudyState.PICKING)
 	_setup_debug_mode()
+	_bind_story_progress()
 
 
 ## 退出场景时断开信号。## 输入: 无。
 ## 输出: 无。
 func _exit_tree() -> void:
+	if App.story_progress_changed.is_connected(_on_story_progress_changed):
+		App.story_progress_changed.disconnect(_on_story_progress_changed)
 	_disconnect_study_signals()
 
 
@@ -109,10 +107,28 @@ func set_study_manager(study_manager: StudyManager) -> void:
 	_connect_study_signals()
 
 
-## 注入 StoryManager（供调试按钮直接触发剧情）。## 输入: manager (StoryManager)。
+## 当前是否正在学习卡片。对话结束时用它决定要不要把卡片显示回来。## 输入: 无。
+## 输出: bool。处于 LEARNING 时返回 true。
+func is_learning() -> bool:
+	return _state == StudyState.LEARNING
+
+
+## 从主逻辑取剧情进度，只用于进度条显示。## 输入: 无。
 ## 输出: 无。
-func inject_story_manager(manager: StoryManager) -> void:
-	_story_manager = manager
+func _bind_story_progress() -> void:
+	var progress := App.get_story_progress()
+	if progress != null:
+		set_story_progress(progress)
+	if not App.story_progress_changed.is_connected(_on_story_progress_changed):
+		App.story_progress_changed.connect(_on_story_progress_changed)
+
+
+## 主逻辑通知进度变化后刷新进度条。## 输入:
+##   _current (int) - 当前进度。
+##   _threshold (int) - 触发阈值。
+## 输出: 无。
+func _on_story_progress_changed(_current: int, _threshold: int) -> void:
+	refresh_story_display()
 
 
 ## 连接 StudyManager 信号（InStudyBar 进度更新）。## 输入: 无。
@@ -359,21 +375,12 @@ func _on_completion_back_pressed() -> void:
 	_set_state(StudyState.PICKING)
 
 
-## 调试按钮"一键触发剧情" → 填满进度条并发射信号。## 输入: 无。
+## 调试按钮请求主逻辑填满进度并触发对话。## 输入: 无。
 ## 输出: 无。
 func _on_debug_story_pressed() -> void:
 	if not DebugSettings.debug_mode:
 		return
-
-	if _story_progress == null:
-		return
-
-	# 填满进度条
-	_story_progress.total_progress = _story_progress.trigger_threshold
-	refresh_story_display()
-
-	# 通知 study.gd 触发剧情
-	story_force_trigger.emit()
+	App.debug_fill_and_trigger()
 
 
 ## Autoload 调试模式变化回调 → 同步 debugUI 组可见性。## 输入: enabled (bool)。
@@ -418,28 +425,7 @@ func set_story_progress(progress: StoryProgress) -> void:
 	_story_value_label.visible = false
 
 
-## 根据评分累加剧情进度。## 输入: rating (int) - 评分值 (1~4)。
-## 输出: 无。
-func add_story_progress(rating: int) -> void:
-	if _story_progress == null:
-		return
-	var add_value: int = int(_story_rating_to_progress.get(str(rating), 0))
-	if add_value == 0:
-		return
-	_story_progress.add_progress(add_value)
-	refresh_story_display()
-
-
-## 消耗剧情进度（触发对话后归零）。## 输入: 无。
-## 输出: 无。
-func consume_story_progress() -> void:
-	if _story_progress == null:
-		return
-	_story_progress.consume_progress()
-	refresh_story_display()
-
-
-## 刷新剧情进度条显示（供 study.gd 在 StoryManager 更新数据后调用）。## 输入: 无。
+## 刷新剧情进度条。进度数据来自主逻辑，本界面只读。## 输入: 无。
 ## 输出: 无。
 func refresh_story_display() -> void:
 	if _story_progress == null:
@@ -468,7 +454,7 @@ func _switch_scene(path: String, label: String) -> void:
 		if _status_label != null:
 			_status_label.text = "[color=#FF6666]场景不存在: %s[/color]" % label
 		return
-	var result: int = get_tree().change_scene_to_file(path)
+	var result: int = App.goto_scene(path)
 	if result != OK:
 		if _status_label != null:
 			_status_label.text = "[color=#FF6666]跳转 %s 失败 (err=%d)[/color]" % [label, result]

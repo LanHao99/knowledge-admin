@@ -11,8 +11,8 @@ config_version=5
 [application]
 
 config/name="KnowledgeAdmin"
-run/main_scene="uid://2ds8mbjfhjgv"
-config/features=PackedStringArray("4.6", "Forward Plus")
+run/main_scene="res://scenes/desktop/boot_screen.tscn"
+config/features=PackedStringArray("4.7", "Forward Plus")
 boot_splash/show_image=false
 boot_splash/stretch_mode=0
 boot_splash/use_filter=false
@@ -21,10 +21,12 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-App="*res://src/app.tscn"
 MCPRuntimeBridge="*uid://wk2yhw3winuo"
 DialogueManager="*uid://c3rodes2l3gxb"
 DebugSettings="*res://src/debug_settings.gd"
+UiSettings="*res://src/ui_settings.gd"
+WindowManager="*res://src/window_manager.gd"
+App="*res://src/app.tscn"
 
 [display]
 
@@ -42,11 +44,12 @@ debugUI="debug控制的全局操纵界面"
 
 [gui]
 
+theme/custom="res://assets/UI/app_theme.tres"
 theme/custom_font="uid://c76ct6f0pkvcl"
 
 [internationalization]
 
-locale/translations_pot_files=PackedStringArray("res://game/dialogue/chapter_prologue.dialogue", "res://game/dialogue/nathan_conversation.dialogue", "res://game/dialogue/ch1_intro.dialogue", "res://game/dialogue/ch1_explain.dialogue", "res://game/dialogue/ch1_trust.dialogue", "res://game/dialogue/ch1_warning.dialogue", "res://game/dialogue/ch1_choice.dialogue", "res://game/dialogue/ch1_end.dialogue", "res://game/dialogue/ch1_past.dialogue", "res://game/dialogue/ch1_revelation.dialogue", "res://game/tutorial/dialogue/main_menu.dialogue", "res://game/tutorial/dialogue/deck_list.dialogue", "res://game/tutorial/dialogue/note_list.dialogue", "res://game/tutorial/dialogue/study.dialogue", "res://game/tutorial/dialogue/debug_panel.dialogue", "res://game/tutorial/dialogue/ai_debug.dialogue", "res://game/dialogue/ch1_bond_epilogue.dialogue", "res://game/dialogue/ch1_bond_memory_1.dialogue", "res://game/dialogue/ch1_bond_memory_2.dialogue", "res://game/dialogue/ch1_bond_memory_3.dialogue", "res://game/dialogue/ch2_choice.dialogue", "res://game/dialogue/ch2_connection.dialogue", "res://game/dialogue/ch2_end.dialogue", "res://game/dialogue/ch2_protocol.dialogue", "res://game/dialogue/ch2_revelation.dialogue", "res://game/dialogue/ch2_survivor.dialogue", "res://game/dialogue/ch2_trojan.dialogue", "res://game/dialogue/ch2_xanaku.dialogue")
+locale/translations_pot_files=PackedStringArray("res://game/dialogue/chapter_prologue.dialogue", "res://game/dialogue/nathan_conversation.dialogue", "res://game/dialogue/ch1_intro.dialogue", "res://game/dialogue/ch1_explain.dialogue", "res://game/dialogue/ch1_trust.dialogue", "res://game/dialogue/ch1_warning.dialogue", "res://game/dialogue/ch1_choice.dialogue", "res://game/dialogue/ch1_end.dialogue", "res://game/dialogue/ch1_past.dialogue", "res://game/dialogue/ch1_revelation.dialogue", "res://game/tutorial/dialogue/main_menu.dialogue", "res://game/tutorial/dialogue/deck_list.dialogue", "res://game/tutorial/dialogue/note_list.dialogue", "res://game/tutorial/dialogue/study.dialogue", "res://game/tutorial/dialogue/debug_panel.dialogue", "res://game/tutorial/dialogue/ai_debug.dialogue", "res://game/dialogue/ch1_bond_epilogue.dialogue", "res://game/dialogue/ch1_bond_memory_1.dialogue", "res://game/dialogue/ch1_bond_memory_2.dialogue", "res://game/dialogue/ch1_bond_memory_3.dialogue", "res://game/dialogue/ch2_choice.dialogue", "res://game/dialogue/ch2_connection.dialogue", "res://game/dialogue/ch2_end.dialogue", "res://game/dialogue/ch2_protocol.dialogue", "res://game/dialogue/ch2_revelation.dialogue", "res://game/dialogue/ch2_survivor.dialogue", "res://game/dialogue/ch2_trojan.dialogue", "res://game/dialogue/ch2_xanaku.dialogue", "res://.temp/ui_baseline/game/dialogue/ch1_bond_epilogue.dialogue", "res://.temp/ui_baseline/game/dialogue/ch1_bond_memory_1.dialogue", "res://.temp/ui_baseline/game/dialogue/ch1_bond_memory_2.dialogue", "res://.temp/ui_baseline/game/dialogue/ch1_bond_memory_3.dialogue", "res://.temp/ui_baseline/game/dialogue/ch1_choice.dialogue", "res://.temp/ui_baseline/game/dialogue/ch1_end.dialogue", "res://.temp/ui_baseline/game/dialogue/ch1_explain.dialogue", "res://.temp/ui_baseline/game/dialogue/ch1_intro.dialogue", "res://.temp/ui_baseline/game/dialogue/ch1_past.dialogue", "res://.temp/ui_baseline/game/dialogue/ch1_revelation.dialogue", "res://.temp/ui_baseline/game/dialogue/ch1_trust.dialogue", "res://.temp/ui_baseline/game/dialogue/ch1_warning.dialogue", "res://.temp/ui_baseline/game/dialogue/ch2_choice.dialogue", "res://.temp/ui_baseline/game/dialogue/ch2_connection.dialogue", "res://.temp/ui_baseline/game/dialogue/ch2_end.dialogue", "res://.temp/ui_baseline/game/dialogue/ch2_protocol.dialogue", "res://.temp/ui_baseline/game/dialogue/ch2_revelation.dialogue", "res://.temp/ui_baseline/game/dialogue/ch2_survivor.dialogue", "res://.temp/ui_baseline/game/dialogue/ch2_trojan.dialogue", "res://.temp/ui_baseline/game/dialogue/ch2_xanaku.dialogue", "res://.temp/ui_baseline/game/dialogue/chapter_prologue.dialogue", "res://.temp/ui_baseline/game/dialogue/nathan_conversation.dialogue", "res://.temp/ui_verify_project/game/dialogue/ch1_bond_epilogue.dialogue", "res://.temp/ui_verify_project/game/dialogue/ch1_bond_memory_1.dialogue", "res://.temp/ui_verify_project/game/dialogue/ch1_bond_memory_2.dialogue", "res://.temp/ui_verify_project/game/dialogue/ch1_bond_memory_3.dialogue", "res://.temp/ui_verify_project/game/dialogue/ch1_choice.dialogue", "res://.temp/ui_verify_project/game/dialogue/ch1_end.dialogue", "res://.temp/ui_verify_project/game/dialogue/ch1_explain.dialogue", "res://.temp/ui_verify_project/game/dialogue/ch1_intro.dialogue", "res://.temp/ui_verify_project/game/dialogue/ch1_past.dialogue", "res://.temp/ui_verify_project/game/dialogue/ch1_revelation.dialogue", "res://.temp/ui_verify_project/game/dialogue/ch1_trust.dialogue", "res://.temp/ui_verify_project/game/dialogue/ch1_warning.dialogue", "res://.temp/ui_verify_project/game/dialogue/ch2_choice.dialogue", "res://.temp/ui_verify_project/game/dialogue/ch2_connection.dialogue", "res://.temp/ui_verify_project/game/dialogue/ch2_end.dialogue", "res://.temp/ui_verify_project/game/dialogue/ch2_protocol.dialogue", "res://.temp/ui_verify_project/game/dialogue/ch2_revelation.dialogue", "res://.temp/ui_verify_project/game/dialogue/ch2_survivor.dialogue", "res://.temp/ui_verify_project/game/dialogue/ch2_trojan.dialogue", "res://.temp/ui_verify_project/game/dialogue/ch2_xanaku.dialogue", "res://.temp/ui_verify_project/game/dialogue/chapter_prologue.dialogue", "res://.temp/ui_verify_project/game/dialogue/nathan_conversation.dialogue", "res://.temp/ui_verify_project/game/tutorial/dialogue/ai_debug.dialogue", "res://.temp/ui_verify_project/game/tutorial/dialogue/debug_panel.dialogue", "res://.temp/ui_verify_project/game/tutorial/dialogue/deck_list.dialogue", "res://.temp/ui_verify_project/game/tutorial/dialogue/main_menu.dialogue", "res://.temp/ui_verify_project/game/tutorial/dialogue/note_list.dialogue", "res://.temp/ui_verify_project/game/tutorial/dialogue/study.dialogue")
 
 [physics]
 

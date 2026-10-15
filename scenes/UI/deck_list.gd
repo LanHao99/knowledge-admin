@@ -16,6 +16,7 @@ var _deck_db: DeckDB = null
 @onready var _back_btn: Button = $RootMargin/MainVBox/TopBar/BackBtn
 @onready var _title_label: Label = $RootMargin/MainVBox/TopBar/TitleLabel
 @onready var _new_deck_btn: Button = $RootMargin/MainVBox/TopBar/NewDeckBtn
+@onready var _top_ai_card_btn: Button = $RootMargin/MainVBox/TopBar/AICardBtn
 
 # ── 牌组树 ──
 @onready var _deck_tree: Tree = $RootMargin/MainVBox/DeckTree
@@ -76,6 +77,7 @@ func _exit_tree() -> void:
 func _bind_actions() -> void:
 	_back_btn.pressed.connect(_on_back_pressed)
 	_new_deck_btn.pressed.connect(_on_new_deck_pressed)
+	_top_ai_card_btn.pressed.connect(_on_ai_card_pressed)
 	_deck_tree.item_activated.connect(_on_item_activated)
 	_close_edit_btn.pressed.connect(_on_close_edit_pressed)
 	_save_btn.pressed.connect(_on_save_pressed)
@@ -479,7 +481,7 @@ func _switch_scene(path: String, label: String) -> void:
 	if not ResourceLoader.exists(path):
 		_set_status("[color=#FF6666]场景不存在: %s[/color]" % label)
 		return
-	get_tree().change_scene_to_file(path)
+	App.goto_scene(path)
 
 
 # ──────────────────────────────────────────────────────────────
@@ -511,10 +513,9 @@ func _on_import_pressed() -> void:
 
 
 func _on_ai_card_pressed() -> void:
-	if not ResourceLoader.exists("res://game/AI/ai_debug.tscn"):
-		_set_status("[color=#FF6666]AI 模块不存在[/color]")
-		return
-	get_tree().change_scene_to_file("res://game/AI/ai_debug.tscn")
+	var result: int = App.open_ai_cards()
+	if result != OK:
+		_set_status("[color=#FF6666]打开 AI 制卡失败（%d）[/color]" % result)
 
 
 ## 设置底部状态栏文本（支持 BBCode）。## 输入: text (String)。

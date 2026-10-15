@@ -34,6 +34,7 @@ var _last_offset: int = 0
 @onready var _delete_note_button: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons/DeleteNoteButton
 @onready var _list_note_button: Button = $RootMargin/MainVBox/MainHSplit/LeftVSplit/ContentHBox/NotesPanel/NotesVBox/NotesButtons/ListNoteButton
 @onready var _clear_all_button: Button = $RootMargin/MainVBox/Toolbar/ClearAllDataButton
+@onready var _reset_save_button: Button = $RootMargin/MainVBox/Toolbar/ResetSaveButton
 @onready var _refresh_all_button: Button = $RootMargin/MainVBox/Toolbar/RefreshAllButton
 @onready var _back_btn: Button = $RootMargin/MainVBox/Toolbar/BackBtn
 @onready var _debug_mode_check: CheckButton = $RootMargin/MainVBox/Toolbar/DebugMode
@@ -41,6 +42,7 @@ var _last_offset: int = 0
 @onready var _clear_log_button: Button = $RootMargin/MainVBox/MainHSplit/LogPanel/LogVBox/LogToolbar/ClearLogButton
 @onready var _export_log_button: Button = $RootMargin/MainVBox/MainHSplit/LogPanel/LogVBox/LogToolbar/ExportLogButton
 @onready var _clear_data_confirm: ConfirmationDialog = $ClearDataConfirm
+@onready var _reset_save_confirm: ConfirmationDialog = $ResetSaveConfirm
 
 ## 研究测试面板控件
 @onready var _gen_test_data_btn: Button = $RootMargin/MainVBox/Toolbar/GenTestDataBtn
@@ -64,6 +66,7 @@ func _ready() -> void:
 	_setup_parent_option()
 	_bind_actions()
 	_setup_debug_mode()
+	_setup_meta_toggle()
 	var init_ok: bool = _ensure_database_ready()
 	if init_ok:
 		_refresh_deck_list()
@@ -119,12 +122,14 @@ func _bind_actions() -> void:
 	_note_list_view.item_activated.connect(_on_note_item_double_clicked)
 	_add_field_button.pressed.connect(_on_add_field_pressed)
 	_clear_all_button.pressed.connect(_on_clear_all_pressed)
+	_reset_save_button.pressed.connect(_on_reset_save_pressed)
 	_refresh_all_button.pressed.connect(_on_refresh_all_pressed)
 	_back_btn.pressed.connect(_on_back_pressed)
 	_copy_log_button.pressed.connect(_on_copy_log_pressed)
 	_clear_log_button.pressed.connect(_on_clear_log_pressed)
 	_export_log_button.pressed.connect(_on_export_log_pressed)
 	_clear_data_confirm.confirmed.connect(_on_clear_data_confirmed)
+	_reset_save_confirm.confirmed.connect(_on_reset_save_confirmed)
 
 	# 研究测试面板
 	_gen_test_data_btn.pressed.connect(_on_gen_test_data_pressed)
@@ -234,7 +239,7 @@ func _on_update_deck_pressed() -> void:
 		_log_result(result)
 		_refresh_deck_list()
 		return
-	result = _deck_manager.set_deck_archived(deck_id, is_archived)
+	result = _deck_manager.archive_deck(deck_id, is_archived)
 	_log_result(result)
 	if result.get("success", false):
 		var deck_result: Dictionary = _deck_manager.get_deck(deck_id)
@@ -286,7 +291,7 @@ func _on_create_note_pressed() -> void:
 		return
 	var deck_id: int = roundi(_note_type_input.value)
 	var fields: Dictionary = _read_fields_from_editor()
-	var note_type_id: String = "1"
+	var note_type_id: String = NoteTypeEntity.DEFAULT_ID
 	_log_operation_header("create_note", "deck_id=%d note_type_id=%s fields=%s" % [deck_id, note_type_id, str(fields)])
 	var result: Dictionary = _note_manager.create_note(note_type_id, fields, deck_id)
 	_log_result(result)
@@ -397,9 +402,9 @@ func _on_gen_test_data_pressed() -> void:
 		var back: String = info["back"]
 		var rating: int = info["rating"]
 
-		# 创建笔记（note_type_id=1 占位；create_note 内部自动生成卡片）
+		# 创建笔记（默认笔记类型；create_note 内部自动生成卡片）
 		var fields := {"front": front, "back": back}
-		var note_result := _note_manager.create_note("1", fields, deck_id)
+		var note_result := _note_manager.create_note(NoteTypeEntity.DEFAULT_ID, fields, deck_id)
 		if not note_result.get("success", false):
 			summaries.append("  ❌ 笔记创建失败: %s" % str(note_result.get("error", "")))
 			continue
@@ -811,6 +816,19 @@ func _on_clear_all_pressed() -> void:
 	_clear_data_confirm.popup_centered()
 
 
+## 弹出确认框，只重置剧情存档和教程，不删闪卡。## 输入: 无。
+## 输出: 无。
+func _on_reset_save_pressed() -> void:
+	_reset_save_confirm.popup_centered()
+
+
+## 确认后重置 App 持有的全局存档。## 输入: 无。
+## 输出: 无。
+func _on_reset_save_confirmed() -> void:
+	App.reset_global_save()
+	_append_log("[存档] 已重置剧情进度、好感度、标记和教程。牌组与卡片未删除。")
+
+
 func _on_clear_data_confirmed() -> void:
 	if not _ensure_database_ready():
 		return
@@ -832,18 +850,11 @@ func _on_clear_data_confirmed() -> void:
 	_refresh_note_list()
 
 
-## 清空 StoryProgress 剧情数据：重置章节、已完成对话、触发阈值和羁绊值。## 输入: 无。
+## 清空当前剧情存档和教程进度。与「一键重置存档」共用 App.reset_global_save。## 输入: 无。
 ## 输出: 无。
 func _clear_story_progress() -> void:
-	var sp := StoryProgress.load_from_user()
-	sp.current_chapter = ""
-	sp.completed_dialogues.clear()
-	sp.bond_dialogues_triggered.clear()
-	sp.trigger_threshold = 10
-	sp.bond = 0
-	sp.flags.clear()
-	sp.save_to_user()
-	_append_log("[清空] 已重置 StoryProgress（章节、对话记录、羁绊、标记、阈值）")
+	App.reset_global_save()
+	_append_log("[清空] 已重置剧情存档和教程进度")
 
 
 func _on_refresh_all_pressed() -> void:
@@ -873,6 +884,27 @@ func _on_export_log_pressed() -> void:
 # ──────────────────────────────────────────────────────────────
 # Debug Mode (DebugSettings 全局同步)
 # ──────────────────────────────────────────────────────────────
+
+
+## 在工具栏加上调试 meta 开关。打开后设置多一行，卡面正面显示密码。## 输入: 无。
+## 输出: 无。
+func _setup_meta_toggle() -> void:
+	var toolbar := $RootMargin/MainVBox/Toolbar as HBoxContainer
+	if toolbar == null:
+		return
+	var meta_check := CheckButton.new()
+	meta_check.name = "MetaUnlock"
+	meta_check.text = "调试 meta"
+	meta_check.set_pressed_no_signal(App.get_flag(MetaRules.DEBUG_META_FLAG, false) == true)
+	meta_check.toggled.connect(_on_meta_unlock_toggled)
+	toolbar.add_child(meta_check)
+
+
+## 把调试 meta 标记写入主逻辑存档。## 输入: pressed (bool) - 开关状态。
+## 输出: 无。
+func _on_meta_unlock_toggled(pressed: bool) -> void:
+	App.set_flag(MetaRules.DEBUG_META_FLAG, pressed)
+	_append_log("[meta] %s = %s" % [MetaRules.DEBUG_META_FLAG, str(pressed)])
 
 
 ## 初始化调试模式：同步 CheckButton 到 DebugSettings，连接信号。
@@ -916,4 +948,4 @@ func _switch_scene(path: String, label: String) -> void:
 	if not ResourceLoader.exists(path):
 		_append_log("[color=#FF6666]场景不存在: %s[/color]" % label)
 		return
-	get_tree().change_scene_to_file(path)
+	App.goto_scene(path)
