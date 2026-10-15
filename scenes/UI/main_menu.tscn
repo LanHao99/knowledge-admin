@@ -167,12 +167,13 @@ theme_override_constants/margin_top = 8
 theme_override_constants/margin_bottom = 16
 
 
-[node name="NavigationTabs" type="TabContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin"]
+[node name="LearningPanel" type="PanelContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_type_variation = &"DesktopFrame"
 
 
-[node name="学习" type="MarginContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs"]
+[node name="LearningMargin" type="MarginContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 20
@@ -180,12 +181,12 @@ theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 20
 
 
-[node name="LearningVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习"]
+[node name="LearningVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin"]
 layout_mode = 2
 theme_override_constants/separation = 16
 
 
-[node name="OverviewRow" type="GridContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox"]
+[node name="OverviewRow" type="GridContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox"]
 layout_mode = 2
 columns = 2
 theme_override_constants/h_separation = 24
@@ -195,24 +196,24 @@ preferred_columns = 2
 minimum_column_width = 380.0
 
 
-[node name="OverviewVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow"]
+[node name="OverviewVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 12
 
 
-[node name="OverviewLabel" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/OverviewVBox"]
+[node name="OverviewLabel" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/OverviewVBox"]
 layout_mode = 2
 text = "学习概况"
 
 
-[node name="StatisticsBox" type="PanelContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/OverviewVBox"]
+[node name="StatisticsBox" type="PanelContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/OverviewVBox"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_type_variation = &"DesktopInset"
 
 
-[node name="StatisticsMargin" type="MarginContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox"]
+[node name="StatisticsMargin" type="MarginContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox"]
 layout_mode = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_right = 16
@@ -220,64 +221,64 @@ theme_override_constants/margin_top = 16
 theme_override_constants/margin_bottom = 16
 
 
-[node name="Statistics" type="GridContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin"]
+[node name="Statistics" type="GridContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin"]
 layout_mode = 2
 columns = 2
 theme_override_constants/h_separation = 24
 theme_override_constants/v_separation = 16
 
 
-[node name="DeckCaption" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
+[node name="DeckCaption" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "牌组总数："
 
 
-[node name="DeckValue" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
+[node name="DeckValue" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "—"
 horizontal_alignment = 2
 
 
-[node name="DueCaption" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
+[node name="DueCaption" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "待复习："
 
 
-[node name="DueValue" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
+[node name="DueValue" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "—"
 horizontal_alignment = 2
 
 
-[node name="TodayCaption" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
+[node name="TodayCaption" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "今日已学："
 
 
-[node name="TodayValue" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
+[node name="TodayValue" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "—"
 horizontal_alignment = 2
 
 
-[node name="Actions" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow"]
+[node name="Actions" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 12
 
 
-[node name="ActionsLabel" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/Actions"]
+[node name="ActionsLabel" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/Actions"]
 layout_mode = 2
 text = "操作"
 
 
-[node name="StudyBtn" type="Button" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/Actions"]
+[node name="StudyBtn" type="Button" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/Actions"]
 unique_name_in_owner = true
 layout_mode = 2
 custom_minimum_size = Vector2(280, 48)
@@ -285,35 +286,27 @@ text = "开始学习"
 disabled = true
 
 
-[node name="DeckListBtn" type="Button" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/Actions"]
+[node name="DeckListBtn" type="Button" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/Actions"]
 unique_name_in_owner = true
 layout_mode = 2
 custom_minimum_size = Vector2(280, 48)
 text = "牌组管理"
 
 
-[node name="NoteBrowseBtn" type="Button" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox/OverviewRow/Actions"]
+[node name="NoteBrowseBtn" type="Button" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/Actions"]
 unique_name_in_owner = true
 layout_mode = 2
 custom_minimum_size = Vector2(280, 48)
 text = "笔记浏览"
 
 
-[node name="EmptyHint" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs/学习/LearningVBox"]
+[node name="EmptyHint" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 theme_type_variation = &"UiMuted"
 text = "暂无牌组，请先新建或导入牌组。"
 autowrap_mode = 3
-
-
-[node name="牌组" type="Control" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs"]
-layout_mode = 2
-
-
-[node name="笔记" type="Control" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/NavigationTabs"]
-layout_mode = 2
 
 
 [node name="StatusInset" type="PanelContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox"]

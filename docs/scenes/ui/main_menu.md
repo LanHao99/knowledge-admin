@@ -222,3 +222,9 @@ main_menu._ready()
 - `CardManager` 新增对应包装方法，透传到 CardDB
 - `main_menu.gd` 新增 `_exit_tree()` 释放 Manager 实例
 - **笔记浏览导航**确认已激活：`NoteBrowseBtn` 连接 `_on_note_browse_pressed()`，经 `_switch_scene()` 安全跳转 `res://scenes/ui/note_list.tscn`，`ResourceLoader.exists()` 前置检查，失败时底部状态栏红色提示
+
+## 顶部导航栏
+
+主页不显示“学习／牌组／笔记”标签栏。原 TabContainer 替换为沿用 DesktopFrame 边框的 LearningPanel；学习概况与操作区直接显示，保留右侧“开始学习／牌组管理／笔记浏览”入口。移除空标签页、标签信号连接及处理函数；容器重新布局后不保留顶栏占位。
+
+Godot 4.7.2 / Forward+ / D3D12：隔离桌面中的 13 项界面与按钮导航检查通过，现有 GUT 39 项、203 个断言通过。[界面预览](main_menu_navigation_review/main_menu_no_tabs.png) 与 [检查报告](main_menu_navigation_review/verification.json)。

@@ -30,7 +30,6 @@ var _card_manager: CardManager = null
 func _ready() -> void:
 	WindowContext.adapt_content(self, _main_card)
 	%CloseButton.pressed.connect(_on_close_pressed)
-	%NavigationTabs.tab_changed.connect(_on_navigation_tab_changed)
 	_settings_button.pressed.connect(_on_settings_pressed)
 	_ai_card_button.pressed.connect(_on_ai_card_pressed)
 	_deck_list_btn.pressed.connect(_on_deck_list_pressed)
@@ -207,17 +206,6 @@ func _switch_scene(path: String, label: String) -> void:
 func _set_status(text: String, is_error: bool = false) -> void:
 	_status_label.text = text
 	_status_label.theme_type_variation = &"UiError" if is_error else &"UiMuted"
-
-
-## 使用标签页进入现有的牌组或笔记管理场景。## 输入: index (int) - 标签索引。
-## 输出: 无。
-func _on_navigation_tab_changed(index: int) -> void:
-	if index == 1:
-		_on_deck_list_pressed()
-	elif index == 2:
-		_on_note_browse_pressed()
-	if index > 0 and is_inside_tree():
-		(%NavigationTabs as TabContainer).current_tab = 0
 
 
 ## 关闭应用窗体并保存待写入的设置。## 输入: 无。
