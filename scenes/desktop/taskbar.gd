@@ -1,6 +1,11 @@
 extends Panel
 ## 任务栏、开始菜单和本机时钟。
 
+const APP_BUTTON_SCENE: PackedScene = preload("res://scenes/desktop/taskbar_app_button.tscn")
+
+@export_range(24.0, 80.0, 1.0) var app_button_size: float = 40.0
+@export_range(16.0, 64.0, 1.0) var app_icon_size: float = 28.0
+
 var _start_menu: Control
 var _app_buttons: Dictionary = {}
 @onready var _start_button: Button = $TaskbarHBox/StartButton
@@ -15,20 +20,35 @@ func _ready() -> void:
 	add_child(timer)
 	timer.start()
 	_start_button.pressed.connect(_toggle_start_menu)
+	UiSettings.font_scale_changed.connect(_update_app_button_layout)
 
 ## 新建单个可切换的任务按钮。## 输入: 应用 ID、标题。输出: 无。
 func add_app_button(app_id: String, title_text: String) -> void:
 	if _app_buttons.has(app_id):
 		return
-	var button: Button = Button.new()
-	button.text = title_text
+	var button: Button = APP_BUTTON_SCENE.instantiate() as Button
 	button.tooltip_text = title_text
-	button.toggle_mode = true
-	button.custom_minimum_size.x = 170
-	button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	button.accessibility_name = title_text
+	var config: Dictionary = WindowManager.REGISTRY.get(app_id, {})
+	var icon_path: String = str(config.get("icon_path", ""))
+	if not icon_path.is_empty():
+		(button.get_node("Icon") as TextureRect).texture = load(icon_path) as Texture2D
 	button.pressed.connect(_on_task_button_pressed.bind(app_id))
 	_task_buttons.add_child(button)
 	_app_buttons[app_id] = button
+	_update_app_button_layout(UiSettings.font_scale)
+
+## 按字体倍率保持程序按钮为正方形，图标居中并留出边框。## 输入: scale_value - 字体倍率。输出: 无。
+func _update_app_button_layout(scale_value: float) -> void:
+	var side: float = roundf(app_button_size * scale_value)
+	var icon_side: float = minf(roundf(app_icon_size * scale_value), side - 8.0)
+	for button: Button in _app_buttons.values():
+		button.custom_minimum_size = Vector2(side, side)
+		var icon: TextureRect = button.get_node("Icon") as TextureRect
+		icon.offset_left = -icon_side * 0.5
+		icon.offset_top = -icon_side * 0.5
+		icon.offset_right = icon_side * 0.5
+		icon.offset_bottom = icon_side * 0.5
 
 ## 删除任务按钮。## 输入: app_id。输出: 无。
 func remove_app_button(app_id: String) -> void:

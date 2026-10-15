@@ -18,6 +18,9 @@ func _run() -> void:
 		return
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(_output))
 	UiSettings.settings_path = "user://desktop_test_ui.cfg"
+	if "--taskbar-icons-only" in OS.get_cmdline_user_args():
+		await _run_taskbar_review()
+		return
 	App.get_story_progress().total_progress = 0
 	App.get_story_progress().trigger_threshold = 100000
 	var tutorial: TutorialProgress = TutorialProgress.new()
@@ -184,6 +187,60 @@ func _run() -> void:
 	ai_window.fit_work_area()
 	await _frames()
 	await _capture("desktop_apps")
+	_finish()
+
+## 检查实际图标尺寸、提示名称、激活及最小化恢复，并保存预览。## 输入: 无。输出: 无。
+func _run_taskbar_review() -> void:
+	_output = "user://taskbar_icons_review"
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(_output))
+	var tutorial: TutorialProgress = TutorialProgress.new()
+	for key: String in TutorialManager._tutorials:
+		tutorial.mark_completed(key)
+	TutorialManager._progress = tutorial
+	get_tree().change_scene_to_file("res://scenes/desktop/desktop.tscn")
+	await _frames()
+	for app_info: Dictionary in WindowManager.get_visible_apps():
+		App.open_app(app_info.app_id)
+	App.open_app("unknown_program")
+	await _frames()
+	var taskbar: Node = get_tree().current_scene.get_node("%Taskbar")
+	for resolution: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080)]:
+		get_tree().root.size = resolution
+		get_tree().root.content_scale_size = resolution
+		for font_scale: float in [0.8, 1.0, 1.5]:
+			UiSettings.set_font_scale(font_scale)
+			await _frames()
+			for app_id: String in taskbar._app_buttons:
+				var button: Button = taskbar._app_buttons[app_id]
+				_check(is_equal_approx(button.size.x, button.size.y), "任务栏正方形：" + app_id)
+				_check(button.text.is_empty() and button.get_node("Icon").texture != null, "只显示程序图标：" + app_id)
+				_check(button.tooltip_text == WindowManager.REGISTRY[app_id].title and button.accessibility_name == button.tooltip_text, "名称提示与无障碍名称：" + app_id)
+			await _capture("icons_%dx%d_%d" % [resolution.x, resolution.y, roundi(font_scale * 100)])
+	UiSettings.set_font_scale(1.0)
+	await _frames()
+	var flash: ManagedWindow = WindowManager.get_app_window("knowledge_admin")
+	var original_page: Control = flash.get_content()
+	var flash_button: Button = taskbar._app_buttons["knowledge_admin"]
+	await _click(flash_button.get_global_rect().get_center())
+	_check(flash_button.button_pressed and WindowManager.get_active_app_id() == "knowledge_admin", "点击图标激活并高亮")
+	await _click(flash_button.get_global_rect().get_center())
+	_check(flash.is_minimized() and not flash_button.button_pressed, "再次点击图标最小化")
+	await _click(flash_button.get_global_rect().get_center())
+	_check(not flash.is_minimized() and flash.get_content() == original_page, "点击图标恢复原页面")
+	for app_id: String in ["control_panel", "recycle_bin", "unknown_program"]:
+		WindowManager.get_app_window(app_id)._on_minimize_pressed()
+	flash.position = Vector2(180, 70)
+	flash.size = Vector2(1260, 840)
+	var computer: ManagedWindow = WindowManager.get_app_window("my_computer")
+	computer.position = Vector2(1130, 120)
+	computer.size = Vector2(740, 580)
+	App.open_app("ai_cards")
+	var ai: ManagedWindow = WindowManager.get_app_window("ai_cards")
+	ai.position = Vector2(760, 460)
+	ai.size = Vector2(1060, 550)
+	ai.fit_work_area()
+	await _frames()
+	await _capture("taskbar_icons")
 	_finish()
 
 ## 验证剧情突现、输入锁、选择、后台待机和教程分流。## 输入: source。输出: 无。

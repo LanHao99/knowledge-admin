@@ -14,6 +14,8 @@ ManagedWindow 的标题栏、内容区、边框及八个缩放把手均保存在
 
 最小化保留页面实例。学习中关闭需确认并调用 end_session；正在执行导入事务时不允许关闭。关闭系统有确认和取消。
 
+任务栏的程序入口使用方形图标按钮，复用应用注册表中的图标，不显示程序名称文字。悬停提示和无障碍名称保留完整标题，当前应用保持按下高亮；点击仍然激活、最小化或恢复对应窗口。按钮与图标随字体倍率同步缩放，可在任务栏 Inspector 中调整 app_button_size 与 app_icon_size，按钮外观保存在 taskbar_app_button.tscn。
+
 ## 页面接入
 
 App.open_app(app_id) 返回 bool；App.close_app(app_id) 请求关闭应用。App.goto_scene(path) 保留错误码返回：闪卡页面始终导航到 knowledge_admin，AI 和设置分别打开独立应用，不依赖哪个窗口当前激活。WindowContext 保留单独运行页面时的兼容路径。
@@ -40,3 +42,5 @@ tests/desktop/verify_desktop.tscn 必须在 application/config/name 为 Knowledg
 ## 验收记录
 
 Godot 4.7.2：30 项 GUT 测试通过；真实 GPU 验收覆盖开机、八向鼠标缩放、菜单、两种导入、学习评分、剧情选项、弹窗恢复和六组分辨率／字号组合。报告及总览截图保存在 desktop_review 目录。未调用外部模型接口。
+
+任务栏图标专项验收：运行 verify_desktop.tscn 时追加 `-- --taskbar-icons-only`，检查六组分辨率与字号组合下的方形比例、图标、名称提示和点击状态切换。118 项检查通过；预览与报告为 desktop_review/taskbar_icons.png 和 taskbar_icons_verification.json。
