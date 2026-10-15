@@ -105,7 +105,7 @@ func _verify_rendering(cover: CanvasLayer) -> void:
 		root.content_scale_size = dimensions
 		await _frames()
 		var suffix: String = "%dx%d" % [dimensions.x, dimensions.y]
-		var status: Label = cover.get_node("%Status")
+		var status: RichTextLabel = cover.get_node("%Status")
 		_check(root.get_visible_rect().encloses(status.get_global_rect()), "中文完整显示 " + suffix)
 		_check(status.get_global_rect().get_center().distance_to(Vector2(dimensions) * 0.5) < 2.0, "文字准确居中 " + suffix)
 		mask.set_shader_parameter("progress", 1.0)
@@ -227,7 +227,7 @@ func _run() -> void:
 	if cover == null:
 		quit(1)
 		return
-	_check(cover.get_node("%Status").text == "正在启动系统", "主文案正确")
+	_check(cover.get_node("%Status").get_parsed_text() == "正在启动系统...", "主文案正确")
 	await _verify_rendering(cover)
 	await _verify_input(cover)
 	await _verify_timing()

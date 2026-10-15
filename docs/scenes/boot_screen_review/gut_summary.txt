@@ -10,7 +10,7 @@ Scripts               5
 Tests                39
 Passing Tests        39
 Asserts             203
-Time              0.519s
+Time              0.499s
 
 
 [32m---- All tests passed! ----

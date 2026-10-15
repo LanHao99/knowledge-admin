@@ -18,7 +18,7 @@ var _desktop: Control
 var _desktop_process_mode: Node.ProcessMode = Node.PROCESS_MODE_INHERIT
 
 @onready var _mask_material: ShaderMaterial = %CoverGroup.material as ShaderMaterial
-@onready var _status: Label = %Status
+@onready var _status: RichTextLabel = %Status
 @onready var _cover: Control = %Cover
 @onready var _input_blocker: Control = $InputBlocker
 
@@ -98,7 +98,7 @@ func _fit_layout() -> void:
 	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
 	_cover.size = viewport_size
 	_input_blocker.size = viewport_size
-	_status.add_theme_font_size_override("font_size", 48 if viewport_size.y >= 900.0 else 32)
+	_status.add_theme_font_size_override("normal_font_size", 48 if viewport_size.y >= 900.0 else 32)
 
 
 ## 遮罩完全打开后恢复桌面处理并释放封面。## 输入: 无。输出: 无。
