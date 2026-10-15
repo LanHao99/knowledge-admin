@@ -4,7 +4,7 @@ extends Panel
 const APP_BUTTON_SCENE: PackedScene = preload("res://scenes/desktop/taskbar_app_button.tscn")
 
 @export_range(24.0, 80.0, 1.0) var app_button_size: float = 40.0
-@export_range(16.0, 64.0, 1.0) var app_icon_size: float = 28.0
+@export_range(16.0, 64.0, 1.0) var app_icon_size: float = 36.0
 
 var _start_menu: Control
 var _app_buttons: Dictionary = {}
@@ -21,6 +21,7 @@ func _ready() -> void:
 	timer.start()
 	_start_button.pressed.connect(_toggle_start_menu)
 	UiSettings.font_scale_changed.connect(_update_app_button_layout)
+	_task_buttons.resized.connect(_on_task_buttons_resized)
 
 ## 新建单个可切换的任务按钮。## 输入: 应用 ID、标题。输出: 无。
 func add_app_button(app_id: String, title_text: String) -> void:
@@ -38,17 +39,22 @@ func add_app_button(app_id: String, title_text: String) -> void:
 	_app_buttons[app_id] = button
 	_update_app_button_layout(UiSettings.font_scale)
 
-## 按字体倍率保持程序按钮为正方形，图标居中并留出边框。## 输入: scale_value - 字体倍率。输出: 无。
+## 按任务栏可用高度填满方形按钮，图标按配置比例放大并留出边框。## 输入: scale_value - 字体倍率。输出: 无。
 func _update_app_button_layout(scale_value: float) -> void:
-	var side: float = roundf(app_button_size * scale_value)
-	var icon_side: float = minf(roundf(app_icon_size * scale_value), side - 8.0)
+	var minimum_side: float = roundf(app_button_size * scale_value)
+	var side: float = maxf(minimum_side, _task_buttons.size.y)
+	var icon_side: float = minf(roundf(side * app_icon_size / app_button_size), side - 4.0)
 	for button: Button in _app_buttons.values():
-		button.custom_minimum_size = Vector2(side, side)
+		button.custom_minimum_size = Vector2(side, minimum_side)
 		var icon: TextureRect = button.get_node("Icon") as TextureRect
 		icon.offset_left = -icon_side * 0.5
 		icon.offset_top = -icon_side * 0.5
 		icon.offset_right = icon_side * 0.5
 		icon.offset_bottom = icon_side * 0.5
+
+## 容器完成布局后同步按钮宽度，避免任务栏变厚时图标仍保持小尺寸。## 输入: 无。输出: 无。
+func _on_task_buttons_resized() -> void:
+	_update_app_button_layout.call_deferred(UiSettings.font_scale)
 
 ## 删除任务按钮。## 输入: app_id。输出: 无。
 func remove_app_button(app_id: String) -> void:
