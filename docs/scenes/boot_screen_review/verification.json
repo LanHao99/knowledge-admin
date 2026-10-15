@@ -1,6 +1,199 @@
 {
-	"checks": 16,
+	"checks": 48,
 	"engine": "4.7.2-stable (official)",
 	"failures": [],
-	"real_timer_ms": 2528
+	"results": [
+		{
+			"description": "桌面在溶解前已完成初始化与绘制",
+			"passed": true
+		},
+		{
+			"description": "主文案正确",
+			"passed": true
+		},
+		{
+			"description": "中文完整显示 1280x720",
+			"passed": true
+		},
+		{
+			"description": "文字准确居中 1280x720",
+			"passed": true
+		},
+		{
+			"description": "全屏波浪持续动画 1280x720",
+			"passed": true
+		},
+		{
+			"description": "停留期封面覆盖桌面 1280x720",
+			"passed": true
+		},
+		{
+			"description": "中心开孔露出真实桌面 1280x720",
+			"passed": true
+		},
+		{
+			"description": "中期四角仍由封面覆盖 1280x720",
+			"passed": true
+		},
+		{
+			"description": "完成画面与无遮罩桌面逐像素一致 1280x720",
+			"passed": true
+		},
+		{
+			"description": "中文完整显示 1920x1080",
+			"passed": true
+		},
+		{
+			"description": "文字准确居中 1920x1080",
+			"passed": true
+		},
+		{
+			"description": "全屏波浪持续动画 1920x1080",
+			"passed": true
+		},
+		{
+			"description": "停留期封面覆盖桌面 1920x1080",
+			"passed": true
+		},
+		{
+			"description": "中心开孔露出真实桌面 1920x1080",
+			"passed": true
+		},
+		{
+			"description": "中期四角仍由封面覆盖 1920x1080",
+			"passed": true
+		},
+		{
+			"description": "完成画面与无遮罩桌面逐像素一致 1920x1080",
+			"passed": true
+		},
+		{
+			"description": "中文完整显示 800x600",
+			"passed": true
+		},
+		{
+			"description": "文字准确居中 800x600",
+			"passed": true
+		},
+		{
+			"description": "全屏波浪持续动画 800x600",
+			"passed": true
+		},
+		{
+			"description": "停留期封面覆盖桌面 800x600",
+			"passed": true
+		},
+		{
+			"description": "中心开孔露出真实桌面 800x600",
+			"passed": true
+		},
+		{
+			"description": "中期四角仍由封面覆盖 800x600",
+			"passed": true
+		},
+		{
+			"description": "完成画面与无遮罩桌面逐像素一致 800x600",
+			"passed": true
+		},
+		{
+			"description": "转场期间桌面处理被暂停",
+			"passed": true
+		},
+		{
+			"description": "松开与重复按键不触发加速",
+			"passed": true
+		},
+		{
+			"description": "真实鼠标按下触发加速",
+			"passed": true
+		},
+		{
+			"description": "转场点击未泄漏到开始菜单",
+			"passed": true
+		},
+		{
+			"description": "连续输入不会重置进度",
+			"passed": true
+		},
+		{
+			"description": "连续输入不会延长剩余时长",
+			"passed": true
+		},
+		{
+			"description": "加速溶解在期限内完成并释放封面",
+			"passed": true
+		},
+		{
+			"description": "完成时保留同一桌面实例",
+			"passed": true
+		},
+		{
+			"description": "结束后恢复桌面处理",
+			"passed": true
+		},
+		{
+			"description": "启动入口已释放",
+			"passed": true
+		},
+		{
+			"description": "转场后开始菜单可正常操作",
+			"passed": true
+		},
+		{
+			"description": "转场后菜单可正常收起",
+			"passed": true
+		},
+		{
+			"description": "转场后双击快捷方式可打开应用",
+			"passed": true
+		},
+		{
+			"description": "桌面在溶解前已完成初始化与绘制",
+			"passed": true
+		},
+		{
+			"description": "默认转场自动完成",
+			"passed": true
+		},
+		{
+			"description": "正常播放约三秒：3050 ms",
+			"passed": true
+		},
+		{
+			"description": "一次启动只实例化一个桌面，重复 start 无副作用",
+			"passed": true
+		},
+		{
+			"description": "桌面在溶解前已完成初始化与绘制",
+			"passed": true
+		},
+		{
+			"description": "溶解途中按键不会倒退",
+			"passed": true
+		},
+		{
+			"description": "溶解途中可加速完成",
+			"passed": true
+		},
+		{
+			"description": "途中加速不超过约 0.6 秒",
+			"passed": true
+		},
+		{
+			"description": "桌面在溶解前已完成初始化与绘制",
+			"passed": true
+		},
+		{
+			"description": "准备较慢时即使加速也保持封面不透明",
+			"passed": true
+		},
+		{
+			"description": "准备完成后兑现提前请求的加速",
+			"passed": true
+		},
+		{
+			"description": "提前销毁封面也会恢复桌面处理",
+			"passed": true
+		}
+	]
 }

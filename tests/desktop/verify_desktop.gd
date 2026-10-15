@@ -34,7 +34,11 @@ func _run() -> void:
 	key_event.keycode = KEY_SPACE
 	key_event.pressed = true
 	get_tree().root.push_input(key_event, true)
+	var boot_deadline: int = Time.get_ticks_msec() + 3000
+	while get_tree().get_first_node_in_group(&"boot_transition") != null and Time.get_ticks_msec() < boot_deadline:
+		await get_tree().process_frame
 	await _frames()
+	_check(get_tree().get_first_node_in_group(&"boot_transition") == null, "启动溶解完成并释放封面")
 	_check(get_tree().current_scene.scene_file_path.ends_with("desktop.tscn"), "按键跳过开机到桌面")
 	_check(WindowManager._open_windows.is_empty(), "启动为空桌面")
 	await _capture("desktop_empty")

@@ -1,0 +1,92 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scenes/desktop/boot_transition.gd" id="2_transition"]
+[ext_resource type="Shader" path="res://scenes/desktop/shaders/boot_background.gdshader" id="3_waves"]
+[ext_resource type="Shader" path="res://scenes/desktop/shaders/boot_dissolve.gdshader" id="4_dissolve"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_waves"]
+resource_local_to_scene = true
+shader = ExtResource("3_waves")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dissolve"]
+resource_local_to_scene = true
+shader = ExtResource("4_dissolve")
+
+[node name="BootTransition" type="CanvasLayer" groups=["boot_transition"]]
+layer = 100
+script = ExtResource("2_transition")
+
+[node name="CoverGroup" type="CanvasGroup" parent="."]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_dissolve")
+fit_margin = 0.0
+clear_margin = 0.0
+
+[node name="Cover" type="Control" parent="CoverGroup"]
+unique_name_in_owner = true
+layout_mode = 3
+offset_right = 1920.0
+offset_bottom = 1080.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Waves" type="ColorRect" parent="CoverGroup/Cover"]
+material = SubResource("ShaderMaterial_waves")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 1)
+
+[node name="Center" type="CenterContainer" parent="CoverGroup/Cover"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Status" type="Label" parent="CoverGroup/Cover/Center"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.93, 0.98, 1, 1)
+theme_override_colors/font_outline_color = Color(0.025, 0.03, 0.1, 0.9)
+theme_override_colors/font_shadow_color = Color(0.015, 0.02, 0.05, 0.8)
+theme_override_constants/outline_size = 6
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 4
+theme_override_font_sizes/font_size = 48
+text = "正在启动系统"
+horizontal_alignment = 1
+
+[node name="SkipHint" type="Label" parent="CoverGroup/Cover"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -70.0
+offset_bottom = -38.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.76, 0.83, 0.94, 0.8)
+theme_override_colors/font_outline_color = Color(0.025, 0.03, 0.1, 0.8)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 16
+text = "单击或按任意键加速"
+horizontal_alignment = 1
+
+[node name="InputBlocker" type="Control" parent="."]
+layout_mode = 3
+offset_right = 1920.0
+offset_bottom = 1080.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
