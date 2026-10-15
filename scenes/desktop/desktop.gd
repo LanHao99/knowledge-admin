@@ -8,6 +8,7 @@ extends Control
 	"recycle_bin": Vector2(820, 560), "unknown_program": Vector2(1180, 800),
 	"help": Vector2(1100, 740),
 }
+var _shortcut_selection: ButtonGroup = ButtonGroup.new()
 @onready var _window_container: Control = %WindowContainer
 @onready var _taskbar: Control = %Taskbar
 
@@ -17,6 +18,7 @@ func _ready() -> void:
 	var shortcut: PackedScene = preload("res://scenes/desktop/desktop_shortcut.tscn")
 	for app_info: Dictionary in WindowManager.get_visible_apps():
 		var entry: Button = shortcut.instantiate() as Button
+		entry.button_group = _shortcut_selection
 		entry.set_meta("app_id", app_info.app_id)
 		%DesktopIconGrid.add_child(entry)
 		entry.get_node("Layout/Icon").texture = load(app_info.icon_path) as Texture2D

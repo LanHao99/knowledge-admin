@@ -16,6 +16,7 @@ Classic98 伪桌面体验。游戏从启动画面进入桌面，所有应用在�
 
 - 背景：青绿色 ColorRect
 - 左侧图标网格：从 `WindowManager.get_visible_apps()` 动态生成
+- 图标共享桌面实例内的 `ButtonGroup`，单击切换唯一选中高亮；重复单击保持选中，双击仍启动应用
 - 窗口容器（%WindowContainer）：所有窗口在此层级内排列
 - 任务栏（%Taskbar）：底部 32px，显示开始按钮、任务按钮、时钟
 
@@ -109,5 +110,9 @@ Classic98 伪桌面体验。游戏从启动画面进入桌面，所有应用在�
 ## 测试
 
 `tests/unit/test_window_manager.gd` — 8 个测试覆盖注册表、信号、空值安全
+
+`tests/desktop/verify_desktop.tscn` 支持 `--desktop-selection-only`：真实鼠标依次点击所有图标，检查唯一高亮、重复单击及双击启动。
+
+Godot 4.7.2 验证结果：1280×720 与 1920×1080 各 41 项交互检查通过；窗口管理与窗口场景 GUT 测试 13 项、42 个断言通过。
 
 截图和实际渲染检查见 [review](review/)（如有）。

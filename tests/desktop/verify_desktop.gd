@@ -45,11 +45,24 @@ func _run() -> void:
 	await _click(Vector2(800, 100))
 	_check(not is_instance_valid(taskbar._start_menu), "外部点击收起开始菜单")
 	var desktop: Control = get_tree().current_scene
-	var shortcut: Control = desktop.get_node("%DesktopIconGrid").get_child(0)
+	var shortcut: Button = desktop.get_node("%DesktopIconGrid").get_child(0)
+	var shortcuts: Array[Node] = desktop.get_node("%DesktopIconGrid").get_children()
+	for entry: Button in shortcuts:
+		_check(not entry.button_pressed, "初始图标未选中：" + str(entry.get_meta("app_id")))
+	for entry: Button in shortcuts:
+		await _click(entry.get_global_rect().get_center())
+		for candidate: Button in shortcuts:
+			_check(candidate.button_pressed == (candidate == entry), "单击只高亮当前图标：%s / %s" % [entry.get_meta("app_id"), candidate.get_meta("app_id")])
+	await _capture("desktop_single_selection")
 	await _click(shortcut.get_global_rect().get_center())
+	await _click(shortcut.get_global_rect().get_center())
+	_check(shortcut.button_pressed, "重复单击已选中的图标保持高亮")
 	_check(WindowManager.get_app_window("knowledge_admin") == null, "单击图标只选中")
 	await _click(shortcut.get_global_rect().get_center(), true)
 	_check(WindowManager.get_app_window("knowledge_admin") != null, "双击图标启动应用")
+	if "--desktop-selection-only" in OS.get_cmdline_user_args():
+		_finish()
+		return
 	var flash: ManagedWindow = WindowManager.get_app_window("knowledge_admin")
 	if flash == null:
 		_finish()
