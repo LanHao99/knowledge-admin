@@ -1,6 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/desktop/my_computer.gd" id="1"]
+[ext_resource type="Resource" path="res://data/desktop/my_computer_files.tres" id="2_files"]
 
 [node name="MyComputer" type="Control"]
 layout_mode = 3
@@ -10,6 +11,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
+file_catalog = ExtResource("2_files")
 
 [node name="VBox" type="VBoxContainer" parent="."]
 layout_mode = 1

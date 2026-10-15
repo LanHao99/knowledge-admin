@@ -8,6 +8,16 @@
 
 WindowManager 注册 knowledge_admin、ai_cards、control_panel、my_computer、recycle_bin、unknown_program、help。后两者没有桌面或开始菜单入口。我的电脑提供预设目录与文本查看，回收站是空内容演示；不读写真实目录。
 
+## 我的电脑预设文件
+
+目录说明及虚拟 txt 正文统一保存在 `res://data/desktop/my_computer_files.tres`，由 `my_computer.tscn` 根节点的 `file_catalog` 属性引用。
+
+在 Godot Inspector 打开该资源：`drive_description` 与 `programs_description` 分别编辑系统盘和程序目录说明；`documents` 数组保存文档。展开每个 DesktopTextFile 资源，用 `file_name` 修改文件名，用多行 `content` 编辑正文。运行应用时按数组生成目录，因此新增、删除或改名条目无需修改查看器脚本。
+
+两个资源类型位于 `data/resources/desktop_file_catalog.gd` 与 `desktop_text_file.gd`；正文仅保存在这一个 `.tres` 中，两个 txt 为内嵌子资源。原有“使用说明.txt”“学习指南.txt”的内容保持一致。编辑并保存资源后重新运行游戏即可看到修改。游戏内继续只读显示，不生成真实 txt，也不写入玩家磁盘目录。
+
+`tests/unit/test_desktop_file_catalog.gd` 验证默认场景的资源绑定、新增文档生成目录、多行正文显示及未绑定资源时的容错。Godot 4.7.2 隔离工程 GUT 共 42 项、215 个断言通过；迁移前后的四段说明与正文精确一致。
+
 ## 窗口与布局
 
 ManagedWindow 的标题栏、内容区、边框及八个缩放把手均保存在场景中。标题栏拖动、八向缩放、双击最大化、最小化、关闭与任务栏切换共用状态。最大化只使用工作区，任务栏高度只扣除一次。
