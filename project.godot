@@ -21,6 +21,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+SaveDirectory="*res://src/save_directory.gd"
 MCPRuntimeBridge="*uid://wk2yhw3winuo"
 DialogueManager="*uid://c3rodes2l3gxb"
 DebugSettings="*res://src/debug_settings.gd"

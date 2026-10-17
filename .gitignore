@@ -20,3 +20,7 @@ api.cfg
 *.tmp
 *.log
 *.bak
+
+# 本地存档
+/saves/*
+!/saves/.gdignore

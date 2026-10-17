@@ -12,6 +12,21 @@
 
 Autoload 顺序放在 `DialogueManager` 之后，保证启动时对话单例已经存在。
 
+## 全局存档目录
+
+`SaveDirectory` 必须排在全部 Autoload 的首位，在其他单例读取存档前切换 Windows 游戏进程的 `user://`。配置文件为 `res://src/save_directory.gd`：
+
+- `ENABLED = true`：启用指定目录；改为 `false` 后，下次运行恢复引擎默认用户目录。
+- `DIRECTORY = "res://saves"`：当前工作区对应 `D:/game design/godot/4.6projects/knowledge-admin/saves/`。也可以填写其他绝对路径。
+
+照常使用 F5/F6。剧情、好感度、世界标记、教程、闪卡数据库、字号、快捷键、调试设置及 AI 配置都沿用 `user://`，实际读写统一进入该目录。启动输出中的 `[SaveDirectory] user:// = ...` 显示当前路径。
+
+目录通过 `.gdignore` 排除资源导入，通过 `.gitignore` 排除实际存档与个人密钥。仅当前游戏进程的 `APPDATA` 和运行时项目设置被调整，不写入系统环境变量；重新运行前已打开的编辑器配置和引擎启动日志不随之搬迁。其他平台保留引擎默认路径。发布前应将 `ENABLED` 改为 `false`。
+
+切换目录不会自动读取旧目录。已有存档可在游戏停止后复制过来；SQLite 数据库应通过一致性备份复制，避免遗漏尚在 WAL 中的数据。
+
+验收见 `tests/unit/test_save_directory.gd`，覆盖启动顺序，以及文件、配置、剧情资源、SQLite 的写入和重新读取。隔离工程的 47 项单元测试、238 条断言通过。
+
 ## 公共方法
 
 - `get_flag` / `set_flag`：读写 `user://story_progress.tres` 里的 `flags`。
