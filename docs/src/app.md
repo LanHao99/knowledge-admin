@@ -38,7 +38,11 @@ Autoload 顺序放在 `DialogueManager` 之后，保证启动时对话单例已�
 - `debug_fill_and_trigger()`：调试按钮用，填满进度并按 Easy 触发一次对话。
 - `reset_global_save()`：重置当前剧情存档和教程进度，不删除闪卡数据库。章节回到 `chapter_1`。
 - `add_bond(amount)` / `get_bond()`：好感度读写。对话选项用 `do App.add_bond(1)` 增减；`if App.get_bond() >= 8` 可做句内分支。
-- `quit_app()`：延迟退出。
+- `quit_app()`：延迟退出。测试播放中改为停止测试，不退出游戏。
+- `get_story_test_state()` / `get_story_catalog()` / `preview_next_story()`：测试台读取状态、目录和下一段。预览不修改存档。
+- `read_story_draft()` / `update_story_draft()` / `apply_story_draft()` / `revert_story_draft()`：草稿编辑。只有应用会写当前游戏。
+- `start_next_story()` / `jump_to_story()` / `stop_story_test()`：测试播放。调试模式关闭，或已有剧情在播放、排队时，不能启动。
+- `reset_story_data()` / `list_story_backups()` / `restore_story_backup()`：只处理剧情。重置和恢复前自动备份。`reset_global_save()` 仍会同时重置教程。
 
 ## 剧情判断
 
@@ -56,6 +60,8 @@ Autoload 顺序放在 `DialogueManager` 之后，保证启动时对话单例已�
 - `dialogue_opened(dialogue_key)` / `dialogue_closed(dialogue_key)`
 - `flags_changed(flag_name, value)`
 - `story_progress_changed(current, threshold)`
+- `story_state_changed`：进度、好感度、标记、完成记录或章节变化时发出。测试台用它刷新，原有进度和标记信号仍然发出。
+- `story_test_stopped(reason)`：测试播放被停止，并带上要显示的原因。
 
 ## 桌面应用导航
 

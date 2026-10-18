@@ -8,6 +8,7 @@ extends Control
 	"recycle_bin": Vector2(820, 560), "unknown_program": Vector2(1180, 800),
 	"help": Vector2(1100, 740),
 	"window_lab": Vector2(900, 620),
+	"story_test": Vector2(1100, 760),
 }
 var _shortcut_selection: ButtonGroup = ButtonGroup.new()
 @onready var _window_container: Control = %WindowContainer
@@ -16,14 +17,9 @@ var _shortcut_selection: ButtonGroup = ButtonGroup.new()
 ## 绑定桌面并生成场景实例化的快捷方式。## 输入: 无。输出: 无。
 func _ready() -> void:
 	WindowManager.setup(_window_container, _taskbar)
-	var shortcut: PackedScene = preload("res://scenes/desktop/desktop_shortcut.tscn")
-	for app_info: Dictionary in WindowManager.get_visible_apps():
-		var entry: Button = shortcut.instantiate() as Button
-		entry.button_group = _shortcut_selection
-		entry.set_meta("app_id", app_info.app_id)
-		%DesktopIconGrid.add_child(entry)
-		entry.get_node("Layout/Icon").texture = load(app_info.icon_path) as Texture2D
-		entry.get_node("Layout/Caption").text = app_info.title
+	_rebuild_shortcuts()
+	if not DebugSettings.debug_mode_changed.is_connected(_on_debug_mode_changed):
+		DebugSettings.debug_mode_changed.connect(_on_debug_mode_changed)
 	resized.connect(_on_resized)
 	_taskbar.resized.connect(_on_resized)
 	UiSettings.font_scale_changed.connect(_on_font_scale_changed)
@@ -32,10 +28,34 @@ func _ready() -> void:
 	_apply_wallpaper(WallpaperSettings.wallpaper_path, WallpaperSettings.display_mode)
 	_on_resized.call_deferred()
 
-## 桌面离开场景树时停止监听壁纸，避免调用已释放节点。## 输入: 无。输出: 无。
+## 桌面离开场景树时停止监听壁纸和调试模式，避免调用已释放节点。## 输入: 无。输出: 无。
 func _exit_tree() -> void:
 	if WallpaperSettings.wallpaper_changed.is_connected(_apply_wallpaper):
 		WallpaperSettings.wallpaper_changed.disconnect(_apply_wallpaper)
+	if DebugSettings.debug_mode_changed.is_connected(_on_debug_mode_changed):
+		DebugSettings.debug_mode_changed.disconnect(_on_debug_mode_changed)
+
+## 按当前调试模式重建桌面图标。## 输入: 无。
+## 输出: 无。
+func _rebuild_shortcuts() -> void:
+	var grid: GridContainer = %DesktopIconGrid
+	for child: Node in grid.get_children():
+		grid.remove_child(child)
+		child.free()
+	var shortcut: PackedScene = preload("res://scenes/desktop/desktop_shortcut.tscn")
+	for app_info: Dictionary in WindowManager.get_visible_apps():
+		var entry: Button = shortcut.instantiate() as Button
+		entry.button_group = _shortcut_selection
+		entry.set_meta("app_id", app_info.app_id)
+		grid.add_child(entry)
+		entry.get_node("Layout/Icon").texture = load(app_info.icon_path) as Texture2D
+		entry.get_node("Layout/Caption").text = app_info.title
+
+## 调试模式变化后刷新入口。关闭时由 App 关掉测试台。## 输入: _enabled。
+## 输出: 无。
+func _on_debug_mode_changed(_enabled: bool) -> void:
+	_rebuild_shortcuts()
+	_on_resized()
 
 ## 按路径和显示方式更新桌面壁纸。无壁纸时露出青绿色底色。## 输入: path (String) - 壁纸路径，空字符串表示无壁纸；mode (int) - 铺满或原比例。输出: 无。
 func _apply_wallpaper(path: String, mode: int) -> void:

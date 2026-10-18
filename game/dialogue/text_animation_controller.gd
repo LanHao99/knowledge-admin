@@ -78,6 +78,9 @@ var _glitch_timer: Timer = null
 ## 是否正在播放动画。
 var _is_playing: bool = false
 
+## 当前行带有 {auto}，跳过打字机后仍要安排自动推进。
+var _pending_auto: bool = false
+
 ## 播放完成回调。
 var _on_complete: Callable = Callable()
 
@@ -119,6 +122,7 @@ func play_line(raw_text: String, on_complete: Callable = Callable()) -> void:
 	_raw_text = raw_text
 	_on_complete = on_complete
 	_skip_requested = false
+	_pending_auto = raw_text.contains("{auto}")
 
 	if disable_all_animations or not enable_typewriter or _label == null:
 		_show_instant(raw_text)
@@ -157,6 +161,8 @@ func skip_to_end() -> void:
 
 	if _on_complete.is_valid():
 		_on_complete.call()
+	if _pending_auto:
+		_emit_auto_advance()
 
 
 ## 检查是否正在播放动画。## 输入: 无。
@@ -168,6 +174,7 @@ func is_playing() -> bool:
 ## 清除当前文字显示。## 输入: 无。
 ## 输出: 无。
 func clear() -> void:
+	_pending_auto = false
 	_stop_current_animation()
 	_on_complete = Callable()
 	if _label != null:
@@ -458,7 +465,16 @@ func _start_segmented_typewriter(segments: Array, pure_text: String) -> void:
 	_tween.tween_callback(_on_typewriter_finished)
 
 	if has_auto:
-		_tween.tween_callback(func(): auto_advance_requested.emit())
+		_tween.tween_callback(_emit_auto_advance)
+
+
+## 发出一次自动推进，并清掉待处理标记。## 输入: 无。
+## 输出: 无。
+func _emit_auto_advance() -> void:
+	if not _pending_auto:
+		return
+	_pending_auto = false
+	auto_advance_requested.emit()
 
 
 ## Tween 回调：设置可见字符数。## 输入: count (int) — 当前可见字符数。

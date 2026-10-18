@@ -15,7 +15,7 @@ const SAVE_PATH: String = "user://story_progress.tres"
 ## 当前章节标识符，如 "chapter_1"、"prologue"，用于条件分支。
 @export var current_chapter: String = ""
 
-## 已完成对话 ID 列表，如 ["intro_met_ai", "ch1_revelation"]。
+## 已完成对话记录。新记录使用「章节/剧情」，旧的短标识在读取时迁移。
 @export var completed_dialogues: Array[String] = []
 
 ## 剧情标记字典，如 {"met_character_x": true, "found_secret": false}。
@@ -32,6 +32,8 @@ const SAVE_PATH: String = "user://story_progress.tres"
 
 ## 已触发过的羁绊专属对话 ID 列表（防止重复触发）。
 @export var bond_dialogues_triggered: Array[String] = []
+
+const RECORD_SEPARATOR: String = "/"
 
 
 # ── 羁绊系统 ──
@@ -58,6 +60,12 @@ func get_bond_tier_name(tier: int = -1) -> String:
 		2: return "信任"
 		3: return "羁绊"
 		_: return "陌生人"
+
+
+## 按当前好感度重写羁绊层级标记。## 输入: 无。
+## 输出: 无。
+func sync_bond_flags() -> void:
+	_sync_bond_flags()
 
 
 ## 羁绊值改变后同步 flags（供 DialogueManager 条件检测）。## 输入: 无。
@@ -152,10 +160,28 @@ func consume_progress(amount: int = 0) -> void:
 # ── 对话完成管理 ──
 
 
-## 检查某个对话 ID 是否已完成。## 输入: dialogue_id (String) - 对话唯一标识符。
+## 把章节和剧情标识拼成完成记录。## 输入: chapter、dialogue_key。
+## 输出: String。
+static func record_key(chapter: String, dialogue_key: String) -> String:
+	return "%s%s%s" % [chapter, RECORD_SEPARATOR, dialogue_key]
+
+
+## 判断完成记录是否已经带有章节。## 输入: record (String)。
+## 输出: bool。
+static func is_composite_record(record: String) -> bool:
+	return record.find(RECORD_SEPARATOR) > 0
+
+
+## 检查某个完成记录是否已存在。## 输入: dialogue_id (String) - 完整记录或历史短标识。
 ## 输出: bool，已完成返回 true。
 func is_dialogue_completed(dialogue_id: String) -> bool:
 	return dialogue_id in completed_dialogues
+
+
+## 检查某一章的主线是否已完成。## 输入: chapter、dialogue_key。
+## 输出: bool。
+func is_chapter_dialogue_completed(chapter: String, dialogue_key: String) -> bool:
+	return is_dialogue_completed(record_key(chapter, dialogue_key))
 
 
 ## 标记某个对话为已完成（去重）。## 输入: dialogue_id (String) - 对话唯一标识符。
@@ -163,6 +189,62 @@ func is_dialogue_completed(dialogue_id: String) -> bool:
 func mark_dialogue_completed(dialogue_id: String) -> void:
 	if not is_dialogue_completed(dialogue_id):
 		completed_dialogues.append(dialogue_id)
+
+
+## 用「章节/剧情」标记当前章节外的主线完成。## 输入: chapter、dialogue_key。
+## 输出: 无。
+func mark_chapter_dialogue(chapter: String, dialogue_key: String) -> void:
+	mark_dialogue_completed(record_key(chapter, dialogue_key))
+
+
+## 用另一份剧情的字段覆盖当前实例，保留这个对象本身。## 输入: other (StoryProgress)。
+## 输出: 无。
+func copy_from(other: StoryProgress) -> void:
+	if other == null:
+		return
+	total_progress = other.total_progress
+	current_chapter = other.current_chapter
+	assign_strings(completed_dialogues, other.completed_dialogues)
+	flags = other.flags.duplicate(true)
+	last_triggered_at = other.last_triggered_at
+	trigger_threshold = other.trigger_threshold
+	bond = other.bond
+	assign_strings(bond_dialogues_triggered, other.bond_dialogues_triggered)
+
+
+## 把字符串数组写入目标数组。## 输入: target、source。
+## 输出: 无。
+static func assign_strings(target: Array[String], source: Array) -> void:
+	target.clear()
+	for item in source:
+		target.append(str(item))
+
+
+## 检查进度、好感度和触发阈值的取值范围。## 输入: 无。
+## 输出: Dictionary。失败时 message 说明哪一项不合法。
+func validate_numbers() -> Dictionary:
+	if total_progress < 0:
+		return {"success": false, "error": "STORY_PROGRESS", "message": "进度必须是非负整数"}
+	if bond < 0:
+		return {"success": false, "error": "STORY_PROGRESS", "message": "好感度必须是非负整数"}
+	if trigger_threshold < 1:
+		return {"success": false, "error": "STORY_PROGRESS", "message": "触发阈值至少为 1"}
+	return {"success": true, "data": true}
+
+
+## 复制当前全部剧情字段，供草稿和冲突比较使用。## 输入: 无。
+## 输出: Dictionary。
+func capture_state() -> Dictionary:
+	return {
+		"total_progress": total_progress,
+		"current_chapter": current_chapter,
+		"trigger_threshold": trigger_threshold,
+		"bond": bond,
+		"last_triggered_at": last_triggered_at,
+		"completed_dialogues": completed_dialogues.duplicate(),
+		"bond_dialogues_triggered": bond_dialogues_triggered.duplicate(),
+		"flags": flags.duplicate(true),
+	}
 
 
 # ── 标记系统 ──
@@ -222,7 +304,8 @@ func to_dict() -> Dictionary:
 		"last_triggered_at": last_triggered_at,
 		"trigger_threshold": trigger_threshold,
 		"bond": bond,
-		"bond_tier": get_bond_tier()
+		"bond_tier": get_bond_tier(),
+		"bond_dialogues_triggered": bond_dialogues_triggered.duplicate(),
 	}
 
 

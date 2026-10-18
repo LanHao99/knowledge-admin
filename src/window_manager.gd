@@ -12,6 +12,7 @@ const REGISTRY: Dictionary = {
 	"my_computer": {"title": "我的电脑", "icon_path": "res://assets/icons/desktop_computer.svg", "scene_path": "res://scenes/desktop/my_computer.tscn", "entry_visible": true, "default_size": Vector2(1000, 720)},
 	"recycle_bin": {"title": "回收站", "icon_path": "res://assets/icons/desktop_recycle.svg", "scene_path": "res://scenes/desktop/recycle_bin.tscn", "entry_visible": true, "default_size": Vector2(820, 560)},
 	"window_lab": {"title": "窗口实验室", "icon_path": "res://assets/icons/control/window.svg", "scene_path": "res://scenes/desktop/window_lab.tscn", "entry_visible": true, "default_size": Vector2(900, 620)},
+	"story_test": {"title": "剧情测试台", "icon_path": "res://assets/icons/desktop_ai.svg", "scene_path": "res://scenes/desktop/story_test_bench.tscn", "entry_visible": true, "debug_only": true, "default_size": Vector2(1100, 760)},
 	"unknown_program": {"title": "未知程序", "icon_path": "res://assets/icons/desktop_unknown.svg", "scene_path": "res://scenes/desktop/unknown_program.tscn", "entry_visible": false, "default_size": Vector2(1180, 800)},
 	"help": {"title": "使用帮助", "icon_path": "res://assets/icons/desktop_knowledge.svg", "scene_path": "res://game/dialogue/story_dialogue_overlay.tscn", "entry_visible": false, "default_size": Vector2(1100, 740)},
 }
@@ -58,6 +59,8 @@ func is_available() -> bool:
 ## 打开或激活一个单实例应用。## 输入: app_id。输出: 是否成功。
 func open_app(app_id: String) -> bool:
 	if not is_available() or not REGISTRY.has(app_id) or _pending_shatters.has(app_id):
+		return false
+	if bool(REGISTRY[app_id].get("debug_only", false)) and not _debug_entry_enabled():
 		return false
 	if _story_locked and app_id != "unknown_program":
 		return false
@@ -244,11 +247,48 @@ func get_app_window(app_id: String) -> ManagedWindow:
 func get_visible_apps() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for app_id: String in REGISTRY:
-		if REGISTRY[app_id].entry_visible:
-			var entry: Dictionary = REGISTRY[app_id].duplicate()
-			entry["app_id"] = app_id
-			result.append(entry)
+		if not REGISTRY[app_id].entry_visible:
+			continue
+		if bool(REGISTRY[app_id].get("debug_only", false)) and not _debug_entry_enabled():
+			continue
+		var entry: Dictionary = REGISTRY[app_id].duplicate()
+		entry["app_id"] = app_id
+		result.append(entry)
 	return result
+
+
+## 调试模式关闭时强制关闭调试应用，不抢占正在播放的剧情焦点。## 输入: app_id。
+## 输出: 无。
+func close_debug_app(app_id: String) -> void:
+	if not bool(REGISTRY.get(app_id, {}).get("debug_only", false)):
+		return
+	var window: ManagedWindow = get_app_window(app_id)
+	if window == null:
+		return
+	window.stop_impact()
+	_layouts[app_id] = Rect2(window.position, window.size)
+	if _taskbar != null and _taskbar.has_method("remove_app_button"):
+		_taskbar.remove_app_button(app_id)
+	_open_windows.erase(app_id)
+	_minimized_popups.erase(app_id)
+	if window.get_parent() != null:
+		window.get_parent().remove_child(window)
+	window.queue_free()
+	if _active_app_id == app_id:
+		_active_app_id = ""
+		if not _story_locked:
+			_focus_top_window()
+	app_closed.emit(app_id)
+
+
+## 当前进程是否打开了调试模式。## 输入: 无。
+## 输出: bool。
+func _debug_entry_enabled() -> bool:
+	var tree := get_tree()
+	if tree == null:
+		return false
+	var settings := tree.root.get_node_or_null("DebugSettings")
+	return settings != null and bool(settings.get("debug_mode"))
 
 ## 提到前台并刷新只读页面，编辑和学习状态保持。## 输入: window、app_id。输出: 无。
 func _activate_window(window: ManagedWindow, app_id: String) -> void:

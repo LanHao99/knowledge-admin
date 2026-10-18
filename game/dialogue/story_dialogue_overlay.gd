@@ -50,6 +50,26 @@ var _is_waiting_for_choice: bool = false
 ## 打字机是否正在播放中。
 var _is_animating: bool = false
 
+## 这次播放是否由剧情测试台发起。
+var _test_playback: bool = false
+
+## 测试停止后不再推进，也不记完成。
+var _stop_requested: bool = false
+
+## 正在等待 DialogueManager 执行当前剧本。
+var _resolving_line: bool = false
+
+## 对话结束流程是否已经跑过。
+var _closed: bool = false
+
+## 让延迟自动推进在停止后失效。
+var _session_token: int = 0
+
+## 已经安排的延迟自动推进次数。
+var auto_advance_count: int = 0
+
+var _stop_button: Button = null
+
 
 # ── 节点引用 ──
 
@@ -77,6 +97,7 @@ func _ready() -> void:
 		_text_animator.speed_multiplier = text_speed_multiplier
 		_text_animator.typewriter_completed.connect(_on_typewriter_finished)
 		_text_animator.auto_advance_requested.connect(_on_auto_advance_requested)
+	_ensure_stop_button()
 
 
 ## 处理输入：跳过/阻止。## 输入: event (InputEvent)。
@@ -105,12 +126,41 @@ func set_story_manager(manager: StoryManager) -> void:
 	_story_manager = manager
 
 
+## 只在测试发起的播放里显示停止按钮。## 输入: enabled (bool)。
+## 输出: 无。
+func set_test_playback(enabled: bool) -> void:
+	_test_playback = enabled
+	if not enabled:
+		_stop_requested = false
+	_ensure_stop_button()
+	if _stop_button != null:
+		_stop_button.visible = enabled
+
+
+## 请求停止测试。正在执行的剧本返回后才结束，并取消延迟回调。## 输入: 无。
+## 输出: 无。
+func request_test_stop() -> void:
+	if _closed:
+		return
+	_stop_requested = true
+	_session_token += 1
+	if _text_animator != null:
+		_text_animator.clear()
+	_is_animating = false
+	_is_waiting_for_choice = false
+	if not _resolving_line:
+		_end_dialogue(false)
+
+
 ## 开始播放对话（由 App.request_dialogue 调用）。## 输入:
 ##   resource (DialogueResource) - 已加载的对话资源。
 ##   key (String) - 对话标识符（用于标记完成）。
 ##   start_title (String) - 起始标题/ID。
 ## 输出: 无。
 func start(resource, key: String = "", start_title: String = "") -> void:
+	_closed = false
+	_stop_requested = false
+	_session_token += 1
 	if resource == null:
 		_end_dialogue()
 		return
@@ -120,12 +170,18 @@ func start(resource, key: String = "", start_title: String = "") -> void:
 	_main_control.show()
 	_answer_bar.hide()
 	_set_status("")
+	_ensure_stop_button()
 
 	var title: String = start_title
 	if title.is_empty() and is_instance_valid(resource):
 		title = resource.first_title if not resource.first_title.is_empty() else ""
 
+	_resolving_line = true
 	var line = await _dialogue_manager.get_next_dialogue_line(resource, title)
+	_resolving_line = false
+	if _stop_requested or _closed:
+		_end_dialogue(false)
+		return
 	await _show_line(line)
 
 
@@ -135,6 +191,9 @@ func start(resource, key: String = "", start_title: String = "") -> void:
 ## 展示一行对话（角色名 + 打字机动画文本 + 选项）。## 输入: line (DialogueLine)。
 ## 输出: 无。
 func _show_line(line) -> void:
+	if _closed or _stop_requested:
+		_end_dialogue(false)
+		return
 	if line == null:
 		_end_dialogue()
 		return
@@ -186,7 +245,12 @@ func _on_card_panel_clicked(event: InputEvent = null) -> void:
 
 	# 推进到下一行
 	if not _current_line.next_id.is_empty():
+		_resolving_line = true
 		var next_line = await _dialogue_manager.get_next_dialogue_line(_current_resource, _current_line.next_id)
+		_resolving_line = false
+		if _stop_requested or _closed:
+			_end_dialogue(false)
+			return
 		await _show_line(next_line)
 
 
@@ -233,16 +297,26 @@ func _on_option_selected(index: int) -> void:
 		return
 
 	_is_waiting_for_choice = false
+	_resolving_line = true
 	var next_line = await _dialogue_manager.get_next_dialogue_line(_current_resource, next_id)
+	_resolving_line = false
+	if _stop_requested or _closed:
+		_end_dialogue(false)
+		return
 	await _show_line(next_line)
 
 
 # ── 对话结束 ──
 
 
-## 结束当前对话序列，隐藏覆盖层，标记完成。## 输入: 无。
+## 结束当前对话序列，隐藏覆盖层。mark_complete 为 false 时不记完成。## 输入: mark_complete。
 ## 输出: 无。
-func _end_dialogue() -> void:
+func _end_dialogue(mark_complete: bool = true) -> void:
+	if _closed:
+		return
+	_closed = true
+	_session_token += 1
+	var should_mark := mark_complete and not _stop_requested
 	# 停止文字动画
 	if _text_animator != null:
 		_text_animator.clear()
@@ -255,11 +329,15 @@ func _end_dialogue() -> void:
 	_is_waiting_for_choice = false
 	_set_status("")
 	_set_click_hint("")
+	if _stop_button != null:
+		_stop_button.visible = false
 
-	if not dialogue_key.is_empty() and _story_manager != null:
+	if should_mark and not dialogue_key.is_empty() and _story_manager != null:
 		_story_manager.complete_dialogue(dialogue_key)
 		_story_manager.end_dialogue()
 		dialogue_completed.emit(dialogue_key)
+	elif _story_manager != null and _story_manager.is_dialogue_active():
+		_story_manager.end_dialogue()
 
 	dialogue_finished.emit()
 
@@ -282,7 +360,10 @@ func _start_typewriter(text: String, line) -> void:
 	_set_click_hint("点击跳过 →")
 
 	# 构建完成回调（捕获 line 引用）
+	var token := _session_token
 	var callback := func():
+		if token != _session_token or _stop_requested or _closed:
+			return
 		_on_typewriter_done_for_line(line)
 
 	_text_animator.play_line(text, callback)
@@ -322,14 +403,23 @@ func _on_typewriter_done_for_line(line) -> void:
 ## 自动推进请求回调（{auto} 标记触发）。## 输入: 无。
 ## 输出: 无。
 func _on_auto_advance_requested() -> void:
-	# 短暂延迟后自动推进
+	# 短暂延迟后自动推进。停止测试会作废这次回调。
+	auto_advance_count += 1
+	var token := _session_token
 	await get_tree().create_timer(0.6).timeout
 
+	if token != _session_token or _stop_requested or _closed:
+		return
 	if _current_line == null or _is_waiting_for_choice:
 		return
 
 	if not _current_line.next_id.is_empty():
+		_resolving_line = true
 		var next_line = await _dialogue_manager.get_next_dialogue_line(_current_resource, _current_line.next_id)
+		_resolving_line = false
+		if _stop_requested or _closed:
+			_end_dialogue(false)
+			return
 		await _show_line(next_line)
 
 
@@ -368,6 +458,35 @@ func _set_character_color(character_name: String) -> void:
 			_character_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.75, 1.0))  # 灰色（未揭示身份）
 		_:
 			_character_label.add_theme_color_override("font_color", Color(0.9, 0.75, 0.3, 1.0))  # 默认金色
+
+
+## 创建只在测试播放时可见的停止按钮。## 输入: 无。
+## 输出: 无。
+func _ensure_stop_button() -> void:
+	if _stop_button != null and is_instance_valid(_stop_button):
+		return
+	if _character_label == null:
+		return
+	var bar := _character_label.get_parent()
+	if bar == null:
+		return
+	var button := Button.new()
+	button.name = "StopTestButton"
+	button.text = "停止测试"
+	button.visible = _test_playback
+	button.theme_type_variation = &"UiSecondaryButton"
+	button.pressed.connect(_on_stop_test_pressed)
+	bar.add_child(button)
+	bar.move_child(button, 0)
+	_stop_button = button
+
+
+## 测试播放中按下停止，不把这一段记成完成。## 输入: 无。
+## 输出: 无。
+func _on_stop_test_pressed() -> void:
+	if _stop_button != null:
+		_stop_button.disabled = true
+	App.stop_story_test("已停止测试")
 
 
 ## 移除 DialogueManager 在行字典中附加的临时资源引用，避免资源自引用。## 输入: 无。输出: 无。

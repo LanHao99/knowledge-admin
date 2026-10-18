@@ -1,0 +1,67 @@
+{
+	"categories": [
+		{
+			"uuid": "5d6b120c-1ddc-4ba3-b1cf-59bed8d25249",
+			"title": "Task",
+			"color": "569eff"
+		}
+	],
+	"stages": [
+		{
+			"uuid": "e5a47423-331c-4f11-92e7-e11f518b93b3",
+			"title": "Todo",
+			"tasks": []
+		},
+		{
+			"uuid": "c3c66ad7-ec8f-4784-a55f-6b66f985659c",
+			"title": "Doing",
+			"tasks": [
+				"378686c4-ad6b-4d9f-8db8-78b379abd1b6",
+				"e1ec5000-db23-42eb-8c6d-b7878fc26842"
+			]
+		},
+		{
+			"uuid": "410872b9-ce23-4fce-b3f2-8e66fd0dfc0b",
+			"title": "Done",
+			"tasks": [
+				"6f0c1a2e-7b34-4d55-9a10-c4e8b2d19f30"
+			]
+		}
+	],
+	"tasks": [
+		{
+			"uuid": "378686c4-ad6b-4d9f-8db8-78b379abd1b6",
+			"title": "重写剧情大纲",
+			"description": "",
+			"category": "5d6b120c-1ddc-4ba3-b1cf-59bed8d25249",
+			"steps": []
+		},
+		{
+			"uuid": "e1ec5000-db23-42eb-8c6d-b7878fc26842",
+			"title": "接入fmod",
+			"description": "",
+			"category": "5d6b120c-1ddc-4ba3-b1cf-59bed8d25249",
+			"steps": []
+		},
+		{
+			"uuid": "6f0c1a2e-7b34-4d55-9a10-c4e8b2d19f30",
+			"title": "剧情测试台",
+			"description": "调试模式下的剧情测试窗口：目录跳转、草稿存档、备份恢复和跨章完成记录。",
+			"category": "5d6b120c-1ddc-4ba3-b1cf-59bed8d25249",
+			"steps": []
+		}
+	],
+	"layout": {
+		"columns": [
+			[
+				"e5a47423-331c-4f11-92e7-e11f518b93b3"
+			],
+			[
+				"c3c66ad7-ec8f-4784-a55f-6b66f985659c"
+			],
+			[
+				"410872b9-ce23-4fce-b3f2-8e66fd0dfc0b"
+			]
+		]
+	}
+}
