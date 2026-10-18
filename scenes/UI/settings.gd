@@ -1,5 +1,5 @@
 extends Control
-## 设置场景。管理调试模式开关、教程重置、应用信息展示。
+## 设置场景。管理显示、壁纸、调试模式、教程重置和快捷键。
 
 const WindowContext: GDScript = preload("res://src/ui/window_context.gd")
 
@@ -20,9 +20,19 @@ const WindowContext: GDScript = preload("res://src/ui/window_context.gd")
 @onready var _meta_extras: VBoxContainer = %MetaExtras
 @onready var _shortcut_rows: VBoxContainer = %ShortcutRows
 @onready var _reset_shortcuts: Button = %ResetShortcutsButton
+@onready var _wallpaper_list: ItemList = %WallpaperList
+@onready var _wallpaper_preview: TextureRect = %WallpaperPreview
+@onready var _wallpaper_preview_backdrop: ColorRect = %WallpaperPreviewBackdrop
+@onready var _wallpaper_preview_ratio: AspectRatioContainer = %WallpaperPreviewRatio
+@onready var _wallpaper_fill_check: CheckBox = %WallpaperFillCheck
+@onready var _wallpaper_fit_check: CheckBox = %WallpaperFitCheck
+
+const DESKTOP_BACKGROUND := Color(0.0, 0.502, 0.502, 1.0)
 
 var _listening_action: StringName = &""
 var _shortcut_buttons: Dictionary = {}
+var _wallpaper_mode_group: ButtonGroup = ButtonGroup.new()
+var _syncing_wallpaper: bool = false
 
 
 # ── 生命周期 ──
@@ -49,6 +59,7 @@ func _ready() -> void:
 	if not App.flags_changed.is_connected(_on_flags_changed):
 		App.flags_changed.connect(_on_flags_changed)
 	_setup_shortcuts()
+	_setup_wallpaper()
 	TutorialManager.check_and_show("settings", self)
 
 
@@ -63,6 +74,13 @@ func _exit_tree() -> void:
 		ShortcutSettings.settings_save_failed.disconnect(_on_shortcut_save_failed)
 	if WindowManager.app_focused.is_connected(_on_shortcut_app_focused):
 		WindowManager.app_focused.disconnect(_on_shortcut_app_focused)
+	if WallpaperSettings.wallpaper_changed.is_connected(_sync_wallpaper_controls):
+		WallpaperSettings.wallpaper_changed.disconnect(_sync_wallpaper_controls)
+	if WallpaperSettings.settings_save_failed.is_connected(_on_wallpaper_save_failed):
+		WallpaperSettings.settings_save_failed.disconnect(_on_wallpaper_save_failed)
+	var viewport := get_viewport()
+	if viewport != null and viewport.size_changed.is_connected(_update_wallpaper_preview_ratio):
+		viewport.size_changed.disconnect(_update_wallpaper_preview_ratio)
 
 
 # ── 信号连接 ──
@@ -349,6 +367,121 @@ func _on_shortcut_app_focused(app_id: String) -> void:
 		return
 	_listening_action = &""
 	_refresh_shortcut_buttons()
+
+
+## 列出壁纸并同步当前选择、预览和显示方式。## 输入: 无。
+## 输出: 无。
+func _setup_wallpaper() -> void:
+	_wallpaper_fill_check.button_group = _wallpaper_mode_group
+	_wallpaper_fit_check.button_group = _wallpaper_mode_group
+	_build_wallpaper_list()
+	_wallpaper_list.item_selected.connect(_on_wallpaper_selected)
+	_wallpaper_fill_check.toggled.connect(_on_wallpaper_mode_toggled.bind(WallpaperSettings.MODE_FILL))
+	_wallpaper_fit_check.toggled.connect(_on_wallpaper_mode_toggled.bind(WallpaperSettings.MODE_FIT))
+	if not WallpaperSettings.wallpaper_changed.is_connected(_sync_wallpaper_controls):
+		WallpaperSettings.wallpaper_changed.connect(_sync_wallpaper_controls)
+	if not WallpaperSettings.settings_save_failed.is_connected(_on_wallpaper_save_failed):
+		WallpaperSettings.settings_save_failed.connect(_on_wallpaper_save_failed)
+	var viewport := get_viewport()
+	if viewport != null and not viewport.size_changed.is_connected(_update_wallpaper_preview_ratio):
+		viewport.size_changed.connect(_update_wallpaper_preview_ratio)
+	_update_wallpaper_preview_ratio()
+	_sync_wallpaper_controls(WallpaperSettings.wallpaper_path, WallpaperSettings.display_mode)
+
+
+## 用「无壁纸」和目录中的图片填充列表，图标使用原图缩略。## 输入: 无。
+## 输出: 无。
+func _build_wallpaper_list() -> void:
+	_wallpaper_list.clear()
+	var none_index := _wallpaper_list.add_item("无壁纸")
+	_wallpaper_list.set_item_metadata(none_index, "")
+	for path: String in WallpaperSettings.list_wallpapers():
+		var index := _wallpaper_list.add_item(path.get_file())
+		_wallpaper_list.set_item_metadata(index, path)
+		var texture := WallpaperSettings.load_texture(path)
+		if texture != null:
+			_wallpaper_list.set_item_icon(index, texture)
+
+
+## 把列表选择写入壁纸设置。## 输入: index (int) - 被选中的列表项。
+## 输出: 无。
+func _on_wallpaper_selected(index: int) -> void:
+	if _syncing_wallpaper:
+		return
+	WallpaperSettings.set_wallpaper(str(_wallpaper_list.get_item_metadata(index)))
+
+
+## 勾选一种显示方式后立即应用。取消勾选由按钮组处理，这里忽略。## 输入:
+##   pressed (bool) - 是否变为勾选。
+##   mode (int) - 对应的显示方式。
+## 输出: 无。
+func _on_wallpaper_mode_toggled(pressed: bool, mode: int) -> void:
+	if not pressed:
+		return
+	WallpaperSettings.set_display_mode(mode)
+
+
+## 按当前壁纸回写列表、勾选和预览，不反向触发选择信号。## 输入:
+##   path (String) - 壁纸路径，空字符串表示无壁纸。
+##   mode (int) - 铺满或原比例。
+## 输出: 无。
+func _sync_wallpaper_controls(path: String, mode: int) -> void:
+	var selected := 0
+	for index: int in _wallpaper_list.item_count:
+		if str(_wallpaper_list.get_item_metadata(index)) == path:
+			selected = index
+			break
+	_syncing_wallpaper = true
+	_wallpaper_list.deselect_all()
+	_wallpaper_list.select(selected)
+	_syncing_wallpaper = false
+	var has_wallpaper := not path.is_empty()
+	_wallpaper_fill_check.disabled = not has_wallpaper
+	_wallpaper_fit_check.disabled = not has_wallpaper
+	_wallpaper_fill_check.set_pressed_no_signal(mode != WallpaperSettings.MODE_FIT)
+	_wallpaper_fit_check.set_pressed_no_signal(mode == WallpaperSettings.MODE_FIT)
+	_refresh_wallpaper_preview(path, mode)
+
+
+## 在预览区按当前屏幕比例演示铺满或黑边。## 输入:
+##   path (String) - 壁纸路径，空字符串表示无壁纸。
+##   mode (int) - 铺满或原比例。
+## 输出: 无。
+func _refresh_wallpaper_preview(path: String, mode: int) -> void:
+	var texture := WallpaperSettings.load_texture(path)
+	if texture == null:
+		_wallpaper_preview.texture = null
+		_wallpaper_preview.visible = false
+		_wallpaper_preview_backdrop.color = DESKTOP_BACKGROUND
+		return
+	_wallpaper_preview.texture = texture
+	_wallpaper_preview.visible = true
+	_wallpaper_preview_backdrop.color = Color.BLACK
+	if mode == WallpaperSettings.MODE_FIT:
+		_wallpaper_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	else:
+		_wallpaper_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+
+
+## 让预览区比例跟随当前屏幕，而不是图片本身。## 输入: 无。
+## 输出: 无。
+func _update_wallpaper_preview_ratio() -> void:
+	if _wallpaper_preview_ratio == null:
+		return
+	var viewport := get_viewport()
+	if viewport == null:
+		return
+	var viewport_size := viewport.get_visible_rect().size
+	if viewport_size.y <= 0.0:
+		return
+	_wallpaper_preview_ratio.ratio = viewport_size.x / viewport_size.y
+
+
+## 壁纸已生效但配置没有写入。## 输入: _error (int) - 保存错误码。
+## 输出: 无。
+func _on_wallpaper_save_failed(_error: int) -> void:
+	_set_status("壁纸已应用，但暂时无法保存。")
+	_status_label.theme_type_variation = &"UiError"
 
 
 ## 快捷键已生效但配置没有写入。## 输入: _error (int) - 保存错误码。

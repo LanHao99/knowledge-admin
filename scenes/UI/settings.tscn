@@ -146,6 +146,114 @@ size_flags_horizontal = 3
 theme_override_constants/separation = 16
 
 
+[node name="壁纸" type="ScrollContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+
+[node name="PageMargin" type="MarginContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/壁纸"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+
+[node name="PageVBox" type="VBoxContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/壁纸/PageMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+
+[node name="WallpaperLabel" type="Label" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/壁纸/PageMargin/PageVBox"]
+layout_mode = 2
+text = "桌面壁纸"
+
+
+[node name="WallpaperList" type="ItemList" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/壁纸/PageMargin/PageVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 240)
+size_flags_horizontal = 3
+icon_mode = 0
+fixed_icon_size = Vector2i(128, 72)
+max_columns = 4
+same_column_width = true
+
+
+[node name="PreviewCaption" type="Label" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/壁纸/PageMargin/PageVBox"]
+layout_mode = 2
+text = "预览"
+
+
+[node name="WallpaperPreviewInset" type="PanelContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/壁纸/PageMargin/PageVBox"]
+layout_mode = 2
+theme_type_variation = &"DesktopInset"
+
+
+[node name="WallpaperPreviewMargin" type="MarginContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/壁纸/PageMargin/PageVBox/WallpaperPreviewInset"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+
+[node name="WallpaperPreviewRatio" type="AspectRatioContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/壁纸/PageMargin/PageVBox/WallpaperPreviewInset/WallpaperPreviewMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 200)
+ratio = 1.7778
+stretch_mode = 1
+alignment_horizontal = 1
+alignment_vertical = 1
+
+
+[node name="WallpaperPreviewBackdrop" type="ColorRect" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/壁纸/PageMargin/PageVBox/WallpaperPreviewInset/WallpaperPreviewMargin/WallpaperPreviewRatio"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+color = Color(0, 0.502, 0.502, 1)
+
+
+[node name="WallpaperPreview" type="TextureRect" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/壁纸/PageMargin/PageVBox/WallpaperPreviewInset/WallpaperPreviewMargin/WallpaperPreviewRatio"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+
+[node name="WallpaperModeLabel" type="Label" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/壁纸/PageMargin/PageVBox"]
+layout_mode = 2
+text = "显示方式"
+
+
+[node name="WallpaperFillCheck" type="CheckBox" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/壁纸/PageMargin/PageVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+disabled = true
+button_pressed = true
+text = "铺满屏幕（保持比例，裁切边缘）"
+
+
+[node name="WallpaperFitCheck" type="CheckBox" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/壁纸/PageMargin/PageVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+disabled = true
+text = "原始比例（可能有黑边）"
+
+
+[node name="WallpaperHint" type="Label" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs/壁纸/PageMargin/PageVBox"]
+layout_mode = 2
+theme_type_variation = &"UiMuted"
+text = "选择后立即应用到桌面，自动保存。"
+autowrap_mode = 3
+
+
 [node name="通用" type="ScrollContainer" parent="PageScroll/RootMargin/SettingsCenter/SettingsFrame/FrameVBox/BodyMargin/SettingsTabs"]
 layout_mode = 2
 horizontal_scroll_mode = 0

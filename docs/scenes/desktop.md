@@ -24,6 +24,10 @@ WindowManager 注册 knowledge_admin、ai_cards、control_panel、my_computer、
 
 `tests/unit/test_desktop_file_catalog.gd` 验证默认场景的资源绑定、新增文档生成目录、多行正文显示、未绑定资源时的容错，以及编辑、快捷键保存、覆盖项删除和关闭询问。
 
+## 壁纸
+
+桌面底色仍是青绿色。选择壁纸后，底色之上的全屏图层显示 `res://assets/wallpapers/` 中的图片。铺满时保持比例并裁切边缘；原比例时图片居中，周围是黑边。控制面板的「壁纸」页可以预览和切换，配置保存在 `user://wallpaper_settings.cfg`。未选择壁纸时不显示这一层。
+
 ## 窗口与布局
 
 ManagedWindow 的标题栏、内容区、边框及八个缩放把手均保存在场景中。标题栏拖动、八向缩放、双击最大化、最小化、关闭与任务栏切换共用状态。最大化只使用工作区，任务栏高度只扣除一次。

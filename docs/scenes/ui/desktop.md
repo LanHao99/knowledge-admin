@@ -15,7 +15,7 @@ Classic98 伪桌面体验。游戏从启动画面进入桌面，所有应用在�
 
 `res://scenes/desktop/desktop.tscn` + `desktop.gd`
 
-- 背景：青绿色 ColorRect
+- 背景：青绿色 ColorRect。壁纸图层盖在底色上，未选择时隐藏；铺满为保持比例裁切，原比例居中并留黑边。图片来自 `res://assets/wallpapers/`，在控制面板中预览和切换
 - 左侧图标网格：从 `WindowManager.get_visible_apps()` 动态生成
 - 图标共享桌面实例内的 `ButtonGroup`，单击切换唯一选中高亮；重复单击保持选中，双击仍启动应用
 - 窗口容器（%WindowContainer）：所有窗口在此层级内排列

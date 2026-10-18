@@ -27,7 +27,31 @@ func _ready() -> void:
 	resized.connect(_on_resized)
 	_taskbar.resized.connect(_on_resized)
 	UiSettings.font_scale_changed.connect(_on_font_scale_changed)
+	if not WallpaperSettings.wallpaper_changed.is_connected(_apply_wallpaper):
+		WallpaperSettings.wallpaper_changed.connect(_apply_wallpaper)
+	_apply_wallpaper(WallpaperSettings.wallpaper_path, WallpaperSettings.display_mode)
 	_on_resized.call_deferred()
+
+## 桌面离开场景树时停止监听壁纸，避免调用已释放节点。## 输入: 无。输出: 无。
+func _exit_tree() -> void:
+	if WallpaperSettings.wallpaper_changed.is_connected(_apply_wallpaper):
+		WallpaperSettings.wallpaper_changed.disconnect(_apply_wallpaper)
+
+## 按路径和显示方式更新桌面壁纸。无壁纸时露出青绿色底色。## 输入: path (String) - 壁纸路径，空字符串表示无壁纸；mode (int) - 铺满或原比例。输出: 无。
+func _apply_wallpaper(path: String, mode: int) -> void:
+	var layer := $WallpaperLayer as Control
+	var wallpaper := %Wallpaper as TextureRect
+	var texture := WallpaperSettings.load_texture(path)
+	if texture == null:
+		wallpaper.texture = null
+		layer.visible = false
+		return
+	wallpaper.texture = texture
+	if mode == WallpaperSettings.MODE_FIT:
+		wallpaper.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	else:
+		wallpaper.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	layer.visible = true
 
 ## 字体变化后等待容器布局，再调整工作区。## 输入: _value。输出: 无。
 func _on_font_scale_changed(_value: float) -> void:
