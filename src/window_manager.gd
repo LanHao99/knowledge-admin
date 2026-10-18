@@ -410,18 +410,14 @@ func begin_dialogue(story: bool, source: Node) -> Control:
 		parent.process_mode = Node.PROCESS_MODE_DISABLED
 	return window.get_content()
 
-## 完成对话后恢复弹窗、学习现场及原先焦点。## 输入: story。输出: 无。
+## 对话结束时释放剧情进程并恢复弹窗、学习现场及焦点；碎裂窗口由快照回调释放。## 输入: story。输出: 无。
 func end_dialogue(story: bool) -> void:
 	if story:
 		var window: ManagedWindow = get_app_window("unknown_program")
 		_story_locked = false
 		_modal_layer.hide()
 		if window != null and not window.is_shattering():
-			window.get_content().end_story()
-			window.set_close_locked(false)
-			window.set_minimize_locked(false)
-			window.reparent(_window_container)
-			window._on_minimize_pressed()
+			_force_close("unknown_program")
 	else:
 		_help_owner = ""
 		_force_close("help")

@@ -42,7 +42,7 @@ DialogueManager 会等待确认和动作执行完毕，再读取下一句。选�
 do App.damage_story_window(0.7)
 ```
 
-对当前正式剧情的未知程序使用窗口实验室相同的局部破损与整窗震动。`0` 恢复，`1` 最强。损伤在该窗口实例内保留，不写入存档，不影响继续阅读、选项和后续剧情。剧情结束或最小化只收起窗口，裂纹继续保留；待机时点击关闭会销毁进程，重新打开或下段剧情重建实例后恢复完好。
+对当前正式剧情的未知程序使用窗口实验室相同的局部破损与整窗震动。`0` 恢复，`1` 最强。损伤只属于当前窗口实例，不写入存档，不影响继续阅读和选项。剧情自然结束、测试停止或点击关闭都会释放未知程序，下一次连接创建完整的新窗口。手动最小化不结束进程，因此保留裂纹。
 
 ```text
 do App.shatter_story_window()
@@ -67,6 +67,6 @@ do App.shatter_story_window()
 - `tests/unit/test_wallpaper_settings.gd`：默认锁定、即时解锁落盘、读回、旧存档和损坏字段。
 - `tests/desktop/verify_dialogue_actions.tscn`：隔离工程中验证真实剧情调用、两种破损、确认层与桌面壁纸的 GPU 画面。
 
-隐藏未解锁壁纸及关闭进程复原损伤的定向 GUT 17 项、146 条断言通过；剧情动作 GPU 48 项检查通过。当前完整 GUT 有 7 项「我的电脑」既有场景错误，详见 [壁纸选项与窗口关闭回归](../scenes/desktop_review/dialogue_actions/followup_validation.md)。
+剧情结束释放进程的定向 GUT 9 项、95 条断言通过；剧情动作 GPU 54 项及剧情测试台 GPU 265 项检查通过。当前完整 GUT 103 项中有 7 项「我的电脑」既有场景错误，详见 [剧情进程释放回归](../scenes/desktop_review/dialogue_actions/process_cleanup_validation.md)。
 
 初次接入时的完整 GUT 95 项、646 条断言，以及窗口 GPU 219 项、剧情测试台 GPU 265 项的历史报告保存在 [剧情动作验收目录](../scenes/desktop_review/dialogue_actions/validation.md)。

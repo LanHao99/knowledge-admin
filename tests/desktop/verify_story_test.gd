@@ -77,10 +77,11 @@ func _verify_playback() -> void:
 	_check(view != null, "延迟回调测试已经打开剧情")
 	await _advance_until_auto(view)
 	var scheduled: int = view.auto_advance_count
+	var stopped_view: WeakRef = weakref(view)
 	App.stop_story_test("延迟回调停止")
 	await _until_unlocked()
 	await get_tree().create_timer(0.8).timeout
-	_check(view.auto_advance_count == scheduled, "停止后不再安排新的延迟推进")
+	_check(scheduled > 0 and stopped_view.get_ref() == null, "停止后释放正文，延迟回调不能再推进")
 	await _dismiss_dialogs()
 	_check(not App.get_story_progress().is_chapter_dialogue_completed("chapter_1", "intro"), "延迟回调停止不记完成")
 	_check(not WindowManager._story_locked and not App._test_playback, "延迟停止后桌面解锁")

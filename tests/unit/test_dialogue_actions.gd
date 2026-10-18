@@ -187,10 +187,10 @@ func test_story_window_damage_and_shatter_release_modal_lock() -> void:
 func test_partial_damage_survives_minimize_and_clears_after_process_close() -> void:
 	var desktop: Control = load("res://scenes/desktop/desktop.tscn").instantiate() as Control
 	add_child_autofree(desktop)
-	assert_not_null(WindowManager.begin_dialogue(true, null))
+	assert_true(WindowManager.open_app("unknown_program"))
 	var window: ManagedWindow = WindowManager.get_app_window("unknown_program")
-	assert_true(WindowManager.set_story_window_damage(0.7))
-	WindowManager.end_dialogue(true)
+	window.set_damage(0.7)
+	window._on_minimize_pressed()
 	assert_true(window.is_minimized())
 	assert_eq(window.damage_amount, 0.7)
 	assert_true(WindowManager.open_app("unknown_program"))
@@ -208,6 +208,30 @@ func test_partial_damage_survives_minimize_and_clears_after_process_close() -> v
 	assert_false((reopened.get_node("DamageOverlay") as CanvasItem).visible)
 	assert_not_null(WindowManager.begin_dialogue(true, null))
 	assert_eq(WindowManager.get_app_window("unknown_program").damage_amount, 0.0)
+	WindowManager.end_dialogue(true)
+
+
+## 剧情连接结束释放损伤实例，后续连接不继承裂纹，背景应用继续运行。## 输入: 无。输出: 无。
+func test_story_end_releases_damaged_process_before_next_connection() -> void:
+	var desktop: Control = load("res://scenes/desktop/desktop.tscn").instantiate() as Control
+	add_child_autofree(desktop)
+	assert_true(WindowManager.open_app("window_lab"))
+	assert_not_null(WindowManager.begin_dialogue(true, null))
+	var window: ManagedWindow = WindowManager.get_app_window("unknown_program")
+	var previous: WeakRef = weakref(window)
+	assert_true(WindowManager.set_story_window_damage(0.7))
+	WindowManager.end_dialogue(true)
+	assert_false(WindowManager._story_locked)
+	assert_false((desktop.get_node("ModalLayer") as Control).visible)
+	assert_null(WindowManager.get_app_window("unknown_program"))
+	assert_false(desktop.get_node("%Taskbar")._app_buttons.has("unknown_program"))
+	await wait_process_frames(2)
+	assert_null(previous.get_ref())
+	assert_eq(WindowManager.get_app_window("window_lab").process_mode, Node.PROCESS_MODE_INHERIT)
+	assert_not_null(WindowManager.begin_dialogue(true, null))
+	var next_window: ManagedWindow = WindowManager.get_app_window("unknown_program")
+	assert_eq(next_window.damage_amount, 0.0)
+	assert_false((next_window.get_node("DamageOverlay") as CanvasItem).visible)
 	WindowManager.end_dialogue(true)
 
 

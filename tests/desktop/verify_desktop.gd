@@ -260,7 +260,7 @@ func _run_taskbar_review() -> void:
 	await _capture("taskbar_icons")
 	_finish()
 
-## 验证剧情突现、输入锁、选择、后台待机和教程分流。## 输入: source。输出: 无。
+## 验证剧情突现、输入锁、选择、进程释放和教程分流。## 输入: source。输出: 无。
 func _verify_story(source: Node) -> void:
 	var resource: Resource = load("res://tests/desktop/story_fixture.dialogue")
 	var popup: ConfirmationDialog = ConfirmationDialog.new()
@@ -271,6 +271,7 @@ func _verify_story(source: Node) -> void:
 	App.request_dialogue(resource, "desktop_story_fixture", true)
 	await _frames()
 	var unknown: ManagedWindow = WindowManager.get_app_window("unknown_program")
+	var previous_unknown: WeakRef = weakref(unknown)
 	_check(unknown != null and WindowManager._story_locked, "剧情优先于排队教程并独立弹出")
 	_check(not popup.visible, "剧情隐藏已有嵌入式弹窗")
 	_check(not WindowManager.open_app("control_panel"), "剧情期间禁止激活其他软件")
@@ -281,7 +282,8 @@ func _verify_story(source: Node) -> void:
 	await _finish_dialogue()
 	await _frames()
 	_check(App.get_flag("desktop_choice_verified", false) == true, "剧情选项执行并保存世界标记")
-	_check(not WindowManager._story_locked and unknown.is_minimized(), "剧情结束恢复桌面，未知软件留在任务栏")
+	_check(not WindowManager._story_locked and previous_unknown.get_ref() == null, "剧情结束恢复桌面并释放未知程序")
+	_check(WindowManager.get_app_window("unknown_program") == null, "剧情结束不保留后台未知实例")
 	_check(WindowManager.get_app_window("help") != null, "排队教程显示为正常帮助窗口")
 	await _finish_dialogue()
 	await _frames()
@@ -289,7 +291,8 @@ func _verify_story(source: Node) -> void:
 	popup.queue_free()
 	App.request_dialogue(resource, "desktop_story_second", true)
 	await _frames()
-	_check(WindowManager.get_app_window("unknown_program") == unknown, "后续剧情复用同一个后台实例")
+	var reconnected: ManagedWindow = WindowManager.get_app_window("unknown_program")
+	_check(reconnected != null and previous_unknown.get_ref() == null and is_zero_approx(reconnected.damage_amount), "后续剧情创建无损新实例")
 	await _finish_dialogue()
 	await _frames()
 
