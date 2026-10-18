@@ -114,14 +114,20 @@ func test_desktop_applies_wallpaper_modes() -> void:
 	WallpaperSettings.wallpaper_changed.emit(saved_path, saved_mode)
 
 
-## 验证控制面板列出无壁纸和全部图片，并按屏幕比例准备预览。## 输入: 无。
+## 验证控制面板仅列出无壁纸和已解锁图片，并按屏幕比例准备预览。## 输入: 无。
 ## 输出: 无。
 func test_control_panel_lists_wallpapers_and_preview() -> void:
 	var settings := load("res://scenes/ui/settings.tscn").instantiate() as Control
 	add_child_autofree(settings)
 	var wallpaper_list := settings.get_node("%WallpaperList") as ItemList
 	assert_eq(wallpaper_list.get_item_text(0), "无壁纸")
-	assert_eq(wallpaper_list.item_count, WallpaperSettings.list_wallpapers().size() + 1)
+	var available: int = 0
+	for path: String in WallpaperSettings.list_wallpapers():
+		if WallpaperSettings.is_wallpaper_unlocked(path):
+			available += 1
+	assert_eq(wallpaper_list.item_count, available + 1)
+	for index: int in range(1, wallpaper_list.item_count):
+		assert_true(WallpaperSettings.is_wallpaper_unlocked(str(wallpaper_list.get_item_metadata(index))))
 	assert_eq(str(wallpaper_list.get_item_metadata(0)), "")
 	assert_true(wallpaper_list.get_item_icon(1) != null)
 	var ratio: AspectRatioContainer = settings.get_node("%WallpaperPreviewRatio") as AspectRatioContainer

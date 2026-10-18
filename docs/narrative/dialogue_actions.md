@@ -42,7 +42,7 @@ DialogueManager 会等待确认和动作执行完毕，再读取下一句。选�
 do App.damage_story_window(0.7)
 ```
 
-对当前正式剧情的未知程序使用窗口实验室相同的局部破损与整窗震动。`0` 恢复，`1` 最强。损伤在该窗口实例内保留，不写入存档，不影响继续阅读、选项和后续剧情。
+对当前正式剧情的未知程序使用窗口实验室相同的局部破损与整窗震动。`0` 恢复，`1` 最强。损伤在该窗口实例内保留，不写入存档，不影响继续阅读、选项和后续剧情。剧情结束或最小化只收起窗口，裂纹继续保留；待机时点击关闭会销毁进程，重新打开或下段剧情重建实例后恢复完好。
 
 ```text
 do App.shatter_story_window()
@@ -59,7 +59,7 @@ do App.shatter_story_window()
 
 `WallpaperSettings` 在 `user://wallpaper_settings.cfg` 的 `[wallpaper]` 节保存 `path`、`mode` 和 `unlocked`。当前项目的 `user://` 由 SaveDirectory 指向项目 `saves/`。
 
-`mountain1.png`、`tower1.png` 默认锁定，其他壁纸默认可用。控制面板显示“未解锁”并禁止选择，收到图片后已经打开的列表即时刷新。缺少解锁字段的旧存档保持这两张图片锁定；旧存档若正在使用其中一张而无解锁记录，回退为无壁纸。损坏或失效的解锁项被过滤。
+`mountain1.png`、`tower1.png` 默认锁定，其他壁纸默认可用。控制面板仅列出“无壁纸”和已解锁图片，锁定图片不显示。收到图片后已经打开的列表即时加入该项，保留原选择及预览。缺少解锁字段的旧存档保持这两张图片锁定；旧存档若正在使用其中一张而无解锁记录，回退为无壁纸。损坏或失效的解锁项被过滤。
 
 ## 验证入口
 
@@ -67,6 +67,6 @@ do App.shatter_story_window()
 - `tests/unit/test_wallpaper_settings.gd`：默认锁定、即时解锁落盘、读回、旧存档和损坏字段。
 - `tests/desktop/verify_dialogue_actions.tscn`：隔离工程中验证真实剧情调用、两种破损、确认层与桌面壁纸的 GPU 画面。
 
-Godot 4.7.2 下完整 GUT 95 项测试、646 条断言通过；剧情动作 GPU 35 项检查、原窗口特效 GPU 219 项检查及剧情测试台 GPU 265 项检查通过。覆盖 1280×720、1920×1080、80%～150% 字号，另由原回归验证最小窗口和画布缩放。
+隐藏未解锁壁纸及关闭进程复原损伤的定向 GUT 17 项、146 条断言通过；剧情动作 GPU 48 项检查通过。当前完整 GUT 有 7 项「我的电脑」既有场景错误，详见 [壁纸选项与窗口关闭回归](../scenes/desktop_review/dialogue_actions/followup_validation.md)。
 
-实际截图及报告保存在 [剧情动作验收目录](../scenes/desktop_review/dialogue_actions/validation.md)。
+初次接入时的完整 GUT 95 项、646 条断言，以及窗口 GPU 219 项、剧情测试台 GPU 265 项的历史报告保存在 [剧情动作验收目录](../scenes/desktop_review/dialogue_actions/validation.md)。

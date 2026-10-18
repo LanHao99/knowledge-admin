@@ -129,21 +129,34 @@ func test_internal_stop_and_invalid_requests_do_not_execute() -> void:
 	assert_null(App._action_confirmation)
 
 
-## 控制面板的锁定项不能选择，接收后已打开的列表立即解锁。## 输入: 无。输出: 无。
+## 控制面板隐藏锁定图片，收到后加入列表且保留原选择与预览。## 输入: 无。输出: 无。
 func test_open_control_panel_refreshes_unlocked_entries() -> void:
 	var panel: Control = load("res://scenes/ui/settings.tscn").instantiate() as Control
 	add_child_autofree(panel)
 	var items: ItemList = panel.get_node("%WallpaperList") as ItemList
-	var target: int = -1
+	var original_paths: PackedStringArray = []
 	for index: int in items.item_count:
-		if items.get_item_metadata(index) == WALLPAPER:
-			target = index
-	assert_gte(target, 0)
-	assert_true(items.is_item_disabled(target))
+		var path: String = str(items.get_item_metadata(index))
+		original_paths.append(path)
+		assert_false(WallpaperSettings.LOCKED_BY_DEFAULT.has(path))
+	assert_eq(original_paths[0], "")
+	var selected_path: String = "res://assets/wallpapers/tree.jpg"
+	WallpaperSettings.set_wallpaper(selected_path)
 	assert_true(WallpaperSettings.unlock_wallpaper(WALLPAPER))
-	assert_false(items.is_item_disabled(target))
-	assert_eq(items.get_item_text(target), "mountain1.png")
-	assert_not_null(items.get_item_icon(target))
+	assert_eq(items.item_count, original_paths.size() + 1)
+	assert_eq(items.get_item_text(0), "无壁纸")
+	for index: int in items.item_count:
+		var path: String = str(items.get_item_metadata(index))
+		assert_ne(path, "res://assets/wallpapers/tower1.png")
+		if path == WALLPAPER:
+			assert_eq(items.get_item_text(index), "mountain1.png")
+			assert_not_null(items.get_item_icon(index))
+			assert_false(items.is_item_disabled(index))
+	var selected: PackedInt32Array = items.get_selected_items()
+	assert_eq(selected.size(), 1)
+	assert_eq(items.get_item_metadata(selected[0]), selected_path)
+	assert_eq(WallpaperSettings.wallpaper_path, selected_path)
+	assert_eq((panel.get_node("%WallpaperPreview") as TextureRect).texture.resource_path, selected_path)
 
 
 ## 剧情特效仅作用于播放中的未知程序，完全破碎释放实例和任务栏后可重新打开。## 输入: 无。输出: 无。
@@ -165,6 +178,34 @@ func test_story_window_damage_and_shatter_release_modal_lock() -> void:
 	assert_null(WindowManager.get_app_window("unknown_program"))
 	assert_false(WindowManager._story_locked)
 	assert_false(desktop.get_node("ModalLayer").visible)
+	assert_not_null(WindowManager.begin_dialogue(true, null))
+	assert_eq(WindowManager.get_app_window("unknown_program").damage_amount, 0.0)
+	WindowManager.end_dialogue(true)
+
+
+## 最小化保留半破损，点击关闭销毁进程后重新打开恢复完好。## 输入: 无。输出: 无。
+func test_partial_damage_survives_minimize_and_clears_after_process_close() -> void:
+	var desktop: Control = load("res://scenes/desktop/desktop.tscn").instantiate() as Control
+	add_child_autofree(desktop)
+	assert_not_null(WindowManager.begin_dialogue(true, null))
+	var window: ManagedWindow = WindowManager.get_app_window("unknown_program")
+	assert_true(WindowManager.set_story_window_damage(0.7))
+	WindowManager.end_dialogue(true)
+	assert_true(window.is_minimized())
+	assert_eq(window.damage_amount, 0.7)
+	assert_true(WindowManager.open_app("unknown_program"))
+	assert_same(WindowManager.get_app_window("unknown_program"), window)
+	assert_eq(window.damage_amount, 0.7)
+	var previous: WeakRef = weakref(window)
+	window._on_close_pressed()
+	assert_null(WindowManager.get_app_window("unknown_program"))
+	assert_false(desktop.get_node("%Taskbar")._app_buttons.has("unknown_program"))
+	await wait_process_frames(2)
+	assert_null(previous.get_ref())
+	assert_true(WindowManager.open_app("unknown_program"))
+	var reopened: ManagedWindow = WindowManager.get_app_window("unknown_program")
+	assert_eq(reopened.damage_amount, 0.0)
+	assert_false((reopened.get_node("DamageOverlay") as CanvasItem).visible)
 	assert_not_null(WindowManager.begin_dialogue(true, null))
 	assert_eq(WindowManager.get_app_window("unknown_program").damage_amount, 0.0)
 	WindowManager.end_dialogue(true)

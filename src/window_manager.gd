@@ -234,7 +234,7 @@ func _contains_import(node: Node) -> bool:
 			return true
 	return false
 
-## 释放应用；未知程序通常保留实例，完全破碎时真实销毁。## 输入: app_id。输出: 无。
+## 销毁应用实例并移除任务栏入口，窗口损伤随实例释放。## 输入: app_id。输出: 无。
 func _force_close(app_id: String) -> void:
 	var window: ManagedWindow = get_app_window(app_id)
 	if window == null:
@@ -242,12 +242,9 @@ func _force_close(app_id: String) -> void:
 	window.stop_impact()
 	_layouts[app_id] = Rect2(window.position, window.size)
 	_taskbar.remove_app_button(app_id)
-	if app_id == "unknown_program" and not window.is_shattering():
-		window._on_minimize_pressed()
-	else:
-		_open_windows.erase(app_id)
-		window.get_parent().remove_child(window)
-		window.queue_free()
+	_open_windows.erase(app_id)
+	window.get_parent().remove_child(window)
+	window.queue_free()
 	_active_app_id = ""
 	_focus_top_window()
 	app_closed.emit(app_id)

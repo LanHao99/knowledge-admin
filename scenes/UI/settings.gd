@@ -393,18 +393,17 @@ func _setup_wallpaper() -> void:
 	_sync_wallpaper_controls(WallpaperSettings.wallpaper_path, WallpaperSettings.display_mode)
 
 
-## 用「无壁纸」和目录中的图片填充列表，图标使用原图缩略。## 输入: 无。
+## 用「无壁纸」和已解锁图片填充列表，图标使用原图缩略。## 输入: 无。
 ## 输出: 无。
 func _build_wallpaper_list() -> void:
 	_wallpaper_list.clear()
 	var none_index := _wallpaper_list.add_item("无壁纸")
 	_wallpaper_list.set_item_metadata(none_index, "")
 	for path: String in WallpaperSettings.list_wallpapers():
-		var unlocked: bool = WallpaperSettings.is_wallpaper_unlocked(path)
-		var label: String = path.get_file() if unlocked else "%s（未解锁）" % path.get_file()
-		var index := _wallpaper_list.add_item(label)
+		if not WallpaperSettings.is_wallpaper_unlocked(path):
+			continue
+		var index := _wallpaper_list.add_item(path.get_file())
 		_wallpaper_list.set_item_metadata(index, path)
-		_wallpaper_list.set_item_disabled(index, not unlocked)
 		var texture := WallpaperSettings.load_texture(path)
 		if texture != null:
 			_wallpaper_list.set_item_icon(index, texture)

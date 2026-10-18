@@ -43,6 +43,15 @@ func _run() -> void:
 
 ## 验证第二章先等待强制确认、Esc 不推进、停止可解除等待，确认后壁纸真实生效。## 输入: 无。输出: 无。
 func _verify_wallpaper() -> void:
+	_check(WindowManager.open_app("control_panel"), "打开壁纸设置")
+	var panel: Control = WindowManager.get_app_window("control_panel").get_content()
+	var items: ItemList = panel.get_node("%WallpaperList") as ItemList
+	var tabs: TabContainer = panel.find_child("SettingsTabs", true, false) as TabContainer
+	tabs.current_tab = tabs.get_tab_idx_from_control(tabs.get_node("壁纸"))
+	for index: int in items.item_count:
+		_check(not WallpaperSettings.LOCKED_BY_DEFAULT.has(str(items.get_item_metadata(index))), "锁定图片不生成选项")
+	await _frames(5)
+	await _capture("wallpaper_choices_locked_hidden")
 	_check(App.jump_to_story("chapter_2", "revelation").success, "跳转世界的真相")
 	await _frames(6)
 	var confirmation: DialogueActionConfirmation = App._action_confirmation
@@ -82,6 +91,13 @@ func _verify_wallpaper() -> void:
 	_check(App._overlay._current_line != null and not App._overlay._resolving_line, "确认后继续第一句")
 	await _drive(0)
 	_check(App.get_story_progress().is_chapter_dialogue_completed("chapter_2", "revelation"), "第二章本段自然完成")
+	var unlocked_paths: PackedStringArray = []
+	for index: int in items.item_count:
+		unlocked_paths.append(str(items.get_item_metadata(index)))
+	_check(unlocked_paths.has("res://assets/wallpapers/mountain1.png"), "已打开设置即时加入收到的壁纸")
+	_check(not unlocked_paths.has("res://assets/wallpapers/tower1.png"), "尚未收到的塔楼仍不出现在选项中")
+	await _capture("wallpaper_choices_after_unlock")
+	WindowManager.close_app("control_panel")
 	await _capture("wallpaper_applied")
 
 
@@ -103,6 +119,21 @@ func _verify_partial_damage() -> void:
 	await _capture("warning_partial_damage")
 	await _drive(0)
 	_check(App.get_story_progress().is_chapter_dialogue_completed("chapter_1", "warning"), "局部破损分支自然完成")
+	_check(WindowManager.open_app("unknown_program"), "剧情结束后恢复未知程序")
+	_check(WindowManager.get_app_window("unknown_program") == window and is_equal_approx(window.damage_amount, 0.7), "收起并恢复仍保留半破碎实例")
+	window._on_minimize_pressed()
+	WindowManager.open_app("unknown_program")
+	_check(is_equal_approx(window.damage_amount, 0.7), "最小化不清除裂纹")
+	var previous: WeakRef = weakref(window)
+	await _click((window.get_node("%CloseButton") as Button).get_global_rect().get_center())
+	await _frames(4)
+	_check(previous.get_ref() == null and WindowManager.get_app_window("unknown_program") == null, "点击关闭真实销毁半破碎进程")
+	_check(not _desktop.get_node("%Taskbar")._app_buttons.has("unknown_program"), "关闭后移除未知程序任务栏按钮")
+	_check(WindowManager.open_app("unknown_program"), "关闭后重新打开未知程序")
+	var reopened: ManagedWindow = WindowManager.get_app_window("unknown_program")
+	_check(is_equal_approx(reopened.damage_amount, 0.0) and not (reopened.get_node("DamageOverlay") as CanvasItem).visible, "新进程恢复完整窗口")
+	await _frames(5)
+	await _capture("unknown_program_after_close")
 
 
 ## 第二分支释放未知程序，产生真实 GPU 快照和碎片，并可打开无损的新剧情。## 输入: 无。输出: 无。
