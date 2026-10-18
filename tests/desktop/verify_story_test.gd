@@ -32,7 +32,8 @@ func _run() -> void:
 	DebugSettings.set_debug_mode(true)
 	var reset: Dictionary = App.reset_story_data()
 	_check(reset.success, "重置剧情: " + str(reset.get("message", "")))
-	await _verify_playback()
+	if not OS.get_cmdline_user_args().has("--story-layout-only"):
+		await _verify_playback()
 	await _verify_window()
 	_finish()
 
@@ -129,12 +130,22 @@ func _verify_window() -> void:
 	DebugSettings.set_debug_mode(true)
 	await _frames()
 	_check(_has_shortcut("story_test"), "调试模式显示桌面图标")
+	App.set_flag("layout_readonly", {"nested": [1, 2, 3]})
+	var seed: Dictionary = App.read_story_draft()
+	var flags: Dictionary = seed.get("flags", {})
+	flags["很长的剧情分支标记_用于检查窗口缩小时名称换行"] = "在大字号和窄窗口下仍能编辑"
+	flags["layout_enabled"] = true
+	flags["layout_numeric"] = 12
+	seed["flags"] = flags
+	App.update_story_draft(seed)
+	_check(App.apply_story_draft().success, "准备包含长名称与复杂值的隔离存档")
 	App.open_app("story_test")
 	await _frames()
 	var bench: ManagedWindow = WindowManager.get_app_window("story_test")
 	var instance_id: int = bench.get_instance_id()
 	App.open_app("story_test")
 	_check(WindowManager.get_app_window("story_test").get_instance_id() == instance_id, "测试台单实例")
+	await _verify_editor_controls(bench.get_content())
 	for resolution: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080)]:
 		get_tree().root.size = resolution
 		get_tree().root.content_scale_size = resolution
@@ -158,7 +169,12 @@ func _verify_window() -> void:
 					overflows = true
 			if resolution.y <= 720 or font_scale >= 1.5:
 				_check(overflows, "小窗口或大字号时内容可滚动")
+			await _verify_page_layouts(bench.get_content(), "%dx%d_%d" % [resolution.x, resolution.y, roundi(font_scale * 100)])
 			await _capture("story_test_%dx%d_%d" % [resolution.x, resolution.y, roundi(font_scale * 100)])
+	bench.size = Vector2(720, 500)
+	bench.fit_work_area()
+	await _frames()
+	await _verify_page_layouts(bench.get_content(), "minimum_720x500_150")
 	UiSettings.set_font_scale(1.0)
 	get_tree().root.size = Vector2i(1920, 1080)
 	get_tree().root.content_scale_size = Vector2i(1920, 1080)
@@ -186,6 +202,97 @@ func _verify_window() -> void:
 	DebugSettings.set_debug_mode(true)
 	await _frames()
 	_check(_has_shortcut("story_test"), "重新开启调试模式后恢复图标")
+
+
+## 通过真实保存按钮验证草稿、常驻操作栏和显示状态。## 输入: page (Control) - 测试台。
+## 输出: 无。
+func _verify_editor_controls(page: Control) -> void:
+	var tabs: TabContainer = page.get_node("%MainTabs")
+	tabs.current_tab = 1
+	await _frames()
+	var live_bond: int = App.get_bond()
+	var bond_spin: SpinBox = page.get_node("%BondSpin")
+	bond_spin.value = live_bond + 9
+	await _frames()
+	_check(App.get_bond() == live_bond and App.is_story_draft_dirty(), "数值编辑先进入草稿")
+	var save: Button = page.get_node("%ApplyButton")
+	_check(not save.disabled and page.get_node("%StartButton").disabled, "草稿期间启用保存并阻止播放")
+	_check(page.get_global_rect().encloses(save.get_global_rect()), "保存按钮固定在可见窗口内")
+	await _click(save.get_global_rect().get_center())
+	_check(App.get_bond() == live_bond + 9 and not App.is_story_draft_dirty(), "真实点击应用按钮后写入存档")
+	_check(str(page.get_node("%BondValue").text).contains(str(live_bond + 9)), "保存后摘要更新")
+	var toggle: Button = page.get_node("%DerivedToggle")
+	toggle.button_pressed = true
+	await _frames()
+	_check(page.get_node("%DerivedBox").visible and not App.is_story_draft_dirty(), "展开只读派生标记不修改草稿")
+	toggle.button_pressed = false
+	var editor_tabs: TabContainer = page.get_node("%EditorTabs")
+	editor_tabs.current_tab = 1
+	await _frames()
+	var checks: Array[Node] = page.get_node("%CompletionBox").find_children("*", "CheckBox", true, false)
+	_check(not checks.is_empty(), "完成记录按章节生成勾选框")
+	if not checks.is_empty():
+		(checks[0] as CheckBox).button_pressed = not (checks[0] as CheckBox).button_pressed
+		await _frames()
+		_check(App.is_story_draft_dirty() and save.is_visible_in_tree(), "完成记录修改也可从固定底栏保存")
+		await _click(page.get_node("%RevertButton").get_global_rect().get_center())
+		_check(not App.is_story_draft_dirty(), "真实点击撤销后放弃完成记录草稿")
+	var filter: OptionButton = page.get_node("%ChapterFilter")
+	filter.select(2)
+	filter.item_selected.emit(2)
+	await _frames()
+	_check(str(page.get_node("%ControlList").get_child(0).text).begins_with("第二章"), "章节筛选仅展示所选章节")
+	filter.select(1)
+	filter.item_selected.emit(1)
+	tabs.current_tab = 0
+	editor_tabs.current_tab = 0
+	await _frames()
+
+
+## 检查各页面、横向约束与固定操作栏，并保存真实画面。## 输入: page、label。
+## 输出: 无。
+func _verify_page_layouts(page: Control, label: String) -> void:
+	var tabs: TabContainer = page.get_node("%MainTabs")
+	var editor_tabs: TabContainer = page.get_node("%EditorTabs")
+	var backup_tabs: TabContainer = page.get_node("%BackupTabs")
+	for view: Dictionary in [
+		{"main": 0, "sub": 0, "name": "control"},
+		{"main": 1, "sub": 0, "name": "numbers"},
+		{"main": 1, "sub": 1, "name": "completions"},
+		{"main": 1, "sub": 2, "name": "flags"},
+		{"main": 2, "sub": 0, "name": "backups"},
+		{"main": 2, "sub": 1, "name": "snapshot"},
+	]:
+		tabs.current_tab = int(view.main)
+		if tabs.current_tab == 1:
+			editor_tabs.current_tab = int(view.sub)
+		elif tabs.current_tab == 2:
+			backup_tabs.current_tab = int(view.sub)
+		await _frames()
+		var caption: String = label + " " + str(view.name)
+		_check(page.get_global_rect().grow(1).encloses(tabs.get_global_rect()), caption + " 内容区位于窗口内")
+		_check(tabs.size.y >= 120.0, caption + " 内容区保留可用高度")
+		for item: Node in page.find_children("*", "ScrollContainer", true, false):
+			var scroll: ScrollContainer = item as ScrollContainer
+			if not scroll.is_visible_in_tree() or scroll.get_child_count() == 0:
+				continue
+			var content: Control = scroll.get_child(0) as Control
+			_check(scroll.size.y >= 72.0, caption + " 滚动区能显示编辑控件")
+			_check(content.size.x <= scroll.size.x + 1.0, caption + " 内容无需横向滚动")
+			if scroll.get_v_scroll_bar().max_value > scroll.size.y:
+				scroll.scroll_vertical = int(scroll.get_v_scroll_bar().max_value)
+				await _frames()
+				_check(page.get_global_rect().grow(1).encloses(tabs.get_global_rect()), caption + " 滚动后页面仍在窗口内")
+				scroll.scroll_vertical = 0
+		if tabs.current_tab == 1:
+			_check(page.get_global_rect().grow(1).encloses(page.get_node("%ApplyButton").get_global_rect()), caption + " 保存操作始终可见")
+			_check(page.get_global_rect().grow(1).encloses(page.get_node("%RevertButton").get_global_rect()), caption + " 撤销操作始终可见")
+		await _capture("layout_%s_%s" % [label, view.name])
+		print("STORY_LAYOUT_PAGE: ", caption)
+	tabs.current_tab = 0
+	editor_tabs.current_tab = 0
+	backup_tabs.current_tab = 0
+	await _frames()
 
 
 ## 推进到出现选项。## 输入: 无。

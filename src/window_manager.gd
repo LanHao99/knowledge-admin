@@ -281,9 +281,11 @@ func close_debug_app(app_id: String) -> void:
 	app_closed.emit(app_id)
 
 
-## 当前进程是否打开了调试模式。## 输入: 无。
+## 读取调试开关，尚未进入场景树时视为关闭。## 输入: 无。
 ## 输出: bool。
 func _debug_entry_enabled() -> bool:
+	if not is_inside_tree():
+		return false
 	var tree := get_tree()
 	if tree == null:
 		return false

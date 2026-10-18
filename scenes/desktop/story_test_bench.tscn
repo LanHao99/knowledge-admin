@@ -1,6 +1,9 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scenes/desktop/story_test_bench.gd" id="1_bench"]
+[ext_resource type="Theme" path="res://assets/UI/app_theme.tres" id="2_theme"]
+[ext_resource type="Script" path="res://src/ui/adaptive_row.gd" id="3_adaptive"]
+[ext_resource type="StyleBox" path="res://assets/desktop_themes/Classic95/Styles/General/Box.tres" id="4_inset"]
 
 [node name="StoryTestBench" type="Control"]
 layout_mode = 3
@@ -9,4 +12,618 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("2_theme")
 script = ExtResource("1_bench")
+
+[node name="PageMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="Page" type="VBoxContainer" parent="PageMargin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Summary" type="PanelContainer" parent="PageMargin/Page"]
+layout_mode = 2
+theme_type_variation = &"DesktopInset"
+
+[node name="SummaryMargin" type="MarginContainer" parent="PageMargin/Page/Summary"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="SummaryBody" type="VBoxContainer" parent="PageMargin/Page/Summary/SummaryMargin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Metrics" type="HFlowContainer" parent="PageMargin/Page/Summary/SummaryMargin/SummaryBody"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 6
+
+[node name="ChapterMetric" type="HBoxContainer" parent="PageMargin/Page/Summary/SummaryMargin/SummaryBody/Metrics"]
+layout_mode = 2
+theme_override_constants/separation = 10
+size_flags_horizontal = 3
+
+[node name="ChapterCaption" type="Label" parent="PageMargin/Page/Summary/SummaryMargin/SummaryBody/Metrics/ChapterMetric"]
+layout_mode = 2
+text = "章节"
+theme_type_variation = &"UiMuted"
+autowrap_mode = 0
+
+[node name="ChapterValue" type="Label" parent="PageMargin/Page/Summary/SummaryMargin/SummaryBody/Metrics/ChapterMetric"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "第一章"
+theme_type_variation = &"UiBody"
+autowrap_mode = 0
+
+[node name="ProgressMetric" type="HBoxContainer" parent="PageMargin/Page/Summary/SummaryMargin/SummaryBody/Metrics"]
+layout_mode = 2
+theme_override_constants/separation = 10
+size_flags_horizontal = 3
+
+[node name="ProgressCaption" type="Label" parent="PageMargin/Page/Summary/SummaryMargin/SummaryBody/Metrics/ProgressMetric"]
+layout_mode = 2
+text = "进度"
+tooltip_text = "当前剧情进度 / 触发阈值"
+theme_type_variation = &"UiMuted"
+autowrap_mode = 0
+
+[node name="ProgressValue" type="Label" parent="PageMargin/Page/Summary/SummaryMargin/SummaryBody/Metrics/ProgressMetric"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0 / 10"
+theme_type_variation = &"UiBody"
+autowrap_mode = 0
+
+[node name="BondMetric" type="HBoxContainer" parent="PageMargin/Page/Summary/SummaryMargin/SummaryBody/Metrics"]
+layout_mode = 2
+theme_override_constants/separation = 10
+size_flags_horizontal = 3
+
+[node name="BondCaption" type="Label" parent="PageMargin/Page/Summary/SummaryMargin/SummaryBody/Metrics/BondMetric"]
+layout_mode = 2
+text = "好感度"
+theme_type_variation = &"UiMuted"
+autowrap_mode = 0
+
+[node name="BondValue" type="Label" parent="PageMargin/Page/Summary/SummaryMargin/SummaryBody/Metrics/BondMetric"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0 · 陌生人"
+theme_type_variation = &"UiBody"
+autowrap_mode = 0
+
+[node name="PlaybackSummary" type="HBoxContainer" parent="PageMargin/Page/Summary/SummaryMargin/SummaryBody"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="NextCaption" type="Label" parent="PageMargin/Page/Summary/SummaryMargin/SummaryBody/PlaybackSummary"]
+layout_mode = 2
+text = "下一段"
+theme_type_variation = &"UiMuted"
+autowrap_mode = 0
+
+[node name="NextValue" type="Label" parent="PageMargin/Page/Summary/SummaryMargin/SummaryBody/PlaybackSummary"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "初次相遇"
+theme_type_variation = &"UiBody"
+autowrap_mode = 0
+size_flags_horizontal = 3
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="PlayingValue" type="Label" parent="PageMargin/Page/Summary/SummaryMargin/SummaryBody/PlaybackSummary"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "待机"
+theme_type_variation = &"UiMuted"
+autowrap_mode = 0
+
+[node name="Body" type="Control" parent="PageMargin/Page"]
+layout_mode = 2
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 120)
+
+[node name="MainTabs" type="TabContainer" parent="PageMargin/Page/Body"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+current_tab = 0
+
+[node name="剧情控制" type="VBoxContainer" parent="PageMargin/Page/Body/MainTabs"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ToolbarMargin" type="MarginContainer" parent="PageMargin/Page/Body/MainTabs/剧情控制"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="ControlToolbar" type="HFlowContainer" parent="PageMargin/Page/Body/MainTabs/剧情控制/ToolbarMargin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+size_flags_horizontal = 3
+
+[node name="StartButton" type="Button" parent="PageMargin/Page/Body/MainTabs/剧情控制/ToolbarMargin/ControlToolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "一键开启下一段"
+
+[node name="ChapterFilter" type="OptionButton" parent="PageMargin/Page/Body/MainTabs/剧情控制/ToolbarMargin/ControlToolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(190, 0)
+
+[node name="ControlScroll" type="ScrollContainer" parent="PageMargin/Page/Body/MainTabs/剧情控制"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_horizontal = 3
+horizontal_scroll_mode = 0
+follow_focus = true
+
+[node name="ListMargin" type="MarginContainer" parent="PageMargin/Page/Body/MainTabs/剧情控制/ControlScroll"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_bottom = 10
+size_flags_horizontal = 3
+
+[node name="ControlList" type="VBoxContainer" parent="PageMargin/Page/Body/MainTabs/剧情控制/ControlScroll/ListMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 10
+size_flags_horizontal = 3
+
+[node name="存档编辑" type="VBoxContainer" parent="PageMargin/Page/Body/MainTabs"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="EditorMargin" type="MarginContainer" parent="PageMargin/Page/Body/MainTabs/存档编辑"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_bottom = 8
+size_flags_vertical = 3
+
+[node name="EditorTabs" type="TabContainer" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+current_tab = 0
+
+[node name="数值" type="ScrollContainer" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_horizontal = 3
+horizontal_scroll_mode = 0
+follow_focus = true
+
+[node name="NumbersMargin" type="MarginContainer" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/数值"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_bottom = 6
+size_flags_horizontal = 3
+
+[node name="Numbers" type="VBoxContainer" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/数值/NumbersMargin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+size_flags_horizontal = 3
+
+[node name="NumberGrid" type="GridContainer" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/数值/NumbersMargin/Numbers"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 10
+script = ExtResource("3_adaptive")
+preferred_columns = 3
+minimum_column_width = 190.0
+columns = 3
+
+[node name="ProgressCell" type="VBoxContainer" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/数值/NumbersMargin/Numbers/NumberGrid"]
+layout_mode = 2
+theme_override_constants/separation = 10
+size_flags_horizontal = 3
+
+[node name="ProgressLabel" type="Label" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/数值/NumbersMargin/Numbers/NumberGrid/ProgressCell"]
+layout_mode = 2
+text = "剧情进度"
+theme_type_variation = &"UiBody"
+autowrap_mode = 3
+
+[node name="ProgressSpin" type="SpinBox" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/数值/NumbersMargin/Numbers/NumberGrid/ProgressCell"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 0.0
+max_value = 10000000.0
+value = 0.0
+rounded = true
+size_flags_horizontal = 3
+
+[node name="ThresholdCell" type="VBoxContainer" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/数值/NumbersMargin/Numbers/NumberGrid"]
+layout_mode = 2
+theme_override_constants/separation = 10
+size_flags_horizontal = 3
+
+[node name="ThresholdLabel" type="Label" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/数值/NumbersMargin/Numbers/NumberGrid/ThresholdCell"]
+layout_mode = 2
+text = "触发阈值"
+theme_type_variation = &"UiBody"
+autowrap_mode = 3
+
+[node name="ThresholdSpin" type="SpinBox" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/数值/NumbersMargin/Numbers/NumberGrid/ThresholdCell"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 1.0
+max_value = 10000000.0
+value = 1.0
+rounded = true
+size_flags_horizontal = 3
+
+[node name="BondCell" type="VBoxContainer" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/数值/NumbersMargin/Numbers/NumberGrid"]
+layout_mode = 2
+theme_override_constants/separation = 10
+size_flags_horizontal = 3
+
+[node name="BondLabel" type="Label" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/数值/NumbersMargin/Numbers/NumberGrid/BondCell"]
+layout_mode = 2
+text = "好感度"
+theme_type_variation = &"UiBody"
+autowrap_mode = 3
+
+[node name="BondSpin" type="SpinBox" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/数值/NumbersMargin/Numbers/NumberGrid/BondCell"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 0.0
+max_value = 10000000.0
+value = 0.0
+rounded = true
+size_flags_horizontal = 3
+
+[node name="NumbersHint" type="Label" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/数值/NumbersMargin/Numbers"]
+layout_mode = 2
+text = "编辑草稿，点击底部按钮保存。"
+tooltip_text = "修改先进入草稿，点击“应用并保存”后生效。章节通过剧情跳转修改。"
+theme_type_variation = &"UiMuted"
+autowrap_mode = 3
+
+[node name="ValueSeparator" type="HSeparator" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/数值/NumbersMargin/Numbers"]
+layout_mode = 2
+
+[node name="TierValue" type="Label" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/数值/NumbersMargin/Numbers"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "羁绊等级：陌生人"
+theme_type_variation = &"UiBody"
+autowrap_mode = 3
+
+[node name="DerivedToggle" type="Button" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/数值/NumbersMargin/Numbers"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "查看派生标记（只读）"
+toggle_mode = true
+alignment = 0
+size_flags_horizontal = 0
+
+[node name="DerivedBox" type="VBoxContainer" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/数值/NumbersMargin/Numbers"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 10
+visible = false
+
+[node name="CooldownSeparator" type="HSeparator" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/数值/NumbersMargin/Numbers"]
+layout_mode = 2
+
+[node name="CooldownRow" type="HFlowContainer" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/数值/NumbersMargin/Numbers"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CooldownValue" type="Label" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/数值/NumbersMargin/Numbers/CooldownRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "冷却：已清除"
+theme_type_variation = &"UiBody"
+autowrap_mode = 3
+size_flags_horizontal = 3
+
+[node name="ClearButton" type="Button" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/数值/NumbersMargin/Numbers/CooldownRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "清除冷却"
+
+[node name="完成记录" type="ScrollContainer" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_horizontal = 3
+horizontal_scroll_mode = 0
+follow_focus = true
+
+[node name="CompletionMargin" type="MarginContainer" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/完成记录"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_bottom = 12
+size_flags_horizontal = 3
+
+[node name="CompletionBody" type="VBoxContainer" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/完成记录/CompletionMargin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+size_flags_horizontal = 3
+
+[node name="CompletionHint" type="Label" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/完成记录/CompletionMargin/CompletionBody"]
+layout_mode = 2
+text = "勾选或取消已完成的剧情。此处修改只作用于草稿。"
+theme_type_variation = &"UiMuted"
+autowrap_mode = 3
+
+[node name="CompletionBox" type="VBoxContainer" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/完成记录/CompletionMargin/CompletionBody"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="剧情标记" type="ScrollContainer" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_horizontal = 3
+horizontal_scroll_mode = 0
+follow_focus = true
+
+[node name="FlagsMargin" type="MarginContainer" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/剧情标记"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_bottom = 12
+size_flags_horizontal = 3
+
+[node name="Flags" type="VBoxContainer" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/剧情标记/FlagsMargin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+size_flags_horizontal = 3
+
+[node name="FlagsHint" type="Label" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/剧情标记/FlagsMargin/Flags"]
+layout_mode = 2
+text = "编辑分支条件。羁绊派生标记由好感度计算，复杂值只读保留。"
+theme_type_variation = &"UiMuted"
+autowrap_mode = 3
+
+[node name="AddFlagRow" type="HFlowContainer" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/剧情标记/FlagsMargin/Flags"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="NewFlagName" type="LineEdit" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/剧情标记/FlagsMargin/Flags/AddFlagRow"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "输入新的标记名"
+custom_minimum_size = Vector2(220, 0)
+size_flags_horizontal = 3
+
+[node name="AddFlagButton" type="Button" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/剧情标记/FlagsMargin/Flags/AddFlagRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "添加标记"
+
+[node name="FlagBox" type="VBoxContainer" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/剧情标记/FlagsMargin/Flags"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="ComplexBox" type="VBoxContainer" parent="PageMargin/Page/Body/MainTabs/存档编辑/EditorMargin/EditorTabs/剧情标记/FlagsMargin/Flags"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="备份" type="VBoxContainer" parent="PageMargin/Page/Body/MainTabs"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BackupMargin" type="MarginContainer" parent="PageMargin/Page/Body/MainTabs/备份"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_bottom = 6
+size_flags_vertical = 3
+
+[node name="BackupBody" type="VBoxContainer" parent="PageMargin/Page/Body/MainTabs/备份/BackupMargin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+size_flags_vertical = 3
+
+[node name="SavePath" type="Label" parent="PageMargin/Page/Body/MainTabs/备份/BackupMargin/BackupBody"]
+unique_name_in_owner = true
+layout_mode = 2
+text = ""
+theme_type_variation = &"UiMuted"
+autowrap_mode = 0
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="BackupTabs" type="TabContainer" parent="PageMargin/Page/Body/MainTabs/备份/BackupMargin/BackupBody"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+current_tab = 0
+
+[node name="备份列表" type="ScrollContainer" parent="PageMargin/Page/Body/MainTabs/备份/BackupMargin/BackupBody/BackupTabs"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_horizontal = 3
+horizontal_scroll_mode = 0
+follow_focus = true
+
+[node name="BackupListMargin" type="MarginContainer" parent="PageMargin/Page/Body/MainTabs/备份/BackupMargin/BackupBody/BackupTabs/备份列表"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_bottom = 10
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="BackupListBody" type="VBoxContainer" parent="PageMargin/Page/Body/MainTabs/备份/BackupMargin/BackupBody/BackupTabs/备份列表/BackupListMargin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="BackupHint" type="Label" parent="PageMargin/Page/Body/MainTabs/备份/BackupMargin/BackupBody/BackupTabs/备份列表/BackupListMargin/BackupListBody"]
+layout_mode = 2
+text = "保存、跳转或开启测试前会自动备份。选择一份备份后可恢复。"
+theme_type_variation = &"UiMuted"
+autowrap_mode = 3
+
+[node name="BackupEmpty" type="Label" parent="PageMargin/Page/Body/MainTabs/备份/BackupMargin/BackupBody/BackupTabs/备份列表/BackupListMargin/BackupListBody"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "暂无备份。"
+theme_type_variation = &"UiMuted"
+autowrap_mode = 3
+
+[node name="BackupList" type="ItemList" parent="PageMargin/Page/Body/MainTabs/备份/BackupMargin/BackupBody/BackupTabs/备份列表/BackupListMargin/BackupListBody"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 120)
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text_overrun_behavior = 3
+theme_override_styles/panel = ExtResource("4_inset")
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+
+[node name="RestoreButton" type="Button" parent="PageMargin/Page/Body/MainTabs/备份/BackupMargin/BackupBody/BackupTabs/备份列表/BackupListMargin/BackupListBody"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "恢复所选备份…"
+size_flags_horizontal = 8
+
+[node name="ResetSeparator" type="HSeparator" parent="PageMargin/Page/Body/MainTabs/备份/BackupMargin/BackupBody/BackupTabs/备份列表/BackupListMargin/BackupListBody"]
+layout_mode = 2
+
+[node name="ResetRow" type="HFlowContainer" parent="PageMargin/Page/Body/MainTabs/备份/BackupMargin/BackupBody/BackupTabs/备份列表/BackupListMargin/BackupListBody"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ResetHint" type="Label" parent="PageMargin/Page/Body/MainTabs/备份/BackupMargin/BackupBody/BackupTabs/备份列表/BackupListMargin/BackupListBody/ResetRow"]
+layout_mode = 2
+text = "重置仅清空剧情，保留教程和学习数据。"
+theme_type_variation = &"UiMuted"
+autowrap_mode = 3
+size_flags_horizontal = 3
+
+[node name="ResetButton" type="Button" parent="PageMargin/Page/Body/MainTabs/备份/BackupMargin/BackupBody/BackupTabs/备份列表/BackupListMargin/BackupListBody/ResetRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "重置剧情…"
+
+[node name="当前存档" type="ScrollContainer" parent="PageMargin/Page/Body/MainTabs/备份/BackupMargin/BackupBody/BackupTabs"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_horizontal = 3
+horizontal_scroll_mode = 0
+follow_focus = true
+
+[node name="SnapshotMargin" type="MarginContainer" parent="PageMargin/Page/Body/MainTabs/备份/BackupMargin/BackupBody/BackupTabs/当前存档"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_bottom = 10
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Snapshot" type="TextEdit" parent="PageMargin/Page/Body/MainTabs/备份/BackupMargin/BackupBody/BackupTabs/当前存档/SnapshotMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+editable = false
+wrap_mode = 1
+custom_minimum_size = Vector2(0, 180)
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/normal = ExtResource("4_inset")
+theme_override_colors/font_readonly_color = Color(0.2, 0.2, 0.2, 1)
+
+[node name="PlaybackBlocker" type="ColorRect" parent="PageMargin/Page/Body"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+color = Color(0, 0, 0, 0.28)
+
+[node name="BlockerCenter" type="CenterContainer" parent="PageMargin/Page/Body/PlaybackBlocker"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BlockerLabel" type="Label" parent="PageMargin/Page/Body/PlaybackBlocker/BlockerCenter"]
+layout_mode = 2
+text = "剧情播放中"
+theme_type_variation = &"UiHeading"
+autowrap_mode = 3
+
+[node name="DraftFooter" type="HFlowContainer" parent="PageMargin/Page"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HintLabel" type="Label" parent="PageMargin/Page/DraftFooter"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "就绪"
+theme_type_variation = &"UiMuted"
+autowrap_mode = 0
+clip_text = true
+text_overrun_behavior = 3
+custom_minimum_size = Vector2(160, 0)
+size_flags_horizontal = 3
+
+[node name="RevertButton" type="Button" parent="PageMargin/Page/DraftFooter"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "撤销修改"
+
+[node name="ApplyButton" type="Button" parent="PageMargin/Page/DraftFooter"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "应用并保存"

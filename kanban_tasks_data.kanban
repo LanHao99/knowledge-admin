@@ -24,7 +24,8 @@
 			"uuid": "410872b9-ce23-4fce-b3f2-8e66fd0dfc0b",
 			"title": "Done",
 			"tasks": [
-				"6f0c1a2e-7b34-4d55-9a10-c4e8b2d19f30"
+				"6f0c1a2e-7b34-4d55-9a10-c4e8b2d19f30",
+				"7bf5cd21-a97f-4b3a-8ecc-95aa4f00b673"
 			]
 		}
 	],
@@ -47,6 +48,13 @@
 			"uuid": "6f0c1a2e-7b34-4d55-9a10-c4e8b2d19f30",
 			"title": "剧情测试台",
 			"description": "调试模式下的剧情测试窗口：目录跳转、草稿存档、备份恢复和跨章完成记录。",
+			"category": "5d6b120c-1ddc-4ba3-b1cf-59bed8d25249",
+			"steps": []
+		},
+		{
+			"uuid": "7bf5cd21-a97f-4b3a-8ecc-95aa4f00b673",
+			"title": "剧情测试台布局优化",
+			"description": "可编辑场景布局、紧凑摘要、章节筛选、分组存档编辑、固定保存操作和备份阅读；修复空白自动推进并完成多尺寸渲染回归。",
 			"category": "5d6b120c-1ddc-4ba3-b1cf-59bed8d25249",
 			"steps": []
 		}

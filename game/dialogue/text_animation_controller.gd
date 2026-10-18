@@ -376,6 +376,7 @@ func _start_segmented_typewriter(segments: Array, pure_text: String) -> void:
 	var total_chars: int = pure_text.length()
 	if total_chars == 0:
 		_on_typewriter_finished()
+		_emit_auto_advance()
 		return
 
 	var current_speed: float = DEFAULT_SPEED * speed_multiplier
@@ -514,6 +515,7 @@ func _show_instant(raw_text: String) -> void:
 
 	if _on_complete.is_valid():
 		_on_complete.call()
+	_emit_auto_advance()
 
 
 # ── 抖动效果 ──

@@ -1,43 +1,50 @@
 extends Control
 ## 调试用剧情测试台。只通过 App 读取状态和提交操作。
 
-var _chapter_label: Label
-var _playing_label: Label
-var _next_label: Label
-var _progress_label: Label
-var _bond_label: Label
-var _hint_label: Label
-var _start_button: Button
-var _apply_button: Button
-var _revert_button: Button
-var _clear_button: Button
-var _restore_button: Button
-var _reset_button: Button
-var _control_list: VBoxContainer
-var _progress_spin: SpinBox
-var _threshold_spin: SpinBox
-var _bond_spin: SpinBox
-var _tier_label: Label
-var _cooldown_label: Label
-var _derived_box: VBoxContainer
-var _completion_box: VBoxContainer
-var _flag_box: VBoxContainer
-var _complex_box: VBoxContainer
-var _new_flag_name: LineEdit
-var _path_label: Label
-var _snapshot: TextEdit
-var _backup_list: ItemList
-var _blocker: Control
+const AdaptiveGrid: GDScript = preload("res://src/ui/adaptive_row.gd")
+
+@onready var _chapter_label: Label = %ChapterValue
+@onready var _playing_label: Label = %PlayingValue
+@onready var _next_label: Label = %NextValue
+@onready var _progress_label: Label = %ProgressValue
+@onready var _bond_label: Label = %BondValue
+@onready var _hint_label: Label = %HintLabel
+@onready var _start_button: Button = %StartButton
+@onready var _apply_button: Button = %ApplyButton
+@onready var _revert_button: Button = %RevertButton
+@onready var _clear_button: Button = %ClearButton
+@onready var _restore_button: Button = %RestoreButton
+@onready var _reset_button: Button = %ResetButton
+@onready var _control_list: VBoxContainer = %ControlList
+@onready var _progress_spin: SpinBox = %ProgressSpin
+@onready var _threshold_spin: SpinBox = %ThresholdSpin
+@onready var _bond_spin: SpinBox = %BondSpin
+@onready var _tier_label: Label = %TierValue
+@onready var _cooldown_label: Label = %CooldownValue
+@onready var _derived_box: VBoxContainer = %DerivedBox
+@onready var _completion_box: VBoxContainer = %CompletionBox
+@onready var _flag_box: VBoxContainer = %FlagBox
+@onready var _complex_box: VBoxContainer = %ComplexBox
+@onready var _new_flag_name: LineEdit = %NewFlagName
+@onready var _path_label: Label = %SavePath
+@onready var _snapshot: TextEdit = %Snapshot
+@onready var _backup_list: ItemList = %BackupList
+@onready var _blocker: Control = %PlaybackBlocker
+@onready var _chapter_filter: OptionButton = %ChapterFilter
+@onready var _main_tabs: TabContainer = %MainTabs
+@onready var _backup_empty: Label = %BackupEmpty
+
 var _draft: Dictionary = {}
 var _jump_buttons: Array[Button] = []
 var _building: bool = false
+var _notice: String = ""
 
 
-## 搭建界面并开始跟踪剧情状态。## 输入: 无。
+## 连接场景控件并开始跟踪剧情状态。## 输入: 无。
 ## 输出: 无。
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
-	_build_ui()
+	_connect_controls()
 	if not App.story_state_changed.is_connected(_on_story_state_changed):
 		App.story_state_changed.connect(_on_story_state_changed)
 	if not App.dialogue_opened.is_connected(_on_playback_changed):
@@ -63,182 +70,50 @@ func _exit_tree() -> void:
 		App.story_test_stopped.disconnect(_on_test_stopped)
 
 
-## 创建状态栏、三个滚动页和播放遮罩。## 输入: 无。
+## 连接固定布局中的操作控件，动态内容由各列表填充。## 输入: 无。
 ## 输出: 无。
-func _build_ui() -> void:
-	var margin := MarginContainer.new()
-	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
-	margin.add_theme_constant_override("margin_left", 12)
-	margin.add_theme_constant_override("margin_top", 12)
-	margin.add_theme_constant_override("margin_right", 12)
-	margin.add_theme_constant_override("margin_bottom", 12)
-	add_child(margin)
-	var root := VBoxContainer.new()
-	root.set_anchors_preset(Control.PRESET_FULL_RECT)
-	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	root.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	margin.add_child(root)
-	root.add_child(_build_status())
-	_hint_label = _label("", &"UiMuted")
-	_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	root.add_child(_hint_label)
-	var body := Control.new()
-	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	root.add_child(body)
-	var tabs := TabContainer.new()
-	tabs.set_anchors_preset(Control.PRESET_FULL_RECT)
-	tabs.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	body.add_child(tabs)
-	tabs.add_child(_build_control_page())
-	tabs.add_child(_build_editor_page())
-	tabs.add_child(_build_backup_page())
-	_blocker = ColorRect.new()
-	_blocker.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_blocker.color = Color(0, 0, 0, 0.28)
-	_blocker.mouse_filter = Control.MOUSE_FILTER_STOP
-	_blocker.visible = false
-	body.add_child(_blocker)
-	var blocker_label := _label("剧情播放中", &"UiHeading")
-	blocker_label.set_anchors_preset(Control.PRESET_CENTER)
-	_blocker.add_child(blocker_label)
+func _connect_controls() -> void:
+	_start_button.pressed.connect(_on_start_next)
+	_apply_button.pressed.connect(_on_apply)
+	_revert_button.pressed.connect(_on_revert)
+	_clear_button.pressed.connect(_on_clear_cooldown)
+	_restore_button.pressed.connect(_on_restore_pressed)
+	_reset_button.pressed.connect(_on_reset_pressed)
+	_progress_spin.value_changed.connect(_on_progress_changed)
+	_threshold_spin.value_changed.connect(_on_threshold_changed)
+	_bond_spin.value_changed.connect(_on_bond_changed)
+	%AddFlagButton.pressed.connect(_on_add_flag)
+	%DerivedToggle.toggled.connect(_on_derived_toggled)
+	_chapter_filter.item_selected.connect(_on_chapter_selected)
+	_main_tabs.tab_changed.connect(_on_tab_changed)
+	_backup_list.item_selected.connect(_on_backup_selected)
 
 
-## 创建顶部状态文字。## 输入: 无。
-## 输出: GridContainer。
-func _build_status() -> GridContainer:
-	var grid := GridContainer.new()
-	grid.columns = 2
-	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_chapter_label = _label("", &"UiBody")
-	_playing_label = _label("", &"UiBody")
-	_next_label = _label("", &"UiBody")
-	_progress_label = _label("", &"UiBody")
-	_bond_label = _label("", &"UiBody")
-	for text in ["章节", "正在播放", "下一段", "进度 / 阈值", "好感度"]:
-		var caption := _label(text, &"UiCaption")
-		caption.autowrap_mode = TextServer.AUTOWRAP_OFF
-		caption.custom_minimum_size = Vector2(220, 0)
-		grid.add_child(caption)
-		var value := _chapter_label
-		match text:
-			"正在播放":
-				value = _playing_label
-			"下一段":
-				value = _next_label
-			"进度 / 阈值":
-				value = _progress_label
-			"好感度":
-				value = _bond_label
-		value.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		grid.add_child(value)
-	return grid
+## 切换只读派生信息，不改变草稿。## 输入: expanded (bool) - 是否展开。
+## 输出: 无。
+func _on_derived_toggled(expanded: bool) -> void:
+	_derived_box.visible = expanded
+	%DerivedToggle.text = "收起派生标记（只读）" if expanded else "查看派生标记（只读）"
 
 
-## 创建剧情控制页。## 输入: 无。
-## 输出: ScrollContainer。
-func _build_control_page() -> ScrollContainer:
-	var scroll := _scroll("ControlScroll")
-	scroll.name = "剧情控制"
-	var box := VBoxContainer.new()
-	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(box)
-	_start_button = _button("一键开启下一段", _on_start_next)
-	box.add_child(_start_button)
-	_control_list = VBoxContainer.new()
-	_control_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	box.add_child(_control_list)
-	return scroll
+## 切换主页面后同步底部保存操作。## 输入: _index (int) - 页码。
+## 输出: 无。
+func _on_tab_changed(_index: int) -> void:
+	_refresh_actions()
 
 
-## 创建存档编辑页。## 输入: 无。
-## 输出: ScrollContainer。
-func _build_editor_page() -> ScrollContainer:
-	var scroll := _scroll("EditorScroll")
-	scroll.name = "存档编辑"
-	var box := VBoxContainer.new()
-	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(box)
-	box.add_child(_label("章节通过跳转修改。", &"UiCaption"))
-	_progress_spin = _spin(0)
-	_threshold_spin = _spin(1)
-	_bond_spin = _spin(0)
-	box.add_child(_number_row("进度", _progress_spin, _on_progress_changed))
-	box.add_child(_number_row("触发阈值", _threshold_spin, _on_threshold_changed))
-	box.add_child(_number_row("好感度", _bond_spin, _on_bond_changed))
-	_tier_label = _label("", &"UiBody")
-	box.add_child(_tier_label)
-	_derived_box = VBoxContainer.new()
-	box.add_child(_derived_box)
-	_cooldown_label = _label("", &"UiBody")
-	box.add_child(_cooldown_label)
-	var actions := HBoxContainer.new()
-	_clear_button = _button("清除冷却", _on_clear_cooldown)
-	_apply_button = _button("应用并保存", _on_apply)
-	_revert_button = _button("撤销修改", _on_revert)
-	actions.add_child(_clear_button)
-	actions.add_child(_apply_button)
-	actions.add_child(_revert_button)
-	box.add_child(actions)
-	box.add_child(_label("完成记录", &"UiHeading"))
-	_completion_box = VBoxContainer.new()
-	box.add_child(_completion_box)
-	box.add_child(_label("剧情标记", &"UiHeading"))
-	_flag_box = VBoxContainer.new()
-	box.add_child(_flag_box)
-	var add_row := HBoxContainer.new()
-	_new_flag_name = LineEdit.new()
-	_new_flag_name.placeholder_text = "新标记名"
-	_new_flag_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	add_row.add_child(_new_flag_name)
-	add_row.add_child(_button("添加标记", _on_add_flag))
-	box.add_child(add_row)
-	box.add_child(_label("复杂标记只读保留", &"UiCaption"))
-	_complex_box = VBoxContainer.new()
-	box.add_child(_complex_box)
-	return scroll
+## 选中备份后更新恢复按钮。## 输入: _index (int) - 列表索引。
+## 输出: 无。
+func _on_backup_selected(_index: int) -> void:
+	_refresh_actions()
 
 
-## 创建备份页。## 输入: 无。
-## 输出: ScrollContainer。
-func _build_backup_page() -> ScrollContainer:
-	var scroll := _scroll("BackupScroll")
-	scroll.name = "备份"
-	var box := VBoxContainer.new()
-	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(box)
-	_path_label = _label("", &"UiCaption")
-	_path_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	box.add_child(_path_label)
-	_snapshot = TextEdit.new()
-	_snapshot.editable = false
-	_snapshot.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
-	_snapshot.custom_minimum_size = Vector2(0, 220)
-	_snapshot.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	box.add_child(_snapshot)
-	_backup_list = ItemList.new()
-	_backup_list.custom_minimum_size = Vector2(0, 160)
-	_backup_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	box.add_child(_backup_list)
-	var actions := HBoxContainer.new()
-	_restore_button = _button("恢复所选备份", _on_restore_pressed)
-	_reset_button = _button("重置剧情", _on_reset_pressed)
-	actions.add_child(_restore_button)
-	actions.add_child(_reset_button)
-	box.add_child(actions)
-	return scroll
-
-
-## 创建纵向滚动容器。## 输入: node_name。
-## 输出: ScrollContainer。
-func _scroll(node_name: String) -> ScrollContainer:
-	var scroll := ScrollContainer.new()
-	scroll.name = node_name
-	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	return scroll
+## 按所选章节筛选剧情，保留当前存档和编辑草稿。## 输入: _index (int) - 筛选索引。
+## 输出: 无。
+func _on_chapter_selected(_index: int) -> void:
+	_rebuild_catalog()
+	%ControlScroll.scroll_vertical = 0
+	_refresh_actions()
 
 
 ## 创建跟随主题字号的标签。## 输入: text、variation。
@@ -258,30 +133,6 @@ func _button(text: String, callback: Callable) -> Button:
 	button.text = text
 	button.pressed.connect(callback)
 	return button
-
-
-## 创建整数输入框。## 输入: minimum。
-## 输出: SpinBox。
-func _spin(minimum: int) -> SpinBox:
-	var spin := SpinBox.new()
-	spin.min_value = minimum
-	spin.max_value = 10000000
-	spin.step = 1
-	spin.rounded = true
-	spin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	return spin
-
-
-## 创建数字编辑行。## 输入: caption、spin、callback。
-## 输出: HBoxContainer。
-func _number_row(caption: String, spin: SpinBox, callback: Callable) -> HBoxContainer:
-	var row := HBoxContainer.new()
-	var caption_label := _label(caption, &"UiBody")
-	caption_label.custom_minimum_size = Vector2(120, 0)
-	row.add_child(caption_label)
-	row.add_child(spin)
-	spin.value_changed.connect(callback)
-	return row
 
 
 ## 重新读取真实存档到草稿。## 输入: announce。
@@ -304,41 +155,70 @@ func _push_draft() -> void:
 	_refresh_actions()
 
 
-## 按目录重建剧情列表。## 输入: 无。
+## 按章节筛选重建剧情列表，标题与条件分别显示。## 输入: 无。
 ## 输出: 无。
 func _rebuild_catalog() -> void:
 	_building = true
 	_clear(_control_list)
 	_jump_buttons.clear()
 	var catalog: Dictionary = App.get_story_catalog()
-	for chapter_variant in catalog.get("chapters", []):
-		if typeof(chapter_variant) != TYPE_DICTIONARY:
+	var selected_chapter: String = str(_chapter_filter.get_item_metadata(_chapter_filter.selected)) if _chapter_filter.item_count > 0 else str(_draft.get("current_chapter", ""))
+	_chapter_filter.clear()
+	_chapter_filter.add_item("全部章节")
+	_chapter_filter.set_item_metadata(0, "")
+	for chapter: Dictionary in catalog.get("chapters", []):
+		_chapter_filter.add_item(str(chapter.get("title", "")))
+		var index: int = _chapter_filter.item_count - 1
+		_chapter_filter.set_item_metadata(index, str(chapter.get("id", "")))
+		if str(chapter.get("id", "")) == selected_chapter:
+			_chapter_filter.select(index)
+	for chapter: Dictionary in catalog.get("chapters", []):
+		if not selected_chapter.is_empty() and str(chapter.get("id", "")) != selected_chapter:
 			continue
-		var chapter: Dictionary = chapter_variant
-		_control_list.add_child(_label(str(chapter.get("title", "")), &"UiHeading"))
-		for entry_variant in chapter.get("entries", []):
-			if typeof(entry_variant) != TYPE_DICTIONARY:
-				continue
-			_control_list.add_child(_catalog_row(entry_variant))
+		var entries: Array = chapter.get("entries", [])
+		_control_list.add_child(_label("%s · %d 段剧情" % [str(chapter.get("title", "")), entries.size()], &"UiCaption"))
+		var titles: Dictionary = {}
+		for entry: Dictionary in entries:
+			titles[str(entry.get("key", ""))] = str(entry.get("title", ""))
+		for index: int in range(entries.size()):
+			_control_list.add_child(_catalog_row(entries[index], index + 1, titles))
 	_building = false
 
 
-## 创建一条剧情和它的跳转按钮。## 输入: entry。
-## 输出: HBoxContainer。
-func _catalog_row(entry: Dictionary) -> HBoxContainer:
-	var row := HBoxContainer.new()
-	var kind := "羁绊" if str(entry.get("kind", "")) == "bond" else "主线"
-	var state := "已完成" if bool(entry.get("completed", false)) else "未完成"
-	var title := "%s　%s　%s" % [str(entry.get("title", "")), kind, state]
-	if str(entry.get("kind", "")) == "bond":
-		title += "　前置 %s / 羁绊 %d" % [str(entry.get("prerequisite", "")), int(entry.get("tier", 0))]
-	var label := _label(title, &"UiBody")
-	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(label)
-	var button := _button("跳转并播放", _on_jump.bind(str(entry.get("chapter", "")), str(entry.get("key", ""))))
-	_jump_buttons.append(button)
-	row.add_child(button)
-	return row
+## 创建分层剧情行；长标题和前置条件可换行，动作保持独立。## 输入: entry、ordinal、titles。
+## 输出: PanelContainer。
+func _catalog_row(entry: Dictionary, ordinal: int, titles: Dictionary) -> PanelContainer:
+	var panel: PanelContainer = PanelContainer.new()
+	panel.theme_type_variation = &"DesktopStatus"
+	var margin: MarginContainer = MarginContainer.new()
+	for side: String in ["left", "right", "top", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, 8)
+	panel.add_child(margin)
+	var row: HBoxContainer = HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	margin.add_child(row)
+	var number: Label = _label("%02d" % ordinal, &"UiMuted")
+	number.autowrap_mode = TextServer.AUTOWRAP_OFF
+	number.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(number)
+	var details: VBoxContainer = VBoxContainer.new()
+	details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(details)
+	details.add_child(_label(str(entry.get("title", "")), &"UiBody"))
+	var is_bond: bool = str(entry.get("kind", "")) == "bond"
+	var state_text: String = "已完成" if bool(entry.get("completed", false)) else "未完成"
+	var metadata: String = "%s · %s" % ["羁绊" if is_bond else "主线", state_text]
+	if is_bond:
+		var prerequisite: String = str(entry.get("prerequisite", ""))
+		metadata += " · 前置：%s · 羁绊等级 %d" % [str(titles.get(prerequisite, prerequisite)), int(entry.get("tier", 0))]
+	details.add_child(_label(metadata, &"UiMuted"))
+	panel.tooltip_text = "%s/%s\n%s" % [entry.get("chapter", ""), entry.get("key", ""), entry.get("path", "")]
+	var action: Button = _button("跳转并播放", _on_jump.bind(str(entry.get("chapter", "")), str(entry.get("key", ""))))
+	action.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	action.tooltip_text = "重排完成记录，保留好感度和分支标记。"
+	_jump_buttons.append(action)
+	row.add_child(action)
+	return panel
 
 
 ## 按草稿重建编辑控件，不触发新的修改。## 输入: 无。
@@ -364,13 +244,19 @@ func _rebuild_completions() -> void:
 		if typeof(chapter_variant) != TYPE_DICTIONARY:
 			continue
 		var chapter: Dictionary = chapter_variant
+		_completion_box.add_child(_label(str(chapter.get("title", "")), &"UiBody"))
+		var grid: GridContainer = AdaptiveGrid.new() as GridContainer
+		grid.preferred_columns = 2
+		grid.minimum_column_width = 260.0
+		grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_completion_box.add_child(grid)
 		for entry_variant in chapter.get("entries", []):
 			if typeof(entry_variant) != TYPE_DICTIONARY:
 				continue
 			var entry: Dictionary = entry_variant
 			var token := _completion_token(entry)
 			seen[token] = true
-			_completion_box.add_child(_completion_check(entry, _draft_has_completion(entry)))
+			grid.add_child(_completion_check(entry, _draft_has_completion(entry)))
 	_add_unknown_completions("completed_dialogues", seen, "main")
 	_add_unknown_completions("bond_dialogues_triggered", seen, "bond")
 
@@ -394,6 +280,9 @@ func _completion_check(entry: Dictionary, pressed: bool) -> CheckBox:
 	var kind := "羁绊" if str(entry.get("kind", "")) == "bond" else "主线"
 	box.text = "%s（%s）" % [str(entry.get("title", "")), kind]
 	box.button_pressed = pressed
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.clip_text = true
+	box.tooltip_text = box.text
 	box.set_meta("entry", entry)
 	box.toggled.connect(_on_completion_toggled.bind(box))
 	return box
@@ -415,24 +304,32 @@ func _rebuild_flags() -> void:
 			_complex_box.add_child(label)
 		else:
 			_flag_box.add_child(_flag_row(name, value))
+	if _flag_box.get_child_count() == 0:
+		_flag_box.add_child(_label("暂无自定义标记，可在上方添加。", &"UiMuted"))
 
 
-## 创建一条普通标记编辑行。## 输入: flag_name、value。
-## 输出: HBoxContainer。
-func _flag_row(flag_name: String, value: Variant) -> HBoxContainer:
-	var row := HBoxContainer.new()
-	var name_label := _label(flag_name, &"UiBody")
-	name_label.custom_minimum_size = Vector2(180, 0)
-	row.add_child(name_label)
-	var kind := OptionButton.new()
-	for text in ["布尔", "数字", "字符串", "空值"]:
+## 把标记名与类型、值分行，避免长名称挤压编辑控件。## 输入: flag_name、value。
+## 输出: VBoxContainer。
+func _flag_row(flag_name: String, value: Variant) -> VBoxContainer:
+	var section: VBoxContainer = VBoxContainer.new()
+	section.add_theme_constant_override("separation", 6)
+	section.add_child(_label(flag_name, &"UiBody"))
+	var row: HFlowContainer = HFlowContainer.new()
+	row.add_theme_constant_override("h_separation", 10)
+	section.add_child(row)
+	var kind: OptionButton = OptionButton.new()
+	for text: String in ["布尔", "数字", "字符串", "空值"]:
 		kind.add_item(text)
 	kind.selected = _flag_kind(value)
 	kind.item_selected.connect(_on_flag_kind_selected.bind(flag_name))
 	row.add_child(kind)
-	row.add_child(_flag_value_editor(flag_name, value))
+	var value_editor: Control = _flag_value_editor(flag_name, value)
+	value_editor.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	value_editor.custom_minimum_size.x = 160.0
+	row.add_child(value_editor)
 	row.add_child(_button("删除", _on_delete_flag.bind(flag_name)))
-	return row
+	section.add_child(HSeparator.new())
+	return section
 
 
 ## 按标记值选择编辑器类型。## 输入: value。
@@ -455,6 +352,7 @@ func _flag_value_editor(flag_name: String, value: Variant) -> Control:
 	match _flag_kind(value):
 		0:
 			var check := CheckButton.new()
+			check.text = "启用"
 			check.button_pressed = bool(value)
 			check.toggled.connect(func(pressed: bool) -> void: _set_flag_value(flag_name, pressed))
 			return check
@@ -481,42 +379,50 @@ func _flag_value_editor(flag_name: String, value: Variant) -> Control:
 ## 输出: 无。
 func _refresh() -> void:
 	var state: Dictionary = App.get_story_test_state()
-	_chapter_label.text = "%s（%s）" % [str(state.get("chapter_title", "")), str(state.get("chapter", ""))]
-	_playing_label.text = _display_story(str(state.get("playing_title", "")), str(state.get("playing_key", "")))
+	_chapter_label.text = str(state.get("chapter_title", ""))
+	_chapter_label.tooltip_text = str(state.get("chapter", ""))
+	_playing_label.text = "播放中：" + str(state.get("playing_title", "")) if not str(state.get("playing_key", "")).is_empty() else "待机"
 	_next_label.text = _display_story(str(state.get("next_title", "")), str(state.get("next_key", "")))
+	_next_label.tooltip_text = _next_label.text
 	_progress_label.text = "%d / %d" % [int(state.get("progress", 0)), int(state.get("threshold", 1))]
-	_bond_label.text = "%d　%s（%d）" % [int(state.get("bond", 0)), str(state.get("tier_name", "")), int(state.get("tier", 0))]
-	_path_label.text = "存档路径：%s" % str(state.get("save_path", ""))
+	_bond_label.text = "%d · %s" % [int(state.get("bond", 0)), str(state.get("tier_name", ""))]
+	_path_label.text = "存档位置：%s" % str(state.get("save_path", ""))
+	_path_label.tooltip_text = str(state.get("save_path", ""))
 	_snapshot.text = App.get_story_snapshot_text()
 	_refresh_backups()
 	_refresh_cooldown_label()
 	_refresh_actions()
 
 
-## 只更新按钮、提示和遮罩。## 输入: 无。
+## 更新固定操作栏、保存状态和播放遮罩，不重建正在编辑的内容。## 输入: 无。
 ## 输出: 无。
 func _refresh_actions() -> void:
 	var state: Dictionary = App.get_story_test_state()
-	var busy := bool(state.get("busy", false)) or not bool(state.get("debug", false))
-	var dirty := bool(state.get("draft_dirty", false))
-	var blocked := busy or dirty
-	_start_button.disabled = blocked
-	for button in _jump_buttons:
-		button.disabled = blocked
-	_apply_button.disabled = busy or not dirty
-	_revert_button.disabled = not dirty
+	var busy: bool = bool(state.get("busy", false)) or not bool(state.get("debug", false))
+	var dirty: bool = bool(state.get("draft_dirty", false))
+	var conflict: bool = bool(state.get("draft_conflict", false)) and dirty
+	_start_button.disabled = busy or dirty or str(state.get("next_key", "")).is_empty()
+	for action: Button in _jump_buttons:
+		action.disabled = busy or dirty
+	_apply_button.disabled = busy or not dirty or conflict
+	_revert_button.disabled = busy or not dirty
 	_clear_button.disabled = busy
-	_restore_button.disabled = busy
-	_reset_button.disabled = busy
+	_restore_button.disabled = busy or dirty or _backup_list.get_selected_items().is_empty()
+	_reset_button.disabled = busy or dirty
+	_chapter_filter.disabled = busy
+	_apply_button.visible = _main_tabs.current_tab == 1 or dirty
+	_revert_button.visible = _apply_button.visible
 	_blocker.visible = bool(state.get("busy", false))
-	if bool(state.get("draft_conflict", false)) and dirty:
-		_hint_label.text = "剧情状态已变化，请重新读取"
+	_hint_label.theme_type_variation = &"UiError" if conflict else &"UiMuted"
+	if conflict:
+		_hint_label.text = "存档已变化，请撤销后重读。"
 	elif dirty:
-		_hint_label.text = "有未保存修改。应用或撤销后才能启动剧情。"
+		_hint_label.text = "有未保存修改"
 	elif bool(state.get("busy", false)):
 		_hint_label.text = "剧情播放中，测试台已暂停。"
-	elif _hint_label.text == "剧情播放中，测试台已暂停。":
-		_hint_label.text = ""
+	else:
+		_hint_label.text = _notice if not _notice.is_empty() else "就绪 · 存档已同步"
+	_hint_label.tooltip_text = _hint_label.text
 
 
 ## 按草稿显示冷却。## 输入: 无。
@@ -541,18 +447,23 @@ func _refresh_derived() -> void:
 		_derived_box.add_child(_label("%s = %s（只读）" % [flag_name, str(probe.flags.get(flag_name))], &"UiCaption"))
 
 
-## 按时间刷新备份列表。## 输入: 无。
+## 显示备份时间与操作来源，完整文件位置保留在提示中。## 输入: 无。
 ## 输出: 无。
 func _refresh_backups() -> void:
-	var selected := "" if _backup_list.get_selected_items().is_empty() else str(_backup_list.get_item_metadata(_backup_list.get_selected_items()[0]))
+	var selected: String = "" if _backup_list.get_selected_items().is_empty() else str(_backup_list.get_item_metadata(_backup_list.get_selected_items()[0]))
 	_backup_list.clear()
-	for row in App.list_story_backups():
-		var stamp := Time.get_datetime_string_from_unix_time(int(row.get("modified", 0)))
-		_backup_list.add_item("%s  %s" % [stamp, str(row.get("name", ""))])
-		var index := _backup_list.item_count - 1
+	var reasons: Dictionary = {"apply": "应用存档", "jump": "跳转剧情", "start": "开启测试", "reset": "重置剧情", "restore": "恢复备份", "migration": "旧档迁移", "migrate": "旧档迁移"}
+	for row: Dictionary in App.list_story_backups():
+		var stamp: String = Time.get_datetime_string_from_unix_time(int(row.get("modified", 0))).replace("T", " ") + " UTC"
+		var filename: String = str(row.get("name", ""))
+		var reason: String = filename.get_basename().get_slice("_", filename.get_basename().get_slice_count("_") - 1)
+		_backup_list.add_item("%s · %s" % [stamp, str(reasons.get(reason, "剧情备份"))])
+		var index: int = _backup_list.item_count - 1
 		_backup_list.set_item_metadata(index, str(row.get("path", "")))
+		_backup_list.set_item_tooltip(index, str(row.get("path", "")))
 		if str(row.get("path", "")) == selected:
 			_backup_list.select(index)
+	_backup_empty.visible = _backup_list.item_count == 0
 
 
 ## 真实状态变化后，没有本地修改就重新读取。## 输入: 无。
@@ -787,6 +698,7 @@ func _report(result: Dictionary, success_text: String) -> void:
 ## 设置页面提示。## 输入: text。
 ## 输出: 无。
 func _set_hint(text: String) -> void:
+	_notice = text
 	_hint_label.text = text
 
 

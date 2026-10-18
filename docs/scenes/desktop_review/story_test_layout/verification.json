@@ -1,0 +1,25 @@
+{
+  "checks": 265,
+  "engine": "4.7.2-stable (official)",
+  "failures": [],
+  "unit_tests": {
+    "tests": 85,
+    "passing": 85,
+    "asserts": 566
+  },
+  "layout_cases": [
+    "1280x720 at 100%",
+    "1280x720 at 150%",
+    "1920x1080 at 100%",
+    "1920x1080 at 150%",
+    "720x500 window at 150%"
+  ],
+  "screenshots": {
+    "control_1280x720_100.png": "583e3b82de177e15d4fb14fdd90dbed27b9d84c811e7836a8d238a37b04a4bf8",
+    "control_1280x720_150.png": "3da11ba65820905cb7e9579832c1e1bd9b9eb1459474c5a9dcb829a9528bcf6f",
+    "editor_1280x720_150.png": "c5f2bec8b5e17f68a1f1e3af99d6419ecf6600e9e6842b14f61888fa41bf3436",
+    "flags_1920x1080_100.png": "a161177bc7fbf83274fafd0031a13e5cf80b2a0eb1f0fefc1ade34d1b2b85352",
+    "backups_1920x1080_100.png": "fe075761f9734b8a94664e3e4e5849ee220db02f6d150563e80fd2618f8db5ac",
+    "minimum_720x500_150.png": "4b82e6a897dbc66a1311e8d1442b0d0e17742debc652884e97554da85f959bc7"
+  }
+}

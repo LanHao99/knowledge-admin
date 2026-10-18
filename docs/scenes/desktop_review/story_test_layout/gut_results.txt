@@ -1,0 +1,191 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+FMOD Sound System: Successfully initialized
+FMOD Sound System: Live update enabled!
+[SaveDirectory] user:// = D:/game design/godot/4.6projects/knowledge-admin/.temp/story_test_verify/saves
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2582)
+---  GUT  ---
+[1m[INFO]:  [0musing [D:/game design/godot/4.6projects/knowledge-admin/.temp/story_test_verify/saves] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+[4m
+
+res://tests/unit/test_ai_chat_bubbles.gd
+[0m* test_sent_content_uses_bubbles_and_back_button_is_gone
+Opened database successfully (D:/game design/godot/4.6projects/knowledge-admin/.temp/story_test_verify/saves/knowledge_admin.db)
+Closed database (D:/game design/godot/4.6projects/knowledge-admin/.temp/story_test_verify/saves/knowledge_admin.db)
+[1m1/1 passed.
+[0m[4m
+
+res://tests/unit/test_desktop_file_catalog.gd
+[0m* test_default_scene_binds_existing_documents
+* test_resource_entry_populates_directory_and_viewer
+* test_missing_catalog_keeps_viewer_usable
+* test_edit_and_shortcut_save_round_trip
+* test_saving_original_text_removes_override
+* test_close_prompt_cancel_and_discard
+* test_start_menu_blocks_save_shortcut
+[1m7/7 passed.
+[0m[4m
+
+res://tests/unit/test_desktop_window.gd
+[0m* test_minimize_retains_content
+* test_maximize_restore_and_minimize
+* test_locked_controls_do_not_close_or_minimize
+* test_smaller_work_area_clamps_bounds
+* test_resize_all_eight_directions
+[1m5/5 passed.
+[0m[4m
+
+res://tests/unit/test_save_directory.gd
+[0m* test_workspace_directory_is_applied_before_save_consumers
+* test_file_access_round_trip
+* test_config_file_round_trip
+* test_story_resource_round_trip
+* test_sqlite_round_trip
+Opened database successfully (D:/game design/godot/4.6projects/knowledge-admin/.temp/story_test_verify/saves/save_directory_probe_2481860.db)
+Closed database (D:/game design/godot/4.6projects/knowledge-admin/.temp/story_test_verify/saves/save_directory_probe_2481860.db)
+Opened database successfully (D:/game design/godot/4.6projects/knowledge-admin/.temp/story_test_verify/saves/save_directory_probe_2481860.db)
+Closed database (D:/game design/godot/4.6projects/knowledge-admin/.temp/story_test_verify/saves/save_directory_probe_2481860.db)
+[1m5/5 passed.
+[0m[4m
+
+res://tests/unit/test_shortcut_settings.gd
+[0m* test_default_bindings
+* test_conflict_is_rejected_until_cleared
+* test_modifier_round_trip
+* test_modifier_clear_and_reset
+* test_corrupt_partial_and_conflict_on_load
+ERROR: ConfigFile parse error at user://shortcut_test_2502152.cfg:0: Unexpected EOF while parsing simple tag.
+   at: _parse (core/io/config_file.cpp:293)
+   GDScript backtrace (most recent call first):
+       [0] load_settings (res://src/shortcut_settings.gd:161)
+       [1] test_corrupt_partial_and_conflict_on_load (res://tests/unit/test_shortcut_settings.gd:93)
+       [2] _run_test (res://addons/gut/gut.gd:622)
+       [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+[34m[ExpectedError][0m
+* test_save_failure_keeps_binding
+* test_shortcut_effect_follows_card_state
+* test_settings_scene_has_shortcut_tab
+* test_focus_menu_and_dialog_block_shortcuts
+[1m9/9 passed.
+[0m[4m
+
+res://tests/unit/test_story_auto_advance.gd
+[0m* test_auto_only_line_advances_once
+* test_instant_text_keeps_auto_advance
+* test_empty_line_without_auto_does_not_advance
+[1m3/3 passed.
+[0m[4m
+
+res://tests/unit/test_story_test_bench.gd
+[0m* test_cross_chapter_completion_records
+* test_legacy_records_migrate_after_backup
+* test_bond_prerequisite_is_chapter_specific
+* test_jump_reorders_records_without_changing_bond_or_flags
+* test_preview_next_does_not_mutate_when_chapter_advances
+* test_commit_round_trip_updates_same_instance
+* test_restore_backup_replaces_current_story
+* test_save_failure_keeps_original_state
+* test_stale_draft_cannot_overwrite_live_state
+* test_launch_checks_debug_draft_and_playback
+* test_draft_validation_and_complex_flags
+* test_catalog_title_and_story_reset_keeps_tutorial
+* test_story_test_entry_follows_debug_mode
+[1m13/13 passed.
+[0m[4m
+
+res://tests/unit/test_ui_settings.gd
+[0m* test_default_typography
+* test_scale_bounds_and_step
+* test_repeated_scaling_preserves_baseline_and_resource_identity
+* test_all_rich_text_faces_scale_together
+* test_configuration_round_trip
+* test_missing_configuration_uses_default
+* test_corrupt_configuration_uses_default
+ERROR: ConfigFile parse error at user://ui_test_3232549.cfg:0: Unexpected EOF while parsing simple tag.
+   at: _parse (core/io/config_file.cpp:293)
+   GDScript backtrace (most recent call first):
+       [0] load_settings (res://src/ui_settings.gd:89)
+       [1] test_corrupt_configuration_uses_default (res://tests/unit/test_ui_settings.gd:84)
+       [2] _run_test (res://addons/gut/gut.gd:622)
+       [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+[34m[ExpectedError][0m
+* test_configuration_type_and_range
+* test_save_failure_keeps_current_scale
+* test_control_and_window_share_runtime_theme
+* test_window_titlebar_fits_scaled_font
+* test_bbcode_sizes_and_formatting
+* test_rich_text_refresh_preserves_visible_characters
+* test_unchanged_scale_and_freed_rich_text
+[34m[ExpectedError][0m
+[1m14/14 passed.
+[0m[4m
+
+res://tests/unit/test_wallpaper_settings.gd
+[0m* test_list_contains_wallpaper_images
+* test_configuration_round_trip
+* test_invalid_path_and_mode_fall_back
+* test_duplicate_choice_is_quiet_and_invalid_mode_becomes_fill
+* test_desktop_applies_wallpaper_modes
+* test_control_panel_lists_wallpapers_and_preview
+[1m6/6 passed.
+[0m[4m
+
+res://tests/unit/test_window_context.gd
+[0m* test_standalone_has_no_host
+* test_nested_page_navigates_in_its_host
+* test_embedded_page_removes_duplicate_chrome
+[1m3/3 passed.
+[0m[4m
+
+res://tests/unit/test_window_effects.gd
+[0m* test_lab_registry_and_single_instance
+* test_damage_restore_preserves_content_and_layout
+* test_damage_is_isolated_per_window
+* test_shatter_freezes_then_closes_once_and_can_reopen
+* test_effects_respect_business_locks
+* test_stale_callback_cannot_close_new_instance
+* test_effects_reject_hidden_locked_or_popup_windows
+* test_shard_mesh_covers_whole_snapshot_and_keeps_uv
+* test_partial_impact_moves_whole_window_and_restores_origin
+* test_impact_end_and_close_preserve_layout
+* test_full_impact_precedes_fragment_motion
+[1m11/11 passed.
+[0m[4m
+
+res://tests/unit/test_window_manager.gd
+[0m* test_registry_has_expected_apps
+* test_visible_apps_excludes_hidden
+* test_initial_state_no_active_window
+* test_open_unknown_app_returns_false
+* test_close_never_opened_app_is_safe
+* test_navigate_without_active_window_returns_error
+* test_get_window_for_closed_app_returns_null
+* test_open_app_with_missing_scene_does_not_emit_opened
+[1m8/8 passed.
+[0m
+
+
+
+[33m==============================================
+[0m[33m= Run Summary
+[0m[33m==============================================
+[0m
+Totals
+------
+Scripts              12
+Tests                85
+Passing Tests        85
+Asserts             566
+Time              2.695s
+
+
+[32m---- All tests passed! ----
+[0m
+FMOD Sound System: System released
+WARNING: 3 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
