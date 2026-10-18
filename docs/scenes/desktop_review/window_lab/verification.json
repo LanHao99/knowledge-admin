@@ -64,7 +64,7 @@
 			"stretched": true
 		}
 	],
-	"checks": 170,
+	"checks": 219,
 	"engine": "4.7.2-stable (official)",
 	"failures": [],
 	"renderer": "forward_plus"

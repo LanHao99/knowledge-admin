@@ -60,6 +60,7 @@ func _verify_case(resolution: Vector2i, font_scale: float, stretched: bool) -> v
 	_check(_black_fraction(damaged, window.get_global_rect()) < 0.15, label + " 破损画面无未初始化黑色区域")
 	var title_rect: Rect2 = (window.get_node("%TitleBarPanel") as Control).get_global_rect()
 	_check(_different_pixels(intact, damaged, title_rect) > 15, label + " 标题栏也出现裂纹")
+	await _verify_partial_impact(window, label)
 	await _verify_live_input(window, sample, label)
 	var before_restore: Rect2 = Rect2(window.position, window.size)
 	var saved_text: String = sample.text
@@ -77,6 +78,28 @@ func _verify_case(resolution: Vector2i, font_scale: float, stretched: bool) -> v
 	await _frames()
 	await _verify_shatter(window, label)
 	_cases.append({"name": label, "resolution": [resolution.x, resolution.y], "font_scale": font_scale, "stretched": stretched})
+
+
+## 从实际画面验证整窗反向抖动和原位恢复，UI 不与边框分离。## 输入: 窗口与标签。输出: 无。
+func _verify_partial_impact(window: ManagedWindow, label: String) -> void:
+	window.play_impact()
+	window.set_process(false)
+	var origin: Vector2 = window.position
+	var title: Control = window.get_node("%TitleBar") as Control
+	var sample: Control = window.get_content().get_node("%SampleText") as Control
+	var title_origin: Vector2 = title.global_position
+	var sample_origin: Vector2 = sample.global_position
+	window._process(0.012)
+	var offset: Vector2 = window.position - origin
+	_check(offset.length() > 4.0, label + " 局部破损触发可见整窗冲击")
+	_check((title.global_position - title_origin).is_equal_approx(offset) and (sample.global_position - sample_origin).is_equal_approx(offset), label + " 标题与输入区跟随同一震动")
+	var first: Image = await _capture(label + "_damage_impact")
+	window._process(0.025)
+	var second: Image = await _capture(label + "_damage_recoil")
+	_check((window.position - origin).x * offset.x < 0.0, label + " 冲击向相反方向回弹")
+	_check(_different_pixels(first, second, Rect2(origin, window.size)) > 500, label + " GPU 画面真实抖动")
+	window._process(window.impact_duration)
+	_check(window.position == origin and not window.is_processing(), label + " 震动结束精确回到原位")
 
 
 ## 通过键盘和鼠标证明局部破损仍保留输入与标题栏拖动。## 输入: 窗口、示例输入和标签。输出: 无。
@@ -117,7 +140,13 @@ func _verify_shatter(window: ManagedWindow, label: String) -> void:
 		return
 	var zero: Image = await _capture(label + "_shards_start")
 	_check(_snapshot_matches(_effect, zero), label + " 第一帧碎片保留完整窗口像素")
-	_effect._process(0.6)
+	_effect._process(0.012)
+	var impact_material: ShaderMaterial = _effect.material as ShaderMaterial
+	var impact_offset: Vector2 = impact_material.get_shader_parameter("impact_offset")
+	_check(impact_offset.length() > 8.0 and is_zero_approx(float(impact_material.get_shader_parameter("progress"))), label + " 完全破碎先整窗猛烈震动")
+	var impact: Image = await _capture(label + "_shatter_impact")
+	_check(_different_pixels(zero, impact, Rect2(Vector2.ZERO, get_tree().root.get_visible_rect().size)) > 1000, label + " 原应用释放后快照继续抖动")
+	_effect._process(0.6 - _effect.elapsed)
 	var falling: Image = await _capture(label + "_falling")
 	_check(_different_pixels(zero, falling, Rect2(Vector2.ZERO, get_tree().root.get_visible_rect().size)) > 1000, label + " 碎片真实移动")
 	_check(WindowManager.open_app("recycle_bin"), label + " 碎裂期间其他应用可打开")

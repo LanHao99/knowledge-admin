@@ -194,6 +194,7 @@ func _force_close(app_id: String) -> void:
 	var window: ManagedWindow = get_app_window(app_id)
 	if window == null:
 		return
+	window.stop_impact()
 	_layouts[app_id] = Rect2(window.position, window.size)
 	_taskbar.remove_app_button(app_id)
 	if app_id == "unknown_program":

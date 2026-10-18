@@ -30,7 +30,7 @@ Scripts               1
 Tests                 5
 Passing Tests         5
 Asserts              21
-Time              0.426s
+Time              0.431s
 
 
 Ran Scripts matching "test_desktop_window.gd"

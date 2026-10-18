@@ -25,7 +25,10 @@ res://tests/unit/test_window_effects.gd
 * test_stale_callback_cannot_close_new_instance
 * test_effects_reject_hidden_locked_or_popup_windows
 * test_shard_mesh_covers_whole_snapshot_and_keeps_uv
-8/8 passed.
+* test_partial_impact_moves_whole_window_and_restores_origin
+* test_impact_end_and_close_preserve_layout
+* test_full_impact_precedes_fragment_motion
+11/11 passed.
 
 
 res://tests/unit/test_window_manager.gd
@@ -49,10 +52,10 @@ res://tests/unit/test_window_manager.gd
 Totals
 ------
 Scripts               3
-Tests                19
-Passing Tests        19
-Asserts             174
-Time              0.754s
+Tests                22
+Passing Tests        22
+Asserts             195
+Time              0.839s
 
 
 Ran Scripts matching "test_window"

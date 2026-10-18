@@ -12,6 +12,10 @@ const SHATTER_SCRIPT: Script = preload("res://scenes/desktop/window_shatter.gd")
 @export_range(0.0, 1000.0, 10.0) var horizontal_speed: float = 190.0
 @export_range(0.0, 600.0, 10.0) var initial_lift: float = 130.0
 @export_range(0.0, 10.0, 0.1) var spin_speed: float = 3.0
+@export_group("Impact")
+@export_range(0.0, 80.0, 1.0) var impact_amplitude: float = 24.0
+@export_range(0.0, 1.0, 0.01, "suffix:s") var impact_duration: float = 0.18
+@export_range(1.0, 60.0, 1.0, "suffix:Hz") var impact_frequency: float = 24.0
 var is_capturing: bool = false
 
 
@@ -30,6 +34,7 @@ func capture_and_shatter(window: ManagedWindow, close_callback: Callable) -> voi
 	if not capture.is_empty():
 		effect = SHATTER_SCRIPT.new() as WindowShatterEffect
 		if effect.configure(capture.snapshot, capture.target, shard_grid, randi(), gravity, horizontal_speed, initial_lift, spin_speed):
+			effect.configure_impact(impact_amplitude, impact_duration, impact_frequency)
 			add_child(effect)
 			effect.set_process(false)
 		else:

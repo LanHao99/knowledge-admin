@@ -11,6 +11,10 @@ enum ResizeDir { NONE, TOP, BOTTOM, LEFT, RIGHT, TOP_LEFT, TOP_RIGHT, BOTTOM_LEF
 @export var default_size: Vector2 = Vector2(1200, 820)
 @export var min_window_size: Vector2 = Vector2(720, 500)
 @export var taskbar_height: float = 48.0
+@export_group("Impact")
+@export_range(0.0, 80.0, 1.0) var impact_amplitude: float = 14.0
+@export_range(0.0, 1.0, 0.01, "suffix:s") var impact_duration: float = 0.26
+@export_range(1.0, 60.0, 1.0, "suffix:Hz") var impact_frequency: float = 22.0
 
 var _app_id: String = ""
 var _is_maximized: bool = false
@@ -26,6 +30,9 @@ var _gesture_mouse: Vector2
 var _last_focus: WeakRef
 var damage_amount: float = 0.0
 var _is_shattering: bool = false
+var _impact_active: bool = false
+var _impact_elapsed: float = 0.0
+var _impact_origin: Vector2
 @onready var _title_label: Label = %TitleLabel
 @onready var _title_bar_panel: Panel = %TitleBarPanel
 @onready var _content_area: Control = %ContentArea
@@ -43,6 +50,34 @@ func _ready() -> void:
 	_update_typography(UiSettings.font_scale)
 	resized.connect(_sync_damage_geometry)
 	_sync_damage_geometry()
+	set_process(false)
+
+## 从当前位置开始短促的整窗震动，重复冲击不会积累位置误差。## 输入: 无。输出: 无。
+func play_impact() -> void:
+	stop_impact()
+	if _is_shattering or impact_amplitude <= 0.0 or impact_duration <= 0.0:
+		return
+	_impact_origin = position
+	_impact_elapsed = 0.0
+	_impact_active = true
+	set_process(true)
+
+## 结束冲击并精确恢复业务布局坐标。## 输入: 无。输出: 无。
+func stop_impact() -> void:
+	if _impact_active:
+		position = _impact_origin
+	_impact_active = false
+	set_process(false)
+
+## 整体移动标题栏、边框、内容与输入区域，震动结束后恢复原位。## 输入: 帧间隔。输出: 无。
+func _process(delta: float) -> void:
+	if not _impact_active:
+		return
+	_impact_elapsed += delta
+	if _impact_elapsed >= impact_duration:
+		stop_impact()
+		return
+	position = _impact_origin + WindowImpact.sample_offset(_impact_elapsed, impact_amplitude, impact_duration, impact_frequency)
 
 ## 对完整窗口启用或移除实时玻璃破损。## 输入: 损伤强度，范围 0 到 1。输出: 无。
 func set_damage(amount: float) -> void:
@@ -53,6 +88,10 @@ func set_damage(amount: float) -> void:
 	$DamageCopy.copy_mode = BackBufferCopy.COPY_MODE_VIEWPORT if damage_amount > 0.0 else BackBufferCopy.COPY_MODE_DISABLED
 	($DamageOverlay.material as ShaderMaterial).set_shader_parameter("damage", damage_amount)
 	_sync_damage_geometry()
+	if damage_amount > 0.0:
+		play_impact()
+	else:
+		stop_impact()
 
 ## 同步局部破损着色器使用的窗口像素尺寸。## 输入: 无。输出: 无。
 func _sync_damage_geometry() -> void:
@@ -60,6 +99,7 @@ func _sync_damage_geometry() -> void:
 
 ## 标记不可逆的关闭状态并冻结输入，保留一帧画面用于快照。## 输入: 无。输出: 无。
 func begin_shatter() -> void:
+	stop_impact()
 	_is_shattering = true
 	_is_dragging = false
 	_resize_dir = ResizeDir.NONE
@@ -160,6 +200,7 @@ func restore() -> void:
 func _on_minimize_pressed() -> void:
 	if _minimize_locked or _is_shattering:
 		return
+	stop_impact()
 	_is_minimized = true
 	hide()
 	minimized.emit()
@@ -173,6 +214,7 @@ func _on_close_pressed() -> void:
 func _on_maximize_pressed() -> void:
 	if _is_shattering:
 		return
+	stop_impact()
 	if _is_maximized:
 		_is_maximized = false
 		position = _pre_max_rect.position
@@ -188,6 +230,7 @@ func _on_maximize_pressed() -> void:
 func fit_work_area() -> void:
 	if not is_node_ready() or _is_shattering:
 		return
+	stop_impact()
 	var area: Vector2 = (get_parent() as Control).size.max(Vector2.ONE)
 	if _is_maximized:
 		position = Vector2.ZERO
@@ -201,6 +244,7 @@ func _on_title_bar_gui_input(event: InputEvent) -> void:
 	if _is_shattering:
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		stop_impact()
 		window_clicked.emit()
 		if event.double_click:
 			_on_maximize_pressed()
@@ -215,6 +259,7 @@ func _on_resize_input(event: InputEvent, direction: int) -> void:
 	if _is_shattering:
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		stop_impact()
 		window_clicked.emit()
 		_resize_dir = direction
 		_gesture_rect = Rect2(position, size)

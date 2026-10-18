@@ -175,3 +175,63 @@ func test_shard_mesh_covers_whole_snapshot_and_keeps_uv() -> void:
 	assert_false(effect.all_shards_below(1080.0))
 	effect.elapsed = 2.0
 	assert_true(effect.all_shards_below(1080.0))
+
+
+## 冲击将标题栏和内容共同移动，并在恢复时精确回到原位。## 输入: 无。输出: 无。
+func test_partial_impact_moves_whole_window_and_restores_origin() -> void:
+	var window: ManagedWindow = WindowManager.get_app_window("window_lab")
+	var origin: Vector2 = window.position
+	var title: Control = window.get_node("%TitleBar") as Control
+	var sample: Control = window.get_content().get_node("%SampleText") as Control
+	var title_origin: Vector2 = title.global_position
+	var sample_origin: Vector2 = sample.global_position
+	WindowManager.set_app_damage("window_lab", 0.7)
+	window._process(0.012)
+	var offset: Vector2 = window.position - origin
+	assert_gt(offset.length(), 4.0)
+	assert_eq(title.global_position - title_origin, offset)
+	assert_eq(sample.global_position - sample_origin, offset)
+	WindowManager.set_app_damage("window_lab", 0.7)
+	window._process(0.012)
+	assert_eq(window.position - origin, offset, "重复冲击不会累加布局偏移")
+	WindowManager.set_app_damage("window_lab", 0.0)
+	assert_eq(window.position, origin)
+	assert_false(window.is_processing())
+
+
+## 自然衰减和外部关闭都不能把震动坐标保存为窗口布局。## 输入: 无。输出: 无。
+func test_impact_end_and_close_preserve_layout() -> void:
+	var window: ManagedWindow = WindowManager.get_app_window("window_lab")
+	var origin: Vector2 = window.position
+	WindowManager.set_app_damage("window_lab", 0.7)
+	window._process(window.impact_duration + 0.01)
+	assert_eq(window.position, origin)
+	assert_false(window.is_processing())
+	window.play_impact()
+	window._process(0.012)
+	WindowManager.close_app("window_lab")
+	var remembered: Rect2 = WindowManager._layouts.window_lab
+	assert_eq(remembered.position, origin)
+	await wait_process_frames(2)
+
+
+## 完全破碎的首次震动由快照承担，冲击结束前碎片不各自移动。## 输入: 无。输出: 无。
+func test_full_impact_precedes_fragment_motion() -> void:
+	var picture: Image = Image.create(16, 16, false, Image.FORMAT_RGBA8)
+	picture.fill(Color.WHITE)
+	var effect: WindowShatterEffect = add_child_autofree(WindowShatterEffect.new())
+	effect.set_process(false)
+	assert_true(effect.configure(ImageTexture.create_from_image(picture), Rect2(100, 80, 900, 620), Vector2i(8, 5), 712, 1800.0, 190.0, 130.0, 3.0))
+	effect.configure_impact(24.0, 0.18, 24.0)
+	effect._process(0.012)
+	var shader_material: ShaderMaterial = effect.material as ShaderMaterial
+	var offset: Vector2 = shader_material.get_shader_parameter("impact_offset")
+	assert_gt(offset.length(), 8.0)
+	assert_eq(float(shader_material.get_shader_parameter("progress")), 0.0)
+	assert_eq(effect.position, Vector2(100, 80))
+	assert_false(effect.all_shards_below(1080.0))
+	effect._process(0.2)
+	assert_eq(shader_material.get_shader_parameter("impact_offset"), Vector2.ZERO)
+	assert_gt(float(shader_material.get_shader_parameter("progress")), 0.0)
+	assert_eq(WindowImpact.sample_offset(0.0, 24.0, 0.18, 24.0), Vector2.ZERO)
+	assert_eq(WindowImpact.sample_offset(0.1, 24.0, 0.0, 24.0), Vector2.ZERO)

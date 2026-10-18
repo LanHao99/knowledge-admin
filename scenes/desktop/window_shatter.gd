@@ -10,6 +10,9 @@ var _seeds: PackedFloat32Array = PackedFloat32Array()
 var _gravity: float = 1800.0
 var _initial_lift: float = 130.0
 var _motion_material: ShaderMaterial
+var _impact_amplitude: float = 0.0
+var _impact_duration: float = 0.0
+var _impact_frequency: float = 24.0
 
 
 ## 用抖动网格生成覆盖整个快照的三角碎片。## 输入: 快照、目标矩形、网格、随机种子与运动参数。输出: 是否生成成功。
@@ -60,6 +63,13 @@ func configure(snapshot: Texture2D, target: Rect2, grid: Vector2i, random_seed: 
 	return true
 
 
+## 配置完全碎裂前的整窗冲击，原应用仍在动画开始前释放。## 输入: 震幅、时长、频率。输出: 无。
+func configure_impact(amplitude: float, duration: float, frequency: float) -> void:
+	_impact_amplitude = maxf(0.0, amplitude)
+	_impact_duration = maxf(0.0, duration) if _impact_amplitude > 0.0 else 0.0
+	_impact_frequency = frequency
+
+
 ## 保持矩形边界并扰动内部网格，使 Delaunay 三角形完整铺满窗口。## 输入: 尺寸、网格和随机源。输出: 唯一顶点数组。
 static func _make_points(extent: Vector2, grid: Vector2i, random: RandomNumberGenerator) -> PackedVector2Array:
 	var columns: int = maxi(1, grid.x)
@@ -82,7 +92,8 @@ func _process(delta: float) -> void:
 	if _motion_material == null:
 		return
 	elapsed += delta
-	_motion_material.set_shader_parameter("progress", elapsed)
+	_motion_material.set_shader_parameter("progress", maxf(0.0, elapsed - _impact_duration))
+	_motion_material.set_shader_parameter("impact_offset", WindowImpact.sample_offset(elapsed, _impact_amplitude, _impact_duration, _impact_frequency))
 	if all_shards_below(get_viewport_rect().end.y):
 		queue_free()
 
@@ -91,9 +102,10 @@ func _process(delta: float) -> void:
 func all_shards_below(bottom: float) -> bool:
 	if shard_count == 0:
 		return false
+	var fall_time: float = maxf(0.0, elapsed - _impact_duration)
 	for index: int in range(shard_count):
 		var vertical_speed: float = -_initial_lift * (0.4 + 0.6 * _seeds[index])
-		var top: float = position.y + _centers[index].y + vertical_speed * elapsed + 0.5 * _gravity * elapsed * elapsed - _radii[index]
+		var top: float = position.y + _centers[index].y + vertical_speed * fall_time + 0.5 * _gravity * fall_time * fall_time - _radii[index]
 		if top <= bottom:
 			return false
 	return true
