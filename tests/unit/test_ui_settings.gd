@@ -163,6 +163,42 @@ func test_rich_text_refresh_preserves_visible_characters() -> void:
 	assert_eq(label.visible_characters, 3)
 
 
+## 验证目录悬浮提示和只读正文在 Classic95 浅底上保持不透明深色。## 输入: 无。
+## 输出: 无。
+func test_classic95_hover_and_readonly_text_stay_opaque() -> void:
+	var theme: Theme = SettingsScript.BASE_THEME
+	var editor: TextEdit = autofree(TextEdit.new())
+	editor.theme = theme
+	var readonly_color: Color = editor.get_theme_color("font_readonly_color")
+	assert_eq(readonly_color, Color(0.2, 0.2, 0.2, 1))
+	assert_false(theme.has_color("font_color_readonly", "TextEdit"))
+	var stored_panel: StyleBox = theme.get_stylebox("panel", "TooltipPanel")
+	assert_true(stored_panel is StyleBoxFlat, "stored tooltip panel is %s" % stored_panel)
+	var tooltip: PopupPanel = autofree(PopupPanel.new())
+	tooltip.theme = theme
+	tooltip.theme_type_variation = "TooltipPanel"
+	add_child(tooltip)
+	var panel: StyleBoxFlat = tooltip.get_theme_stylebox("panel") as StyleBoxFlat
+	assert_not_null(panel, "resolved tooltip panel is %s" % tooltip.get_theme_stylebox("panel"))
+	assert_eq(panel.bg_color.a, 1.0)
+	assert_true(panel.bg_color.is_equal_approx(Color(1, 1, 225.0 / 255.0, 1)))
+	var tip_label: Label = autofree(Label.new())
+	tip_label.theme = theme
+	tip_label.theme_type_variation = "TooltipLabel"
+	add_child(tip_label)
+	assert_eq(tip_label.get_theme_color("font_color"), Color(0, 0, 0, 1))
+	var tree: Tree = autofree(Tree.new())
+	tree.theme = theme
+	add_child(tree)
+	assert_eq(tree.get_theme_color("font_hovered_color"), Color(0, 0, 0, 1))
+	assert_eq(tree.get_theme_color("font_hovered_dimmed_color"), Color(0, 0, 0, 1))
+	assert_eq(tree.get_theme_color("font_hovered_selected_color"), Color(1, 1, 1, 1))
+	assert_true(tree.get_theme_stylebox("hovered") is StyleBoxEmpty)
+	var hovered_selected: StyleBoxFlat = tree.get_theme_stylebox("hovered_selected") as StyleBoxFlat
+	assert_not_null(hovered_selected)
+	assert_eq(hovered_selected.bg_color.a, 1.0)
+
+
 ## 验证相同倍率不重复广播，释放过的富文本不会引起错误。## 输入: 无。
 ## 输出: 无。
 func test_unchanged_scale_and_freed_rich_text() -> void:
