@@ -6,7 +6,7 @@
 
 启动封面使用深蓝／青紫液态波浪，中央显示“正在启动系统”。原生文字与波浪置于同一个 CanvasGroup，用统一噪声遮罩从中心向外溶解。独立 CanvasLayer 跨过启动入口的场景切换，桌面提前在下层初始化，准备完成后才允许揭开封面；转场期间输入被拦截，结束后恢复桌面处理并释放封面。时长、着色器参数与动画预览见 [启动封面](boot_screen.md)。
 
-WindowManager 注册 knowledge_admin、ai_cards、control_panel、my_computer、recycle_bin、window_lab、unknown_program、help。后两者没有桌面或开始菜单入口。我的电脑提供预设目录与文本查看，回收站是空内容演示；不读写真实目录。
+WindowManager 注册 knowledge_admin、ai_cards、control_panel、my_computer、recycle_bin、window_lab、unknown_program、help。后两者没有桌面或开始菜单入口。我的电脑提供预设目录和可编辑文档，修改写入 `user://my_computer_documents.cfg`；回收站是空内容演示。两者都不读写真实磁盘目录。
 
 “窗口实验室”在桌面和开始菜单提供入口，包含“完全破碎窗口”“不完全破损”“恢复”三个按钮。局部裂纹保留实时交互；完全破碎先结束应用，再由独立桌面特效显示包含标题栏、边框和 UI 的快照碎片。使用方法、Inspector 参数和验收见 [窗口实验室](window_lab.md)。
 
@@ -16,9 +16,13 @@ WindowManager 注册 knowledge_admin、ai_cards、control_panel、my_computer、
 
 在 Godot Inspector 打开该资源：`drive_description` 与 `programs_description` 分别编辑系统盘和程序目录说明；`documents` 数组保存文档。展开每个 DesktopTextFile 资源，用 `file_name` 修改文件名，用多行 `content` 编辑正文。运行应用时按数组生成目录，因此新增、删除或改名条目无需修改查看器脚本。
 
-两个资源类型位于 `data/resources/desktop_file_catalog.gd` 与 `desktop_text_file.gd`；正文仅保存在这一个 `.tres` 中，两个 txt 为内嵌子资源。原有“使用说明.txt”“学习指南.txt”的内容保持一致。编辑并保存资源后重新运行游戏即可看到修改。游戏内继续只读显示，不生成真实 txt，也不写入玩家磁盘目录。
+两个资源类型位于 `data/resources/desktop_file_catalog.gd` 与 `desktop_text_file.gd`；预设正文保存在这一个 `.tres` 中，两个 txt 为内嵌子资源。原有“使用说明.txt”“学习指南.txt”的内容保持一致。在 Inspector 中编辑并保存资源后，重新运行游戏即可看到预设变化。
 
-`tests/unit/test_desktop_file_catalog.gd` 验证默认场景的资源绑定、新增文档生成目录、多行正文显示及未绑定资源时的容错。Godot 4.7.2 隔离工程 GUT 共 42 项、215 个断言通过；迁移前后的四段说明与正文精确一致。
+游戏内选中文档后可以直接修改正文。系统盘和程序目录仍只显示说明。切换文件不会询问，草稿留在当前窗口里，未保存的文件名末尾显示 `*`。`Ctrl+S` 只保存当前文档。关闭「我的电脑」，或从开始菜单关闭系统时，只要还有未保存文档，就询问保存、不保存或取消。保存失败时不关闭、不退出。剧情调用的 `App.quit_app()` 不插入这个询问。
+
+覆盖档按文件名保存。正文改回预设内容后，对应覆盖项会删除，之后仍跟随 `.tres`。这份覆盖档不是玩家电脑上的真实 txt。
+
+`tests/unit/test_desktop_file_catalog.gd` 验证默认场景的资源绑定、新增文档生成目录、多行正文显示、未绑定资源时的容错，以及编辑、快捷键保存、覆盖项删除和关闭询问。
 
 ## 窗口与布局
 

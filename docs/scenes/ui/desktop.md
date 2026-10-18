@@ -32,7 +32,7 @@ Classic98 伪桌面体验。游戏从启动画面进入桌面，所有应用在�
 | `knowledge_admin` | 知识管理主界面 |
 | `ai_cards` | AI 制卡助手 |
 | `control_panel` | 控制面板（设置） |
-| `my_computer` | 我的电脑（演示） |
+| `my_computer` | 我的电脑（可编辑预设文档） |
 | `recycle_bin` | 回收站（演示） |
 | `unknown_program` | 未知程序（hidden，剧情触发） |
 

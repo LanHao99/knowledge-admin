@@ -3,6 +3,7 @@ extends Panel
 
 ## 从注册表填充菜单。## 输入: 无。输出: 无。
 func _ready() -> void:
+	add_to_group(&"start_menu")
 	for app_info: Dictionary in WindowManager.get_visible_apps():
 		var button: Button = Button.new()
 		button.text = "  " + str(app_info.title)
@@ -35,18 +36,52 @@ func _input(event: InputEvent) -> void:
 		hide()
 		queue_free()
 
-## 弹出可取消的关闭系统确认。## 输入: 无。输出: 无。
+## 先处理我的电脑里未保存的文档，再确认关闭系统。## 输入: 无。
+## 输出: 无。
 func _on_quit_pressed() -> void:
-	var dialog: ConfirmationDialog = ConfirmationDialog.new()
-	dialog.title = "关闭系统"
-	dialog.dialog_text = "确认要关闭系统吗？"
-	dialog.confirmed.connect(App.quit_app)
-	dialog.confirmed.connect(dialog.queue_free)
-	dialog.canceled.connect(dialog.queue_free)
-	get_parent().add_child(dialog)
-	dialog.popup_centered()
+	var host: Node = get_parent()
+	var page: Control = _open_my_computer_page()
 	hide()
 	queue_free()
+	var confirm := _QuitConfirm.new(host)
+	if page != null and page.has_method("desktop_request_close"):
+		page.desktop_request_close(confirm.proceed)
+		return
+	confirm.proceed()
+
+
+## 读取仍打开的我的电脑页面，最小化时同样有效。## 输入: 无。
+## 输出: Control - 页面；未打开时返回 null。
+func _open_my_computer_page() -> Control:
+	if not WindowManager.is_available():
+		return null
+	var window: ManagedWindow = WindowManager.get_app_window("my_computer")
+	if window == null:
+		return null
+	return window.get_content()
+
+
+class _QuitConfirm extends RefCounted:
+	var _host: Node
+
+	## 记住关闭确认要挂到的桌面节点。## 输入: host (Node) - 对话框父节点。
+	## 输出: 无。
+	func _init(host: Node) -> void:
+		_host = host
+
+	## 弹出可取消的关闭系统确认。## 输入: 无。
+	## 输出: 无。
+	func proceed() -> void:
+		if not is_instance_valid(_host):
+			return
+		var dialog: ConfirmationDialog = ConfirmationDialog.new()
+		dialog.title = "关闭系统"
+		dialog.dialog_text = "确认要关闭系统吗？"
+		dialog.confirmed.connect(App.quit_app)
+		dialog.confirmed.connect(dialog.queue_free)
+		dialog.canceled.connect(dialog.queue_free)
+		_host.add_child(dialog)
+		dialog.popup_centered()
 
 ## 对话框关闭后释放，避免隐藏窗口泄漏。## 输入: dialog。输出: 无。
 func _release_dialog(dialog: ConfirmationDialog) -> void:

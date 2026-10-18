@@ -26,6 +26,7 @@ MCPRuntimeBridge="*uid://wk2yhw3winuo"
 DialogueManager="*uid://c3rodes2l3gxb"
 DebugSettings="*res://src/debug_settings.gd"
 UiSettings="*res://src/ui_settings.gd"
+ShortcutSettings="*res://src/shortcut_settings.gd"
 WindowManager="*res://src/window_manager.gd"
 App="*res://src/app.tscn"
 

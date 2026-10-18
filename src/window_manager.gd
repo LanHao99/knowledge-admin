@@ -115,6 +115,9 @@ func close_app(app_id: String) -> void:
 		_close_confirm.popup_centered()
 		_close_confirm.canceled.connect(_close_confirm.queue_free)
 		return
+	if page != null and page.has_method("desktop_request_close"):
+		page.desktop_request_close(_force_close.bind(app_id))
+		return
 	_force_close(app_id)
 
 ## 调整普通应用的整窗玻璃损伤；不会改变内容和布局。## 输入: 应用 ID、损伤强度。输出: 是否接受。
