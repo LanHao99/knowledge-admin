@@ -11,6 +11,7 @@ const REGISTRY: Dictionary = {
 	"control_panel": {"title": "控制面板", "icon_path": "res://assets/icons/desktop_settings.svg", "scene_path": "res://scenes/ui/settings.tscn", "entry_visible": true, "default_size": Vector2(1200, 880)},
 	"my_computer": {"title": "我的电脑", "icon_path": "res://assets/icons/desktop_computer.svg", "scene_path": "res://scenes/desktop/my_computer.tscn", "entry_visible": true, "default_size": Vector2(1000, 720)},
 	"recycle_bin": {"title": "回收站", "icon_path": "res://assets/icons/desktop_recycle.svg", "scene_path": "res://scenes/desktop/recycle_bin.tscn", "entry_visible": true, "default_size": Vector2(820, 560)},
+	"camera": {"title": "摄像头", "icon_path": "res://assets/icons/desktop_camera.svg", "scene_path": "res://scenes/desktop/camera.tscn", "entry_visible": true, "default_size": Vector2(560, 560), "keep_square": true, "min_size": Vector2(320, 320)},
 	"window_lab": {"title": "窗口实验室", "icon_path": "res://assets/icons/control/window.svg", "scene_path": "res://scenes/desktop/window_lab.tscn", "entry_visible": true, "default_size": Vector2(900, 620)},
 	"story_test": {"title": "剧情测试台", "icon_path": "res://assets/icons/desktop_ai.svg", "scene_path": "res://scenes/desktop/story_test_bench.tscn", "entry_visible": true, "debug_only": true, "default_size": Vector2(1100, 760)},
 	"unknown_program": {"title": "未知程序", "icon_path": "res://assets/icons/desktop_unknown.svg", "scene_path": "res://scenes/desktop/unknown_program.tscn", "entry_visible": false, "default_size": Vector2(1180, 800)},
@@ -80,6 +81,8 @@ func open_app(app_id: String) -> bool:
 	var window: ManagedWindow = load(WINDOW_SCENE_PATH).instantiate() as ManagedWindow
 	var sizes: Dictionary = _window_container.get_parent().get("application_sizes")
 	window.default_size = sizes.get(app_id, config.default_size)
+	window.keep_square = bool(config.get("keep_square", false))
+	window.min_window_size = config.get("min_size", window.min_window_size)
 	if app_id in ["my_computer", "recycle_bin", "window_lab"]:
 		window.min_window_size = Vector2(520, 360)
 	_open_windows[app_id] = window

@@ -6,9 +6,11 @@
 
 启动封面使用深蓝／青紫液态波浪，中央显示“正在启动系统”。原生文字与波浪置于同一个 CanvasGroup，用统一噪声遮罩从中心向外溶解。独立 CanvasLayer 跨过启动入口的场景切换，桌面提前在下层初始化，准备完成后才允许揭开封面；转场期间输入被拦截，结束后恢复桌面处理并释放封面。时长、着色器参数与动画预览见 [启动封面](boot_screen.md)。
 
-WindowManager 注册 knowledge_admin、ai_cards、control_panel、my_computer、recycle_bin、window_lab、unknown_program、help。后两者没有桌面或开始菜单入口。我的电脑提供预设目录和可编辑文档，修改写入 `user://my_computer_documents.cfg`；回收站是空内容演示。两者都不读写真实磁盘目录。
+WindowManager 注册 knowledge_admin、ai_cards、control_panel、my_computer、recycle_bin、camera、window_lab、unknown_program、help。后两者没有桌面或开始菜单入口。我的电脑提供预设目录和可编辑文档，修改写入 `user://my_computer_documents.cfg`；回收站是空内容演示。两者都不读写真实磁盘目录。
 
 “窗口实验室”在桌面和开始菜单提供入口，包含“完全破碎窗口”“不完全破损”“恢复”三个按钮。局部裂纹保留实时交互；完全破碎先结束应用，再由独立桌面特效显示包含标题栏、边框和 UI 的快照碎片。使用方法、Inspector 参数和验收见 [窗口实验室](window_lab.md)。
+
+“摄像头”在桌面和开始菜单提供入口，默认 560×560，显示 MIRA 的透明背景人物头像。普通缩放与最大化均保持整窗方形，复用现有拖动、最小化和任务栏行为。内容根节点通过 `@export` 暴露立绘、缩放、偏移、镜像、背景色及 CRT 参数，支持编辑器预览。CRT 只处理自己的画面，不采样桌面；详细参数及渲染证据见 [摄像头窗口](camera.md)。
 
 ## 我的电脑预设文件
 

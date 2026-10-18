@@ -10,6 +10,7 @@ signal restored
 enum ResizeDir { NONE, TOP, BOTTOM, LEFT, RIGHT, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT }
 @export var default_size: Vector2 = Vector2(1200, 820)
 @export var min_window_size: Vector2 = Vector2(720, 500)
+@export var keep_square: bool = false
 @export var taskbar_height: float = 48.0
 @export_group("Impact")
 @export_range(0.0, 80.0, 1.0) var impact_amplitude: float = 14.0
@@ -129,6 +130,8 @@ func initialize(app_id: String, title_text: String, scene_path: String) -> void:
 	_app_id = app_id
 	_title_label.text = title_text
 	size = default_size.min((get_parent() as Control).size)
+	if keep_square:
+		size = Vector2.ONE * minf(size.x, size.y)
 	position = (((get_parent() as Control).size - size) * 0.5).round()
 	navigate_to(scene_path)
 	fit_work_area()
@@ -235,8 +238,15 @@ func fit_work_area() -> void:
 	if _is_maximized:
 		position = Vector2.ZERO
 		size = area
+		if keep_square:
+			size = Vector2.ONE * minf(area.x, area.y)
+			position = ((area - size) * 0.5).round()
 	else:
 		size = size.clamp(min_window_size.min(area), area)
+		if keep_square:
+			var maximum_side: float = minf(area.x, area.y)
+			var minimum_side: float = minf(maxf(min_window_size.x, min_window_size.y), maximum_side)
+			size = Vector2.ONE * clampf(minf(size.x, size.y), minimum_side, maximum_side)
 		position = position.clamp(Vector2.ZERO, (area - size).max(Vector2.ZERO)).round()
 
 ## 标题栏拖动或双击最大化。## 输入: event。输出: 无。
@@ -283,14 +293,14 @@ func _input(event: InputEvent) -> void:
 		if _is_dragging:
 			position = _gesture_rect.position + movement
 		else:
-			var next_rect: Rect2 = resized_rect(_gesture_rect, movement, _resize_dir, min_window_size)
+			var next_rect: Rect2 = resized_rect(_gesture_rect, movement, _resize_dir, min_window_size, keep_square)
 			position = next_rect.position
 			size = next_rect.size
 		fit_work_area()
 		get_viewport().set_input_as_handled()
 
-## 计算八向缩放，达到最小值时保持对边固定。## 输入: 矩形、位移、方向、下限。输出: Rect2。
-static func resized_rect(rect: Rect2, movement: Vector2, direction: int, minimum: Vector2) -> Rect2:
+## 计算八向缩放，方形模式以拖动主轴等比缩放并保持对边固定。## 输入: 矩形、位移、方向、下限、是否保持方形。输出: Rect2。
+static func resized_rect(rect: Rect2, movement: Vector2, direction: int, minimum: Vector2, square: bool = false) -> Rect2:
 	var result: Rect2 = rect
 	if direction in [ResizeDir.RIGHT, ResizeDir.TOP_RIGHT, ResizeDir.BOTTOM_RIGHT]:
 		result.size.x = maxf(minimum.x, rect.size.x + movement.x)
@@ -302,6 +312,16 @@ static func resized_rect(rect: Rect2, movement: Vector2, direction: int, minimum
 	if direction in [ResizeDir.TOP, ResizeDir.TOP_LEFT, ResizeDir.TOP_RIGHT]:
 		result.size.y = maxf(minimum.y, rect.size.y - movement.y)
 		result.position.y = rect.end.y - result.size.y
+	if square:
+		var horizontal: bool = direction not in [ResizeDir.TOP, ResizeDir.BOTTOM]
+		var vertical: bool = direction not in [ResizeDir.LEFT, ResizeDir.RIGHT]
+		var use_width: bool = horizontal and (not vertical or absf(movement.x) > absf(movement.y))
+		var side: float = maxf(result.size.x if use_width else result.size.y, maxf(minimum.x, minimum.y))
+		result.size = Vector2.ONE * side
+		if direction in [ResizeDir.LEFT, ResizeDir.TOP_LEFT, ResizeDir.BOTTOM_LEFT]:
+			result.position.x = rect.end.x - side
+		if direction in [ResizeDir.TOP, ResizeDir.TOP_LEFT, ResizeDir.TOP_RIGHT]:
+			result.position.y = rect.end.y - side
 	return result
 
 ## 标题和按钮随字体倍率变化。## 输入: scale_value。输出: 无。

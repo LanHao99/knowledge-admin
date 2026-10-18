@@ -9,6 +9,7 @@ extends Control
 	"help": Vector2(1100, 740),
 	"window_lab": Vector2(900, 620),
 	"story_test": Vector2(1100, 760),
+	"camera": Vector2(560, 560),
 }
 var _shortcut_selection: ButtonGroup = ButtonGroup.new()
 @onready var _window_container: Control = %WindowContainer
