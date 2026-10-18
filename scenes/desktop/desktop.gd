@@ -7,6 +7,7 @@ extends Control
 	"control_panel": Vector2(1200, 880), "my_computer": Vector2(1000, 720),
 	"recycle_bin": Vector2(820, 560), "unknown_program": Vector2(1180, 800),
 	"help": Vector2(1100, 740),
+	"window_lab": Vector2(900, 620),
 }
 var _shortcut_selection: ButtonGroup = ButtonGroup.new()
 @onready var _window_container: Control = %WindowContainer

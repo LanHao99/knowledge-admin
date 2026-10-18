@@ -6,7 +6,9 @@
 
 启动封面使用深蓝／青紫液态波浪，中央显示“正在启动系统”。原生文字与波浪置于同一个 CanvasGroup，用统一噪声遮罩从中心向外溶解。独立 CanvasLayer 跨过启动入口的场景切换，桌面提前在下层初始化，准备完成后才允许揭开封面；转场期间输入被拦截，结束后恢复桌面处理并释放封面。时长、着色器参数与动画预览见 [启动封面](boot_screen.md)。
 
-WindowManager 注册 knowledge_admin、ai_cards、control_panel、my_computer、recycle_bin、unknown_program、help。后两者没有桌面或开始菜单入口。我的电脑提供预设目录与文本查看，回收站是空内容演示；不读写真实目录。
+WindowManager 注册 knowledge_admin、ai_cards、control_panel、my_computer、recycle_bin、window_lab、unknown_program、help。后两者没有桌面或开始菜单入口。我的电脑提供预设目录与文本查看，回收站是空内容演示；不读写真实目录。
+
+“窗口实验室”在桌面和开始菜单提供入口，包含“完全破碎窗口”“不完全破损”“恢复”三个按钮。局部裂纹保留实时交互；完全破碎先结束应用，再由独立桌面特效显示包含标题栏、边框和 UI 的快照碎片。使用方法、Inspector 参数和验收见 [窗口实验室](window_lab.md)。
 
 ## 我的电脑预设文件
 

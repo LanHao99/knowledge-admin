@@ -11,6 +11,7 @@ const REGISTRY: Dictionary = {
 	"control_panel": {"title": "控制面板", "icon_path": "res://assets/icons/desktop_settings.svg", "scene_path": "res://scenes/ui/settings.tscn", "entry_visible": true, "default_size": Vector2(1200, 880)},
 	"my_computer": {"title": "我的电脑", "icon_path": "res://assets/icons/desktop_computer.svg", "scene_path": "res://scenes/desktop/my_computer.tscn", "entry_visible": true, "default_size": Vector2(1000, 720)},
 	"recycle_bin": {"title": "回收站", "icon_path": "res://assets/icons/desktop_recycle.svg", "scene_path": "res://scenes/desktop/recycle_bin.tscn", "entry_visible": true, "default_size": Vector2(820, 560)},
+	"window_lab": {"title": "窗口实验室", "icon_path": "res://assets/icons/control/window.svg", "scene_path": "res://scenes/desktop/window_lab.tscn", "entry_visible": true, "default_size": Vector2(900, 620)},
 	"unknown_program": {"title": "未知程序", "icon_path": "res://assets/icons/desktop_unknown.svg", "scene_path": "res://scenes/desktop/unknown_program.tscn", "entry_visible": false, "default_size": Vector2(1180, 800)},
 	"help": {"title": "使用帮助", "icon_path": "res://assets/icons/desktop_knowledge.svg", "scene_path": "res://game/dialogue/story_dialogue_overlay.tscn", "entry_visible": false, "default_size": Vector2(1100, 740)},
 }
@@ -29,15 +30,19 @@ var _suspended_popups: Array[WeakRef] = []
 var _layouts: Dictionary = {}
 var _minimized_popups: Dictionary = {}
 var _close_confirm: ConfirmationDialog
+var _window_effects: DesktopWindowEffects
+var _pending_shatters: Dictionary[String, int] = {}
 
 ## 绑定当前桌面及其模态层。## 输入: 窗口容器、任务栏。输出: 无。
 func setup(container: Control, taskbar: Node) -> void:
 	_window_container = container
 	_taskbar = taskbar
 	var desktop_root: Node = container.get_parent()
+	_window_effects = desktop_root.get_node_or_null("WindowEffects") as DesktopWindowEffects if desktop_root != null else null
 	_modal_layer = desktop_root.get_node_or_null("ModalLayer") as Control if desktop_root != null else null
 	_modal_container = desktop_root.get_node_or_null("ModalLayer/ModalWindows") as Control if desktop_root != null else null
 	_open_windows.clear()
+	_pending_shatters.clear()
 	_active_app_id = ""
 	_story_locked = false
 	if not is_inside_tree():
@@ -52,7 +57,7 @@ func is_available() -> bool:
 
 ## 打开或激活一个单实例应用。## 输入: app_id。输出: 是否成功。
 func open_app(app_id: String) -> bool:
-	if not is_available() or not REGISTRY.has(app_id):
+	if not is_available() or not REGISTRY.has(app_id) or _pending_shatters.has(app_id):
 		return false
 	if _story_locked and app_id != "unknown_program":
 		return false
@@ -72,7 +77,7 @@ func open_app(app_id: String) -> bool:
 	var window: ManagedWindow = load(WINDOW_SCENE_PATH).instantiate() as ManagedWindow
 	var sizes: Dictionary = _window_container.get_parent().get("application_sizes")
 	window.default_size = sizes.get(app_id, config.default_size)
-	if app_id in ["my_computer", "recycle_bin"]:
+	if app_id in ["my_computer", "recycle_bin", "window_lab"]:
 		window.min_window_size = Vector2(520, 360)
 	_open_windows[app_id] = window
 	_window_container.add_child(window)
@@ -94,7 +99,7 @@ func open_app(app_id: String) -> bool:
 ## 请求关闭，剧情锁定、帮助及写入过程不允许绕过。## 输入: app_id。输出: 无。
 func close_app(app_id: String) -> void:
 	var window: ManagedWindow = get_app_window(app_id)
-	if window == null or _story_locked or app_id == "help" or app_id == _help_owner:
+	if window == null or _story_locked or app_id == "help" or app_id == _help_owner or _pending_shatters.has(app_id):
 		return
 	var page: Control = window.get_content()
 	if _contains_import(page):
@@ -111,6 +116,58 @@ func close_app(app_id: String) -> void:
 		_close_confirm.canceled.connect(_close_confirm.queue_free)
 		return
 	_force_close(app_id)
+
+## 调整普通应用的整窗玻璃损伤；不会改变内容和布局。## 输入: 应用 ID、损伤强度。输出: 是否接受。
+func set_app_damage(app_id: String, amount: float) -> bool:
+	var window: ManagedWindow = _effect_target(app_id)
+	if window == null or not is_finite(amount):
+		return false
+	window.set_damage(amount)
+	return true
+
+## 冻结目标并请求单次整窗快照，动画交由桌面层持有。## 输入: 应用 ID。输出: 是否接受。
+func shatter_app(app_id: String) -> bool:
+	var window: ManagedWindow = _effect_target(app_id)
+	if window == null or not is_instance_valid(_window_effects) or _window_effects.is_capturing:
+		return false
+	var instance_id: int = window.get_instance_id()
+	_pending_shatters[app_id] = instance_id
+	_taskbar.dismiss_start_menu()
+	window.begin_shatter()
+	_window_effects.capture_and_shatter(window, _finish_shatter.bind(app_id, instance_id))
+	return true
+
+## 检查剧情、帮助、会话、写入与模态弹窗保护，禁止特效绕过业务限制。## 输入: 应用 ID。输出: 可用目标或 null。
+func _effect_target(app_id: String) -> ManagedWindow:
+	var window: ManagedWindow = get_app_window(app_id)
+	if window == null or _story_locked or _pending_shatters.has(app_id) or app_id in ["unknown_program", "help", _help_owner]:
+		return null
+	if not window.is_visible_in_tree() or window._close_locked or _contains_import(window):
+		return null
+	var page: Control = window.get_content()
+	if page != null and page.has_method("desktop_has_active_session") and page.desktop_has_active_session():
+		return null
+	if _has_visible_popup(window):
+		return null
+	return window
+
+## 检查目标内部的可见弹窗，避免捕获遗漏弹窗或绕过确认。## 输入: 子树根。输出: bool。
+func _has_visible_popup(node: Node) -> bool:
+	for child: Node in node.get_children():
+		if child is Window and child.visible:
+			return true
+		if _has_visible_popup(child):
+			return true
+	return false
+
+## 在碎片第一帧出现前释放对应旧实例，过期回调不能关闭新窗口。## 输入: 应用 ID、实例标识。输出: 无。
+func _finish_shatter(app_id: String, instance_id: int) -> void:
+	if _pending_shatters.get(app_id, 0) != instance_id:
+		return
+	_pending_shatters.erase(app_id)
+	var window: ManagedWindow = get_app_window(app_id)
+	if window != null and window.get_instance_id() == instance_id:
+		_force_close(app_id)
 
 ## 确认结束会话后再释放窗口。## 输入: app_id。输出: 无。
 func _confirm_study_close(app_id: String) -> void:
@@ -191,6 +248,8 @@ func get_visible_apps() -> Array[Dictionary]:
 
 ## 提到前台并刷新只读页面，编辑和学习状态保持。## 输入: window、app_id。输出: 无。
 func _activate_window(window: ManagedWindow, app_id: String) -> void:
+	if window.is_shattering():
+		return
 	if _story_locked and app_id != "unknown_program":
 		return
 	for other_id: String in _open_windows:
@@ -234,7 +293,7 @@ func _focus_top_window() -> void:
 	var nodes: Array[Node] = _window_container.get_children()
 	nodes.reverse()
 	for node: Node in nodes:
-		if node is ManagedWindow and node.visible:
+		if node is ManagedWindow and node.visible and not node.is_shattering():
 			_activate_window(node, node._app_id)
 			return
 	_taskbar.set_active_button("")

@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scenes/desktop/desktop.gd" id="1"]
 [ext_resource type="Script" path="res://scenes/desktop/taskbar.gd" id="2"]
+[ext_resource type="Script" path="res://scenes/desktop/window_effects.gd" id="3_effects"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_taskbar"]
 content_margin_left = 4.0
@@ -132,7 +133,19 @@ layout_mode = 2
 size_flags_vertical = 4
 text = "00:00"
 
+[node name="WindowEffects" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+z_index = 100
+script = ExtResource("3_effects")
+
 [node name="ModalLayer" type="Control" parent="."]
+z_index = 300
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

@@ -1,0 +1,37 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[SaveDirectory] user:// = D:/game design/godot/4.6projects/knowledge-admin/.temp/window_effects_verify/saves
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2582)
+---  GUT  ---
+[INFO]:  using [D:/game design/godot/4.6projects/knowledge-admin/.temp/window_effects_verify/saves] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_desktop_window.gd
+* test_minimize_retains_content
+* test_maximize_restore_and_minimize
+* test_locked_controls_do_not_close_or_minimize
+* test_smaller_work_area_clamps_bounds
+* test_resize_all_eight_directions
+5/5 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                 5
+Passing Tests         5
+Asserts              21
+Time              0.426s
+
+
+Ran Scripts matching "test_desktop_window.gd"
+---- All tests passed! ----
