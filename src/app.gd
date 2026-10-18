@@ -31,6 +31,8 @@ signal story_test_stopped(reason: String)
 
 const OVERLAY_SCENE: String = "res://game/dialogue/story_dialogue_overlay.tscn"
 const DEFAULT_CHAPTER: String = "chapter_1"
+const ACTION_CONFIRMATION: PackedScene = preload("res://game/dialogue/dialogue_action_confirmation.tscn")
+const SEND_WALLPAPER_ACTION: String = "res://game/dialogue/actions/send_wallpaper.gd"
 
 var _story_manager: StoryManager = null
 var _overlay: StoryDialogueOverlay = null
@@ -44,6 +46,8 @@ var _test_playback: bool = false
 var _stop_reason: String = ""
 var _drop_next_story: bool = false
 var _pending_test_backup: String = ""
+var _action_confirmation: DialogueActionConfirmation
+var _action_running: bool = false
 
 
 ## 启动 AVG，并准备唯一的对话窗。## 输入: 无。
@@ -253,6 +257,65 @@ func open_app(app_id: String) -> bool:
 ## 输出: 无。
 func close_app(app_id: String) -> void:
 	WindowManager.close_app(app_id)
+
+
+## 显示确认层，选择是后运行 RefCounted 脚本的 execute(arguments)。## 输入: 脚本路径、提示内容、是否允许否、动作参数。
+## 输出: bool - 确认且动作成功时为 true；取消、重入或无效脚本返回 false。
+func run_confirmed_action(script_path: String, message: String, allow_no: bool = true, arguments: Array = []) -> bool:
+	if _action_running or not script_path.begins_with("res://") or not ResourceLoader.exists(script_path, "GDScript"):
+		return false
+	var action_script: GDScript = load(script_path) as GDScript
+	if action_script == null or not action_script.can_instantiate() or not ClassDB.is_parent_class(action_script.get_instance_base_type(), "RefCounted"):
+		return false
+	var action: RefCounted = action_script.new() as RefCounted
+	if action == null or not action.has_method("execute"):
+		return false
+	_action_running = true
+	var confirmation: DialogueActionConfirmation = ACTION_CONFIRMATION.instantiate() as DialogueActionConfirmation
+	confirmation.message = message
+	confirmation.allow_no = allow_no
+	confirmation.show_test_stop = _test_playback
+	_action_confirmation = confirmation
+	add_child(confirmation)
+	var accepted: bool = await confirmation.decided
+	_action_confirmation = null
+	confirmation.queue_free()
+	var succeeded: bool = false
+	if accepted:
+		succeeded = bool(await action.call("execute", arguments))
+	_action_running = false
+	return succeeded
+
+
+## 接收时解锁并保存图片，等待确认后自动更换，拒绝时保留已解锁图片。## 输入: 壁纸路径、可编辑提示、是否允许否。
+## 输出: bool - 确认并成功更换时为 true。
+func send_wallpaper(path: String, message: String = "收到一张壁纸，是否更换？", allow_no: bool = true) -> bool:
+	if _action_running or not WallpaperSettings.unlock_wallpaper(path):
+		return false
+	return await run_confirmed_action(SEND_WALLPAPER_ACTION, message, allow_no, [path])
+
+
+## 仅让正在播放正式剧情的未知程序局部破损。## 输入: amount (float) - 0 恢复，1 最强。
+## 输出: bool - 是否接受。
+func damage_story_window(amount: float = 0.7) -> bool:
+	return WindowManager.set_story_window_damage(amount)
+
+
+## 请求未知程序破碎，截取最后画面后完成本段剧情并释放旧窗口。## 输入: 无。输出: bool - 是否接受。
+func shatter_story_window() -> bool:
+	if not is_instance_valid(_overlay) or _action_running:
+		return false
+	_overlay.set_window_shatter_pending(true)
+	if WindowManager.shatter_story_window(_on_story_shatter_captured):
+		return true
+	_overlay.set_window_shatter_pending(false)
+	return false
+
+
+## 快照完成后结束对话；窗口管理器随后释放旧实例，碎片继续独立播放。## 输入: 无。输出: 无。
+func _on_story_shatter_captured() -> void:
+	if is_instance_valid(_overlay):
+		_overlay.finish_window_shatter()
 
 
 ## 打开 AI 制卡应用。保留向后兼容的调用接口。
@@ -579,6 +642,8 @@ func stop_story_test(reason: String = "已停止测试") -> Dictionary:
 		_finish_test_stop()
 		return {"success": true, "data": reason}
 	_overlay.request_test_stop()
+	if is_instance_valid(_action_confirmation):
+		_action_confirmation.cancel_pending()
 	return {"success": true, "data": reason}
 
 

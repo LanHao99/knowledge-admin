@@ -25,6 +25,9 @@ func capture_and_shatter(window: ManagedWindow, close_callback: Callable) -> voi
 	is_capturing = true
 	window.z_as_relative = false
 	window.z_index = CAPTURE_Z_INDEX
+	var modal: CanvasItem = get_parent().get_node_or_null("ModalLayer") as CanvasItem
+	if modal != null and modal.is_ancestor_of(window):
+		window.z_index += modal.z_index
 	if DisplayServer.get_name() == "headless":
 		await scene_tree.process_frame
 	else:
@@ -54,7 +57,7 @@ func capture_and_shatter(window: ManagedWindow, close_callback: Callable) -> voi
 ## 将目标窗口在当前帧的完整像素映射到桌面特效坐标。## 输入: 冻结的窗口。输出: 快照和目标矩形；失败时为空字典。
 func _read_window(window: ManagedWindow) -> Dictionary:
 	var modal: CanvasItem = get_parent().get_node_or_null("ModalLayer") as CanvasItem
-	var obscured: bool = modal != null and modal.is_visible_in_tree()
+	var obscured: bool = modal != null and modal.is_visible_in_tree() and not modal.is_ancestor_of(window)
 	if DisplayServer.get_name() == "headless" or obscured or not is_instance_valid(window) or not window.is_inside_tree():
 		return {}
 	var viewport: Viewport = window.get_viewport()

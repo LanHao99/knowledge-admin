@@ -143,6 +143,42 @@ func shatter_app(app_id: String) -> bool:
 	_window_effects.capture_and_shatter(window, _finish_shatter.bind(app_id, instance_id))
 	return true
 
+## 剧情专用损伤入口，只接受模态层中正在播放的未知程序。## 输入: amount (float)。输出: bool。
+func set_story_window_damage(amount: float) -> bool:
+	var window: ManagedWindow = _story_effect_target()
+	if window == null or not is_finite(amount):
+		return false
+	window.set_damage(amount)
+	return true
+
+## 捕获剧情窗口并在回调结束剧情后销毁真实实例，普通特效入口保持原有保护。## 输入: on_captured (Callable)。输出: bool。
+func shatter_story_window(on_captured: Callable) -> bool:
+	var window: ManagedWindow = _story_effect_target()
+	if window == null or not on_captured.is_valid() or not is_instance_valid(_window_effects) or _window_effects.is_capturing:
+		return false
+	var instance_id: int = window.get_instance_id()
+	_pending_shatters["unknown_program"] = instance_id
+	window.begin_shatter()
+	_window_effects.capture_and_shatter(window, _finish_story_shatter.bind(instance_id, on_captured))
+	return true
+
+## 校验剧情锁、模态归属及弹窗，拒绝待机窗口或重复请求。## 输入: 无。输出: ManagedWindow 或 null。
+func _story_effect_target() -> ManagedWindow:
+	var window: ManagedWindow = get_app_window("unknown_program")
+	if not _story_locked or window == null or window.get_parent() != _modal_container:
+		return null
+	if _pending_shatters.has("unknown_program") or not window.is_visible_in_tree() or _has_visible_popup(window):
+		return null
+	return window
+
+## 快照取得后解除对话模态，再按原实例标识关闭未知程序。## 输入: 实例标识、剧情完成回调。输出: 无。
+func _finish_story_shatter(instance_id: int, on_captured: Callable) -> void:
+	if _pending_shatters.get("unknown_program", 0) != instance_id:
+		return
+	if on_captured.is_valid():
+		on_captured.call()
+	_finish_shatter("unknown_program", instance_id)
+
 ## 检查剧情、帮助、会话、写入与模态弹窗保护，禁止特效绕过业务限制。## 输入: 应用 ID。输出: 可用目标或 null。
 func _effect_target(app_id: String) -> ManagedWindow:
 	var window: ManagedWindow = get_app_window(app_id)
@@ -195,7 +231,7 @@ func _contains_import(node: Node) -> bool:
 			return true
 	return false
 
-## 释放普通应用；未知程序仅隐藏其持久实例。## 输入: app_id。输出: 无。
+## 释放应用；未知程序通常保留实例，完全破碎时真实销毁。## 输入: app_id。输出: 无。
 func _force_close(app_id: String) -> void:
 	var window: ManagedWindow = get_app_window(app_id)
 	if window == null:
@@ -203,7 +239,7 @@ func _force_close(app_id: String) -> void:
 	window.stop_impact()
 	_layouts[app_id] = Rect2(window.position, window.size)
 	_taskbar.remove_app_button(app_id)
-	if app_id == "unknown_program":
+	if app_id == "unknown_program" and not window.is_shattering():
 		window._on_minimize_pressed()
 	else:
 		_open_windows.erase(app_id)
@@ -378,13 +414,14 @@ func begin_dialogue(story: bool, source: Node) -> Control:
 func end_dialogue(story: bool) -> void:
 	if story:
 		var window: ManagedWindow = get_app_window("unknown_program")
-		window.get_content().end_story()
-		window.set_close_locked(false)
-		window.set_minimize_locked(false)
 		_story_locked = false
-		window.reparent(_window_container)
 		_modal_layer.hide()
-		window._on_minimize_pressed()
+		if window != null and not window.is_shattering():
+			window.get_content().end_story()
+			window.set_close_locked(false)
+			window.set_minimize_locked(false)
+			window.reparent(_window_container)
+			window._on_minimize_pressed()
 	else:
 		_help_owner = ""
 		_force_close("help")

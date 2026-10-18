@@ -2,7 +2,7 @@ extends GutTest
 ## 验证壁纸列表、存档回退和桌面显示方式，不改写玩家的壁纸配置。
 
 const SettingsScript: GDScript = preload("res://src/wallpaper_settings.gd")
-const SAMPLE_WALLPAPER: String = "res://assets/wallpapers/1V6A3094.jpg"
+const SAMPLE_WALLPAPER: String = "res://assets/wallpapers/leaf.jpg"
 
 var _settings: Node
 var _config_path: String = ""
@@ -121,7 +121,7 @@ func test_control_panel_lists_wallpapers_and_preview() -> void:
 	add_child_autofree(settings)
 	var wallpaper_list := settings.get_node("%WallpaperList") as ItemList
 	assert_eq(wallpaper_list.get_item_text(0), "无壁纸")
-	assert_eq(wallpaper_list.item_count, 5)
+	assert_eq(wallpaper_list.item_count, WallpaperSettings.list_wallpapers().size() + 1)
 	assert_eq(str(wallpaper_list.get_item_metadata(0)), "")
 	assert_true(wallpaper_list.get_item_icon(1) != null)
 	var ratio: AspectRatioContainer = settings.get_node("%WallpaperPreviewRatio") as AspectRatioContainer
@@ -135,3 +135,50 @@ func test_control_panel_lists_wallpapers_and_preview() -> void:
 		assert_true(fill_check.disabled)
 		assert_true(fit_check.disabled)
 		assert_false((settings.get_node("%WallpaperPreview") as CanvasItem).visible)
+
+
+## 默认剧情图片不能被选择或读取纹理，普通壁纸不受限制。## 输入: 无。输出: 无。
+func test_story_wallpapers_start_locked() -> void:
+	for path: String in SettingsScript.LOCKED_BY_DEFAULT:
+		assert_false(_settings.is_wallpaper_unlocked(path))
+		_settings.set_wallpaper(path)
+		assert_eq(_settings.wallpaper_path, "")
+		assert_null(_settings.load_texture(path))
+	assert_true(_settings.is_wallpaper_unlocked(SAMPLE_WALLPAPER))
+	assert_false(_settings.unlock_wallpaper("res://icon.svg"))
+
+
+## 领取立即持久化，重复领取不重复发信号，恢复后仍能切换。## 输入: 无。输出: 无。
+func test_unlock_is_saved_before_wallpaper_selection() -> void:
+	var path: String = SettingsScript.LOCKED_BY_DEFAULT[0]
+	watch_signals(_settings)
+	assert_true(_settings.unlock_wallpaper(path))
+	assert_true(_settings.unlock_wallpaper(path))
+	assert_signal_emit_count(_settings, "wallpaper_unlocked", 1)
+	assert_eq(_settings.wallpaper_path, "")
+	var reloaded: Node = autofree(SettingsScript.new())
+	reloaded.load_settings(_config_path)
+	assert_true(reloaded.is_wallpaper_unlocked(path))
+	assert_false(reloaded.is_wallpaper_unlocked(SettingsScript.LOCKED_BY_DEFAULT[1]))
+	reloaded.set_wallpaper(path)
+	assert_eq(reloaded.wallpaper_path, path)
+	assert_eq(reloaded.save_settings(), OK)
+	_settings.load_settings(_config_path)
+	assert_eq(_settings.wallpaper_path, path)
+	reloaded.set("_dirty", false)
+
+
+## 旧存档不会误解锁剧情图片，损坏的解锁项被过滤且不影响普通设置。## 输入: 无。输出: 无。
+func test_legacy_and_invalid_unlock_records() -> void:
+	var config: ConfigFile = ConfigFile.new()
+	var path: String = SettingsScript.LOCKED_BY_DEFAULT[0]
+	config.set_value("wallpaper", "path", path)
+	assert_eq(config.save(_config_path), OK)
+	_settings.load_settings(_config_path)
+	assert_false(_settings.is_wallpaper_unlocked(path))
+	assert_eq(_settings.wallpaper_path, "")
+	config.set_value("wallpaper", "unlocked", [null, 3, "res://icon.svg", path, path])
+	assert_eq(config.save(_config_path), OK)
+	_settings.load_settings(_config_path)
+	assert_eq(_settings.wallpaper_path, path)
+	assert_eq(_settings.get("_unlocked_wallpapers"), PackedStringArray([path]))

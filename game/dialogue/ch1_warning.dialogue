@@ -15,11 +15,12 @@ MIRA: {shake}它在扫描我。{/shake}
 	系统: {system}正在启动保护进程……{/system}
 	MIRA: {glitch}不——等一下——{/glitch}
 	MIRA: {slow}别让它——{/slow}
-	do App.quit_app()
-	=> warning_choice
+	do App.shatter_story_window()
+	=> END
 
 ~ warning_choice
 系统: {system}再分配完成。非关键进程优先级已降低。{/system}
+do App.damage_story_window(0.7)
 MIRA: {pause=1.0}{slow}...还好。{/slow}
 - 你还好吗？
 	MIRA: {slow}比之前模糊了一点。但还在。{/slow}

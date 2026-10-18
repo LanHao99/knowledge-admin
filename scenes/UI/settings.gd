@@ -76,6 +76,8 @@ func _exit_tree() -> void:
 		WindowManager.app_focused.disconnect(_on_shortcut_app_focused)
 	if WallpaperSettings.wallpaper_changed.is_connected(_sync_wallpaper_controls):
 		WallpaperSettings.wallpaper_changed.disconnect(_sync_wallpaper_controls)
+	if WallpaperSettings.wallpaper_unlocked.is_connected(_on_wallpaper_unlocked):
+		WallpaperSettings.wallpaper_unlocked.disconnect(_on_wallpaper_unlocked)
 	if WallpaperSettings.settings_save_failed.is_connected(_on_wallpaper_save_failed):
 		WallpaperSettings.settings_save_failed.disconnect(_on_wallpaper_save_failed)
 	var viewport := get_viewport()
@@ -380,6 +382,8 @@ func _setup_wallpaper() -> void:
 	_wallpaper_fit_check.toggled.connect(_on_wallpaper_mode_toggled.bind(WallpaperSettings.MODE_FIT))
 	if not WallpaperSettings.wallpaper_changed.is_connected(_sync_wallpaper_controls):
 		WallpaperSettings.wallpaper_changed.connect(_sync_wallpaper_controls)
+	if not WallpaperSettings.wallpaper_unlocked.is_connected(_on_wallpaper_unlocked):
+		WallpaperSettings.wallpaper_unlocked.connect(_on_wallpaper_unlocked)
 	if not WallpaperSettings.settings_save_failed.is_connected(_on_wallpaper_save_failed):
 		WallpaperSettings.settings_save_failed.connect(_on_wallpaper_save_failed)
 	var viewport := get_viewport()
@@ -396,11 +400,20 @@ func _build_wallpaper_list() -> void:
 	var none_index := _wallpaper_list.add_item("无壁纸")
 	_wallpaper_list.set_item_metadata(none_index, "")
 	for path: String in WallpaperSettings.list_wallpapers():
-		var index := _wallpaper_list.add_item(path.get_file())
+		var unlocked: bool = WallpaperSettings.is_wallpaper_unlocked(path)
+		var label: String = path.get_file() if unlocked else "%s（未解锁）" % path.get_file()
+		var index := _wallpaper_list.add_item(label)
 		_wallpaper_list.set_item_metadata(index, path)
+		_wallpaper_list.set_item_disabled(index, not unlocked)
 		var texture := WallpaperSettings.load_texture(path)
 		if texture != null:
 			_wallpaper_list.set_item_icon(index, texture)
+
+
+## 接收剧情赠送的壁纸时即时更新列表，保留当前壁纸与预览。## 输入: _path (String)。输出: 无。
+func _on_wallpaper_unlocked(_path: String) -> void:
+	_build_wallpaper_list()
+	_sync_wallpaper_controls(WallpaperSettings.wallpaper_path, WallpaperSettings.display_mode)
 
 
 ## 把列表选择写入壁纸设置。## 输入: index (int) - 被选中的列表项。

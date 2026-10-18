@@ -112,11 +112,13 @@ func _verify_playback() -> void:
 	_check(jumped.success, "跳转到警告: " + str(jumped.get("message", "")))
 	_check(App.get_story_progress().bond == 0, "跳转不提高好感度")
 	await _frames()
-	await _choose_quit_branch()
+	var shattered_window: WeakRef = weakref(WindowManager.get_app_window("unknown_program"))
+	await _choose_shatter_branch()
 	await _until_unlocked()
-	_check(not App.get_story_progress().is_chapter_dialogue_completed("chapter_1", "warning"), "退出指令不记完成")
-	_check(_has_stop_dialog("退出游戏"), "退出指令显示停止原因")
-	_check(not WindowManager._story_locked, "退出指令停止后回到桌面")
+	await _frames()
+	_check(App.get_story_progress().is_chapter_dialogue_completed("chapter_1", "warning"), "破碎分支记为本段剧情完成")
+	_check(shattered_window.get_ref() == null, "破碎释放旧未知程序")
+	_check(not WindowManager._story_locked, "破碎退出后回到桌面")
 
 
 ## 检查单实例、默认尺寸、滚动、拖动和调试入口。## 输入: 无。
@@ -337,9 +339,9 @@ func _advance_until_auto(view: StoryDialogueOverlay) -> void:
 		await _frames(2)
 
 
-## 选择会请求退出游戏的分支并继续推进到停止。## 输入: 无。
+## 选择未知程序完全破碎的分支并推进至窗口退出。## 输入: 无。
 ## 输出: 无。
-func _choose_quit_branch() -> void:
+func _choose_shatter_branch() -> void:
 	var selected: bool = false
 	for _step: int in range(40):
 		if not WindowManager._story_locked:

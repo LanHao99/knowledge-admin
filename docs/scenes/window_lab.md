@@ -55,6 +55,8 @@ DamageCopy 使用 COPY_MODE_VIEWPORT。当前 Forward+ 渲染路径的矩形复�
 
 `WindowManager.set_app_damage(app_id: String, amount: float) -> bool` 设置损伤，0 表示恢复，有效数值限制在 0～1，非有限值拒绝。`WindowManager.shatter_app(app_id: String) -> bool` 请求完全破碎，返回是否接受请求。动画由桌面拥有，不需要应用页面等待异步完成。
 
+剧情通过专用的 `App.damage_story_window(amount)` 和 `App.shatter_story_window()` 操作当前模态中的未知程序，普通特效入口的业务保护保持生效。剧情快照允许捕获模态层自己的窗口，取得最后一帧后完成对话、释放实例并解除模态，再播放独立碎片；待机未知程序与其他被遮挡窗口不适用。详见 [Dialogue 剧情动作](../narrative/dialogue_actions.md)。
+
 ## 验收
 
 Godot 4.7.2、Forward+／D3D12 实际渲染：

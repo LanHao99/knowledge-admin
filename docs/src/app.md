@@ -39,6 +39,9 @@ Autoload 顺序放在 `DialogueManager` 之后，保证启动时对话单例已�
 - `reset_global_save()`：重置当前剧情存档和教程进度，不删除闪卡数据库。章节回到 `chapter_1`。
 - `add_bond(amount)` / `get_bond()`：好感度读写。对话选项用 `do App.add_bond(1)` 增减；`if App.get_bond() >= 8` 可做句内分支。
 - `quit_app()`：延迟退出。测试播放中改为停止测试，不退出游戏。
+- `run_confirmed_action(script_path, message, allow_no, arguments)`：等待确认后运行脚本的 `execute(arguments)`，拒绝时不执行。
+- `send_wallpaper(path, message, allow_no)`：收到时解锁并保存，确认后自动更换壁纸。`allow_no = false` 表示只能选“是”。
+- `damage_story_window(amount)` / `shatter_story_window()`：对正在播放的未知程序施加局部破损，或完整破碎并完成本段。详见 [Dialogue 剧情动作](../narrative/dialogue_actions.md)。
 - `get_story_test_state()` / `get_story_catalog()` / `preview_next_story()`：测试台读取状态、目录和下一段。预览不修改存档。
 - `read_story_draft()` / `update_story_draft()` / `apply_story_draft()` / `revert_story_draft()`：草稿编辑。只有应用会写当前游戏。
 - `start_next_story()` / `jump_to_story()` / `stop_story_test()`：测试播放。调试模式关闭，或已有剧情在播放、排队时，不能启动。

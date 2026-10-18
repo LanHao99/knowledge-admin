@@ -1,0 +1,71 @@
+{
+	"cases": [
+		{
+			"font_scale": 0.8,
+			"name": "1280x720_080",
+			"resolution": [
+				1280,
+				720
+			],
+			"stretched": false
+		},
+		{
+			"font_scale": 1.0,
+			"name": "1280x720_100",
+			"resolution": [
+				1280,
+				720
+			],
+			"stretched": false
+		},
+		{
+			"font_scale": 1.5,
+			"name": "1280x720_150",
+			"resolution": [
+				1280,
+				720
+			],
+			"stretched": false
+		},
+		{
+			"font_scale": 0.8,
+			"name": "1920x1080_080",
+			"resolution": [
+				1920,
+				1080
+			],
+			"stretched": false
+		},
+		{
+			"font_scale": 1.0,
+			"name": "1920x1080_100",
+			"resolution": [
+				1920,
+				1080
+			],
+			"stretched": false
+		},
+		{
+			"font_scale": 1.5,
+			"name": "1920x1080_150",
+			"resolution": [
+				1920,
+				1080
+			],
+			"stretched": false
+		},
+		{
+			"font_scale": 1.0,
+			"name": "1280x720_100_stretched",
+			"resolution": [
+				1280,
+				720
+			],
+			"stretched": true
+		}
+	],
+	"checks": 219,
+	"engine": "4.7.2-stable (official)",
+	"failures": [],
+	"renderer": "forward_plus"
+}

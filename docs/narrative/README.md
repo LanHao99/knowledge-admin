@@ -30,6 +30,7 @@
 | [叙事-玩法融合矩阵](./gameplay_integration_matrix.md) | 每个叙事节拍的玩法后果 |
 | [羁绊系统设计](./affection_system_design.md) | 长期好感度变量 + 高羁绊专属剧情（设计阶段） |
 | [实施路线图](./implementation_roadmap.md) | Phase 1~5 任务分解 |
+| [Dialogue 剧情动作](./dialogue_actions.md) | 确认后运行脚本、赠送及解锁壁纸、未知程序破损与退出 |
 
 ## 剧本文件
 

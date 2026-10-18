@@ -61,6 +61,7 @@ var _resolving_line: bool = false
 
 ## 对话结束流程是否已经跑过。
 var _closed: bool = false
+var _window_shatter_pending: bool = false
 
 ## 让延迟自动推进在停止后失效。
 var _session_token: int = 0
@@ -191,6 +192,8 @@ func start(resource, key: String = "", start_title: String = "") -> void:
 ## 展示一行对话（角色名 + 打字机动画文本 + 选项）。## 输入: line (DialogueLine)。
 ## 输出: 无。
 func _show_line(line) -> void:
+	if _window_shatter_pending:
+		return
 	if _closed or _stop_requested:
 		_end_dialogue(false)
 		return
@@ -223,6 +226,8 @@ func _show_line(line) -> void:
 ## 对话面板点击：打字机播放中 → 跳过动画；打字机完成 → 推进到下一行。## 输入: event (InputEvent) — gui_input 信号参数。
 ## 输出: 无。
 func _on_card_panel_clicked(event: InputEvent = null) -> void:
+	if _resolving_line or _window_shatter_pending or _closed:
+		return
 	if event != null:
 		if not (event is InputEventMouseButton):
 			return
@@ -282,7 +287,7 @@ func _build_response_buttons(responses: Array) -> void:
 ## 选项选择回调：进入被选中的分支。好感度由该分支里的 do App.add_bond 写入。## 输入: index (int) - 选项索引。
 ## 输出: 无。
 func _on_option_selected(index: int) -> void:
-	if _current_line == null:
+	if _current_line == null or _resolving_line or _window_shatter_pending or not _is_waiting_for_choice:
 		return
 
 	var responses: Array = _current_line.responses
@@ -312,7 +317,7 @@ func _on_option_selected(index: int) -> void:
 ## 结束当前对话序列，隐藏覆盖层。mark_complete 为 false 时不记完成。## 输入: mark_complete。
 ## 输出: 无。
 func _end_dialogue(mark_complete: bool = true) -> void:
-	if _closed:
+	if _closed or _window_shatter_pending:
 		return
 	_closed = true
 	_session_token += 1
@@ -340,6 +345,17 @@ func _end_dialogue(mark_complete: bool = true) -> void:
 		_story_manager.end_dialogue()
 
 	dialogue_finished.emit()
+
+
+## 暂缓对话结束，保留最后一帧直到窗口快照完成。## 输入: pending (bool)。输出: 无。
+func set_window_shatter_pending(pending: bool) -> void:
+	_window_shatter_pending = pending
+
+
+## 解除快照等待并完成剧情；停止测试时由原有停止标记阻止记完成。## 输入: 无。输出: 无。
+func finish_window_shatter() -> void:
+	_window_shatter_pending = false
+	_end_dialogue()
 
 
 # ── 打字机动画 ──
@@ -410,7 +426,7 @@ func _on_auto_advance_requested() -> void:
 
 	if token != _session_token or _stop_requested or _closed:
 		return
-	if _current_line == null or _is_waiting_for_choice:
+	if _current_line == null or _is_waiting_for_choice or _resolving_line or _window_shatter_pending:
 		return
 
 	if not _current_line.next_id.is_empty():

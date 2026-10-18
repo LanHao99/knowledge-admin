@@ -25,7 +25,8 @@
 			"title": "Done",
 			"tasks": [
 				"6f0c1a2e-7b34-4d55-9a10-c4e8b2d19f30",
-				"7bf5cd21-a97f-4b3a-8ecc-95aa4f00b673"
+				"7bf5cd21-a97f-4b3a-8ecc-95aa4f00b673",
+				"c9fc76aa-36fd-4c1a-a13e-6511d63908b6"
 			]
 		}
 	],
@@ -55,6 +56,13 @@
 			"uuid": "7bf5cd21-a97f-4b3a-8ecc-95aa4f00b673",
 			"title": "剧情测试台布局优化",
 			"description": "可编辑场景布局、紧凑摘要、章节筛选、分组存档编辑、固定保存操作和备份阅读；修复空白自动推进并完成多尺寸渲染回归。",
+			"category": "5d6b120c-1ddc-4ba3-b1cf-59bed8d25249",
+			"steps": []
+		},
+		{
+			"uuid": "c9fc76aa-36fd-4c1a-a13e-6511d63908b6",
+			"title": "Dialogue 剧情动作与壁纸解锁",
+			"description": "确认后运行脚本，可编辑提示与拒绝权限；壁纸解锁存档及第二章强制接收；系统警告中的未知程序局部破损与完整破碎退出。",
 			"category": "5d6b120c-1ddc-4ba3-b1cf-59bed8d25249",
 			"steps": []
 		}
