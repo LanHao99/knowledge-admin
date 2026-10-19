@@ -11,6 +11,8 @@ var db: SQLite = null
 @onready var score_input: TextEdit = $ScoreInput
 
 # Called when the node enters the scene tree for the first time.
+## 初始化脚本：打开 SQLite 数据库、创建 players 表并连接各按钮信号。## 输入: 无。
+## 输出: 无。
 func _ready() -> void:
 	#创建数据库
 	db = SQLite.new()
@@ -32,7 +34,9 @@ func _ready() -> void:
 	look_up_button.pressed.connect(_on_look_up_pressed)
 	pass # Replace with function body.
 
-func _on_insert_pressed() -> void: ## 插入数据
+## 按钮回调：读取名称和分数，把一条记录插入 players 表。## 输入: 无。
+## 输出: 无（插入结果打印到控制台）。
+func _on_insert_pressed() -> void:
 	var local_name = name_input.text
 	var local_score = int(score_input.text)
 	
@@ -45,6 +49,8 @@ func _on_insert_pressed() -> void: ## 插入数据
 
 	pass
 
+## 按钮回调：按名称删除 players 表中匹配的记录。## 输入: 无。
+## 输出: 无（删除结果或错误打印到控制台）。
 func _on_delete_pressed() -> void:
 	var local_name := name_input.text.strip_edges()
 	if local_name == "":
@@ -57,6 +63,8 @@ func _on_delete_pressed() -> void:
 	else:
 		print("Delete failed: ", db.error_message)
 
+## 按钮回调：按名称把 players 表中该记录的分数字段更新为输入值。## 输入: 无。
+## 输出: 无（更新结果或错误打印到控制台）。
 func _on_update_pressed() -> void:
 	var local_name := name_input.text.strip_edges()
 	if local_name == "":
@@ -74,6 +82,8 @@ func _on_update_pressed() -> void:
 	else:
 		print("Update failed: ", db.error_message)
 
+## 按钮回调：按名称查询 players 表中的记录；名称为空时直接打印失败信息。## 输入: 无。
+## 输出: 无（查询结果或错误信息打印到控制台）。
 func _on_select_pressed() -> void:
 	var local_name := name_input.text.strip_edges()
 
@@ -88,6 +98,8 @@ func _on_select_pressed() -> void:
 
 	pass
 
+## 按钮回调：查询 players 表全部记录（按 id 升序）并打印查询结果。## 输入: 无。
+## 输出: 无（查询结果或错误打印到控制台）。
 func _on_look_up_pressed() -> void:
 	var success := db.query("SELECT id, name, score FROM players ORDER BY id ASC;")
 	if success:

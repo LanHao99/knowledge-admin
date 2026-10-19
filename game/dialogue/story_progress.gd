@@ -294,7 +294,8 @@ func set_chapter(chapter_id: String, reset_progress: bool = false) -> void:
 # ── 工具方法 ──
 
 
-## 将 StoryProgress 序列化为字典（不含 Resource 元数据），用于调试或导出。## 输出: Dictionary。
+## 将 StoryProgress 序列化为字典（不含 Resource 元数据），用于调试或导出。## 输入: 无。
+## 输出: Dictionary - 含进度、章节、已完成对话、标记、羁绊等全部剧情字段。
 func to_dict() -> Dictionary:
 	return {
 		"total_progress": total_progress,

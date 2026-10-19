@@ -27,11 +27,15 @@ var _last_code: String = ""
 var _last_rows: Array[Dictionary] = []
 
 
-func configure(db_path: String = "user://knowledge_admin.db") -> void: ## 配置数据库文件路径
+## 配置数据库文件路径，供后续调用 open() 使用。## 输入: db_path (String) - 数据库文件路径，支持 user:// 前缀，默认 "user://knowledge_admin.db"。
+## 输出: 无。
+func configure(db_path: String = "user://knowledge_admin.db") -> void:
 	_db_path = db_path
 
 
-func open() -> bool: ## 创建或复用同 db_path 的共享连接，并加载 schema JSON
+## 创建或复用同 db_path 的共享连接，并加载 schema JSON。## 输入: 无。
+## 输出: bool - 成功拿到连接并加载 schema 配置时返回 true；打开数据库或读取 schema 失败时返回 false。
+func open() -> bool:
 	clear_last_error()
 
 	# 1) 优先复用已存在的共享连接，避免对同一文件开多个 SQLite 句柄导致跨连接写锁冲突
@@ -64,7 +68,9 @@ func open() -> bool: ## 创建或复用同 db_path 的共享连接，并加载 s
 	return true
 
 
-func close() -> void: ## 释放当前实例对共享连接的引用，归零时真正放手底层 SQLite
+## 释放当前实例对共享连接的引用，归零时真正放手底层 SQLite。## 输入: 无。
+## 输出: 无。
+func close() -> void:
 	if _owns_connection and _shared_connections.has(_db_path):
 		var entry: Dictionary = _shared_connections[_db_path]
 		var refs: int = int(entry.get("refs", 0)) - 1
@@ -82,23 +88,31 @@ func get_sqlite() -> SQLite:
 	return _db
 
 
-func _exit_tree() -> void: ## 节点销毁时自动释放共享连接引用，避免泄漏
+## 节点销毁时自动释放共享连接引用，避免泄漏。## 输入: 无。
+## 输出: 无。
+func _exit_tree() -> void:
 	if _owns_connection:
 		close()
 
 
-func is_open() -> bool: ## 检查数据库是否已经打开
+## 检查数据库是否已经打开。## 输入: 无。
+## 输出: bool - 已持有底层 SQLite 连接返回 true，否则返回 false。
+func is_open() -> bool:
 	return _db != null
 
 
-func require_open() -> bool: ## 要求数据库已打开，否则返回失败
+## 要求数据库已打开，未打开时记录失败并发出错误信号。## 输入: 无。
+## 输出: bool - 已打开返回 true；未打开返回 false，错误码为 DB_NOT_OPEN。
+func require_open() -> bool:
 	if is_open():
 		return true
 	_fail("DB_NOT_OPEN", "数据库尚未打开，请先调用 open()")
 	return false
 
 
-func load_schema_config() -> Dictionary: ## 从 JSON 文件读取 schema 配置
+## 从 JSON 文件读取 schema 配置并缓存到实例。## 输入: 无。
+## 输出: 返回标准字典。成功时 `data` 为解析出的 schema 配置字典；文件缺失或解析失败时透传 SchemaParser 的失败结果。
+func load_schema_config() -> Dictionary:
 	var result := SchemaParser.parse_json_file(SCHEMA_JSON_PATH)
 	if not result.get("success", false):
 		# 如果失败了，直接透传带有错误代码和信息的字典
@@ -109,19 +123,27 @@ func load_schema_config() -> Dictionary: ## 从 JSON 文件读取 schema 配置
 	return ok(_schema_config)
 
 
-func begin_transaction() -> bool: ## 开始事务，保证多步写入要么全成功要么全失败
+## 开始事务，保证多步写入要么全成功要么全失败。## 输入: 无。
+## 输出: bool - BEGIN 执行成功返回 true；数据库未打开或执行失败返回 false，错误码为 TX_BEGIN_FAILED。
+func begin_transaction() -> bool:
 	return _exec_bool("BEGIN TRANSACTION;", "TX_BEGIN_FAILED", "开启事务失败")
 
 
-func commit_transaction() -> bool: ## 提交事务，把草稿中的改动真正写入数据库
+## 提交事务，把本次事务中的改动真正写入数据库。## 输入: 无。
+## 输出: bool - COMMIT 执行成功返回 true；数据库未打开或执行失败返回 false，错误码为 TX_COMMIT_FAILED。
+func commit_transaction() -> bool:
 	return _exec_bool("COMMIT;", "TX_COMMIT_FAILED", "提交事务失败")
 
 
-func rollback_transaction() -> bool: ## 回滚事务，放弃本次事务中的所有草稿改动
+## 回滚事务，放弃本次事务中的所有改动。## 输入: 无。
+## 输出: bool - ROLLBACK 执行成功返回 true；数据库未打开或执行失败返回 false，错误码为 TX_ROLLBACK_FAILED。
+func rollback_transaction() -> bool:
 	return _exec_bool("ROLLBACK;", "TX_ROLLBACK_FAILED", "回滚事务失败")
 
 
-func execute(sql: String) -> Dictionary: ## 执行不带参数的 SQL，返回统一结果字典
+## 执行不带参数的 SQL，返回统一结果字典。## 输入: sql (String) - 要执行的完整 SQL 语句。
+## 输出: 返回标准字典。成功时 `success` 为 true 并清空查询缓存；失败时 `code` 为 DB_NOT_OPEN 或 SQL_EXEC_FAILED。
+func execute(sql: String) -> Dictionary:
 	if not require_open():
 		return fail("DB_NOT_OPEN", "数据库尚未打开")
 
@@ -133,7 +155,11 @@ func execute(sql: String) -> Dictionary: ## 执行不带参数的 SQL，返回�
 	return ok()
 
 
-func execute_bind(sql: String, params: Array = []) -> Dictionary: ## 执行带参数 SQL（推荐写操作都用这个）
+## 执行带参数 SQL，推荐写操作使用。## 输入:
+##   sql (String) - 含 ? 占位符的 SQL 语句。
+##   params (Array) - 与占位符顺序对应的绑定参数，默认空数组。
+## 输出: 返回标准字典。成功时 `success` 为 true 并清空查询缓存；失败时 `code` 为 DB_NOT_OPEN 或 SQL_BIND_EXEC_FAILED。
+func execute_bind(sql: String, params: Array = []) -> Dictionary:
 	if not require_open():
 		return fail("DB_NOT_OPEN", "数据库尚未打开")
 
@@ -145,7 +171,11 @@ func execute_bind(sql: String, params: Array = []) -> Dictionary: ## 执行带�
 	return ok()
 
 
-func fetch_all(sql: String, params: Array = []) -> Dictionary: ## 查询多行数据，返回 data=Array[Dictionary]
+## 查询多行数据，结果同时缓存到 _last_rows。## 输入:
+##   sql (String) - 查询语句。
+##   params (Array) - 绑定参数，为空时走不带参查询，默认空数组。
+## 输出: 返回标准字典。成功时 `data` 为 Array[Dictionary]（查询到的行）；执行失败时返回带 SQL_QUERY_FAILED 的失败结构。
+func fetch_all(sql: String, params: Array = []) -> Dictionary:
 	if not require_open():
 		return fail("DB_NOT_OPEN", "数据库尚未打开")
 
@@ -170,7 +200,11 @@ func fetch_all(sql: String, params: Array = []) -> Dictionary: ## 查询多行�
 	return ok(_last_rows)
 
 
-func fetch_one(sql: String, params: Array = []) -> Dictionary: ## 查询单行数据，返回 data=Dictionary（没有则空字典）
+## 查询单行数据，内部复用 fetch_all。## 输入:
+##   sql (String) - 查询语句。
+##   params (Array) - 绑定参数，默认空数组。
+## 输出: 返回标准字典。成功时 `data` 为第一行的 Dictionary，无结果时为空字典；失败时透传 fetch_all 的失败结构。
+func fetch_one(sql: String, params: Array = []) -> Dictionary:
 	var result := fetch_all(sql, params)
 	if not result.get("success", false):
 		return result
@@ -182,7 +216,12 @@ func fetch_one(sql: String, params: Array = []) -> Dictionary: ## 查询单行�
 	return ok(rows[0])
 
 
-func scalar(sql: String, params: Array = [], default_value: Variant = null) -> Dictionary: ## 查询单值（如 COUNT(*)），返回 data=单个值
+## 查询单值，如 COUNT(*) 或 MAX(列)。## 输入:
+##   sql (String) - 只返回一个字段的查询语句。
+##   params (Array) - 绑定参数，默认空数组。
+##   default_value (Variant) - 查询结果为空时的兜底值，默认 null。
+## 输出: 返回标准字典。成功时 `data` 为第一行第一个字段的值，无结果时为 default_value；失败时透传 fetch_one 的失败结构。
+func scalar(sql: String, params: Array = [], default_value: Variant = null) -> Dictionary:
 	var result := fetch_one(sql, params)
 	if not result.get("success", false):
 		return result
@@ -247,7 +286,9 @@ func count(table_name: String, where_sql: String = "", params: Array = []) -> Di
 	return ok(int(result.get("data", 0)))
 
 
-func init_schema() -> Dictionary: ## 根据 JSON 动态创建表和索引
+## 根据 schema 配置动态创建表和索引，并补齐已有表缺失的列。## 输入: 无。
+## 输出: 返回标准字典。成功时 `success` 为 true；schema 未加载返回 SCHEMA_NOT_LOADED，建表过程中任一步失败会回滚事务并返回 SCHEMA_INIT_FAILED 或 TX_BEGIN_FAILED、TX_COMMIT_FAILED。
+func init_schema() -> Dictionary:
 	if not require_open():
 		return fail("DB_NOT_OPEN", "数据库尚未打开")
 	if _schema_config.is_empty():
@@ -329,7 +370,9 @@ func _migrate_missing_columns() -> Dictionary:
 	return ok()
 
 
-func reset_schema() -> Dictionary: ## 根据 JSON 配置的删除顺序重置表结构（开发调试用）
+## 按 schema 配置的删除顺序删表后重建表结构，供开发调试使用。## 输入: 无。
+## 输出: 返回标准字典。成功时透传 init_schema 的结果；schema 未加载或删表失败时返回 SCHEMA_NOT_LOADED、TX_BEGIN_FAILED、SCHEMA_RESET_FAILED 或 TX_COMMIT_FAILED。
+func reset_schema() -> Dictionary:
 	if not require_open():
 		return fail("DB_NOT_OPEN", "数据库尚未打开")
 	if _schema_config.is_empty():
@@ -359,24 +402,36 @@ func reset_schema() -> Dictionary: ## 根据 JSON 配置的删除顺序重置表
 	return init_schema()
 
 
-func get_last_error() -> String: ## 获取最近一次失败信息
+## 获取最近一次失败的错误信息。## 输入: 无。
+## 输出: String - 最近一次 _fail 记录的 message，没有错误时为空字符串。
+func get_last_error() -> String:
 	return _last_error
 
 
-func get_last_code() -> String: ## 获取最近一次失败代码
+## 获取最近一次失败的错误代码。## 输入: 无。
+## 输出: String - 最近一次 _fail 记录的 code，没有错误时为空字符串。
+func get_last_code() -> String:
 	return _last_code
 
 
-func get_last_rows() -> Array[Dictionary]: ## 获取最近一次查询结果缓存
+## 获取最近一次查询结果缓存。## 输入: 无。
+## 输出: Array[Dictionary] - 最近一次 fetch_all 整理后的行数组，写操作或尚未查询时为空数组。
+func get_last_rows() -> Array[Dictionary]:
 	return _last_rows
 
 
-func clear_last_error() -> void: ## 清空最近一次错误信息
+## 清空最近一次错误信息和错误代码。## 输入: 无。
+## 输出: 无。
+func clear_last_error() -> void:
 	_last_error = ""
 	_last_code = ""
 
 
-func ok(data: Variant = null, warning: String = "") -> Dictionary: ## 返回与 Manager 对齐的成功结构
+## 返回与 Manager 对齐的成功结构。## 输入:
+##   data (Variant) - 成功时携带的数据，默认 null。
+##   warning (String) - 可选警告文本，非空时打印 push_warning，默认空字符串。
+## 输出: 返回标准字典，含 success=true、data、code="OK" 和 warning。
+func ok(data: Variant = null, warning: String = "") -> Dictionary:
 	var result := {
 		"success": true,
 		"data": data,
@@ -389,11 +444,21 @@ func ok(data: Variant = null, warning: String = "") -> Dictionary: ## 返回与 
 	return result
 
 
-func fail(code: String, message: String, data: Variant = null) -> Dictionary: ## 返回与 Manager 对齐的失败结构（公开入口）
+## 返回与 Manager 对齐的失败结构，是公开的失败入口。## 输入:
+##   code (String) - 错误代码，如 DB_NOT_OPEN。
+##   message (String) - 面向调用者的错误描述。
+##   data (Variant) - 失败时一并返回的数据，默认 null。
+## 输出: 返回标准字典，含 success=false、error、code 和 data。
+func fail(code: String, message: String, data: Variant = null) -> Dictionary:
 	return _fail(code, message, data)
 
 
-func _fail(code: String, message: String, data: Variant = null) -> Dictionary: ## 记录错误、打印控制台并发出错误信号
+## 记录错误代码与信息、打印控制台并发出 db_error 信号。## 输入:
+##   code (String) - 错误代码。
+##   message (String) - 错误描述。
+##   data (Variant) - 失败时一并返回的数据，默认 null。
+## 输出: 返回标准字典，含 success=false、error、code 和 data。
+func _fail(code: String, message: String, data: Variant = null) -> Dictionary:
 	_last_code = code
 	_last_error = message
 	push_warning("[%s] %s" % [code, message])
@@ -407,7 +472,12 @@ func _fail(code: String, message: String, data: Variant = null) -> Dictionary: #
 	}
 
 
-func _exec_bool(sql: String, code: String, message: String) -> bool: ## 给事务命令使用的简化布尔执行器
+## 给事务命令使用的简化布尔执行器。## 输入:
+##   sql (String) - 要执行的事务控制语句，如 "BEGIN TRANSACTION;"。
+##   code (String) - 执行失败时记录的错误代码。
+##   message (String) - 执行失败时的错误描述前缀。
+## 输出: bool - 语句执行成功返回 true；数据库未打开或语句执行失败返回 false。
+func _exec_bool(sql: String, code: String, message: String) -> bool:
 	if not require_open():
 		return false
 
@@ -419,7 +489,12 @@ func _exec_bool(sql: String, code: String, message: String) -> bool: ## 给事�
 	return true
 
 
-func _sqlite_fail(code: String, sql: String, prefix: String = "") -> Dictionary: ## 统一包装 sqlite 插件报错内容
+## 统一包装 sqlite 插件的报错内容后转交 _fail。## 输入:
+##   code (String) - 错误代码。
+##   sql (String) - 触发失败的 SQL 语句，会拼进错误信息。
+##   prefix (String) - 可选的中文前缀，非空时拼在错误信息最前，默认空字符串。
+## 输出: 返回标准字典，透传 _fail 构造的失败结构。
+func _sqlite_fail(code: String, sql: String, prefix: String = "") -> Dictionary:
 	var plugin_error: String = ""
 	if is_open():
 		plugin_error = str(_db.error_message)

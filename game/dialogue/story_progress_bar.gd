@@ -125,7 +125,8 @@ func set_threshold(new_threshold: int) -> void:
 	_refresh_display()
 
 
-## 获取当前进度百分比（0.0 ~ 1.0+）。## 输出: float，进度比例。
+## 获取当前进度百分比（0.0 ~ 1.0+）。## 输入: 无。
+## 输出: float - 进度比例；数据未注入或阈值 <= 0 时返回 0.0。
 func get_progress_ratio() -> float:
 	if story_progress == null or threshold <= 0:
 		return 0.0

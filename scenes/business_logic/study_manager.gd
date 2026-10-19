@@ -361,7 +361,8 @@ func _build_stats() -> Dictionary:
 	return stats
 
 
-## 重置运行时状态。
+## 重置运行时状态：清空会话、队列、当前卡片索引和答题统计，不删除已落库的卡片数据。## 输入: 无。
+## 输出: 无。
 func _reset_runtime_state() -> void:
 	_session = null
 	_current_queue.clear()

@@ -21,19 +21,27 @@ signal batch_operation_completed(entity_type: String, count: int)
 var _db_manager: DBManager = null
 
 
-func set_db_manager(db_manager: DBManager) -> void: ## 注入数据层管理器引用
+## 注入数据层管理器引用，子管理器后续的 SQL 操作都经它转发。## 输入: db_manager (DBManager) - 已初始化的数据层管理器实例。
+## 输出: 无。
+func set_db_manager(db_manager: DBManager) -> void:
 	_db_manager = db_manager
 
 
-func get_db_manager() -> DBManager: ## 获取当前注入的 db_manager
+## 获取当前注入的数据层管理器。## 输入: 无。
+## 输出: DBManager - 当前注入的实例，未注入时返回 null。
+func get_db_manager() -> DBManager:
 	return _db_manager
 
 
-func has_db_manager() -> bool: ## 检查是否已注入 db_manager
+## 检查是否已注入数据层管理器。## 输入: 无。
+## 输出: bool - 已注入返回 true，否则返回 false。
+func has_db_manager() -> bool:
 	return _db_manager != null
 
 
-func require_db_manager() -> bool: ## 要求 db_manager 必须存在，否则立刻报错
+## 要求数据层管理器必须存在，缺失时打印错误并发出 manager_error 信号。## 输入: 无。
+## 输出: bool - 已注入返回 true；未注入返回 false，错误码为 DB_NOT_SET。
+func require_db_manager() -> bool:
 	if has_db_manager():
 		return true
 	push_error("DB manager not set")
@@ -65,7 +73,9 @@ func _notify_deleted(entity_type: String, entity_id: Variant) -> void:
 	entity_deleted.emit(entity_type, entity_id)
 
 # 数据库修改操作规范化，先检测再提交，若提交失败则回滚
-func begin_transaction() -> bool: ## 统一开始事务并做方法存在性校验
+## 统一开始事务：先校验 db_manager 及其事务方法是否存在，再转发调用。## 输入: 无。
+## 输出: bool - 转发到 DBManager.begin_transaction() 的结果；db_manager 缺失或方法不存在时返回 false。
+func begin_transaction() -> bool:
 	if not require_db_manager():
 		return false
 	if not _db_manager.has_method("begin_transaction"):
@@ -74,7 +84,9 @@ func begin_transaction() -> bool: ## 统一开始事务并做方法存在性校�
 	return _db_manager.call("begin_transaction")
 
 
-func commit_transaction() -> bool: ## 统一提交事务并做方法存在性校验
+## 统一提交事务：先校验 db_manager 及其事务方法是否存在，再转发调用。## 输入: 无。
+## 输出: bool - 转发到 DBManager.commit_transaction() 的结果；db_manager 缺失或方法不存在时返回 false。
+func commit_transaction() -> bool:
 	if not require_db_manager():
 		return false
 	if not _db_manager.has_method("commit_transaction"):
@@ -83,7 +95,9 @@ func commit_transaction() -> bool: ## 统一提交事务并做方法存在性校
 	return _db_manager.call("commit_transaction")
 
 
-func rollback_transaction() -> bool: ## 统一回滚事务并做方法存在性校验
+## 统一回滚事务：先校验 db_manager 及其事务方法是否存在，再转发调用。## 输入: 无。
+## 输出: bool - 转发到 DBManager.rollback_transaction() 的结果；db_manager 缺失或方法不存在时返回 false。
+func rollback_transaction() -> bool:
 	if not require_db_manager():
 		return false
 	if not _db_manager.has_method("rollback_transaction"):
@@ -92,7 +106,9 @@ func rollback_transaction() -> bool: ## 统一回滚事务并做方法存在性�
 	return _db_manager.call("rollback_transaction")
 
 
-func run_in_transaction(action: Callable) -> Dictionary: ## 用"自动挡事务"执行业务动作（推荐子类优先用它）
+## 用自动挡事务执行业务动作：自动开启事务，按 action 返回值提交或回滚，推荐子类优先使用。## 输入: action (Callable) - 事务体，约定返回标准结果字典。
+## 输出: 返回标准字典。action 成功且提交成功时透传 action 的结果；开启事务失败返回 TX_BEGIN_FAILED，提交失败返回 TX_COMMIT_FAILED，业务失败则回滚后透传原结果或包装为 TX_ACTION_FAILED。
+func run_in_transaction(action: Callable) -> Dictionary:
 	# 步骤 1：先开事务
 	if not begin_transaction():
 		return fail("TX_BEGIN_FAILED", "无法开启事务")
@@ -201,7 +217,11 @@ func _now_timestamp() -> int:
 
 
 # 接收函数返回信息
-func ok(data: Variant = null, warning: String = "") -> Dictionary: ## 返回标准成功结果结构，可携带警告信息
+## 返回标准成功结果结构，可携带警告信息。## 输入:
+##   data (Variant) - 成功时携带的数据，默认 null。
+##   warning (String) - 可选警告文本，非空时打印 push_warning，默认空字符串。
+## 输出: 返回标准字典，含 success=true、data、code="OK" 和 warning。
+func ok(data: Variant = null, warning: String = "") -> Dictionary:
 	var result := {
 		"success": true,
 		"data": data,
@@ -214,11 +234,21 @@ func ok(data: Variant = null, warning: String = "") -> Dictionary: ## 返回标�
 	return result
 
 
-func fail(code: String, message: String, data: Variant = null) -> Dictionary: ## 返回标准失败结果结构（公开接口）
+## 返回标准失败结果结构，是子类可调用的公开失败入口。## 输入:
+##   code (String) - 错误代码，如 DB_NOT_SET。
+##   message (String) - 面向调用者的错误描述。
+##   data (Variant) - 失败时一并返回的数据，默认 null。
+## 输出: 返回标准字典，含 success=false、error、code 和 data。
+func fail(code: String, message: String, data: Variant = null) -> Dictionary:
 	return _fail(code, message, data)
 
 
-func _fail(code: String, message: String, data: Variant = null) -> Dictionary: ## 记录警告并发出错误信号（内部实现）
+## 记录失败信息、打印警告与错误，并发出 manager_error 信号。## 输入:
+##   code (String) - 错误代码。
+##   message (String) - 错误描述。
+##   data (Variant) - 失败时一并返回的数据，默认 null。
+## 输出: 返回标准字典，含 success=false、error、code 和 data。
+func _fail(code: String, message: String, data: Variant = null) -> Dictionary:
 	push_warning("[%s] %s" % [code, message])
 	printerr("[Manager Fail] code=", code, " message=", message, " data=", data)
 	manager_error.emit(code, message)

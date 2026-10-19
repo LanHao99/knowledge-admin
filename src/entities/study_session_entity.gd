@@ -33,7 +33,8 @@ var total_time_ms: int = 0
 var session_stats: Dictionary = {}
 
 
-## 将会话实体序列化为字典，便于调试日志输出或持久化存储。## 输出: Dictionary，包含会话的所有统计字段。
+## 将会话实体序列化为字典，便于调试日志输出或持久化存储。## 输入: 无。
+## 输出: Dictionary - 包含会话的所有统计字段；session_stats 经 duplicate() 浅拷贝，修改返回值的顶层键不影响实体。
 func to_dict() -> Dictionary:
 	return {
 		"deck_id": deck_id,
@@ -46,6 +47,7 @@ func to_dict() -> Dictionary:
 
 
 ## 从字典反序列化，用于从持久化存储恢复会话状态（如断点续学场景）。## 输入: d (Dictionary) - 包含会话数据的字典。
+## 输出: 无。
 func from_dict(d: Dictionary) -> void:
 	if d.has("deck_id"): deck_id = int(d.get("deck_id", 0))
 	if d.has("started_at"): started_at = int(d.get("started_at", 0))
@@ -56,17 +58,20 @@ func from_dict(d: Dictionary) -> void:
 		session_stats = d.get("session_stats").duplicate()
 
 
-## 递增新卡片计数器，当用户看到一张新卡片时调用。
+## 递增新卡片计数器，当用户看到一张新卡片时调用。## 输入: 无。
+## 输出: 无。
 func increment_new_seen() -> void:
 	new_cards_seen += 1
 
 
-## 递增复习卡片计数器，当用户看到一张复习卡片时调用。
+## 递增复习卡片计数器，当用户看到一张复习卡片时调用。## 输入: 无。
+## 输出: 无。
 func increment_review_seen() -> void:
 	review_cards_seen += 1
 
 
 ## 累加答题耗时。## 输入: time_ms (int) - 本次答题耗时（毫秒）。
+## 输出: 无。
 func add_time_ms(time_ms: int) -> void:
 	total_time_ms += time_ms
 
@@ -75,6 +80,7 @@ func add_time_ms(time_ms: int) -> void:
 ##   rating (int) - 评分，取值 1=Again, 2=Hard, 3=Good, 4=Easy。
 ##   time_taken_ms (int) - 本次答题耗时（毫秒）。
 ##   is_new_card (bool) - 是否为新卡片，影响 new_cards_seen 计数。
+## 输出: 无。
 func record_answer(rating: int, time_taken_ms: int, is_new_card: bool = false) -> void:
 	add_time_ms(time_taken_ms)
 	if is_new_card:
@@ -98,13 +104,14 @@ func record_answer(rating: int, time_taken_ms: int, is_new_card: bool = false) -
 		session_stats["average_time_ms"] = total_time_ms / total_answers
 
 
-## 获取会话中已处理的总卡片数量（新卡片 + 复习卡片）。## 输出: int，总卡片数。
+## 获取会话中已处理的总卡片数量（新卡片 + 复习卡片）。## 输入: 无。
+## 输出: int - 新卡片数与复习卡片数之和。
 func get_total_cards_seen() -> int:
 	return new_cards_seen + review_cards_seen
 
 
 ## 获取会话已持续的时间（毫秒）。## 输入: now_timestamp (int) - 当前 Unix 时间戳，默认使用当前系统时间。
-## 输出: int，已持续时间（毫秒）。
+## 输出: int - 已持续时间（毫秒）。
 func get_elapsed_time_ms(now_timestamp: int = 0) -> int:
 	if now_timestamp == 0:
 		now_timestamp = int(Time.get_unix_time_from_system())
@@ -112,7 +119,8 @@ func get_elapsed_time_ms(now_timestamp: int = 0) -> int:
 
 
 ## 将会话统计转换为更详细的汇总字典，供 UI 层展示或持久化存储。
-## 包含所有原始字段 + 派生计算字段（正确率、平均耗时等）。## 输出: Dictionary，包含完整的会话统计信息。
+## 包含所有原始字段 + 派生计算字段（正确率、平均耗时等）。## 输入: 无。
+## 输出: Dictionary - 在 to_dict() 结果之上追加 total_cards_seen、correct_count、accuracy、elapsed_time_ms。
 func to_stats_dict() -> Dictionary:
 	var total: int = get_total_cards_seen()
 	var correct_count: int = int(session_stats.get("good_count", 0)) + int(session_stats.get("easy_count", 0))
@@ -128,13 +136,14 @@ func to_stats_dict() -> Dictionary:
 	return result
 
 
-## 生成当前时间的 Unix 时间戳（秒级）。## 输出: int，当前系统时间的 Unix 时间戳。
+## 生成当前时间的 Unix 时间戳（秒级）。## 输入: 无。
+## 输出: int - 当前系统时间的 Unix 时间戳。
 static func now_timestamp() -> int:
 	return int(Time.get_unix_time_from_system())
 
 
 ## 创建一个新的会话实体，自动填充 started_at 为当前时间。## 输入: target_deck_id (int) - 目标牌组 ID，0 表示全部牌组。
-## 输出: StudySessionEntity，已初始化的会话实体。
+## 输出: StudySessionEntity - 已初始化的会话实体，deck_id 与 started_at 已填充。
 static func create_new(target_deck_id: int = 0) -> StudySessionEntity:
 	var session := StudySessionEntity.new()
 	session.deck_id = target_deck_id

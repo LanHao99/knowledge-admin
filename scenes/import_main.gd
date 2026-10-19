@@ -41,7 +41,12 @@ var _json_data_array: Array = []
 var _json_file_path: String = ""
 
 
-## 注入所有依赖并构建子组件、启动 Step 1。
+## 注入全部依赖，绑定顶栏事件、构建三个步骤子组件、填充牌组下拉并进入 Step 1。## 输入:
+##   notetype_manager (NoteTypeManager) - 笔记类型管理器，供 NoteTypeSelector 使用。
+##   import_manager (ImportManager) - 导入管理器，供映射器与进度对话框使用。
+##   note_manager (NoteManager) - 笔记管理器，保存用于后续导入写入。
+##   deck_db (DeckDB) - 牌组数据库，用于填充目标牌组下拉列表。
+## 输出: 无。
 func setup(notetype_manager: NoteTypeManager, import_manager: ImportManager, note_manager: NoteManager, deck_db: DeckDB) -> void:
 	_notetype_manager = notetype_manager
 	_import_manager = import_manager
@@ -54,12 +59,16 @@ func setup(notetype_manager: NoteTypeManager, import_manager: ImportManager, not
 	_show_step(1)
 
 
+## 绑定顶栏返回、文件选择按钮与文件路径输入框的信号。## 输入: 无。
+## 输出: 无。
 func _bind_actions() -> void:
 	_back_btn.pressed.connect(_on_back_pressed)
 	_file_pick_btn.pressed.connect(_on_file_pick_pressed)
 	_file_path_input.text_changed.connect(_on_file_path_changed)
 
 
+## 实例化三个步骤子组件，挂到步骤容器上并连接各自信号，初始全部隐藏。## 输入: 无。
+## 输出: 无。
 func _create_sub_components() -> void:
 	_notetype_selector = NoteTypeSelector.new()
 	_notetype_selector.name = "NoteTypeSelector"
@@ -85,6 +94,8 @@ func _create_sub_components() -> void:
 
 # ── 步骤导航 ──
 
+## 切换当前步骤：更新步骤标签、隐藏全部子组件后只显示目标组件，并决定返回按钮是否可见。## 输入: step (int) - 目标步骤，1=选类型、2=字段映射、3=导入进度。
+## 输出: 无。
 func _show_step(step: int) -> void:
 	_current_step = step
 	_step_label.text = "步骤 %d/3" % step
@@ -111,6 +122,8 @@ func _show_step(step: int) -> void:
 			_back_btn.visible = false
 
 
+## 把步骤子控件的布局模式设为锚点，使其四边贴合父容器铺满。## 输入: ctrl (Control) - 待铺满的步骤子控件。
+## 输出: 无。
 func _set_step_control_fill(ctrl: Control) -> void:
 	ctrl.layout_mode = 1
 	ctrl.anchor_left = 0.0
@@ -125,6 +138,8 @@ func _set_step_control_fill(ctrl: Control) -> void:
 
 # ── 牌组列表 ──
 
+## 清空牌组下拉框并按数据库中的未归档牌组重新填充，条目元数据存放牌组 ID。## 输入: 无。
+## 输出: 无。
 func _refresh_deck_list() -> void:
 	if _deck_db == null or _deck_select == null:
 		return
@@ -138,6 +153,8 @@ func _refresh_deck_list() -> void:
 		_deck_select.set_item_metadata(-1, deck.id)
 
 
+## 在牌组下拉框中按 ID 选中对应条目。## 输入: deck_id (int) - 要选中的牌组 ID。
+## 输出: 无。匹配不到或下拉框为空时不做任何事。
 func select_deck_by_id(deck_id: int) -> void:
 	if _deck_select == null: return
 	for i in range(_deck_select.item_count):
@@ -149,10 +166,14 @@ func select_deck_by_id(deck_id: int) -> void:
 
 # ── 文件选择 ──
 
+## 响应文件路径输入框文本变化，去掉首尾空白后记录为待导入文件路径。## 输入: new_text (String) - 输入框的当前文本。
+## 输出: 无。
 func _on_file_path_changed(new_text: String) -> void:
 	_json_file_path = new_text.strip_edges()
 
 
+## 响应「选择文件」按钮：弹出只筛选 *.json 的系统文件对话框。## 输入: 无。
+## 输出: 无。
 func _on_file_pick_pressed() -> void:
 	var file_dialog := FileDialog.new()
 	file_dialog.name = "TempFileDialog"
@@ -166,6 +187,8 @@ func _on_file_pick_pressed() -> void:
 	file_dialog.popup_centered(Vector2(600, 500))
 
 
+## 文件对话框选中回调：记录路径、回填输入框并释放临时对话框。## 输入: path (String) - 用户选中的文件路径。
+## 输出: 无。
 func _on_file_selected(path: String) -> void:
 	_json_file_path = path
 	if _file_path_input: _file_path_input.text = path
@@ -175,12 +198,18 @@ func _on_file_selected(path: String) -> void:
 			break
 
 
+## 判断给定路径是否非空且文件真实存在。## 输入: path (String) - 待校验的文件路径。
+## 输出: bool - 路径非空且文件存在时返回 true。
 func _is_file_valid(path: String) -> bool:
 	return path != "" and FileAccess.file_exists(path)
 
 
 # ── Step 1 → Step 2 ──
 
+## 响应笔记类型选择：校验类型、JSON 文件与解析结果，通过后加载字段映射并进入 Step 2。## 输入:
+##   note_type_id (String) - 选中的笔记类型 ID。
+##   note_type (Dictionary) - 选中的笔记类型数据（本函数未直接使用）。
+## 输出: 无。任一步校验失败时弹出错误并停留在 Step 1。
 func _on_type_selected(note_type_id: String, note_type: Dictionary) -> void:
 	_selected_note_type_id = note_type_id
 
@@ -202,10 +231,14 @@ func _on_type_selected(note_type_id: String, note_type: Dictionary) -> void:
 	_show_step(2)
 
 
+## 笔记类型选择被取消时的回调：释放本界面节点。## 输入: 无。
+## 输出: 无。
 func _on_selector_cancelled() -> void:
 	queue_free()
 
 
+## 响应顶栏返回按钮：回到 Step 1 的笔记类型选择。## 输入: 无。
+## 输出: 无。
 func _on_back_pressed() -> void:
 	match _current_step:
 		2: _show_step(1)
@@ -214,6 +247,8 @@ func _on_back_pressed() -> void:
 
 # ── Step 2 → Step 3 ──
 
+## 字段映射确认回调：校验目标牌组后进入 Step 3，调用导入管理器执行导入，失败时延迟通知进度对话框。## 输入: mapping (Dictionary) - 用户确认的字段映射表。
+## 输出: 无。未选择牌组时弹出错误并留在 Step 2。
 func _on_mapping_confirmed(mapping: Dictionary) -> void:
 	var deck_idx: int = _deck_select.selected
 	if deck_idx < 0:
@@ -239,23 +274,31 @@ func _on_mapping_confirmed(mapping: Dictionary) -> void:
 		})
 
 
+## 延迟一帧把导入失败信息交给进度对话框展示。## 输入: error (Dictionary) - 含 error 文本与 data 明细的错误信息。
+## 输出: 无。
 func _deferred_notify_failure(error: Dictionary) -> void:
 	if _progress_dialog != null:
 		_progress_dialog._on_import_failed(error)
 
 
+## 字段映射界面请求返回时的回调：回到 Step 1。## 输入: 无。
+## 输出: 无。
 func _on_mapping_back() -> void:
 	_show_step(1)
 
 
 # ── Step 3 完成 ──
 
+## 导入完成回调：释放本界面节点，返回上一层。## 输入: 无。
+## 输出: 无。
 func _on_import_finished() -> void:
 	queue_free()
 
 
 # ── JSON 解析 ──
 
+## 解析 JSON 文件，缓存数据行并汇总所有行出现过的顶层字段名（按小写去重）。## 输入: path (String) - 待解析的 JSON 文件路径。
+## 输出: bool - 解析成功且数据非空返回 true；文件缺失、打不开、解析失败、顶层类型不符或数据为空时弹错误并返回 false。
 func _parse_json_keys(path: String) -> bool:
 	_json_keys.clear()
 	_json_data_array.clear()
@@ -302,6 +345,8 @@ func _parse_json_keys(path: String) -> bool:
 	return true
 
 
+## 弹出标题为「错误」的临时模态提示框，关闭后自动释放。## 输入: message (String) - 要显示的错误文本。
+## 输出: 无。
 func _show_error(message: String) -> void:
 	var dialog := AcceptDialog.new()
 	dialog.name = "TempErrorDialog"

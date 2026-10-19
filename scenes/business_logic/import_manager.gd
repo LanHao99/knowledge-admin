@@ -33,6 +33,7 @@ const PROGRESS_INTERVAL := 500
 ##   note_manager (NoteManager) - 笔记管理器，用于调用 create_note()。
 ##   notetype_manager (NoteTypeManager) - 笔记类型管理器，用于查询 note type 信息。
 ##   deck_db (DeckDB) - 牌组数据仓库，用于校验 deck 是否存在。
+## 输出: 无。
 func setup(note_manager: NoteManager, notetype_manager: NoteTypeManager, deck_db: DeckDB) -> void:
 	_note_manager = note_manager
 	_notetype_manager = notetype_manager

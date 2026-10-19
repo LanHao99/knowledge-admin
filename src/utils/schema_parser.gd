@@ -73,7 +73,11 @@ static func build_drop_statements(schema_config: Dictionary) -> Dictionary:
 	return _ok(statements)
 
 
-static func _build_create_table_sql(table_name: String, table_cfg: Dictionary) -> Dictionary: ## 依据表配置拼接 CREATE TABLE SQL
+## 依据表配置拼接单张表的 CREATE TABLE SQL。## 输入:
+##   table_name (String) - 表名，直接写入 SQL。
+##   table_cfg (Dictionary) - 该表的配置，需含 columns 字典，可选 foreign_keys 数组。
+## 输出: 返回标准字典。成功时 `data` 为 CREATE TABLE IF NOT EXISTS 语句；缺少 columns 时返回 SCHEMA_COLUMNS_MISSING 的失败结构。
+static func _build_create_table_sql(table_name: String, table_cfg: Dictionary) -> Dictionary:
 	if not table_cfg.has("columns"):
 		return _fail("SCHEMA_COLUMNS_MISSING", "表 %s 缺少 columns 定义" % table_name)
 
@@ -97,7 +101,11 @@ static func _build_create_table_sql(table_name: String, table_cfg: Dictionary) -
 	return _ok(sql)
 
 
-static func _build_column_sql(column_name: String, column_cfg: Dictionary) -> String: ## 把单个字段配置转换成列 SQL 片段
+## 把单个字段配置转换成 CREATE TABLE 中的一列定义片段。## 输入:
+##   column_name (String) - 字段名。
+##   column_cfg (Dictionary) - 字段配置，可含 data_type、primary_key、auto_increment、not_null、default。
+## 输出: String - "字段名 类型" 加上按配置追加的约束，如 PRIMARY KEY、AUTOINCREMENT、NOT NULL、DEFAULT。
+static func _build_column_sql(column_name: String, column_cfg: Dictionary) -> String:
 	# 先拼 "字段名 + 类型"
 	var part: String = "%s %s" % [column_name, str(column_cfg.get("data_type", "TEXT"))]
 
@@ -114,7 +122,9 @@ static func _build_column_sql(column_name: String, column_cfg: Dictionary) -> St
 	return part
 
 
-static func _build_foreign_key_sql(fk_cfg: Dictionary) -> String: ## 把外键配置转换成 FOREIGN KEY SQL 片段
+## 把外键配置转换成 FOREIGN KEY 约束片段。## 输入: fk_cfg (Dictionary) - 外键配置，含 column、ref_table，可选 ref_column（默认 "id"）和 on_delete。
+## 输出: String - "FOREIGN KEY(列) REFERENCES 表(列)" 片段，配置了 on_delete 时追加 "ON DELETE xxx"。
+static func _build_foreign_key_sql(fk_cfg: Dictionary) -> String:
 	var column: String = str(fk_cfg.get("column", ""))
 	var ref_table: String = str(fk_cfg.get("ref_table", ""))
 	var ref_column: String = str(fk_cfg.get("ref_column", "id"))
@@ -126,7 +136,9 @@ static func _build_foreign_key_sql(fk_cfg: Dictionary) -> String: ## 把外键�
 	return part
 
 
-static func _build_create_index_sql(index_cfg: Dictionary) -> Dictionary: ## 依据索引配置拼接 CREATE INDEX SQL
+## 依据索引配置拼接 CREATE INDEX SQL。## 输入: index_cfg (Dictionary) - 索引配置，含 name、table、columns 数组，可选 unique（true 时生成 UNIQUE INDEX）。
+## 输出: 返回标准字典。成功时 `data` 为 CREATE INDEX IF NOT EXISTS 语句；name、table 为空或 columns 为空时返回 SCHEMA_INDEX_INVALID 的失败结构。
+static func _build_create_index_sql(index_cfg: Dictionary) -> Dictionary:
 	var name: String = str(index_cfg.get("name", ""))
 	var table_name: String = str(index_cfg.get("table", ""))
 	var columns: Array = index_cfg.get("columns", [])
@@ -146,7 +158,9 @@ static func _build_create_index_sql(index_cfg: Dictionary) -> Dictionary: ## 依
 	return _ok(sql)
 
 
-static func _format_default_value(value: Variant) -> String: ## 把 JSON 默认值转换为 SQL 可用文本
+## 把 JSON 默认值转换为 SQL 字面量文本。## 输入: value (Variant) - 字段配置里的默认值，来自 JSON。
+## 输出: String - null 转 "NULL"，字符串转单引号包裹并转义内部单引号，布尔转 "1" 或 "0"，其余类型转字符串。
+static func _format_default_value(value: Variant) -> String:
 	# JSON 默认值要转换成 SQL 字面量：
 	# null -> NULL, string -> 'text', bool -> 1/0, 数字保持原样
 	match typeof(value):
@@ -160,7 +174,9 @@ static func _format_default_value(value: Variant) -> String: ## 把 JSON 默认�
 			return str(value)
 
 
-static func _ok(data: Variant = null) -> Dictionary: ## 返回标准成功结构
+## 返回标准成功结构。## 输入: data (Variant) - 成功时携带的数据，默认 null。
+## 输出: 返回标准字典，含 success=true、data、code="OK" 和空的 error、warning。
+static func _ok(data: Variant = null) -> Dictionary:
 	return {
 		"success": true,
 		"data": data,
@@ -170,7 +186,11 @@ static func _ok(data: Variant = null) -> Dictionary: ## 返回标准成功结构
 	}
 
 
-static func _fail(code: String, message: String) -> Dictionary: ## 返回标准失败结构并记录警告
+## 返回标准失败结构并打印警告。## 输入:
+##   code (String) - 错误代码，如 SCHEMA_FILE_NOT_FOUND。
+##   message (String) - 错误描述。
+## 输出: 返回标准字典，含 success=false、error、code，data 固定为 null。
+static func _fail(code: String, message: String) -> Dictionary:
 	push_warning("[SchemaParser Fail] [%s] %s" % [code, message])
 	return {
 		"success": false,
