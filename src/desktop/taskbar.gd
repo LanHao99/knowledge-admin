@@ -1,5 +1,7 @@
 extends Panel
-## 任务栏、开始菜单和本机时钟。
+## 任务栏、开始菜单和可打开日期时间设置的软件时钟。
+
+const WindowContext: GDScript = preload("res://src/ui/window_context.gd")
 
 const APP_BUTTON_SCENE: PackedScene = preload("res://content/scenes/desktop/taskbar_app_button.tscn")
 
@@ -10,9 +12,12 @@ var _start_menu: Control
 var _app_buttons: Dictionary = {}
 @onready var _start_button: Button = $TaskbarHBox/StartButton
 @onready var _task_buttons: HBoxContainer = $TaskbarHBox/TaskScroll/TaskButtons
+@onready var _clock_button: Button = $TaskbarHBox/RightArea/ClockButton
 
 ## 连接开始按钮并定时刷新时钟。## 输入: 无。输出: 无。
 func _ready() -> void:
+	_clock_button.pressed.connect(_open_time_settings)
+	AppClock.time_changed.connect(_update_clock)
 	_update_clock()
 	var timer: Timer = Timer.new()
 	timer.wait_time = 1.0
@@ -71,9 +76,17 @@ func set_active_button(app_id: String) -> void:
 
 ## 刷新时钟及日期提示。## 输入: 无。输出: 无。
 func _update_clock() -> void:
-	var now: Dictionary = Time.get_time_dict_from_system()
-	$TaskbarHBox/RightArea/ClockLabel.text = "  %02d:%02d  " % [now.hour, now.minute]
-	$TaskbarHBox/RightArea/ClockLabel.tooltip_text = Time.get_date_string_from_system()
+	var now: Dictionary = AppClock.local_datetime()
+	_clock_button.text = "  %02d:%02d%s  " % [now.hour, now.minute, " *" if AppClock.is_adjusted() else ""]
+	var mode: String = "已调整（本次运行）" if AppClock.is_adjusted() else "真实时间"
+	_clock_button.tooltip_text = "%s\n%s\n单击调整日期和时间" % [AppClock.display_datetime(), mode]
+	_clock_button.accessibility_name = "日期和时间，%s，%s" % [AppClock.display_datetime(), mode]
+
+
+## 通过鼠标或键盘打开同一日期时间窗口。## 输入: 无。
+## 输出: 无。
+func _open_time_settings() -> void:
+	WindowContext.open_time_settings(self)
 
 ## 安全关闭当前开始菜单。## 输入: 无。输出: 无。
 func dismiss_start_menu() -> void:

@@ -60,7 +60,27 @@ func _ready() -> void:
 		App.flags_changed.connect(_on_flags_changed)
 	_setup_shortcuts()
 	_setup_wallpaper()
+	%TimeSettingsButton.pressed.connect(_open_time_settings)
+	AppClock.time_changed.connect(_update_software_time)
+	var clock_timer: Timer = Timer.new()
+	clock_timer.wait_time = 1.0
+	clock_timer.timeout.connect(_update_software_time)
+	add_child(clock_timer)
+	clock_timer.start()
+	_update_software_time()
 	TutorialManager.check_and_show("settings", self)
+
+
+## 打开与任务栏共用的日期时间窗口。## 输入: 无。
+## 输出: 无。
+func _open_time_settings() -> void:
+	WindowContext.open_time_settings(self)
+
+
+## 展示当前软件日期时间及会话偏移状态。## 输入: 无。
+## 输出: 无。
+func _update_software_time() -> void:
+	%SoftwareTimeValue.text = "%s · %s" % [AppClock.display_datetime(), "已调整" if AppClock.is_adjusted() else "真实时间"]
 
 
 ## 离开设置时断开标记信号。## 输入: 无。

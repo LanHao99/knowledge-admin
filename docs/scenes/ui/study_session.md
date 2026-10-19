@@ -99,3 +99,7 @@ StudySession._inject_into_card_ui()
 
 ### `class_name StudySession`
 声明类名，可供其他场景引用。
+
+## 到期数量与软件时间
+
+新增 `set_card_manager(card_manager)` 注入，用 CardManager.get_study_queue() 的 counts 显示当前软件时间下的新卡、学习卡和复习卡到期数量。查询失败显示占位符，刷新时保留选中的牌组。完成页不会因时间调整自动开始新会话。见 [日期和时间](../date_time.md)。

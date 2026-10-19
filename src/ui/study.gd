@@ -21,6 +21,8 @@ func _ready() -> void:
 	_setup_managers()
 	_inject_all()
 	_connect_bridge()
+	AppClock.time_changed.connect(_on_clock_changed)
+	AppClock.day_changed.connect(_on_clock_day_changed)
 	if not App.dialogue_opened.is_connected(_on_dialogue_opened):
 		App.dialogue_opened.connect(_on_dialogue_opened)
 	if not App.dialogue_closed.is_connected(_on_dialogue_closed):
@@ -68,6 +70,7 @@ func _inject_all() -> void:
 	if _session != null:
 		_session.set_deck_manager(_deck_manager)
 		_session.set_study_manager(_study_manager)
+		_session.set_card_manager(_card_manager)
 		_session.build_deck_list()
 	if _card_ui != null:
 		_card_ui.set_managers(_study_manager, _note_manager, _card_manager)
@@ -118,6 +121,21 @@ func _on_deck_selected(deck_id: int) -> void:
 func _on_learning_exited() -> void:
 	if _card_ui != null:
 		_card_ui.visible = false
+
+
+## 调时后保留卡面，刷新本轮剩余队列及牌组到期统计。## 输入: 无。
+## 输出: 无。
+func _on_clock_changed() -> void:
+	if _study_manager != null:
+		_study_manager.refresh_for_time_change()
+	if _session != null:
+		_session.build_deck_list()
+
+
+## 复习日自然切换时复用队列刷新过程。## 输入: _day_index (int) - 当前 Unix 天索引。
+## 输出: 无。
+func _on_clock_day_changed(_day_index: int) -> void:
+	_on_clock_changed()
 
 
 ## 学习会话结束时隐藏卡片并显示完成面板。## 输入: stats (Dictionary) - 学习统计。

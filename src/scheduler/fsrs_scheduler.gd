@@ -129,7 +129,7 @@ func calculate_next_state(card: CardEntity, rating: int, now_timestamp: int) -> 
 				next_step = -1
 			else:
 				next_interval_days = 0
-				next_due = now_day_index  # 当天可复习（不再等固定秒数）
+				next_due = now_timestamp + int(step_result.get("interval_sec", 0))
 
 		1:  # Review
 			match rating:
@@ -145,7 +145,7 @@ func calculate_next_state(card: CardEntity, rating: int, now_timestamp: int) -> 
 						next_queue = CardEntity.QUEUE_LEARNING
 						next_step = 0
 						next_interval_days = 0
-						next_due = now_day_index  # 当天可复习
+						next_due = now_timestamp + relearning_steps[0]
 				_:
 					next_queue = CardEntity.QUEUE_REVIEW
 					next_step = -1
@@ -164,7 +164,7 @@ func calculate_next_state(card: CardEntity, rating: int, now_timestamp: int) -> 
 				next_step = -1
 			else:
 				next_interval_days = 0
-				next_due = now_day_index  # 当天可复习
+				next_due = now_timestamp + int(step_result.get("interval_sec", 0))
 
 		_:
 			# 未知状态退化为 NEW 逻辑
@@ -227,44 +227,10 @@ func get_initial_state() -> Dictionary:
 ## 估算某评分对应的下次间隔文案。## 输入:
 ##   card (CardEntity) - 当前卡片实体。
 ##   rating (int) - 用户评分。
+##   now_timestamp (int) - 本次评分的软件 Unix 秒数。
 ## 输出: String，形如 "10分钟后"、"4天后"。
-func estimate_next_interval(card: CardEntity, rating: int) -> String:
-	if rating == Rating.AGAIN:
-		if _derive_fsrs_state(card) == 1:  # Review 的 Again
-			if not relearning_steps.is_empty():
-				return _format_seconds(relearning_steps[0])
-		if card.step >= 0:
-			var steps: Array[int] = _get_step_array(card)
-			if not steps.is_empty():
-				return _format_seconds(steps[0])
-		return "10分钟后"
-
-	match _derive_fsrs_state(card):
-		0:  # Learning
-			if rating == Rating.EASY:
-				var s: float = _initial_stability(rating)
-				var days: int = _next_interval(s)
-				return "%d天后" % days
-			var steps: Array[int] = learning_steps
-			if card.step >= 0 and card.step + 1 < steps.size():
-				return _format_seconds(steps[card.step + 1])
-			return "%d天后" % _next_interval(_initial_stability(Rating.GOOD))
-
-		1:  # Review
-			var s: float = card.stability if card.stability > 0 else _initial_stability(rating)
-			var days: int = _next_interval(s)
-			return "%d天后" % days
-
-		2:  # Relearning
-			if rating == Rating.EASY:
-				var s: float = card.stability
-				return "%d天后" % _next_interval(s)
-			var steps: Array[int] = relearning_steps
-			if card.step >= 0 and card.step + 1 < steps.size():
-				return _format_seconds(steps[card.step + 1])
-			return "%d天后" % _next_interval(card.stability)
-
-	return "1天后"
+func estimate_next_interval(card: CardEntity, rating: int, now_timestamp: int) -> String:
+	return format_interval(calculate_next_state(card, rating, now_timestamp), now_timestamp)
 
 
 # ── 内部：状态推导 ──

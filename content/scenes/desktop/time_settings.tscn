@@ -1,0 +1,230 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/desktop/time_settings.gd" id="1_clock"]
+
+[node name="TimeSettings" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_clock")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Layout" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Scroll" type="ScrollContainer" parent="Margin/Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Fields" type="VBoxContainer" parent="Margin/Layout/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="CurrentCaption" type="Label" parent="Margin/Layout/Scroll/Fields"]
+layout_mode = 2
+theme_type_variation = &"UiMuted"
+text = "当前软件时间"
+
+[node name="CurrentTimeValue" type="Label" parent="Margin/Layout/Scroll/Fields"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0000-00-00 00:00:00"
+autowrap_mode = 3
+
+[node name="TimeModeValue" type="Label" parent="Margin/Layout/Scroll/Fields"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"UiMuted"
+autowrap_mode = 3
+
+[node name="Separator" type="HSeparator" parent="Margin/Layout/Scroll/Fields"]
+layout_mode = 2
+
+
+[node name="TargetCaption" type="Label" parent="Margin/Layout/Scroll/Fields"]
+layout_mode = 2
+text = "调整为"
+
+[node name="DateFields" type="HFlowContainer" parent="Margin/Layout/Scroll/Fields"]
+layout_mode = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 8
+
+[node name="YearGroup" type="VBoxContainer" parent="Margin/Layout/Scroll/Fields/DateFields"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="YearCaption" type="Label" parent="Margin/Layout/Scroll/Fields/DateFields/YearGroup"]
+layout_mode = 2
+theme_type_variation = &"UiMuted"
+text = "年"
+
+[node name="YearValue" type="SpinBox" parent="Margin/Layout/Scroll/Fields/DateFields/YearGroup"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(142, 40)
+min_value = 1970.0
+max_value = 9999.0
+value = 2026.0
+rounded = true
+select_all_on_focus = true
+
+[node name="MonthGroup" type="VBoxContainer" parent="Margin/Layout/Scroll/Fields/DateFields"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="MonthCaption" type="Label" parent="Margin/Layout/Scroll/Fields/DateFields/MonthGroup"]
+layout_mode = 2
+theme_type_variation = &"UiMuted"
+text = "月"
+
+[node name="MonthValue" type="SpinBox" parent="Margin/Layout/Scroll/Fields/DateFields/MonthGroup"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(104, 40)
+min_value = 1.0
+max_value = 12.0
+value = 1.0
+rounded = true
+select_all_on_focus = true
+
+[node name="DayGroup" type="VBoxContainer" parent="Margin/Layout/Scroll/Fields/DateFields"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="DayCaption" type="Label" parent="Margin/Layout/Scroll/Fields/DateFields/DayGroup"]
+layout_mode = 2
+theme_type_variation = &"UiMuted"
+text = "日"
+
+[node name="DayValue" type="SpinBox" parent="Margin/Layout/Scroll/Fields/DateFields/DayGroup"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(104, 40)
+min_value = 1.0
+max_value = 31.0
+value = 1.0
+rounded = true
+select_all_on_focus = true
+
+[node name="TimeFields" type="HFlowContainer" parent="Margin/Layout/Scroll/Fields"]
+layout_mode = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 8
+
+[node name="HourGroup" type="VBoxContainer" parent="Margin/Layout/Scroll/Fields/TimeFields"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="HourCaption" type="Label" parent="Margin/Layout/Scroll/Fields/TimeFields/HourGroup"]
+layout_mode = 2
+theme_type_variation = &"UiMuted"
+text = "时"
+
+[node name="HourValue" type="SpinBox" parent="Margin/Layout/Scroll/Fields/TimeFields/HourGroup"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(142, 40)
+max_value = 23.0
+rounded = true
+select_all_on_focus = true
+
+[node name="MinuteGroup" type="VBoxContainer" parent="Margin/Layout/Scroll/Fields/TimeFields"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="MinuteCaption" type="Label" parent="Margin/Layout/Scroll/Fields/TimeFields/MinuteGroup"]
+layout_mode = 2
+theme_type_variation = &"UiMuted"
+text = "分"
+
+[node name="MinuteValue" type="SpinBox" parent="Margin/Layout/Scroll/Fields/TimeFields/MinuteGroup"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(142, 40)
+max_value = 59.0
+rounded = true
+select_all_on_focus = true
+
+[node name="JumpButtons" type="HFlowContainer" parent="Margin/Layout/Scroll/Fields"]
+layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+
+[node name="PreviousDayButton" type="Button" parent="Margin/Layout/Scroll/Fields/JumpButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "前一天"
+
+[node name="NextDayButton" type="Button" parent="Margin/Layout/Scroll/Fields/JumpButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "后一天"
+
+[node name="PreviousHourButton" type="Button" parent="Margin/Layout/Scroll/Fields/JumpButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "前一小时"
+
+[node name="NextHourButton" type="Button" parent="Margin/Layout/Scroll/Fields/JumpButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "后一小时"
+
+[node name="PreviewValue" type="Label" parent="Margin/Layout/Scroll/Fields"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"UiMuted"
+autowrap_mode = 3
+
+[node name="SessionHint" type="Label" parent="Margin/Layout/Scroll/Fields"]
+layout_mode = 2
+theme_type_variation = &"UiMuted"
+text = "本次运行有效，复习结果保留，重启恢复真实时间。"
+autowrap_mode = 3
+
+[node name="TimeStatusLabel" type="Label" parent="Margin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"UiMuted"
+autowrap_mode = 3
+
+[node name="Actions" type="HFlowContainer" parent="Margin/Layout"]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 8
+
+[node name="ApplyButton" type="Button" parent="Margin/Layout/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(100, 42)
+text = "应用"
+
+[node name="ResetTimeButton" type="Button" parent="Margin/Layout/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(100, 42)
+text = "恢复真实时间"
+
+[node name="CloseButton" type="Button" parent="Margin/Layout/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(100, 42)
+text = "关闭"

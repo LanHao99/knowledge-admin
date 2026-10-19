@@ -301,7 +301,7 @@ func _generate_cards_for_note(note_id: int, deck_id: int, note_type_id: String) 
 		_last_generate_error = fail("NOTE_TYPE_INVALID", "note_type_id 不能为空")
 		return []
 
-	var card_result := _card_db.create_card(note_id, deck_id, 0)
+	var card_result := _card_db.create_card(note_id, deck_id, 0, AppClock.now_unix())
 	if not card_result.get("success", false):
 		_last_generate_error = card_result
 		return []

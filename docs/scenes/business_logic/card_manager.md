@@ -86,3 +86,7 @@
 | `entity_updated` | `entity_type: String, entity_id: int` | 继承自 Manager，卡片状态变更后发出（如 answer/suspend/bury/reset/move） |
 | `entity_deleted` | `entity_type: String, entity_id: int` | 继承自 Manager，实体删除后发出 |
 | `batch_operation_completed` | `entity_type: String, count: int` | 继承自 Manager，批量操作完成时发出 |
+
+## 软件时间注入
+
+CardManager 使用 AppClock，保持基础 Manager、笔记与牌组的真实创建时间。`get_study_queue(deck_id, now_timestamp = -1)` 可接收同一次采样的软件时间，省略时读取时钟。创建卡片和到期查询显式把当前时间传给 CardDB；answer_card 仅采样一次，用于调度、历史记录、SQL 评分时间及间隔文案。文案通过 Scheduler.format_interval(next_state, now_timestamp) 生成，不再次抽取随机间隔。详见 [日期和时间](../date_time.md)。

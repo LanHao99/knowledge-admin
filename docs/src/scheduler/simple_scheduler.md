@@ -35,7 +35,7 @@
 **输出**: Dictionary — `{queue: NEW, due: 0, reps: 0, lapses: 0, stability: 0.0, difficulty: 3.0}`。  
 **说明**: 返回新卡片的默认调度状态。
 
-### `estimate_next_interval(card: CardEntity, rating: int) -> String`
+### `estimate_next_interval(card: CardEntity, rating: int, now_timestamp: int) -> String`
 **输入**:
 - card (CardEntity) — 当前卡片实体。
 - rating (int) — 用户评分，取值见 `Scheduler.Rating`。
@@ -51,9 +51,6 @@
 ### `_get_ease_factor(card: CardEntity) -> float`
 计算简单版易度因子（SM-2 风格），基于 `difficulty` 映射到 1.3~3.0 范围。
 
-### `_now_timestamp() -> int`
-返回当前 Unix 时间戳（秒）。
-
 ### `_day_index_from_timestamp(unix_timestamp: int) -> int`
 将 Unix 时间戳转换为天数索引。
 
@@ -66,3 +63,7 @@
 |------|----|------|
 | `_LEARNING_STEP_SECONDS` | `600`（10分钟） | learning 队列步长（私有） |
 | `_SECONDS_PER_DAY` | `86400` | 每天秒数（私有） |
+
+## 显式时间与间隔文案
+
+调度和估算均接收调用方采样的 now_timestamp；format_interval(state, now_timestamp) 将已计算的状态转换为间隔文案，实际评分复用保存的同一状态。LEARNING 的 due 为当前秒数加步进秒数，REVIEW 为 Unix 天索引加间隔天数。规则见 [日期和时间](../../scenes/date_time.md)。

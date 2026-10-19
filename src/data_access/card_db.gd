@@ -9,14 +9,15 @@ const _SECONDS_PER_DAY: int = 86400
 ##   note_id (int) - 关联笔记 ID。
 ##   deck_id (int) - 归属牌组 ID。
 ##   template_order (int) - 模板序号。
+##   now_timestamp (int) - 软件当前 Unix 秒数。
 ## 输出: 返回标准字典。成功时 `data` 为 CardEntity。
-func create_card(note_id: int, deck_id: int, template_order: int = 0) -> Dictionary:
+func create_card(note_id: int, deck_id: int, template_order: int, now_timestamp: int) -> Dictionary:
 	if note_id <= 0:
 		return fail("CARD_NOTE_ID_INVALID", "note_id 必须大于 0")
 	if deck_id <= 0:
 		return fail("CARD_DECK_ID_INVALID", "deck_id 必须大于 0")
 
-	var due_day_index: int = int(Time.get_unix_time_from_system() / _SECONDS_PER_DAY)
+	var due_day_index: int = int(now_timestamp / _SECONDS_PER_DAY)
 	var insert_result := execute_bind(
 		"INSERT INTO cards(note_id, deck_id, template_order, queue, due, reps, lapses, last_review_time, last_rating, last_time_taken, review_history_json, stability, difficulty, step) VALUES(?, ?, ?, ?, ?, 0, 0, 0, 0, 0, '[]', 0.0, 0.0, NULL);",
 		[note_id, deck_id, template_order, CardEntity.QUEUE_NEW, due_day_index]
@@ -108,25 +109,10 @@ func update_cards_deck_by_note(note_id: int, new_deck_id: int) -> Dictionary:
 ##   deck_id (int) - 牌组 ID。
 ##   queue_type (int) - 队列类型（0=new, 1=learning, 2=review）。
 ##   limit (int) - 限制条数，<=0 表示不限制。
+##   now_timestamp (int) - 软件当前 Unix 秒数。
 ## 输出: 返回标准字典。成功时 `data` 为 Array[CardEntity]。
-func get_due_cards(deck_id: int, queue_type: int, limit: int = 20) -> Dictionary:
-	var now_ts: int = int(Time.get_unix_time_from_system())
-	var now_day_index: int = int(now_ts / _SECONDS_PER_DAY)
-
-	var compare_value: int = now_day_index
-
-	var sql := "SELECT * FROM cards WHERE deck_id = ? AND queue = ? AND due <= ? ORDER BY due ASC, id ASC"
-	var params: Array = [deck_id, queue_type, compare_value]
-	if limit > 0:
-		sql += " LIMIT ?"
-		params.append(limit)
-	sql += ";"
-
-	var result := fetch_all(sql, params)
-	if not result.get("success", false):
-		return result
-
-	return ok(_rows_to_card_entities(result.get("data", [])))
+func get_due_cards(deck_id: int, queue_type: int, limit: int, now_timestamp: int) -> Dictionary:
+	return _get_due_cards_with_time(deck_id, queue_type, limit, int(now_timestamp / _SECONDS_PER_DAY), now_timestamp)
 
 
 ## 综合查询某牌组全部到期卡片（new/learning/review）。## 输入:
@@ -215,8 +201,8 @@ func get_global_due_count(now_day_index: int, now_timestamp: int) -> Dictionary:
 ## 统计今天复习过的卡片数（按 last_review_time 落在今天的内部）。## 输入: today_start_ts (int) - 今天零点的 Unix 时间戳。
 ## 输出: 返回标准字典。成功时 `data` 为 int（今日复习卡片数）。
 func get_today_studied_count(today_start_ts: int) -> Dictionary:
-	var sql := "SELECT COUNT(*) AS cnt FROM cards WHERE last_review_time >= ?;"
-	return scalar(sql, [today_start_ts])
+	var sql := "SELECT COUNT(*) AS cnt FROM cards WHERE reps > 0 AND last_review_time >= ? AND last_review_time < ?;"
+	return scalar(sql, [today_start_ts, today_start_ts + _SECONDS_PER_DAY])
 
 
 ## 记录一次复习结果（单条更新）。## 输入:
@@ -230,17 +216,17 @@ func get_today_studied_count(today_start_ts: int) -> Dictionary:
 ##   stability (float) - 新稳定性。
 ##   difficulty (float) - 新困难度。
 ##   history_json (String) - 新历史 JSON。
+##   reviewed_at (int) - 本次评分采用的软件 Unix 秒数。
 ##   new_step (int) - 新步进索引（-1 为 NULL 即 Review 状态）。
 ## 输出: 返回标准字典。成功时 `data` 为 null。
-func record_review(card_id: int, rating: int, time_taken_ms: int, new_due: int, new_queue: int, new_reps: int, new_lapses: int, stability: float, difficulty: float, history_json: String, new_step: int = -1) -> Dictionary:
-	var now_ts: int = int(Time.get_unix_time_from_system())
+func record_review(card_id: int, rating: int, time_taken_ms: int, new_due: int, new_queue: int, new_reps: int, new_lapses: int, stability: float, difficulty: float, history_json: String, reviewed_at: int, new_step: int = -1) -> Dictionary:
 	var sql := "UPDATE cards SET due = ?, queue = ?, reps = ?, lapses = ?, last_review_time = ?, last_rating = ?, last_time_taken = ?, review_history_json = ?, stability = ?, difficulty = ?, step = ? WHERE id = ?;"
 	return execute_bind(sql, [
 		new_due,
 		new_queue,
 		new_reps,
 		new_lapses,
-		now_ts,
+		reviewed_at,
 		rating,
 		time_taken_ms,
 		history_json,

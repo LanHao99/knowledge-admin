@@ -118,4 +118,12 @@ layout_mode = 2
 
 [node name="StatusLabel" type="Label" parent="MainVBox/StatusBar" unique_id=705032724]
 layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
 theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1)
+
+[node name="RetryQueueButton" type="Button" parent="MainVBox/StatusBar"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "重试刷新"

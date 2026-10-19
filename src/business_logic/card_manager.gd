@@ -9,6 +9,12 @@ var _card_db: CardDB = null
 var _scheduler: Scheduler = null
 
 
+## 获取闪卡调度使用的软件时间。## 输入: 无。
+## 输出: int - 软件 Unix 秒数。
+func _now_timestamp() -> int:
+	return AppClock.now_unix()
+
+
 ## 初始化数据层并打开数据库，由 Manager 自行管理 DB 生命周期。## 输入: db_path (String) - 数据库文件路径（如 "user://knowledge_admin.db"）。
 ## 输出: bool - 初始化成功返回 true。
 func setup(db_path: String) -> bool:
@@ -59,7 +65,7 @@ func create_card(note_id: int, deck_id: int, template_order: int = 0) -> Diction
 	if deck_id <= 0:
 		return fail("DECK_ID_INVALID", "deck_id 必须大于 0")
 
-	return _card_db.create_card(note_id, deck_id, template_order)
+	return _card_db.create_card(note_id, deck_id, template_order, _now_timestamp())
 
 
 ## 删除某笔记下的全部卡片（供 NoteManager 在删除笔记前调用）。
@@ -120,18 +126,18 @@ func get_cards_by_deck(deck_id: int) -> Dictionary:
 func get_due_cards(deck_id: int, queue_type: int, limit: int = 20) -> Dictionary:
 	if _card_db == null:
 		return fail("CARD_DB_NOT_SET", "card_db 未注入")
-	return _card_db.get_due_cards(deck_id, queue_type, limit)
+	return _card_db.get_due_cards(deck_id, queue_type, limit, _now_timestamp())
 
 
-## 组装某牌组的学习队列。## 输入: deck_id (int) - 牌组 ID。
+## 组装某牌组的学习队列。## 输入: deck_id (int) - 牌组 ID；now_timestamp (int) - 软件 Unix 秒数，负数时读取时钟。
 ## 输出: 返回标准字典。成功时 `data` 为 `{new, learning, review, counts}`。
-func get_study_queue(deck_id: int) -> Dictionary:
+func get_study_queue(deck_id: int, now_timestamp: int = -1) -> Dictionary:
 	if _card_db == null:
 		return fail("CARD_DB_NOT_SET", "card_db 未注入")
 	if deck_id <= 0:
 		return fail("DECK_ID_INVALID", "deck_id 必须大于 0")
 
-	var now_ts: int = _now_timestamp()
+	var now_ts: int = _now_timestamp() if now_timestamp < 0 else now_timestamp
 	var now_day: int = int(now_ts / 86400)
 	var due_result := _card_db.get_all_due_cards(deck_id, now_day, now_ts)
 	if not due_result.get("success", false):
@@ -198,6 +204,7 @@ func answer_card(card_id: int, rating: int, time_taken_ms: int) -> Dictionary:
 	var next_state: Dictionary = _scheduler.calculate_next_state(card, rating, now_ts)
 	if not _is_valid_next_state(next_state):
 		return fail("SCHEDULER_STATE_INVALID", "scheduler 返回状态缺少必要字段", next_state)
+	var interval_text: String = _scheduler.format_interval(next_state, now_ts)
 
 	card.queue = int(next_state.get("queue", card.queue))
 	card.due = int(next_state.get("due", card.due))
@@ -222,6 +229,7 @@ func answer_card(card_id: int, rating: int, time_taken_ms: int) -> Dictionary:
 		card.stability,
 		card.difficulty,
 		card.review_history_json,
+		now_ts,
 		card.step
 	)
 	if not save_result.get("success", false):
@@ -232,7 +240,7 @@ func answer_card(card_id: int, rating: int, time_taken_ms: int) -> Dictionary:
 		"card": card,
 		"next_due": card.due,
 		"interval_days": int(next_state.get("interval_days", 0)),
-		"interval_text": _scheduler.estimate_next_interval(card, rating)
+		"interval_text": interval_text
 	})
 
 

@@ -106,3 +106,7 @@ FSRS（Free Spaced Repetition Scheduler）的 GDScript 实现，基于 py-fsrs v
 | 难度 | 简单 SM-2 ease_factor | 均值回归 + 线性衰减 |
 | 遗忘稳定性 | S × 0.5 | 双公式取 min |
 | 间隔模糊 | 无 | 三段 fuzzing |
+
+## 显式时间与间隔文案
+
+调度和估算均接收调用方采样的 now_timestamp；format_interval(state, now_timestamp) 将已计算的状态转换为间隔文案，实际评分复用保存的同一状态。LEARNING 的 due 为当前秒数加步进秒数，REVIEW 为 Unix 天索引加间隔天数。规则见 [日期和时间](../../scenes/date_time.md)。

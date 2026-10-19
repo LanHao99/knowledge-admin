@@ -32,7 +32,7 @@
 **输出**: Dictionary — 至少包含 `queue`/`due`/`reps`/`lapses`/`stability`/`difficulty` 键。  
 **说明**: 初始化新卡片的默认调度参数。
 
-### `estimate_next_interval(card: CardEntity, rating: int) -> String` *abstract*
+### `estimate_next_interval(card: CardEntity, rating: int, now_timestamp: int) -> String` *abstract*
 **输入**:
 - card (CardEntity) — 当前卡片实体。
 - rating (int) — 用户评分，取值见 `Rating` 枚举。
@@ -59,3 +59,7 @@
 
 ## 常量
 无。
+
+## 显式时间与间隔文案
+
+调度和估算均接收调用方采样的 now_timestamp；format_interval(state, now_timestamp) 将已计算的状态转换为间隔文案，实际评分复用保存的同一状态。LEARNING 的 due 为当前秒数加步进秒数，REVIEW 为 Unix 天索引加间隔天数。规则见 [日期和时间](../../scenes/date_time.md)。

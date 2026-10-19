@@ -46,5 +46,23 @@ enum Queue {
 ## 估算某评分对应的下次间隔文案（抽象接口，子类必须重写）。## 输入:
 ##   card (CardEntity) - 当前卡片实体。
 ##   rating (int) - 用户评分，取值见 Rating 枚举。
+##   now_timestamp (int) - 本次评分的软件 Unix 秒数。
 ## 输出: String，形如 "10分钟后"、"4天后"。
-@abstract func estimate_next_interval(card: CardEntity, rating: int) -> String
+@abstract func estimate_next_interval(card: CardEntity, rating: int, now_timestamp: int) -> String
+
+
+## 将已计算的调度状态格式化，避免重新抽取随机间隔。## 输入:
+##   state (Dictionary) - 本次评分的下一状态。
+##   now_timestamp (int) - 本次评分的软件 Unix 秒数。
+## 输出: String - 与保存的到期状态对应的间隔文案。
+func format_interval(state: Dictionary, now_timestamp: int) -> String:
+	if int(state.get("queue", Queue.REVIEW)) != Queue.LEARNING:
+		return "%d天后" % int(state.get("interval_days", 0))
+	var seconds: int = maxi(int(state.get("due", now_timestamp)) - now_timestamp, 0)
+	if seconds < 60:
+		return "%d秒后" % seconds
+	if seconds < 3600:
+		return "%d分钟后" % int(seconds / 60)
+	if seconds < 86400:
+		return "%d小时后" % int(seconds / 3600)
+	return "%d天后" % int(seconds / 86400)

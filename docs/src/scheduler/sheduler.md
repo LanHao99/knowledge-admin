@@ -40,7 +40,7 @@ enum Queue { NEW = 0, LEARNING = 1, REVIEW = 2, SUSPENDED = -1, BURIED = -2 }
 # ── 学习进度估算 ──
 
 ## 估算某评分对应的下次间隔（用于按钮上展示"4天后"）
-@abstract func estimate_next_interval(card: CardEntity, rating: int) -> String
+@abstract func estimate_next_interval(card: CardEntity, rating: int, now_timestamp: int) -> String
 ```
 
 ### 4.2 SimpleScheduler（简易实现 —— V1 可用）

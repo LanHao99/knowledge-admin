@@ -3,7 +3,7 @@ extends Scheduler
 
 # 基于 SM-2 思路的简化调度器：
 # - 只做纯计算，不触碰数据库。
-# - 所有队列统一按天数索引调度。
+# - 学习队列使用 Unix 秒数，复习队列使用 Unix 天索引。
 
 const _LEARNING_STEP_SECONDS: int = 10 * 60
 const _SECONDS_PER_DAY: int = 86400
@@ -28,7 +28,7 @@ func calculate_next_state(card: CardEntity, rating: int, now_timestamp: int) -> 
 	match rating:
 		Rating.AGAIN:
 			next_queue = Queue.LEARNING
-			next_due = now_day_index  # 当天可再次复习（不再等固定分钟数）
+			next_due = now_timestamp + _LEARNING_STEP_SECONDS
 			next_lapses += 1
 			next_interval_days = 0
 			next_stability = max(0.1, next_stability * 0.5)
@@ -113,12 +113,13 @@ func get_initial_state() -> Dictionary:
 ## 估算某评分对应的下次间隔文案。## 输入:
 ##   card (CardEntity) - 当前卡片实体。
 ##   rating (int) - 用户评分，取值见 Scheduler.Rating。
+##   now_timestamp (int) - 本次评分的软件 Unix 秒数。
 ## 输出: String，形如 "10分钟后"、"4天后"。
-func estimate_next_interval(card: CardEntity, rating: int) -> String:
+func estimate_next_interval(card: CardEntity, rating: int, now_timestamp: int) -> String:
 	if rating == Rating.AGAIN:
 		return "10分钟后"
 
-	var now_day_index: int = _day_index_from_timestamp(_now_timestamp())
+	var now_day_index: int = _day_index_from_timestamp(now_timestamp)
 	var current_interval_days: int = _resolve_current_interval_days(card, now_day_index)
 	var estimated_days: int = 1
 
@@ -160,12 +161,6 @@ func _get_ease_factor(card: CardEntity) -> float:
 		return 2.5
 	var factor: float = 2.7 - card.difficulty * 0.15
 	return _clampf(factor, 1.3, 3.0)
-
-
-## 返回当前 Unix 时间戳（秒）。## 输入: 无。
-## 输出: int，当前系统时间戳。
-func _now_timestamp() -> int:
-	return int(Time.get_unix_time_from_system())
 
 
 ## 将 Unix 时间戳转换为天数索引。## 输入: unix_timestamp (int) - Unix 时间戳（秒）。

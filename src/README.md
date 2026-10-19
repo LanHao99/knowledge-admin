@@ -24,3 +24,5 @@
 `utils/progress_resource_loader.gd` 通过临时副本兼容剧情及教程存档中的脚本路径，原存档保持原样。壁纸设置读取时兼容 `res://assets/wallpapers/` 路径，保存时使用当前内容目录。
 
 业务说明在 [实现文档](../docs/src/)，界面说明在 [场景文档](../docs/scenes/)，验证方式见 [测试入口](../tests/README.md)。
+
+会话内日期时间由 `app_clock.gd` 提供，窗口行为在 `desktop/time_settings.gd`，可编辑场景在 `../content/scenes/desktop/time_settings.tscn`。说明见 [日期和时间](../docs/scenes/date_time.md)。

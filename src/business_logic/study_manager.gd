@@ -7,6 +7,7 @@ signal session_ended(stats: Dictionary)
 signal card_shown(card: CardEntity, is_back: bool)
 signal card_answered(card: CardEntity, rating: int, next_interval: String)
 signal queue_updated(counts: Dictionary)
+signal queue_refresh_status_changed(message: String)
 
 
 var _deck_manager: DeckManager = null
@@ -22,6 +23,12 @@ var _question_shown_at_ms: int = 0
 var _done_count: int = 0
 var _initial_total: int = 0
 var _last_answer_stack: Array = []
+var _session_started_at_ms: int = 0
+var _new_limit: int = 20
+var _review_limit: int = 100
+var _admitted_new: Dictionary[int, bool] = {}
+var _admitted_review: Dictionary[int, bool] = {}
+var _queue_refresh_error: String = ""
 
 
 ## 注入 DeckManager。## 输入: deck_manager (DeckManager) - 牌组业务管理器。
@@ -75,12 +82,23 @@ func start_session(deck_id: int, new_limit: int = 20, review_limit: int = 100) -
 	_current_queue.append_array(learning_cards)
 	_current_queue.append_array(new_cards)
 	_current_queue.append_array(review_cards)
+	_new_limit = new_limit
+	_review_limit = review_limit
+	_admitted_new.clear()
+	_admitted_review.clear()
+	for card: CardEntity in new_cards:
+		_admitted_new[card.id] = true
+	for card: CardEntity in review_cards:
+		_admitted_review[card.id] = true
+	_queue_refresh_error = ""
 
 	_session = StudySessionEntity.create_new(deck_id)
+	_session.started_at = _now_timestamp()
+	_session_started_at_ms = _now_msec()
 	_current_card_index = 0 if not _current_queue.is_empty() else -1
 	_is_active = true
 	_showing_back = false
-	_question_shown_at_ms = _now_msec()
+	_question_shown_at_ms = _session_started_at_ms
 	_done_count = 0
 	_initial_total = _current_queue.size()
 	_last_answer_stack.clear()
@@ -92,6 +110,7 @@ func start_session(deck_id: int, new_limit: int = 20, review_limit: int = 100) -
 		"total": _current_queue.size()
 	}
 
+	queue_refresh_status_changed.emit("")
 	session_started.emit(deck_id, counts)
 	if _current_card_index >= 0:
 		card_shown.emit(_current_queue[_current_card_index], false)
@@ -149,6 +168,8 @@ func show_answer() -> Dictionary:
 func answer(rating: int) -> Dictionary:
 	if not _is_active:
 		return fail("SESSION_NOT_ACTIVE", "学习会话未启动")
+	if not _queue_refresh_error.is_empty():
+		return fail("QUEUE_REFRESH_REQUIRED", _queue_refresh_error)
 	if _card_manager == null:
 		return fail("CARD_MANAGER_NOT_SET", "card_manager 未注入")
 	if rating < CardEntity.RATING_AGAIN or rating > CardEntity.RATING_EASY:
@@ -247,6 +268,8 @@ func answer(rating: int) -> Dictionary:
 func skip_card() -> Dictionary:
 	if not _is_active:
 		return fail("SESSION_NOT_ACTIVE", "学习会话未启动")
+	if not _queue_refresh_error.is_empty():
+		return fail("QUEUE_REFRESH_REQUIRED", _queue_refresh_error)
 	if _current_queue.is_empty() or _current_card_index < 0:
 		return ok(null)
 
@@ -289,12 +312,12 @@ func get_session_progress() -> Dictionary:
 		}
 
 	return {
-		"total": _initial_total,
+		"total": _done_count + _current_queue.size(),
 		"done": _done_count,
 		"remaining": _current_queue.size(),
 		"new_seen": _session.new_cards_seen,
 		"review_seen": _session.review_cards_seen,
-		"elapsed_ms": _session.get_elapsed_time_ms()
+		"elapsed_ms": maxi(_now_msec() - _session_started_at_ms, 0)
 	}
 
 
@@ -320,7 +343,7 @@ func _calculate_counts() -> Dictionary:
 		"new": 0,
 		"learning": 0,
 		"review": 0,
-		"total": _initial_total,
+		"total": _done_count + _current_queue.size(),
 		"done": _done_count,
 		"remaining": _current_queue.size()
 	}
@@ -341,6 +364,8 @@ func _build_stats() -> Dictionary:
 	if _session == null:
 		return {}
 	var stats: Dictionary = _session.to_stats_dict()
+	stats["elapsed_ms"] = maxi(_now_msec() - _session_started_at_ms, 0)
+	stats["elapsed_time_ms"] = stats["elapsed_ms"]
 	stats["done"] = _done_count
 	stats["remaining"] = _current_queue.size()
 	stats["initial_total"] = _initial_total
@@ -373,6 +398,67 @@ func _reset_runtime_state() -> void:
 	_done_count = 0
 	_initial_total = 0
 	_last_answer_stack.clear()
+	_admitted_new.clear()
+	_admitted_review.clear()
+	_queue_refresh_error = ""
+	_session_started_at_ms = 0
+	queue_refresh_status_changed.emit("")
+
+
+## 按软件时间刷新剩余卡片，保留当前卡、翻面、计时和统计。## 输入: 无。
+## 输出: Dictionary - 成功时 data 为队列统计；失败时保留原队列并暂停评分。
+func refresh_for_time_change() -> Dictionary:
+	if not _is_active or _session == null or _current_card_index < 0:
+		return ok({})
+	var current: CardEntity = get_current_card().get("data") as CardEntity
+	var result: Dictionary = _card_manager.get_study_queue(_session.deck_id, _now_timestamp())
+	if not result.get("success", false):
+		_queue_refresh_error = "时间已调整，学习队列暂时无法刷新。请重试后继续评分。"
+		queue_refresh_status_changed.emit(_queue_refresh_error)
+		return result
+	var refreshed: Array[CardEntity] = []
+	var seen: Dictionary[int, bool] = {}
+	if current != null:
+		refreshed.append(current)
+		seen[current.id] = true
+	var data: Dictionary = result.get("data", {})
+	for key: String in ["learning", "new", "review"]:
+		for card: CardEntity in _to_card_array(data.get(key, [])):
+			if seen.has(card.id) or not _admit_card(card):
+				continue
+			refreshed.append(card)
+			seen[card.id] = true
+	_current_queue = refreshed
+	_current_card_index = 0 if not refreshed.is_empty() else -1
+	_queue_refresh_error = ""
+	var counts: Dictionary = _calculate_counts()
+	queue_refresh_status_changed.emit("")
+	queue_updated.emit(counts)
+	return ok(counts)
+
+
+## 判断卡片能否进入本轮队列，同一 ID 只占用一次新卡或复习额度。## 输入: card (CardEntity) - 候选到期卡片。
+## 输出: bool - 学习卡、已接纳卡片或仍有相应额度时返回 true。
+func _admit_card(card: CardEntity) -> bool:
+	if card.queue == CardEntity.QUEUE_LEARNING or _admitted_new.has(card.id) or _admitted_review.has(card.id):
+		return true
+	if card.queue == CardEntity.QUEUE_NEW:
+		if _new_limit > 0 and _admitted_new.size() >= _new_limit:
+			return false
+		_admitted_new[card.id] = true
+		return true
+	if card.queue == CardEntity.QUEUE_REVIEW:
+		if _review_limit > 0 and _admitted_review.size() >= _review_limit:
+			return false
+		_admitted_review[card.id] = true
+		return true
+	return false
+
+
+## 获取学习队列及评分使用的软件时间。## 输入: 无。
+## 输出: int - 软件 Unix 秒数。
+func _now_timestamp() -> int:
+	return AppClock.now_unix()
 
 
 ## 获取当前毫秒时间戳。## 输入: 无。

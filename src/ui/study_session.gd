@@ -18,6 +18,7 @@ enum StudyState {
 # ── 注入的 Manager（由 study.gd 注入）──
 var _deck_manager: DeckManager = null
 var _study_manager: StudyManager = null
+var _card_manager: CardManager = null
 var _signals_connected: bool = false
 
 var _state: StudyState = StudyState.PICKING
@@ -107,6 +108,12 @@ func set_study_manager(study_manager: StudyManager) -> void:
 	_connect_study_signals()
 
 
+## 注入用于查询当前到期数量的卡片管理器。## 输入: card_manager (CardManager) - 闪卡业务服务。
+## 输出: 无。
+func set_card_manager(card_manager: CardManager) -> void:
+	_card_manager = card_manager
+
+
 ## 当前是否正在学习卡片。对话结束时用它决定要不要把卡片显示回来。## 输入: 无。
 ## 输出: bool。处于 LEARNING 时返回 true。
 func is_learning() -> bool:
@@ -160,9 +167,11 @@ func _disconnect_study_signals() -> void:
 # ──────────────────────────────────────────────────────────────
 
 
-## 从 DeckDB 获取全部牌组（不含归档），填充 Tree 控件并附带卡片统计。
-## 由 study.gd 在注入 Manager 后调用。
+## 按软件时间显示未归档牌组的到期数量，并保留选中的牌组。## 输入: 无。
+## 输出: 无；牌组读取失败时保留空树，到期查询失败时显示占位符。
 func build_deck_list() -> void:
+	var previous: TreeItem = _deck_tree.get_selected()
+	var previous_id: int = int(previous.get_metadata(0)) if previous != null else -1
 	_deck_tree.clear()
 	_deck_tree.columns = 4
 	_deck_tree.set_column_title(0, "牌组")
@@ -196,14 +205,17 @@ func build_deck_list() -> void:
 	var root_item: TreeItem = _deck_tree.create_item()
 
 	var total_non_empty: int = 0
+	var failed: bool = false
 	for deck in decks:
 		var item: TreeItem = _deck_tree.create_item(root_item)
 		item.set_text(0, deck.name)
 		item.set_metadata(0, deck.id)
+		if deck.id == previous_id:
+			item.select(0)
 
-		var counts_result := deck_db.get_deck_card_counts(deck.id)
+		var counts_result: Dictionary = _card_manager.get_study_queue(deck.id) if _card_manager != null else {"success": false}
 		if counts_result.get("success", false):
-			var counts: Dictionary = counts_result.get("data", {})
+			var counts: Dictionary = counts_result.get("data", {}).get("counts", {})
 			var new_cnt: int = int(counts.get("new", 0))
 			var learn_cnt: int = int(counts.get("learning", 0))
 			var review_cnt: int = int(counts.get("review", 0))
@@ -212,11 +224,17 @@ func build_deck_list() -> void:
 			item.set_text(3, str(review_cnt))
 			if new_cnt + learn_cnt + review_cnt > 0:
 				total_non_empty += 1
+		else:
+			failed = true
+			for column: int in range(1, 4):
+				item.set_text(column, "—")
 
-	if total_non_empty > 0:
+	if failed:
+		_set_status_picker("到期数量暂时无法读取，请稍后重试")
+	elif total_non_empty > 0:
 		_set_status_picker("共 %d 个牌组有待学习卡片" % total_non_empty)
 	else:
-		_set_status_picker("没有待学习的卡片，请先创建笔记")
+		_set_status_picker("当前没有到期的卡片")
 
 
 # ──────────────────────────────────────────────────────────────

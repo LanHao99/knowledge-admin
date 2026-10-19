@@ -41,6 +41,8 @@ func _ready() -> void:
 	_content_scroll.resized.connect(_schedule_layout)
 	_center_area.resized.connect(_schedule_layout)
 	_schedule_layout()
+	AppClock.time_changed.connect(_on_clock_changed)
+	AppClock.day_changed.connect(_on_clock_day_changed)
 	if _ensure_managers_ready():
 		_refresh_stats()
 	else:
@@ -122,7 +124,7 @@ func _ensure_managers_ready() -> bool:
 func _refresh_stats() -> void:
 	var decks: Dictionary = _deck_manager.get_all_decks()
 	var deck_count: int = (decks.get("data", []) as Array).size() if decks.get("success", false) else -1
-	var now_ts: int = int(Time.get_unix_time_from_system())
+	var now_ts: int = AppClock.now_unix()
 	var now_day: int = int(now_ts / CardDB._SECONDS_PER_DAY)
 	var due: Dictionary = _card_manager.get_global_due_count(now_day, now_ts)
 	var today: Dictionary = _card_manager.get_today_studied_count(_get_today_start_ts(now_ts))
@@ -133,6 +135,19 @@ func _refresh_stats() -> void:
 	_empty_hint.visible = deck_count == 0
 	var failed: bool = deck_count < 0 or not due.get("success", false) or not today.get("success", false)
 	_set_status("统计暂时不可用，请稍后重试" if failed else "数据库就绪", failed)
+
+
+## 软件时间调整后重新读取首页统计。## 输入: 无。
+## 输出: 无。
+func _on_clock_changed() -> void:
+	if _card_manager != null and _card_manager.is_ready() and _deck_manager != null and _deck_manager.is_ready():
+		_refresh_stats()
+
+
+## 复习日自然切换后刷新首页统计。## 输入: _day_index (int) - 当前 Unix 天索引。
+## 输出: 无。
+func _on_clock_day_changed(_day_index: int) -> void:
+	_on_clock_changed()
 
 
 ## 显示统计数字或读取失败占位符。## 输入: label (Label) - 数字控件；value (int) - 统计值，负数表示失败。

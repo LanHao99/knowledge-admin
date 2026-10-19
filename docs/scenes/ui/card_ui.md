@@ -91,3 +91,7 @@ study.gd → card_ui.start_study(deck_id)
 ---
 
 > **注意**: CardUI 不可独立使用，须由 study.gd 注入 Manager 后调用 `start_study()`。
+
+## 调时后的队列重试
+
+订阅 StudyManager.queue_refresh_status_changed(message)。非空消息时保留卡面，禁用四档评分按钮并显示 RetryQueueButton；点击后重新查询新时间下的队列，成功恢复评分。业务层同时拒绝评分及跳卡，快捷键无法绕过。单纯调时不重新渲染卡片或发送评分事件。见 [日期和时间](../date_time.md)。

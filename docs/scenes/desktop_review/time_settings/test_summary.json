@@ -1,0 +1,29 @@
+{
+	"baseline": {
+		"tests": 127,
+		"passing": 120,
+		"failing": 7,
+		"assertions": "975/982"
+	},
+	"final": {
+		"tests": 147,
+		"passing": 140,
+		"failing": 7,
+		"assertions": "1186/1193"
+	},
+	"new_tests": 20,
+	"new_assertions": 211,
+	"unchanged_failures": [
+		"test_desktop_file_catalog.gd::test_close_prompt_cancel_and_discard",
+		"test_desktop_file_catalog.gd::test_default_scene_binds_existing_documents",
+		"test_desktop_file_catalog.gd::test_edit_and_shortcut_save_round_trip",
+		"test_desktop_file_catalog.gd::test_missing_catalog_keeps_viewer_usable",
+		"test_desktop_file_catalog.gd::test_resource_entry_populates_directory_and_viewer",
+		"test_desktop_file_catalog.gd::test_saving_original_text_removes_override",
+		"test_desktop_file_catalog.gd::test_start_menu_blocks_save_shortcut"
+	],
+	"gpu_checks": 119,
+	"restart_checks": 12,
+	"engine": "4.7.2-stable",
+	"new_failures": []
+}

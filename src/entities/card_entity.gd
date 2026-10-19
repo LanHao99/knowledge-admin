@@ -161,8 +161,8 @@ func is_buried() -> bool:
 ##   time_taken_ms (int) - 本次答题耗时（毫秒）。
 ##   reviewed_at (int) - 复习时间的 Unix 时间戳，默认使用当前时间。
 ## 输出: 无。
-func append_review_history(rating: int, time_taken_ms: int, reviewed_at: int = 0) -> void:
-	if reviewed_at == 0:
+func append_review_history(rating: int, time_taken_ms: int, reviewed_at: int = -1) -> void:
+	if reviewed_at < 0:
 		reviewed_at = int(Time.get_unix_time_from_system())
 
 	# 解析现有历史记录

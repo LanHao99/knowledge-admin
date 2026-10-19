@@ -56,6 +56,7 @@ var _signals_connected: bool = false
 
 # ── 状态栏 ──
 @onready var _status_label: Label = $"MainVBox/StatusBar/StatusLabel"
+@onready var _retry_queue_button: Button = %RetryQueueButton
 
 
 ## 初始化按钮绑定，等待 set_managers() 注入。## 输入: 无。
@@ -115,6 +116,7 @@ func _bind_buttons() -> void:
 	_good_btn.pressed.connect(_on_good_pressed)
 	_easy_btn.pressed.connect(_on_easy_pressed)
 	_card_panel.gui_input.connect(_on_card_panel_gui_input)
+	_retry_queue_button.pressed.connect(_retry_queue_refresh)
 
 
 ## 连接 StudyManager 信号。## 输入: 无。
@@ -127,10 +129,12 @@ func _connect_signals() -> void:
 	_study_manager.card_shown.connect(_on_card_shown)
 	_study_manager.card_answered.connect(_on_card_answered)
 	_study_manager.queue_updated.connect(_on_queue_updated)
+	_study_manager.queue_refresh_status_changed.connect(_on_queue_refresh_status_changed)
 	_signals_connected = true
 
 
-## 断开 StudyManager 信号。
+## 断开 StudyManager 的全部信号连接，避免重复绑定。## 输入: 无。
+## 输出: 无。
 func _disconnect_signals() -> void:
 	if not _signals_connected or _study_manager == null:
 		return
@@ -144,6 +148,8 @@ func _disconnect_signals() -> void:
 		_study_manager.card_answered.disconnect(_on_card_answered)
 	if _study_manager.queue_updated.is_connected(_on_queue_updated):
 		_study_manager.queue_updated.disconnect(_on_queue_updated)
+	if _study_manager.queue_refresh_status_changed.is_connected(_on_queue_refresh_status_changed):
+		_study_manager.queue_refresh_status_changed.disconnect(_on_queue_refresh_status_changed)
 	_signals_connected = false
 
 
@@ -234,6 +240,25 @@ func _on_queue_updated(counts: Dictionary) -> void:
 	_progress_label.text = "%d / %d" % [done, total]
 	if _current_card != null:
 		_queue_label.text = _current_card.get_queue_name()
+
+
+## 队列读取失败时暂停评分并显示重试入口，保留卡面状态。## 输入: message (String) - 空字符串表示刷新成功。
+## 输出: 无。
+func _on_queue_refresh_status_changed(message: String) -> void:
+	_retry_queue_button.visible = not message.is_empty()
+	for button: Button in [_again_btn, _hard_btn, _good_btn, _easy_btn]:
+		button.disabled = not message.is_empty()
+	if not message.is_empty():
+		_set_status(message)
+	elif _study_manager != null and _study_manager.is_session_active():
+		_set_status("学习队列已就绪")
+
+
+## 重新读取新时间下的学习队列，成功后恢复评分。## 输入: 无。
+## 输出: 无。
+func _retry_queue_refresh() -> void:
+	if _study_manager != null:
+		_study_manager.refresh_for_time_change()
 
 
 # ──────────────────────────────────────────────────────────────

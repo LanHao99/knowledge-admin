@@ -104,3 +104,9 @@
 | `card_shown` | `card: CardEntity, is_back: bool` | 卡片被展示；`is_back=true` 表示答案面 |
 | `card_answered` | `card: CardEntity, rating: int, next_interval: String` | 用户对卡片做出评分回答 |
 | `queue_updated` | `counts: Dictionary` | 学习队列分布发生变化 |
+
+## 软件时间与队列刷新
+
+`refresh_for_time_change() -> Dictionary` 在活跃会话中保留当前卡片、翻面、答题起点与统计，按软件时间重建后续队列。当前卡片可完成本次评分；新卡与复习额度按本轮累计接纳 ID 计算，同一卡再次到期不重复占额度。失败保留原队列，发出非空的 `queue_refresh_status_changed(message)` 并阻止评分、跳卡；重试成功发送空字符串。
+
+`get_session_progress().total` 为 done 加 remaining；整轮耗时由单调计时计算，结束统计同时包含 elapsed_ms 和 elapsed_time_ms。初始数量仍保存在 initial_total。已完成会话不会因时间变化重新开启。详见 [日期和时间](../date_time.md)。

@@ -69,3 +69,7 @@ Autoload 顺序放在 `DialogueManager` 之后，保证启动时对话单例已�
 ## 桌面应用导航
 
 桌面常驻时，open_app / close_app 由 WindowManager 管理单实例窗口；goto_scene 将闪卡页面放入闪卡宿主，AI 与控制面板分别打开独立窗口。request_dialogue 新增可选 source 来源节点，正式剧情进入隐藏软件，教程进入使用帮助。详见 ../scenes/desktop.md。
+
+## 会话日期时间
+
+AppClock 在 App 之前作为 Autoload 初始化，只持有进程内的时间偏移。日期时间窗口通过现有 App.open_app 与 WindowManager 注册表打开；独立设置页由 WindowContext.open_time_settings(content) 建立嵌入窗口。调时影响闪卡时间，不产生评分或剧情充能。见 [日期和时间](../scenes/date_time.md)。

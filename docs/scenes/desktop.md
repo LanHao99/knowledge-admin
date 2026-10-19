@@ -94,3 +94,7 @@ tests/scenes/desktop/verify_desktop.tscn 必须在 application/config/name 为 K
 Godot 4.7.2：30 项 GUT 测试通过；真实 GPU 验收覆盖开机、八向鼠标缩放、菜单、两种导入、学习评分、剧情选项、弹窗恢复和六组分辨率／字号组合。报告及总览截图保存在 desktop_review 目录。未调用外部模型接口。
 
 任务栏图标专项验收：运行 verify_desktop.tscn 时追加 `-- --taskbar-icons-only`，检查六组分辨率与字号组合下的方形比例、图标、名称提示和点击状态切换。118 项检查通过；预览与报告为 desktop_review/taskbar_icons.png 和 taskbar_icons_verification.json。
+
+## 日期和时间
+
+右下角时钟支持单击及键盘激活，与控制面板「通用」页共用单实例日期时间窗口。软件时间只在本次进程生效，影响闪卡调度与统计；关闭内置窗口保持，重启恢复真实时间，复习结果保留。操作、接口和验证见 [日期和时间](date_time.md)。

@@ -2,6 +2,31 @@ extends RefCounted
 ## 兼容独立运行与桌面宿主中的页面布局、导航和关闭行为。
 
 
+## 打开共用的日期时间窗口，独立页面使用嵌入子窗口。## 输入: content (Node) - 请求打开的页面或任务栏。
+## 输出: bool - 窗口成功打开或复用时返回 true。
+static func open_time_settings(content: Node) -> bool:
+	if WindowManager.is_available():
+		return App.open_app("time_settings")
+	var root: Window = content.get_tree().root
+	var existing: Window = root.get_node_or_null("TimeSettingsStandalone") as Window
+	if is_instance_valid(existing) and not existing.is_queued_for_deletion():
+		existing.show()
+		existing.grab_focus()
+		return true
+	root.gui_embed_subwindows = true
+	var window: Window = Window.new()
+	window.name = "TimeSettingsStandalone"
+	window.title = "日期和时间"
+	window.min_size = Vector2i(480, 400)
+	window.size = Vector2i(720, 560)
+	window.theme = UiSettings.runtime_theme
+	window.close_requested.connect(window.queue_free)
+	root.add_child(window)
+	window.add_child(load("res://content/scenes/desktop/time_settings.tscn").instantiate())
+	window.popup_centered()
+	return true
+
+
 ## 查找提供页面导航与关闭信号的上级窗体。## 输入: content (Node) - 内容节点。
 ## 输出: Node - 宿主窗体；独立场景返回 null。
 static func find_host(content: Node) -> Node:

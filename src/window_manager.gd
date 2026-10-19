@@ -6,6 +6,7 @@ signal app_closed(app_id: String)
 signal app_focused(app_id: String)
 
 const REGISTRY: Dictionary = {
+	"time_settings": {"title": "日期和时间", "icon_path": "res://content/assets/icons/desktop_settings.svg", "scene_path": "res://content/scenes/desktop/time_settings.tscn", "entry_visible": false, "default_size": Vector2(740, 620), "min_size": Vector2(480, 400)},
 	"knowledge_admin": {"title": "Knowledge Admin", "icon_path": "res://content/assets/icons/desktop_knowledge.svg", "scene_path": "res://content/scenes/ui/main_menu.tscn", "entry_visible": true, "default_size": Vector2(1440, 900)},
 	"ai_cards": {"title": "AI 制卡助手", "icon_path": "res://content/assets/icons/desktop_ai.svg", "scene_path": "res://content/scenes/ai/ai_debug.tscn", "entry_visible": true, "default_size": Vector2(1220, 850)},
 	"control_panel": {"title": "控制面板", "icon_path": "res://content/assets/icons/desktop_settings.svg", "scene_path": "res://content/scenes/ui/settings.tscn", "entry_visible": true, "default_size": Vector2(1200, 880)},
