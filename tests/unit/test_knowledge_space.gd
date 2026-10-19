@@ -136,6 +136,9 @@ func test_browsing_is_read_only() -> void:
 	view.read_selected()
 	assert_true(view.get_node("%Reader").visible)
 	assert_true("水的分子式？" in view.get_node("%ReaderText").text)
+	view.minimize_document("card:%d" % card.id)
+	view.fullscreen_document("card:%d" % card.id)
+	view.close_document("card:%d" % card.id)
 	assert_eq((_cards.get_card(card.id).data as CardEntity).to_dict(), before_card)
 	assert_eq(App.get_story_progress().capture_state(), before_story)
 	assert_signal_not_emitted(App, "card_presented")
@@ -191,7 +194,7 @@ func test_long_document_keeps_full_text_in_reader() -> void:
 	paragraph.width = preview.width
 	paragraph.break_flags = TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND | TextServer.BREAK_ADAPTIVE
 	paragraph.add_string(preview.text, preview.font, preview.font_size)
-	assert_lte(paragraph.get_size().y * preview.pixel_size, view.configuration.page_size.y - 3.3)
+	assert_lte(paragraph.get_size().y * preview.pixel_size, view.configuration.page_size.y - 3.3 - KnowledgeSpaceDocument.TITLE_BAR_HEIGHT)
 	view._select_document(document)
 	view.read_selected()
 	assert_eq(str(view.get_node("%ReaderText").text), document.body)
@@ -286,6 +289,117 @@ func test_document_materials_are_independent() -> void:
 	first.set_selected(true)
 	assert_eq((second.get_node("Frame").material_override as StandardMaterial3D).albedo_color, before_tint)
 	assert_ne(first.get_node("Frame").material_override, second.get_node("Frame").material_override)
+	assert_ne(first.get_node("TitleBar/Background").material_override, second.get_node("TitleBar/Background").material_override)
+
+
+## 关闭只影响本次空间实例，刷新不复活文档也不移动剩余窗口。## 输入: 无。输出: 无。
+func test_closed_window_stays_closed_until_space_reopens() -> void:
+	var view: KnowledgeSpace = _open_space()
+	view.set_card_documents(_rows(3))
+	var kept_position: Vector3 = view._documents["card:2"].position
+	view._select_document(view._documents["card:1"])
+	view.read_selected()
+	view._move_camera(Vector3.ZERO, Quaternion.IDENTITY)
+	view.close_document("card:1")
+	assert_eq(view._card_count, 2)
+	assert_false(view._documents.has("card:1"))
+	assert_eq(view._selected_id, "")
+	assert_false(view.get_node("%Reader").visible)
+	assert_null(view._travel)
+	view.set_card_documents(_rows(3))
+	view.hide()
+	view.show()
+	assert_eq(view._card_count, 2)
+	assert_false(view._documents.has("card:1"))
+	assert_eq(view._documents["card:2"].position, kept_position)
+	view.close_document("card:2")
+	view.close_document("card:3")
+	assert_true(view.get_node("%EmptyMessage").visible)
+	assert_true("重新打开" in str(view.get_node("%EmptyMessage").text))
+	view.close_document("card:3")
+	assert_eq(view._card_count, 0)
+	var reopened: KnowledgeSpace = _open_space()
+	reopened.set_card_documents(_rows(3))
+	assert_eq(reopened._card_count, 3)
+	assert_true(reopened._documents.has("card:1"))
+
+
+## 折叠隐藏正文并收缩选取范围，原来正文区域不再挡住后面的窗口。## 输入: 无。输出: 无。
+func test_minimized_window_only_occupies_its_title_bar() -> void:
+	var view: KnowledgeSpace = _open_space()
+	view.set_card_documents(_rows(2))
+	var document: KnowledgeSpaceDocument = view._documents["card:1"]
+	document.position = Vector3.ZERO
+	view._documents["card:2"].position = Vector3(0, 0, -8)
+	view._camera.position = Vector3(0, 0, 20)
+	var title_bar_position: Vector3 = document.get_node("TitleBar").global_position
+	view._select_document(document)
+	view.read_selected()
+	view.minimize_document(document.document_id)
+	assert_true(document.is_minimized())
+	assert_false(view.get_node("%Reader").visible)
+	assert_false(document.get_node("Body").visible)
+	assert_true(document.get_action_button(&"fullscreen").is_visible_in_tree())
+	assert_eq(document.get_node("TitleBar").global_position, title_bar_position)
+	assert_almost_eq((document.get_node("Paper").mesh as BoxMesh).size.y, KnowledgeSpaceDocument.TITLE_BAR_HEIGHT, 0.0001)
+	assert_eq(document.ray_distance(Vector3(0, 0, 20), Vector3.FORWARD), -1.0)
+	assert_gt(document.ray_distance(title_bar_position + Vector3(0, 0, 20), Vector3.FORWARD), 0.0)
+	assert_eq(view.pick_document(Vector2(view._viewport.size) * 0.5), view._documents["card:2"])
+
+
+## 折叠与展开在刷新后保持正确状态，展开时恢复正文和完整选取范围。## 输入: 无。输出: 无。
+func test_refresh_preserves_fold_and_fullscreen_restores_body() -> void:
+	var view: KnowledgeSpace = _open_space()
+	view.set_card_documents(_rows(2))
+	view.minimize_document("card:1")
+	view.set_card_documents(_rows(2))
+	var document: KnowledgeSpaceDocument = view._documents["card:1"]
+	assert_true(document.is_minimized())
+	assert_false(document.get_node("Body").visible)
+	view.fullscreen_document("card:1")
+	assert_false(document.is_minimized())
+	assert_true(document.get_node("Body").visible)
+	assert_eq(view._selected_id, "card:1")
+	assert_gt(document.ray_distance(document.global_position + Vector3(0, 0, 20), Vector3.FORWARD), 0.0)
+	view.set_card_documents(_rows(2))
+	assert_false(view._documents["card:1"].is_minimized())
+
+
+## 档案关闭和折叠在重锁再解锁后仍保留，但新空间实例恢复默认。## 输入: 无。输出: 无。
+func test_archive_window_state_survives_story_updates() -> void:
+	var view: KnowledgeSpace = _open_space(true)
+	var progress: StoryProgress = StoryProgress.new()
+	progress.mark_chapter_dialogue("chapter_1", "intro")
+	progress.mark_chapter_dialogue("chapter_1", "explain")
+	view.sync_archives(progress)
+	view.close_document("archive:first_contact")
+	view.minimize_document("archive:recall_loop")
+	view.sync_archives(StoryProgress.new())
+	assert_eq(view._archive_count, 0)
+	view.sync_archives(progress)
+	assert_eq(view._archive_count, 1)
+	assert_false(view._documents.has("archive:first_contact"))
+	assert_true(view._documents["archive:recall_loop"].is_minimized())
+	var reopened: KnowledgeSpace = _open_space(true)
+	reopened.sync_archives(progress)
+	assert_eq(reopened._archive_count, 2)
+	assert_false(reopened._documents["archive:recall_loop"].is_minimized())
+
+
+## 三个按钮只接受正面可见命中，普通标题栏与正文不会触发窗口操作。## 输入: 无。输出: 无。
+func test_window_action_hit_regions_match_buttons() -> void:
+	var view: KnowledgeSpace = _open_space()
+	view.configuration.page_size = Vector2(4, 5)
+	view.set_card_documents(_rows(1))
+	var document: KnowledgeSpaceDocument = view._documents["card:1"]
+	for action: StringName in KnowledgeSpaceDocument.WINDOW_ACTIONS:
+		var point: Vector3 = document.get_action_button(action).global_position
+		assert_eq(document.get_window_action(point + Vector3(0, 0, 10), Vector3.FORWARD), action)
+		assert_eq(document.get_window_action(point - Vector3(0, 0, 10), Vector3.BACK), &"")
+		assert_true(document.get_visible_rect().has_point(Vector2(document.to_local(point).x, document.to_local(point).y)))
+	assert_eq(document.get_window_action(document.global_position + Vector3(0, 0, 10), Vector3.FORWARD), &"")
+	var title_left: Vector3 = document.get_node("TitleBar").global_position + Vector3(-1.5, 0, 10)
+	assert_eq(document.get_window_action(title_left, Vector3.FORWARD), &"")
 
 
 ## 场景默认资源含六篇档案且桌面入口可见，限额与窗口尺寸符合约定。## 输入: 无。输出: 无。

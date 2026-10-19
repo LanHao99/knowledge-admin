@@ -11,6 +11,8 @@ const DOCUMENT_SCENE: PackedScene = preload("res://scenes/desktop/knowledge_spac
 var _note_manager: NoteManager
 var _host: ManagedWindow
 var _documents: Dictionary[String, KnowledgeSpaceDocument] = {}
+var _closed_document_ids: Dictionary[String, bool] = {}
+var _minimized_document_ids: Dictionary[String, bool] = {}
 var _selected_id: String = ""
 var _card_count: int = 0
 var _archive_count: int = 0
@@ -156,8 +158,8 @@ func _build_card_group(rows: Array, group_index: int) -> void:
 			(row_index - 0.5) * 10.2 + 1.0,
 			group_depth - floorf(item_index / 4.0) * 16.0
 		)
-		_add_document(data, page_position, _cards_root)
-		_card_count += 1
+		if _add_document(data, page_position, _cards_root) != null:
+			_card_count += 1
 
 
 ## 按当前完整完成记录同步档案，新增和移除不移动其他文档。## 输入: progress (StoryProgress)，可为 null。
@@ -181,7 +183,7 @@ func sync_archives(progress: StoryProgress) -> void:
 			_documents.erase(document.document_id)
 			_archives_root.remove_child(document)
 			document.queue_free()
-	_archive_count = unlocked_ids.size()
+	_archive_count = _archives_root.get_child_count()
 	if not _selected_id.is_empty() and not _documents.has(_selected_id):
 		_select_document(null)
 		close_reader()
@@ -189,12 +191,16 @@ func sync_archives(progress: StoryProgress) -> void:
 	_update_summary()
 
 
-## 实例化平行文档页面并登记选择身份。## 输入: data、page_position、parent_node。输出: 文档实例。
+## 实例化文档并恢复本次打开的折叠状态，关闭的文档不重新创建。## 输入: data、page_position、parent_node。
+## 输出: 文档实例；本次已经关闭时返回 null。
 func _add_document(data: Dictionary, page_position: Vector3, parent_node: Node3D) -> KnowledgeSpaceDocument:
+	if _closed_document_ids.has(str(data.get("id", ""))):
+		return null
 	var document: KnowledgeSpaceDocument = DOCUMENT_SCENE.instantiate() as KnowledgeSpaceDocument
 	parent_node.add_child(document)
 	document.position = page_position
 	document.configure(data, configuration)
+	document.set_minimized(_minimized_document_ids.has(document.document_id))
 	_documents[document.document_id] = document
 	return document
 
@@ -210,10 +216,66 @@ func _on_surface_gui_input(event: InputEvent) -> void:
 	elif button.button_index == MOUSE_BUTTON_LEFT and button.pressed and not _owns_mouse_capture:
 		_surface.grab_focus()
 		var viewport_point: Vector2 = button.position * Vector2(_viewport.size) / _surface.size.max(Vector2.ONE)
-		_select_document(pick_document(viewport_point))
-		if button.double_click:
-			focus_selected()
+		var document: KnowledgeSpaceDocument = pick_document(viewport_point)
+		_select_document(document)
+		if document != null:
+			var action: StringName = document.get_window_action(_camera.project_ray_origin(viewport_point), _camera.project_ray_normal(viewport_point))
+			match action:
+				&"close":
+					close_document(document.document_id)
+				&"minimize":
+					minimize_document(document.document_id)
+				&"fullscreen":
+					fullscreen_document(document.document_id)
+				_:
+					if button.double_click:
+						focus_selected()
 		_surface.accept_event()
+
+
+## 从本次空间会话中移除一个窗口，不删除卡片或改变剧情进度。## 输入: document_id (String)。输出: 无。
+func close_document(document_id: String) -> void:
+	var document: KnowledgeSpaceDocument = _documents.get(document_id) as KnowledgeSpaceDocument
+	if document == null:
+		return
+	_closed_document_ids[document_id] = true
+	_minimized_document_ids.erase(document_id)
+	_documents.erase(document_id)
+	if document.is_archive:
+		_archive_count -= 1
+	else:
+		_card_count -= 1
+	if _selected_id == document_id:
+		_suspend_controls()
+		_select_document(null)
+		close_reader()
+	document.get_parent().remove_child(document)
+	document.queue_free()
+	_update_summary()
+
+
+## 将一个窗口折叠成标题栏，刷新与剧情显隐保留本次状态。## 输入: document_id (String)。输出: 无。
+func minimize_document(document_id: String) -> void:
+	var document: KnowledgeSpaceDocument = _documents.get(document_id) as KnowledgeSpaceDocument
+	if document == null:
+		return
+	_minimized_document_ids[document_id] = true
+	document.set_minimized(true)
+	if _selected_id == document_id:
+		_suspend_controls()
+		close_reader()
+
+
+## 展开窗口并平滑移动到正面，让完整窗口在视图区入镜。## 输入: document_id (String)。输出: 无。
+func fullscreen_document(document_id: String) -> void:
+	var document: KnowledgeSpaceDocument = _documents.get(document_id) as KnowledgeSpaceDocument
+	if document == null:
+		return
+	_minimized_document_ids.erase(document_id)
+	document.set_minimized(false)
+	_select_document(document)
+	close_reader()
+	focus_selected()
 
 
 ## 捕获期间接收转向和释放事件，Esc 只处理本窗口的飞行或阅读。## 输入: event (InputEvent)。输出: 无。
@@ -287,15 +349,17 @@ func _select_document(document: KnowledgeSpaceDocument) -> void:
 		candidate.set_selected(candidate == document)
 	%FocusButton.disabled = document == null
 	%ReadButton.disabled = document == null
-	%SelectionName.text = document.document_title.replace("\n", " ") if document != null else "单击选择文档 · 双击靠近阅读"
+	%SelectionName.text = document.document_title.replace("\n", " ") if document != null else "单击选择文档 · 标题栏可折叠、全屏或关闭"
 	%SelectionName.tooltip_text = document.document_title if document != null else ""
 
 
-## 根据画面比例移动到所选文档正面，保证页面完整入镜。## 输入: 无。输出: 无。
+## 展开所选文档并根据画面比例移动到正面，保证窗口完整入镜。## 输入: 无。输出: 无。
 func focus_selected() -> void:
 	var document: KnowledgeSpaceDocument = _documents.get(_selected_id) as KnowledgeSpaceDocument
 	if document == null or not _allows_navigation():
 		return
+	_minimized_document_ids.erase(document.document_id)
+	document.set_minimized(false)
 	_suspend_controls()
 	var dimensions: Vector2 = configuration.page_size.max(Vector2(4, 5))
 	var aspect: float = float(_viewport.size.x) / maxf(1.0, _viewport.size.y)
@@ -408,6 +472,8 @@ func _update_summary() -> void:
 	%Status.text = _load_error if not _load_error.is_empty() else "右键 + WASD 飞行 · Q/E 升降 · Shift 加速 · Esc 释放鼠标"
 	%EmptyMessage.visible = _card_count == 0
 	%EmptyMessage.text = "暂无闪卡。添加卡片后点击「刷新内容」。\n已解锁的剧情档案仍可探索。" if _load_error.is_empty() else _load_error
+	if not _closed_document_ids.is_empty() and _load_error.is_empty():
+		%EmptyMessage.text = "当前没有可见文档。\n重新打开「知识空间」可恢复本次关闭的窗口。"
 	if _archive_count > 0:
 		%EmptyMessage.visible = false
 

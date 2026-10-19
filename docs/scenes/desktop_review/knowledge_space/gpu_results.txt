@@ -7,6 +7,6 @@ FMOD Sound System: Live update enabled!
 ERROR: Failed to read the root certificate store.
    at: get_system_ca_certificates (platform/windows/os_windows.cpp:2582)
 Opened database successfully (D:/game design/godot/4.6projects/knowledge-admin/.temp/knowledge_space_verify/saves/knowledge_admin.db)
-KNOWLEDGE_SPACE_VERIFICATION: {"adapter":"NVIDIA GeForce RTX 5060 Ti","checks":77,"engine":"4.7.2-stable (official)","failures":[],"renderer":"forward_plus"}
+KNOWLEDGE_SPACE_VERIFICATION: {"adapter":"NVIDIA GeForce RTX 5060 Ti","checks":107,"engine":"4.7.2-stable (official)","failures":[],"renderer":"forward_plus"}
 Closed database (D:/game design/godot/4.6projects/knowledge-admin/.temp/knowledge_space_verify/saves/knowledge_admin.db)
 FMOD Sound System: System released

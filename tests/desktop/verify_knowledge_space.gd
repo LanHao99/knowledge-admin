@@ -8,6 +8,7 @@ var _desktop: Control
 var _view: KnowledgeSpace
 var _window: ManagedWindow
 var _saved_records: Array[String] = []
+var _closed_card_id: String = ""
 
 
 ## 等待 Autoload 完成后开始隔离验收。## 输入: 无。输出: 无。
@@ -50,6 +51,7 @@ func _run() -> void:
 	_check((_view.get_node("%SpaceViewport") as SubViewport).world_3d != get_tree().root.world_3d, "空间使用独立World3D")
 	await _capture("overview_1280_100")
 	await _verify_selection_and_focus()
+	await _verify_document_windows()
 	await _verify_flight()
 	await _verify_lifecycle()
 	await _verify_progress()
@@ -120,6 +122,44 @@ func _verify_selection_and_focus() -> void:
 	_check(_page_fits(target), "实际双击文档可聚焦")
 
 
+## 实际点击三种标题栏按钮，检查会话状态、刷新、折叠和正视恢复。## 输入: 无。输出: 无。
+func _verify_document_windows() -> void:
+	var target: KnowledgeSpaceDocument = _view._documents["archive:first_contact"]
+	var kept_position: Vector3 = target.position
+	await _click_document_action(target, &"minimize")
+	_check(target.is_minimized() and not target.get_node("Body").visible, "实际最小化按钮将文档折叠为标题栏")
+	_check(target.position == kept_position, "折叠保持文档空间位置")
+	await _capture("document_minimized")
+	var camera: Camera3D = _view.get_node("%SpaceCamera") as Camera3D
+	camera.position += Vector3(0.7, -0.4, 1.5)
+	camera.rotation = Vector3(0.05, 0.08, 0)
+	await _click_document_action(target, &"fullscreen")
+	await get_tree().create_timer(0.8).timeout
+	_check(not target.is_minimized() and target.get_node("Body").visible, "实际全屏按钮展开折叠的窗口")
+	_check(_page_fits(target) and camera.rotation.is_equal_approx(Vector3.ZERO), "全屏从偏移视角恢复完整正视窗口")
+	_check(is_equal_approx(camera.position.x, target.position.x) and is_equal_approx(camera.position.y, target.position.y), "全屏视角位于窗口正前方")
+	await _capture("document_fullscreen")
+	for document_id: String in _view._documents:
+		if document_id.begins_with("card:"):
+			_closed_card_id = document_id
+			break
+	_view.fullscreen_document(_closed_card_id)
+	await get_tree().create_timer(0.8).timeout
+	target = _view._documents[_closed_card_id]
+	await _click_document_action(target, &"minimize")
+	await _click_control(_view.get_node("%RefreshButton") as Control)
+	target = _view._documents[_closed_card_id]
+	_check(target.is_minimized(), "实际刷新按钮保留卡片窗口折叠状态")
+	await _click_document_action(target, &"fullscreen")
+	await get_tree().create_timer(0.8).timeout
+	await _click_document_action(target, &"close", true)
+	_check(not _view._documents.has(_closed_card_id) and _view._card_count == 23, "实际关闭按钮移除窗口并同步可见数量")
+	_check(_view._selected_id.is_empty() and _view._travel == null, "关闭按钮的双击不会继续聚焦已关闭窗口")
+	await _capture("document_closed")
+	await _click_control(_view.get_node("%RefreshButton") as Control)
+	_check(not _view._documents.has(_closed_card_id) and _view._card_count == 23, "实际刷新按钮不恢复本次关闭的窗口")
+
+
 ## 注入右键、移动、转向及 Esc，验证自由飞行与动画中断。## 输入: 无。输出: 无。
 func _verify_flight() -> void:
 	var camera: Camera3D = _view.get_node("%SpaceCamera") as Camera3D
@@ -171,6 +211,7 @@ func _verify_lifecycle() -> void:
 	WindowManager.open_app("knowledge_space")
 	await _frames()
 	_check(_window.get_content() == _view and (_view.get_node("%SpaceCamera") as Camera3D).position.is_equal_approx(kept_position), "恢复复用实例及摄像头位置")
+	_check(not _view._documents.has(_closed_card_id), "外层窗口最小化恢复后仍保留已关闭的文档状态")
 	var taskbar: Node = _desktop.get_node("%Taskbar")
 	var task_button: Button = taskbar._app_buttons["knowledge_space"]
 	_check(task_button.tooltip_text == "知识空间" and task_button.get_node("Icon").texture != null, "任务栏使用知识空间图标与名称提示")
@@ -239,6 +280,13 @@ func _verify_display_matrix() -> void:
 			await _click_document(target)
 			_check(_view._selected_id == target.document_id, "最大化后选取坐标正确 " + label)
 			await _capture("overview_" + label)
+			_view.fullscreen_document(target.document_id)
+			await get_tree().create_timer(0.8).timeout
+			await _click_document_action(target, &"minimize")
+			_check(target.is_minimized(), "缩放后标题栏最小化命中正确 " + label)
+			await _click_document_action(target, &"fullscreen")
+			await get_tree().create_timer(0.8).timeout
+			_check(not target.is_minimized() and _page_fits(target), "缩放后全屏展开并正视窗口 " + label)
 			_window._on_maximize_pressed()
 			await _frames()
 
@@ -264,6 +312,15 @@ func _verify_minimum_and_long_text() -> void:
 	_view.close_reader()
 	await _frames()
 	await _capture("minimum_space_720x480_150")
+	_view.focus_selected()
+	await get_tree().create_timer(0.8).timeout
+	var target: KnowledgeSpaceDocument = _view._documents["card:9001"]
+	await _click_document_action(target, &"minimize")
+	_check(target.is_minimized(), "最小窗口与150%字号可点击折叠")
+	await _click_document_action(target, &"fullscreen")
+	await get_tree().create_timer(0.8).timeout
+	_check(not target.is_minimized() and _page_fits(target), "最小窗口与150%字号可展开并完整正视")
+	await _capture("minimum_document_fullscreen_720x480_150")
 	_view.refresh_content()
 
 
@@ -291,6 +348,8 @@ func _verify_close_and_standalone() -> void:
 	await _frames()
 	var reopened: KnowledgeSpace = WindowManager.get_app_window("knowledge_space").get_content() as KnowledgeSpace
 	_check(reopened._card_count == 24 and not reopened._owns_mouse_capture, "重开创建干净的新实例")
+	_check(reopened._documents.has(_closed_card_id) and reopened._closed_document_ids.is_empty(), "重新打开知识空间恢复此前关闭的文档")
+	_check(reopened._minimized_document_ids.is_empty(), "重新打开知识空间恢复所有文档展开状态")
 	WindowManager.close_app("knowledge_space")
 	_desktop.queue_free()
 	await _frames()
@@ -317,10 +376,21 @@ func _page_fits(document: KnowledgeSpaceDocument) -> bool:
 
 ## 将文档投影位置映射到实际 GUI 视图区并注入鼠标。## 输入: document、double_click。输出: 无。
 func _click_document(document: KnowledgeSpaceDocument, double_click: bool = false) -> void:
+	var center: Vector2 = document.get_visible_rect().get_center()
+	await _click_world_point(document.to_global(Vector3(center.x, center.y, 0.16)), double_click)
+
+
+## 点击投影后的实际标题栏按钮，经过正式 GUI 输入路由。## 输入: document、action、double_click。输出: 无。
+func _click_document_action(document: KnowledgeSpaceDocument, action: StringName, double_click: bool = false) -> void:
+	await _click_world_point(document.get_action_button(action).global_position, double_click)
+
+
+## 将世界位置映射到实际 GUI 视图区并注入鼠标。## 输入: world_point、double_click。输出: 无。
+func _click_world_point(world_point: Vector3, double_click: bool = false) -> void:
 	var camera: Camera3D = _view.get_node("%SpaceCamera") as Camera3D
 	var surface: Control = _view.get_node("%FlightSurface") as Control
 	var viewport_size: Vector2 = Vector2((_view.get_node("%SpaceViewport") as SubViewport).size)
-	var local_point: Vector2 = camera.unproject_position(document.global_position) * surface.size / viewport_size
+	var local_point: Vector2 = camera.unproject_position(world_point) * surface.size / viewport_size
 	await _click(surface.global_position + local_point, double_click)
 
 
