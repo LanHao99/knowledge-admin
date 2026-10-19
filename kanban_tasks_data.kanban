@@ -10,7 +10,15 @@
 		{
 			"uuid": "e5a47423-331c-4f11-92e7-e11f518b93b3",
 			"title": "Todo",
-			"tasks": []
+			"tasks": [
+				"78e3b438-fc00-7c00-bc38-7ce7a4001a99",
+				"3aaa02a4-4800-d800-a800-191838006060",
+				"7c705110-9400-7400-9440-0a3d8f0037c8",
+				"3e369f80-1980-4c00-8c00-08188c4026af",
+				"7ffcedec-6600-de00-b600-753b6e0019d2",
+				"41c33c58-b100-cd38-a100-519e7d003891",
+				"03898ac4-fda8-60c0-a200-4e4b6a004c68"
+			]
 		},
 		{
 			"uuid": "c3c66ad7-ec8f-4784-a55f-6b66f985659c",
@@ -65,6 +73,78 @@
 			"description": "确认后运行脚本，可编辑提示与拒绝权限；壁纸解锁存档及第二章强制接收，未解锁图片隐藏；系统警告中的未知程序局部破损与完整破碎退出。剧情结束、停止测试和关闭窗口均释放进程并清除损伤，手动最小化保留裂纹。",
 			"category": "5d6b120c-1ddc-4ba3-b1cf-59bed8d25249",
 			"steps": []
+		},
+		{
+			"uuid": "78e3b438-fc00-7c00-bc38-7ce7a4001a99",
+			"title": "笔记列表搜索框",
+			"description": "NoteManager.search_notes() 与 NoteDB.search_notes() 已实现，但 note_list 界面尚未接线。需在 note_list 添加搜索框（场景中已有占位节点），支持按关键词过滤，可选增加牌组过滤下拉。",
+			"category": "5d6b120c-1ddc-4ba3-b1cf-59bed8d25249",
+			"steps": [
+				"在 note_list.tscn 接入搜索框输入信号",
+				"调用 NoteManager.search_notes(query, deck_id) 刷新列表",
+				"补充 tests/unit 单元测试"
+			]
+		},
+		{
+			"uuid": "3aaa02a4-4800-d800-a800-191838006060",
+			"title": "标签系统",
+			"description": "notes 表当前没有 tags 列。需要落库 tags 字段、提供标签筛选与标签展示，并补充数据层与业务层接口。",
+			"category": "5d6b120c-1ddc-4ba3-b1cf-59bed8d25249",
+			"steps": [
+				"在 data/db_schema.json 增加 tags 列并做旧库迁移",
+				"NoteDB / NoteManager 增加标签读写与筛选接口",
+				"note_list 增加标签筛选 UI"
+			]
+		},
+		{
+			"uuid": "7c705110-9400-7400-9440-0a3d8f0037c8",
+			"title": "主菜单归档统计",
+			"description": "DeckManager.archive_deck() 与 deck_list 归档操作已完成，但主菜单统计仍只算全部牌组。需要区分总牌组数与活跃牌组数。",
+			"category": "5d6b120c-1ddc-4ba3-b1cf-59bed8d25249",
+			"steps": [
+				"DeckDB 增加按归档状态统计的接口",
+				"main_menu 统计面板分别展示总数与活跃数"
+			]
+		},
+		{
+			"uuid": "3e369f80-1980-4c00-8c00-08188c4026af",
+			"title": "牌组编辑器独立场景",
+			"description": "deck_list 的编辑面板目前内嵌。可分离为独立 deck_editor.tscn，支持批量设置。属重构，非缺陷。",
+			"category": "5d6b120c-1ddc-4ba3-b1cf-59bed8d25249",
+			"steps": [
+				"梳理 deck_list 内嵌编辑面板职责",
+				"抽出 deck_editor.tscn 并接回 deck_list"
+			]
+		},
+		{
+			"uuid": "7ffcedec-6600-de00-b600-753b6e0019d2",
+			"title": "设置面板学习配置",
+			"description": "设置界面尚无学习相关配置。计划增加每日新卡数与复习上限，以及数据导入/导出入口。",
+			"category": "5d6b120c-1ddc-4ba3-b1cf-59bed8d25249",
+			"steps": [
+				"确定学习配置字段与存储位置",
+				"settings 增加对应控件并持久化"
+			]
+		},
+		{
+			"uuid": "41c33c58-b100-cd38-a100-519e7d003891",
+			"title": "性能优化：计数与分页",
+			"description": "统计场景应改用计数查询而非全量拉取；笔记量大时分页加载。",
+			"category": "5d6b120c-1ddc-4ba3-b1cf-59bed8d25249",
+			"steps": [
+				"统计场景改用 get_notes_count 类接口",
+				"为 note_list 增加分页加载"
+			]
+		},
+		{
+			"uuid": "03898ac4-fda8-60c0-a200-4e4b6a004c68",
+			"title": "UI 润色与过渡动画",
+			"description": "BBCode 动画标题、场景切换与面板展开过渡、主题切换。",
+			"category": "5d6b120c-1ddc-4ba3-b1cf-59bed8d25249",
+			"steps": [
+				"补充场景切换过渡",
+				"补充面板展开动画"
+			]
 		}
 	],
 	"layout": {

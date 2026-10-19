@@ -194,4 +194,4 @@ assets/Banks/                      FMOD 构建产物
 - [音库加载](https://fmod-gdextension.readthedocs.io/en/latest/user-guide/4-loading-banks/)
 - [事件与参数播放](https://fmod-gdextension.readthedocs.io/en/latest/user-guide/5-playing-events/)
 - [插件 6.1.0 对应发布](https://github.com/utopia-rise/fmod-gdextension/releases/tag/6.1.0-4.5.0)
-- 项目依据：`docs/scenes/ui/desktop.md`、`docs/scenes/ui/settings.md`、`docs/scenes/window_lab.md`、`docs/narrative/narrative_framework.md`、`docs/narrative/gameplay_integration_matrix.md`，并对照当前实现。
+- 项目依据：`docs/scenes/desktop.md`、`docs/scenes/ui/settings.md`、`docs/scenes/window_lab.md`、`docs/narrative/narrative_framework.md`、`docs/narrative/gameplay_integration_matrix.md`，并对照当前实现。
