@@ -1,0 +1,61 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+FMOD Sound System: Successfully initialized
+FMOD Sound System: Live update enabled!
+[SaveDirectory] user:// = D:/game design/godot/4.6projects/knowledge-admin/.temp/knowledge_space_verify/saves
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2582)
+---  GUT  ---
+[1m[INFO]:  [0musing [D:/game design/godot/4.6projects/knowledge-admin/.temp/knowledge_space_verify/saves] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+[4m
+
+res://tests/unit/test_knowledge_space.gd
+[0m* test_empty_database_returns_empty_documents
+Opened database successfully (D:/game design/godot/4.6projects/knowledge-admin/.temp/knowledge_space_verify/saves/knowledge_space_test_1610557.db)
+Closed database (D:/game design/godot/4.6projects/knowledge-admin/.temp/knowledge_space_verify/saves/knowledge_space_test_1610557.db)
+* test_recent_selection_and_bounded_query
+Opened database successfully (D:/game design/godot/4.6projects/knowledge-admin/.temp/knowledge_space_verify/saves/knowledge_space_test_1683899.db)
+Closed database (D:/game design/godot/4.6projects/knowledge-admin/.temp/knowledge_space_verify/saves/knowledge_space_test_1683899.db)
+* test_fields_match_existing_card_content
+Opened database successfully (D:/game design/godot/4.6projects/knowledge-admin/.temp/knowledge_space_verify/saves/knowledge_space_test_2137742.db)
+Closed database (D:/game design/godot/4.6projects/knowledge-admin/.temp/knowledge_space_verify/saves/knowledge_space_test_2137742.db)
+* test_browsing_is_read_only
+Opened database successfully (D:/game design/godot/4.6projects/knowledge-admin/.temp/knowledge_space_verify/saves/knowledge_space_test_2210430.db)
+Closed database (D:/game design/godot/4.6projects/knowledge-admin/.temp/knowledge_space_verify/saves/knowledge_space_test_2210430.db)
+* test_deleted_note_disappears_on_refresh
+Opened database successfully (D:/game design/godot/4.6projects/knowledge-admin/.temp/knowledge_space_verify/saves/knowledge_space_test_2288391.db)
+Closed database (D:/game design/godot/4.6projects/knowledge-admin/.temp/knowledge_space_verify/saves/knowledge_space_test_2288391.db)
+* test_failed_refresh_preserves_documents_and_can_retry
+* test_plain_text_does_not_execute_or_eat_literal_brackets
+* test_long_document_keeps_full_text_in_reader
+* test_layout_is_parallel_and_refresh_keeps_camera
+* test_archive_unlock_uses_full_record
+* test_unlock_and_reset_preserve_other_documents
+* test_story_state_signal_refreshes_archive_visibility
+* test_page_ray_intersection_matches_actual_rect
+* test_document_materials_are_independent
+* test_default_configuration_and_registry
+[1m15/15 passed.
+[0m
+
+
+
+[33m==============================================
+[0m[33m= Run Summary
+[0m[33m==============================================
+[0m
+Totals
+------
+Scripts               1
+Tests                15
+Passing Tests        15
+Asserts             171
+Time              1.434s
+
+
+Ran Scripts matching "test_knowledge_space.gd"
+[32m---- All tests passed! ----
+[0m
+FMOD Sound System: System released

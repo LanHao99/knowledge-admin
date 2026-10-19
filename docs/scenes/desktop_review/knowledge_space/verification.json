@@ -1,0 +1,7 @@
+{
+	"adapter": "NVIDIA GeForce RTX 5060 Ti",
+	"checks": 77,
+	"engine": "4.7.2-stable (official)",
+	"failures": [],
+	"renderer": "forward_plus"
+}

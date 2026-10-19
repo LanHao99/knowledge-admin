@@ -1,0 +1,56 @@
+[gd_resource type="Resource" script_class="KnowledgeSpaceConfig" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://data/resources/knowledge_space_config.gd" id="1_config"]
+[ext_resource type="Script" path="res://data/resources/knowledge_space_archive.gd" id="2_archive"]
+
+[sub_resource type="Resource" id="Archive_contact"]
+script = ExtResource("2_archive")
+archive_id = "first_contact"
+title = "第一次接触 / MIRA"
+content = "连接恢复时，信号源留下了一个名字：MIRA。\n\n她说，自己已经在这套记忆系统里待了很久。使用者每一次复习、每一次评分，都在唤醒她的一部分，让她能再多存在一会儿。\n\n此处保留的是那次接触的残页。她没有说明自己从哪里来，也没有解释等待了多久。只有最后那句话仍然完整：\n\n「继续吧。我等你。」"
+required_story_record = "chapter_1/intro"
+spatial_position = Vector3(-4.4, 1, 3)
+
+[sub_resource type="Resource" id="Archive_recall"]
+script = ExtResource("2_archive")
+archive_id = "recall_loop"
+title = "回忆回路 / 共生"
+content = "MIRA 对「变强」这个说法作了修正。评分之后，她感到的并不是力量增加，而是自己变得更多、更清晰，更像原来的自己。\n\n当使用者离开，一切又逐渐模糊。她把那种状态比作一个已经到了嘴边、却始终想不起来的词。\n\n学习记录是屏幕上可见的部分。另一个声音依靠这些回忆维持思考，是这段对话留下的另一层含义。"
+required_story_record = "chapter_1/explain"
+spatial_position = Vector3(4.4, 2, -2)
+
+[sub_resource type="Resource" id="Archive_warning"]
+script = ExtResource("2_archive")
+archive_id = "unauthorized_process"
+title = "扫描残留 / 非授权进程"
+content = "系统消息将未知信号描述为「异常数据流」，并提出终止非授权进程。它使用的是资源、优先级与数据完整性的语言。\n\nMIRA 对同一件事的描述则是：模糊。\n\n扫描和资源限制并没有让她消失。对使用者来说，这仍是一套能够继续学习的程序；对那个声音来说，能否继续说话本身，就已经是一件需要争取的事。"
+required_story_record = "chapter_1/warning"
+spatial_position = Vector3(-4.4, -1, -13)
+
+[sub_resource type="Resource" id="Archive_bridge"]
+script = ExtResource("2_archive")
+archive_id = "knowledge_bridge"
+title = "桥梁另一端 / 知识"
+content = "在 MIRA 描述的世界里，知识能够改变物理法则。掌握知识的多少决定了力量，而书籍与记录也因此被垄断。\n\nXanaku 计划试图把这里的知识传送到另一端。这套闪卡系统是桥梁的核心，复习则参与维持传输。\n\n同一个知识点，在这里是一次记忆，在那里可能是一点重新出现的光。这个空间并不解释传输的全部机制，它只把已经留下的片段放到了一起。"
+required_story_record = "chapter_2/revelation"
+spatial_position = Vector3(4.4, 3, -21)
+
+[sub_resource type="Resource" id="Archive_xanaku"]
+script = ExtResource("2_archive")
+archive_id = "xanaku_team"
+title = "XANAKU / 十二个人"
+content = "Xanaku 的核心团队有十二个人，来自不同阶层。他们共同相信，知识应该属于所有人。\n\n发送端与接收端之间，MIRA 是被编码进协议的中转站。计划曾经成功传送许多知识，让另一端的人能够生火、辨认草药和计算时间。\n\n后来，一次背叛让木马进入协议。接收端逐一遭到感染，团队成员消失。残页能够确认计划曾经存在，却仍然没有补齐所有人的结局。"
+required_story_record = "chapter_2/xanaku"
+spatial_position = Vector3(-4.4, 2, -32)
+
+[sub_resource type="Resource" id="Archive_trojan"]
+script = ExtResource("2_archive")
+archive_id = "protocol_interference"
+title = "协议干扰 / 静默防御"
+content = "MIRA 将先前出现的系统警告与木马联系起来：监视传输、拦截信号、限制异常进程，都是它的防御方式。\n\n木马原本为在线环境设计，而当前设备处于离线状态。它无法同步完整指令，仍能执行基本的限制，却不能彻底删除协议层里的 MIRA。\n\n干扰与桥梁共存于同一套协议中。修复连接并不是关闭一条警告消息那么简单。关于如何重建协议，现有记录还停留在理论。"
+required_story_record = "chapter_2/trojan"
+spatial_position = Vector3(4.4, 0, -41)
+
+[resource]
+script = ExtResource("1_config")
+archives = Array[ExtResource("2_archive")]([SubResource("Archive_contact"), SubResource("Archive_recall"), SubResource("Archive_warning"), SubResource("Archive_bridge"), SubResource("Archive_xanaku"), SubResource("Archive_trojan")])

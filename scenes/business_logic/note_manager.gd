@@ -211,6 +211,27 @@ func search_notes(query: String, deck_id: int = 0) -> Dictionary:
 	return _note_db.search_notes(query, deck_id)
 
 
+## 限量取得知识空间的卡片文档，不触发学习或剧情事件。## 输入: limit (int) - 数量，限制在 1～64。
+## 输出: 标准结果字典；data 为含 card_id、note_id、deck_id、deck_name、front、back 的数组。
+func get_spatial_documents(limit: int = 24) -> Dictionary:
+	if _note_db == null:
+		return fail("NOTE_DB_NOT_SET", "note_db 未注入")
+	var result: Dictionary = _note_db.get_spatial_card_rows(limit)
+	if not result.get("success", false):
+		return result
+	var documents: Array[Dictionary] = []
+	for row: Dictionary in result.get("data", []):
+		var decoded: Variant = JSON.parse_string(str(row.get("fields_data", "{}")))
+		var fields: Dictionary = decoded if decoded is Dictionary else {}
+		var content: Dictionary = _resolve_card_fields(fields)
+		documents.append({
+			"card_id": int(row.card_id), "note_id": int(row.note_id),
+			"deck_id": int(row.deck_id), "deck_name": str(row.get("deck_name", "未命名牌组")),
+			"front": content.front, "back": content.back,
+		})
+	return ok(documents)
+
+
 ## 获取渲染卡片所需的内容（卡片 + 关联笔记的字段数据）。
 ## Note ↔ Card 的内容拼接逻辑归属 NoteManager，因为内容的"正反面"由笔记字段决定。## 输入: card_id (int) - 卡片 ID。
 ## 输出: 返回标准字典。成功时 `data` 为 `{front, back, fields, card, note}`。
@@ -234,19 +255,11 @@ func get_content_for_card(card_id: int) -> Dictionary:
 	if note == null:
 		return fail("NOTE_NOT_FOUND", "关联笔记不存在")
 
-	var front: String = _pick_field_value(note.fields_data, ["front", "Front", "正面", "question", "Question"])
-	var back: String = _pick_field_value(note.fields_data, ["back", "Back", "背面", "answer", "Answer"])
-	if front == "" and not note.fields_data.is_empty():
-		var first_key: Variant = note.fields_data.keys()[0]
-		front = str(note.fields_data.get(first_key, ""))
-	if back == "" and note.fields_data.size() > 1:
-		var keys: Array = note.fields_data.keys()
-		var second_key: Variant = keys[1]
-		back = str(note.fields_data.get(second_key, ""))
+	var content: Dictionary = _resolve_card_fields(note.fields_data)
 
 	return ok({
-		"front": front,
-		"back": back,
+		"front": content.front,
+		"back": content.back,
 		"fields": note.fields_data.duplicate(true),
 		"card": card,
 		"note": note
@@ -254,6 +267,18 @@ func get_content_for_card(card_id: int) -> Dictionary:
 
 
 # ── 内部工具方法 ──
+
+
+## 按现有候选字段名及字段顺序提取正反面，供学习和空间共用。## 输入: fields (Dictionary) - 原始字段。
+## 输出: 含 front、back 的字典，不修改原始字段。
+func _resolve_card_fields(fields: Dictionary) -> Dictionary:
+	var front: String = _pick_field_value(fields, ["front", "Front", "正面", "question", "Question"])
+	var back: String = _pick_field_value(fields, ["back", "Back", "背面", "answer", "Answer"])
+	if front.is_empty() and not fields.is_empty():
+		front = str(fields.get(fields.keys()[0], ""))
+	if back.is_empty() and fields.size() > 1:
+		back = str(fields.get(fields.keys()[1], ""))
+	return {"front": front, "back": back}
 
 
 ## 根据 note_type 生成卡片（V1 每条笔记只生成 1 张卡）。## 输入:

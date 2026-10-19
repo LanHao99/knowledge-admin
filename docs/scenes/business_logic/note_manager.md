@@ -106,6 +106,14 @@
 
 **说明**: 获取渲染卡片所需的内容（卡片 + 关联笔记的字段数据），由 NoteManager 根据笔记字段决定卡片正反面内容。
 
+### `get_spatial_documents(limit: int = 24) -> Dictionary`
+
+**输入**: `limit`，实际限制在 1～64 张卡片。
+
+**输出**: 标准结果字典；`data` 为文档数组，每项含 `card_id`、`note_id`、`deck_id`、`deck_name`、`front`、`back`。
+
+**说明**: 从 NoteDB 限量查询最近创建的卡片及关联内容，与 `get_content_for_card` 共用字段提取规则。不调用展示、评分或剧情接口，也不读取复习历史。知识空间负责纯文本显示和空间分群。
+
 ## 信号
 > 以下信号均继承自基类 `Manager`。
 

@@ -142,6 +142,13 @@ func get_all_notes() -> Dictionary:
 	return ok(_rows_to_note_entities(result.get("data", [])))
 
 
+## 限量读取最新卡片及其笔记、牌组，仅返回空间展示需要的字段。## 输入: limit (int) - 1～64 张。
+## 输出: 标准结果字典；data 为查询行数组，不读取或更新复习历史。
+func get_spatial_card_rows(limit: int = 24) -> Dictionary:
+	var sql: String = "SELECT c.id AS card_id, c.note_id, c.deck_id, n.fields_data, d.name AS deck_name FROM cards c INNER JOIN notes n ON n.id = c.note_id LEFT JOIN decks d ON d.id = c.deck_id ORDER BY c.id DESC LIMIT ?;"
+	return fetch_all(sql, [clampi(limit, 1, 64)])
+
+
 ## 将单行查询结果转换为 NoteEntity。## 输入: row (Dictionary) - notes 表的一行数据。
 ## 输出: NoteEntity - 反序列化后的实体对象。
 func _row_to_note_entity(row: Dictionary) -> NoteEntity:

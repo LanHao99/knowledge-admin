@@ -53,3 +53,11 @@
 **输入**: 无。
 **输出**: 返回标准字典，成功时 `data` 为 `Array[NoteEntity]`。
 **说明**: 获取全部笔记列表。
+
+### `get_spatial_card_rows(limit: int = 24) -> Dictionary`
+
+**输入**: `limit`，限制在 1～64。
+
+**输出**: 标准结果字典；`data` 为查询行，包含卡片 ID、笔记 ID、牌组 ID 和名称以及 `fields_data`。
+
+**说明**: 关联 cards、notes 和 decks，按卡片 ID 倒序并在 SQL 中使用 LIMIT。仅用于知识空间的只读内容快照，不返回或更新复习历史。

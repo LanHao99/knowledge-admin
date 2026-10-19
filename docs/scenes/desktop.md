@@ -12,6 +12,8 @@ WindowManager 注册 knowledge_admin、ai_cards、control_panel、my_computer、
 
 “摄像头”在桌面和开始菜单提供入口，默认 560×560，显示 MIRA 的透明背景人物头像。普通缩放与最大化均保持整窗方形，复用现有拖动、最小化和任务栏行为。内容根节点通过 `@export` 暴露立绘、缩放、偏移、镜像、背景色及 CRT 参数，支持编辑器预览。CRT 只处理自己的画面，不采样桌面；详细参数及渲染证据见 [摄像头窗口](camera.md)。
 
+“知识空间”在桌面和开始菜单提供入口，默认 1100×740、最小 720×480。在独立 3D 视口中按牌组展示最近的闪卡文档，玩家可右键飞行、单击选择、双击聚焦及打开全文阅读。六份高亮剧情档案按已完成剧情解锁；不记录收集奖励或改变学习进度。内容和视觉配置集中在 `data/desktop/knowledge_space.tres`；操作、参数及验收见 [知识空间](knowledge_space.md)。
+
 ## 我的电脑预设文件
 
 目录说明及虚拟 txt 正文统一保存在 `res://data/desktop/my_computer_files.tres`，由 `my_computer.tscn` 根节点的 `file_catalog` 属性引用。

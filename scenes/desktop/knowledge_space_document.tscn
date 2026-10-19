@@ -1,0 +1,86 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scenes/desktop/knowledge_space_document.gd" id="1_document"]
+[ext_resource type="FontFile" path="res://assets/fonts/ark-pixel-16px-proportional-zh_cn.ttf" id="2_font"]
+
+[sub_resource type="BoxMesh" id="Mesh_frame"]
+size = Vector3(7.3, 8.5, 0.06)
+
+[sub_resource type="BoxMesh" id="Mesh_paper"]
+size = Vector3(7.2, 8.4, 0.06)
+
+[sub_resource type="StandardMaterial3D" id="Material_frame"]
+resource_local_to_scene = true
+shading_mode = 0
+albedo_color = Color(0.3, 0.46, 0.55, 1)
+
+[sub_resource type="StandardMaterial3D" id="Material_paper"]
+resource_local_to_scene = true
+shading_mode = 0
+albedo_color = Color(0.08, 0.16, 0.24, 1)
+
+[node name="Document" type="Node3D"]
+script = ExtResource("1_document")
+
+[node name="Frame" type="MeshInstance3D" parent="."]
+mesh = SubResource("Mesh_frame")
+material_override = SubResource("Material_frame")
+cast_shadow = 0
+
+[node name="Paper" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 0.04)
+mesh = SubResource("Mesh_paper")
+material_override = SubResource("Material_paper")
+cast_shadow = 0
+
+[node name="Source" type="Label3D" parent="."]
+position = Vector3(-3.2, 3.8, 0.08)
+pixel_size = 0.005
+font = ExtResource("2_font")
+font_size = 48
+outline_size = 0
+horizontal_alignment = 0
+vertical_alignment = 0
+alpha_cut = 1
+double_sided = false
+text = "知识 / 来源"
+
+[node name="Title" type="Label3D" parent="."]
+position = Vector3(-3.2, 3.25, 0.08)
+pixel_size = 0.005
+font = ExtResource("2_font")
+font_size = 96
+outline_size = 0
+horizontal_alignment = 0
+vertical_alignment = 0
+autowrap_mode = 3
+width = 1280.0
+alpha_cut = 1
+double_sided = false
+text = "文档标题"
+
+[node name="Body" type="Label3D" parent="."]
+position = Vector3(-3.2, 2, 0.08)
+pixel_size = 0.005
+font = ExtResource("2_font")
+font_size = 64
+outline_size = 0
+horizontal_alignment = 0
+vertical_alignment = 0
+autowrap_mode = 3
+width = 1280.0
+alpha_cut = 1
+double_sided = false
+text = "文档摘录"
+
+[node name="Footer" type="Label3D" parent="."]
+position = Vector3(-3.2, -3.8, 0.08)
+pixel_size = 0.005
+font = ExtResource("2_font")
+font_size = 40
+outline_size = 0
+horizontal_alignment = 0
+vertical_alignment = 0
+alpha_cut = 1
+double_sided = false
+text = "CARD // 0"
