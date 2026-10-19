@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="DesktopFileCatalog" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/resources/desktop_file_catalog.gd" id="1_catalog"]
+[ext_resource type="Script" path="res://src/resources/desktop_text_file.gd" id="2_file"]
+
+[sub_resource type="Resource" id="Resource_instructions"]
+script = ExtResource("2_file")
+file_name = "使用说明.txt"
+content = "欢迎使用 Knowledge Admin。\n\n双击桌面图标打开软件。拖动标题栏移动窗口，拖动边框调整大小。\n\n任务栏可切换、最小化或恢复应用。学习和输入内容在最小化后仍会保留。"
+
+[sub_resource type="Resource" id="Resource_study_guide"]
+script = ExtResource("2_file")
+file_name = "学习指南.txt"
+content = "在 Knowledge Admin 中创建牌组并添加笔记，也可以使用 JSON 导入或 AI 制卡助手。\n\n进入学习后，先回忆答案，再翻面并选择评分。已完成的评分会自动保存。"
+
+[resource]
+script = ExtResource("1_catalog")
+drive_description = "Knowledge Admin\nClassic98 Desktop\n\n系统状态：运行正常\n界面：中文\n学习引擎：FSRS"
+programs_description = "双击桌面或开始菜单中的应用图标，即可启动对应软件。"
+documents = Array[ExtResource("2_file")]([SubResource("Resource_instructions"), SubResource("Resource_study_guide")])

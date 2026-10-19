@@ -2,7 +2,7 @@ extends GutTest
 ## 验证确认阻塞、强制选择、解锁与更换分离，以及剧情窗口的特效生命周期。
 
 const RECORD_ACTION: String = "res://tests/fixtures/record_dialogue_action.gd"
-const WALLPAPER: String = "res://assets/wallpapers/mountain1.png"
+const WALLPAPER: String = "res://content/assets/wallpapers/mountain1.png"
 
 var _outcome: Dictionary = {}
 var _wallpaper_before: Dictionary = {}
@@ -124,14 +124,14 @@ func test_internal_stop_and_invalid_requests_do_not_execute() -> void:
 	assert_false(_outcome.success)
 	assert_eq(state.count, 0)
 	assert_false(await App.run_confirmed_action("res://missing_action.gd", "无效"))
-	assert_false(await App.run_confirmed_action("res://scenes/desktop/desktop.gd", "节点脚本"))
-	assert_false(await App.send_wallpaper("res://icon.svg"))
+	assert_false(await App.run_confirmed_action("res://src/desktop/desktop.gd", "节点脚本"))
+	assert_false(await App.send_wallpaper("res://content/assets/branding/icon.svg"))
 	assert_null(App._action_confirmation)
 
 
 ## 控制面板隐藏锁定图片，收到后加入列表且保留原选择与预览。## 输入: 无。输出: 无。
 func test_open_control_panel_refreshes_unlocked_entries() -> void:
-	var panel: Control = load("res://scenes/ui/settings.tscn").instantiate() as Control
+	var panel: Control = load("res://content/scenes/ui/settings.tscn").instantiate() as Control
 	add_child_autofree(panel)
 	var items: ItemList = panel.get_node("%WallpaperList") as ItemList
 	var original_paths: PackedStringArray = []
@@ -140,14 +140,14 @@ func test_open_control_panel_refreshes_unlocked_entries() -> void:
 		original_paths.append(path)
 		assert_false(WallpaperSettings.LOCKED_BY_DEFAULT.has(path))
 	assert_eq(original_paths[0], "")
-	var selected_path: String = "res://assets/wallpapers/tree.jpg"
+	var selected_path: String = "res://content/assets/wallpapers/tree.jpg"
 	WallpaperSettings.set_wallpaper(selected_path)
 	assert_true(WallpaperSettings.unlock_wallpaper(WALLPAPER))
 	assert_eq(items.item_count, original_paths.size() + 1)
 	assert_eq(items.get_item_text(0), "无壁纸")
 	for index: int in items.item_count:
 		var path: String = str(items.get_item_metadata(index))
-		assert_ne(path, "res://assets/wallpapers/tower1.png")
+		assert_ne(path, "res://content/assets/wallpapers/tower1.png")
 		if path == WALLPAPER:
 			assert_eq(items.get_item_text(index), "mountain1.png")
 			assert_not_null(items.get_item_icon(index))
@@ -161,7 +161,7 @@ func test_open_control_panel_refreshes_unlocked_entries() -> void:
 
 ## 剧情特效仅作用于播放中的未知程序，完全破碎释放实例和任务栏后可重新打开。## 输入: 无。输出: 无。
 func test_story_window_damage_and_shatter_release_modal_lock() -> void:
-	var desktop: Control = load("res://scenes/desktop/desktop.tscn").instantiate() as Control
+	var desktop: Control = load("res://content/scenes/desktop/desktop.tscn").instantiate() as Control
 	add_child_autofree(desktop)
 	assert_false(WindowManager.set_story_window_damage(0.7))
 	assert_not_null(WindowManager.begin_dialogue(true, null))
@@ -185,7 +185,7 @@ func test_story_window_damage_and_shatter_release_modal_lock() -> void:
 
 ## 最小化保留半破损，点击关闭销毁进程后重新打开恢复完好。## 输入: 无。输出: 无。
 func test_partial_damage_survives_minimize_and_clears_after_process_close() -> void:
-	var desktop: Control = load("res://scenes/desktop/desktop.tscn").instantiate() as Control
+	var desktop: Control = load("res://content/scenes/desktop/desktop.tscn").instantiate() as Control
 	add_child_autofree(desktop)
 	assert_true(WindowManager.open_app("unknown_program"))
 	var window: ManagedWindow = WindowManager.get_app_window("unknown_program")
@@ -213,7 +213,7 @@ func test_partial_damage_survives_minimize_and_clears_after_process_close() -> v
 
 ## 剧情连接结束释放损伤实例，后续连接不继承裂纹，背景应用继续运行。## 输入: 无。输出: 无。
 func test_story_end_releases_damaged_process_before_next_connection() -> void:
-	var desktop: Control = load("res://scenes/desktop/desktop.tscn").instantiate() as Control
+	var desktop: Control = load("res://content/scenes/desktop/desktop.tscn").instantiate() as Control
 	add_child_autofree(desktop)
 	assert_true(WindowManager.open_app("window_lab"))
 	assert_not_null(WindowManager.begin_dialogue(true, null))

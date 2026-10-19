@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tests/scripts/desktop/verify_dialogue_actions.gd" id="1_verify"]
+
+[node name="VerifyDialogueActions" type="Node"]
+script = ExtResource("1_verify")

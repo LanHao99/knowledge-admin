@@ -2,7 +2,7 @@
 
 ## 视觉与节奏
 
-入口为 `res://scenes/desktop/boot_screen.tscn`，根节点挂载 `boot_screen.gd`。首帧显示居中的“正在启动系统...”和覆盖全屏的深蓝、青色、紫色液态色带，底部提示“单击或按任意键加速”。文字使用项目像素字体，按视口高度选用 32 或 48 像素。
+入口为 `res://content/scenes/desktop/boot_screen.tscn`，根节点挂载 `boot_screen.gd`。首帧显示居中的“正在启动系统...”和覆盖全屏的深蓝、青色、紫色液态色带，底部提示“单击或按任意键加速”。文字使用项目像素字体，按视口高度选用 32 或 48 像素。
 
 正常停留 1.6 秒，随后用 1.4 秒从屏幕中心向外溶解。边界使用平滑噪声形成不规则波纹，附带轻微亮边；文字与背景使用同一遮罩一起擦除。结束时完整露出真实桌面，没有黑屏淡出或桌面重新实例化。
 
@@ -79,9 +79,9 @@ RichTextLabel 调整后复验启动专项 48 项及现有 GUT 39 项、203 个�
 
 验证工程保存在 `.temp/boot_review`，使用独立 `application/config/name`，不连接正式玩家数据库或存档。保留 `dialogue_manager` 编辑器导入插件，停用 MCP 插件；先运行隔离工程的导入，再运行验收。
 
-`tests/desktop/verify_boot_transition.gd` 要求配置名为 `KnowledgeAdminBootVerification`，通过 Godot 的 `--script res://tests/desktop/verify_boot_transition.gd` 运行。它输出完整结果及所有分辨率的停留、初期、中期、后期与结束截图。
+`tests/scripts/desktop/verify_boot_transition.gd` 要求配置名为 `KnowledgeAdminBootVerification`，通过 Godot 的 `--script res://tests/scripts/desktop/verify_boot_transition.gd` 运行。它输出完整结果及所有分辨率的停留、初期、中期、后期与结束截图。
 
-`tests/desktop/verify_desktop.tscn` 要求配置名为 `KnowledgeAdminDesktopVerification`，已改为等待启动遮罩释放后再操作桌面。
+`tests/scenes/desktop/verify_desktop.tscn` 要求配置名为 `KnowledgeAdminDesktopVerification`，已改为等待启动遮罩释放后再操作桌面。
 
 结果：[启动专项报告](boot_screen_review/verification.json)、[GUT 汇总](boot_screen_review/gut_summary.txt)、[桌面验收报告](boot_screen_review/desktop_verification.json)。
 

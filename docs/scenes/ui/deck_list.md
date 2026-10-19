@@ -1,6 +1,6 @@
 # deck_list.gd (DeckList)
 
-> **路径**: `res://scenes/ui/deck_list.gd`
+> **路径**: `res://src/ui/deck_list.gd`
 > **继承**: `Control`
 > **类型**: UI层
 

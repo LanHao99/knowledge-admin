@@ -29,10 +29,10 @@ signal story_state_changed
 signal story_test_stopped(reason: String)
 
 
-const OVERLAY_SCENE: String = "res://game/dialogue/story_dialogue_overlay.tscn"
+const OVERLAY_SCENE: String = "res://content/scenes/dialogue/story_dialogue_overlay.tscn"
 const DEFAULT_CHAPTER: String = "chapter_1"
-const ACTION_CONFIRMATION: PackedScene = preload("res://game/dialogue/dialogue_action_confirmation.tscn")
-const SEND_WALLPAPER_ACTION: String = "res://game/dialogue/actions/send_wallpaper.gd"
+const ACTION_CONFIRMATION: PackedScene = preload("res://content/scenes/dialogue/dialogue_action_confirmation.tscn")
+const SEND_WALLPAPER_ACTION: String = "res://src/dialogue/actions/send_wallpaper.gd"
 
 var _story_manager: StoryManager = null
 var _overlay: StoryDialogueOverlay = null

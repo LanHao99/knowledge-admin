@@ -78,18 +78,18 @@ MIRA 能解释信号和记忆的内部规律，玩家能同时看见桌面、文
 | 工程现状 | 直接证据 | 能支撑什么 | 仍缺什么 |
 | --- | --- | --- | --- |
 | 桌面具备应用注册、窗口焦点及最小化／恢复信号 | `src/window_manager.gd` | 让窗口状态与注意力参与谜题 | 将普通事件关联到有条件、可存档的叙事目标。 |
-| 我的电脑支持编辑、草稿、Ctrl+S 和保存覆盖档 | `scenes/desktop/my_computer.gd`、[桌面文档](../scenes/desktop.md) | 留言、抄录证据、保存某段记忆 | 文件 ID、剧情版本、保存后的故事事件；现有持久化按文件名定位，后续改名需迁移设计。 |
-| 目录内容集中于 `.tres` | `data/resources/desktop_file_catalog.gd`、`data/desktop/my_computer_files.tres` | 在 Inspector 中编写谜题材料 | 目录资源本身尚不是带权限、删除与版本历史的虚拟文件系统。 |
-| 回收站当前仅显示「回收站为空」 | `scenes/desktop/recycle_bin.tscn` | 可作为未来恢复玩法的入口 | 删除、恢复、来源与存档均需新增。 |
+| 我的电脑支持编辑、草稿、Ctrl+S 和保存覆盖档 | `src/desktop/my_computer.gd`、[桌面文档](../scenes/desktop.md) | 留言、抄录证据、保存某段记忆 | 文件 ID、剧情版本、保存后的故事事件；现有持久化按文件名定位，后续改名需迁移设计。 |
+| 目录内容集中于 `.tres` | `src/resources/desktop_file_catalog.gd`、`content/data/desktop/my_computer_files.tres` | 在 Inspector 中编写谜题材料 | 目录资源本身尚不是带权限、删除与版本历史的虚拟文件系统。 |
+| 回收站当前仅显示「回收站为空」 | `content/scenes/desktop/recycle_bin.tscn` | 可作为未来恢复玩法的入口 | 删除、恢复、来源与存档均需新增。 |
 | 剧情可送壁纸、局部破损或击碎未知程序 | `src/app.gd`、[剧情动作](dialogue_actions.md) | 为谜题提供结果和人物回应 | 将特效与可解释的剧情状态连接，而非只播放一次动画。 |
 | MetaRules 可由标记改变卡面显示，保持原文数据 | `src/meta_rules.gd` | 展示层与原始资料的对照 | 正式规则与目标卡范围；现有示例是调试密码替换。 |
-| 知识空间可阅读原始字段和按剧情解锁的档案 | [知识空间](../scenes/knowledge_space.md)、`scenes/desktop/knowledge_space.gd` | 作为独立证据来源，对照受到影响的卡面 | 玩家对照／提交证据和探索进度机制尚未接入。 |
+| 知识空间可阅读原始字段和按剧情解锁的档案 | [知识空间](../scenes/knowledge_space.md)、`src/desktop/knowledge_space.gd` | 作为独立证据来源，对照受到影响的卡面 | 玩家对照／提交证据和探索进度机制尚未接入。 |
 | 正式对话锁住桌面其他应用 | `src/window_manager.gd` 的 `begin_dialogue()` | 保证对白、选项和输入焦点可靠 | 需要明确的探索阶段，不能在模态对话里要求玩家操作另一个窗口。 |
 
 ### 当前叙事存在两组待统一的材料
 
 - 现有 [叙事框架](narrative_framework.md)、[传说架构](lore_architecture.md) 和角色文档围绕 MIRA、记忆、系统与创造者展开；第二章文件和知识空间档案还涉及 Xanaku 与木马。
-- `game/dialogue/大纲.dialogue` 要求重写剧情，并提出平行宇宙、魔法与时间／熵变干预，目前只写到「第一章—异常」。
+- `content/dialogue/story/大纲.dialogue` 要求重写剧情，并提出平行宇宙、魔法与时间／熵变干预，目前只写到「第一章—异常」。
 
 作者随后明确：前述「现有剧情不必完全遵循」指第一章。第一章旧情节、旧台词与事件顺序不作为硬约束；这不自动扩展为对其他章节或全部世界设定的否定。以已选择的情感目标和交互方向构建新的开场，再讨论它与其他材料的衔接。方向三探索新大纲如何成为操作规则，具体因果与代价属于待确认提案。
 
@@ -270,4 +270,4 @@ MIRA 的回应应来自预写剧情条件与记录的明确槽位。这个原型
 - [桌面系统](../scenes/desktop.md)
 - [窗口实验室](../scenes/window_lab.md)
 - [知识空间](../scenes/knowledge_space.md)
-- 新剧情大纲：`game/dialogue/大纲.dialogue`；正式计划：`kanban_tasks_data.kanban`。
+- 新剧情大纲：`content/dialogue/story/大纲.dialogue`；正式计划：`kanban_tasks_data.kanban`。

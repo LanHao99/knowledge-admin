@@ -4,7 +4,7 @@ extends GutTest
 
 ## 空图片可在运行时接入与移除，透明贴图尺寸不改变控制布局。## 输入: 无。输出: 无。
 func test_portrait_can_connect_and_disconnect() -> void:
-	var camera: Control = add_child_autofree(load("res://scenes/desktop/camera.tscn").instantiate())
+	var camera: Control = add_child_autofree(load("res://content/scenes/desktop/camera.tscn").instantiate())
 	camera.set("portrait_texture", null)
 	assert_true((camera.get_node("%WaitingSignal") as Label).visible)
 	var image: Image = Image.create(64, 128, false, Image.FORMAT_RGBA8)
@@ -23,7 +23,7 @@ func test_portrait_can_connect_and_disconnect() -> void:
 
 ## 编辑一个摄像头的参数不能污染其他场景实例。## 输入: 无。输出: 无。
 func test_crt_material_is_independent_per_instance() -> void:
-	var scene: PackedScene = load("res://scenes/desktop/camera.tscn")
+	var scene: PackedScene = load("res://content/scenes/desktop/camera.tscn")
 	var first: Control = add_child_autofree(scene.instantiate())
 	var second: Control = add_child_autofree(scene.instantiate())
 	first.set("scanlines_opacity", 0.8)
@@ -42,7 +42,7 @@ func test_crt_material_is_independent_per_instance() -> void:
 
 ## 虚拟分辨率不能为零，防止像素化除零。## 输入: 无。输出: 无。
 func test_resolution_rejects_zero_dimensions() -> void:
-	var camera: Control = add_child_autofree(load("res://scenes/desktop/camera.tscn").instantiate())
+	var camera: Control = add_child_autofree(load("res://content/scenes/desktop/camera.tscn").instantiate())
 	camera.set("resolution", Vector2(0, -10))
 	assert_eq(camera.get("resolution"), Vector2.ONE)
 
@@ -66,12 +66,12 @@ func test_square_resize_preserves_shape_and_opposite_edges() -> void:
 func test_square_window_fits_work_area_and_restores() -> void:
 	var area: Control = add_child_autofree(Control.new())
 	area.size = Vector2(1280, 672)
-	var window: ManagedWindow = load("res://scenes/desktop/managed_window.tscn").instantiate() as ManagedWindow
+	var window: ManagedWindow = load("res://content/scenes/desktop/managed_window.tscn").instantiate() as ManagedWindow
 	window.keep_square = true
 	window.default_size = Vector2(560, 560)
 	window.min_window_size = Vector2(320, 320)
 	area.add_child(window)
-	window.initialize("camera", "摄像头", "res://scenes/desktop/camera.tscn")
+	window.initialize("camera", "摄像头", "res://content/scenes/desktop/camera.tscn")
 	var original: Rect2 = Rect2(window.position, window.size)
 	window._on_maximize_pressed()
 	assert_eq(window.size, Vector2(672, 672))

@@ -10,7 +10,7 @@ const MIN_SCALE: float = 0.8
 const MAX_SCALE: float = 1.5
 const SCALE_STEP: float = 0.05
 const SAVE_PATH: String = "user://ui_settings.cfg"
-const BASE_THEME: Theme = preload("res://assets/UI/app_theme.tres")
+const BASE_THEME: Theme = preload("res://content/assets/UI/app_theme.tres")
 
 var font_scale: float = DEFAULT_SCALE
 var runtime_theme: Theme

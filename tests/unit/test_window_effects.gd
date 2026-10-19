@@ -16,7 +16,7 @@ var _desktop: Control
 
 ## 构造真实桌面，但不启动学习或访问玩家数据库。## 输入: 无。输出: 无。
 func before_each() -> void:
-	_desktop = load("res://scenes/desktop/desktop.tscn").instantiate() as Control
+	_desktop = load("res://content/scenes/desktop/desktop.tscn").instantiate() as Control
 	_desktop.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
 	_desktop.size = Vector2(1280, 720)
 	add_child_autofree(_desktop)
@@ -83,7 +83,7 @@ func test_shatter_freezes_then_closes_once_and_can_reopen() -> void:
 	assert_false(WindowManager.shatter_app("window_lab"))
 	assert_false(WindowManager.set_app_damage("window_lab", 0.0))
 	assert_false(WindowManager.open_app("window_lab"))
-	assert_eq(window.navigate_to("res://scenes/desktop/recycle_bin.tscn"), ERR_BUSY)
+	assert_eq(window.navigate_to("res://content/scenes/desktop/recycle_bin.tscn"), ERR_BUSY)
 	window._on_minimize_pressed()
 	window._on_maximize_pressed()
 	assert_false(window.is_minimized())

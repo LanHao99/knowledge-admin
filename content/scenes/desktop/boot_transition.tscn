@@ -1,0 +1,108 @@
+[gd_scene format=3 uid="uid://dx8feru33mb5l"]
+
+[ext_resource type="Script" uid="uid://hx461x7tkxov" path="res://src/desktop/boot_transition.gd" id="2_transition"]
+[ext_resource type="Shader" uid="uid://b206xsmkk6aws" path="res://src/shaders/desktop/boot_background.gdshader" id="3_waves"]
+[ext_resource type="Shader" uid="uid://bcmpvohwdr2pf" path="res://src/shaders/desktop/boot_dissolve.gdshader" id="4_dissolve"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dissolve"]
+resource_local_to_scene = true
+shader = ExtResource("4_dissolve")
+shader_parameter/progress = 0.0
+shader_parameter/edge_roughness = 0.12
+shader_parameter/noise_scale = 6.0
+shader_parameter/edge_width = 0.012
+shader_parameter/edge_color = Color(0.38, 0.78, 0.98, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_waves"]
+resource_local_to_scene = true
+shader = ExtResource("3_waves")
+shader_parameter/base_color = Color(0.045, 0.055, 0.17, 1)
+shader_parameter/accent_color = Color(0.08, 0.55, 0.64, 1)
+shader_parameter/secondary_color = Color(0.36, 0.2, 0.66, 1)
+shader_parameter/animation_speed = 0.4
+shader_parameter/wave_scale = 4.5
+shader_parameter/distortion_strength = 1.25
+
+[node name="BootTransition" type="CanvasLayer" unique_id=617792397 groups=["boot_transition"]]
+layer = 100
+script = ExtResource("2_transition")
+
+[node name="CoverGroup" type="CanvasGroup" parent="." unique_id=1244002004]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_dissolve")
+fit_margin = 0.0
+clear_margin = 0.0
+
+[node name="Cover" type="Control" parent="CoverGroup" unique_id=1167109998]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Waves" type="ColorRect" parent="CoverGroup/Cover" unique_id=237645103]
+material = SubResource("ShaderMaterial_waves")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Center" type="CenterContainer" parent="CoverGroup/Cover" unique_id=1374395523]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Status" type="RichTextLabel" parent="CoverGroup/Cover/Center" unique_id=333835186]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(384, 112)
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/default_color = Color(0.93, 0.98, 1, 1)
+theme_override_colors/font_outline_color = Color(0.025, 0.03, 0.1, 0.9)
+theme_override_colors/font_shadow_color = Color(0.015, 0.02, 0.05, 0.8)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 4
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/normal_font_size = 48
+bbcode_enabled = true
+text = "[wave amp=20.0 freq=4.0 connected=0]正在启动系统...[/wave]"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SkipHint" type="Label" parent="CoverGroup/Cover" unique_id=1666141878]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -70.0
+offset_bottom = -38.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.76, 0.83, 0.94, 0.8)
+theme_override_colors/font_outline_color = Color(0.025, 0.03, 0.1, 0.8)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 16
+text = "单击或按任意键加速"
+horizontal_alignment = 1
+
+[node name="InputBlocker" type="Control" parent="." unique_id=496818027]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+grow_horizontal = 2
+grow_vertical = 2

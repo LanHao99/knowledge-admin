@@ -70,7 +70,7 @@ func test_close_never_opened_app_is_safe() -> void:
 ## 输入: 无。
 ## 输出: 无。
 func test_navigate_without_active_window_returns_error() -> void:
-	var result: int = _wm.navigate_in_active("res://scenes/ui/main_menu.tscn")
+	var result: int = _wm.navigate_in_active("res://content/scenes/ui/main_menu.tscn")
 	assert_ne(result, OK, "无活动窗口时应返回错误")
 
 

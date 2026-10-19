@@ -5,8 +5,8 @@
 主界面和设置页以 `godot-desktop-themes-master` 的 Classic95 示范界面为参考。
 窗体、按钮、标签页、白色凹陷面板、滚动条和禁用状态使用原始纹理，标题栏通过 AtlasTexture 引用原始窗口纹理中的蓝色渐变。
 
-原始纹理位于 `assets/desktop_themes/Classic95/Styles/`，来源和许可证见该目录上级的 README 与 LICENSE。
-布局使用可编辑的 `.tscn` 节点；主题基准位于 `assets/UI/app_theme.tres`。
+原始纹理位于 `content/assets/desktop_themes/Classic95/Styles/`，来源和许可证见该目录上级的 README 与 LICENSE。
+布局使用可编辑的 `.tscn` 节点；主题基准位于 `content/assets/UI/app_theme.tres`。
 
 悬浮提示使用不透明浅黄底和黑字，不沿用工具窗口纹理或引擎默认的半透明面板。树项目悬浮时文字保持黑色；已选中项维持蓝底白字。只读 `TextEdit` 使用 `font_readonly_color`，颜色为不透明深灰。
 

@@ -1,0 +1,206 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://src/desktop/desktop.gd" id="1"]
+[ext_resource type="Script" path="res://src/desktop/taskbar.gd" id="2"]
+[ext_resource type="Script" path="res://src/desktop/window_effects.gd" id="3_effects"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_taskbar"]
+content_margin_left = 4.0
+content_margin_top = 2.0
+content_margin_right = 4.0
+content_margin_bottom = 2.0
+bg_color = Color(0.753, 0.753, 0.753, 1)
+border_width_top = 1
+border_color = Color(1, 1, 1, 1)
+
+[node name="Desktop" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="DesktopBg" type="ColorRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.0, 0.502, 0.502, 1)
+
+[node name="WallpaperLayer" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="WallpaperBars" type="ColorRect" parent="WallpaperLayer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Wallpaper" type="TextureRect" parent="WallpaperLayer"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="DesktopIconArea" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_right = 180.0
+grow_horizontal = 1
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="DesktopIconGrid" type="GridContainer" parent="DesktopIconArea"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 14.0
+offset_top = 14.0
+offset_right = 174.0
+offset_bottom = 900.0
+grow_horizontal = 1
+grow_vertical = 1
+columns = 1
+mouse_filter = 2
+
+[node name="WindowContainer" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -48.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Taskbar" type="Panel" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -48.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_taskbar")
+script = ExtResource("2")
+
+[node name="TaskbarHBox" type="HBoxContainer" parent="Taskbar"]
+layout_mode = 1
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -4.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 2
+mouse_filter = 2
+
+[node name="StartButton" type="Button" parent="Taskbar/TaskbarHBox"]
+layout_mode = 2
+size_flags_vertical = 4
+text = "开始"
+
+[node name="Separator" type="VSeparator" parent="Taskbar/TaskbarHBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TaskScroll" type="ScrollContainer" parent="Taskbar/TaskbarHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_scroll_mode = 1
+vertical_scroll_mode = 0
+
+[node name="TaskButtons" type="HBoxContainer" parent="Taskbar/TaskbarHBox/TaskScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 2
+mouse_filter = 2
+
+[node name="RightArea" type="HBoxContainer" parent="Taskbar/TaskbarHBox"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/separation = 4
+
+[node name="ClockLabel" type="Label" parent="Taskbar/TaskbarHBox/RightArea"]
+layout_mode = 2
+size_flags_vertical = 4
+text = "00:00"
+
+[node name="WindowEffects" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+z_index = 100
+script = ExtResource("3_effects")
+
+[node name="ModalLayer" type="Control" parent="."]
+z_index = 300
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+[node name="Blocker" type="ColorRect" parent="ModalLayer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.08)
+mouse_filter = 0
+[node name="ModalWindows" type="Control" parent="ModalLayer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_bottom = -48.0
+mouse_filter = 2

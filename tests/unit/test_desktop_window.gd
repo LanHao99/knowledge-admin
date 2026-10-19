@@ -8,9 +8,9 @@ var _window: ManagedWindow
 func before_each() -> void:
 	_area = add_child_autofree(Control.new())
 	_area.size = Vector2(1280, 672)
-	_window = load("res://scenes/desktop/managed_window.tscn").instantiate() as ManagedWindow
+	_window = load("res://content/scenes/desktop/managed_window.tscn").instantiate() as ManagedWindow
 	_area.add_child(_window)
-	_window.initialize("recycle_bin", "回收站", "res://scenes/desktop/recycle_bin.tscn")
+	_window.initialize("recycle_bin", "回收站", "res://content/scenes/desktop/recycle_bin.tscn")
 
 ## 最小化和恢复不能重建内容。## 输入: 无。输出: 无。
 func test_minimize_retains_content() -> void:

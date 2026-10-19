@@ -30,8 +30,8 @@ func test_nested_page_navigates_in_its_host() -> void:
 	host.add_child(container)
 	container.add_child(page)
 	assert_same(Context.find_host(page), host)
-	assert_eq(Context.navigate(page, "res://scenes/ui/settings.tscn"), OK)
-	assert_eq(host.last_path, "res://scenes/ui/settings.tscn")
+	assert_eq(Context.navigate(page, "res://content/scenes/ui/settings.tscn"), OK)
+	assert_eq(host.last_path, "res://content/scenes/ui/settings.tscn")
 
 
 ## 嵌入后保留宿主窗体，隐藏页面重复的背景和标题栏。## 输入: 无。

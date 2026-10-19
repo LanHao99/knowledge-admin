@@ -1,6 +1,6 @@
 # deck_manager.gd (DeckManager)
 
-> **路径**: `res://scenes/business_logic/deck_manager.gd`
+> **路径**: `res://src/business_logic/deck_manager.gd`
 > **继承**: `Manager`
 > **类型**: 逻辑层
 

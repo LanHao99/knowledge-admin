@@ -34,9 +34,9 @@ Godot 4.7.2、Forward+／D3D12、NVIDIA GeForce RTX 5060 Ti。测试在当前工
 
 ```text
 godot --headless --path <隔离目录> -s addons/gut/gut_cmdln.gd -gdir=res://tests/unit -gexit
-godot --path <隔离目录> res://tests/desktop/verify_dialogue_actions.tscn
-godot --path <隔离目录> res://tests/desktop/verify_window_effects.tscn
-godot --path <隔离目录> res://tests/desktop/verify_story_test.tscn
+godot --path <隔离目录> res://tests/scenes/desktop/verify_dialogue_actions.tscn
+godot --path <隔离目录> res://tests/scenes/desktop/verify_window_effects.tscn
+godot --path <隔离目录> res://tests/scenes/desktop/verify_story_test.tscn
 ```
 
 隔离配置可设置 `rendering/shader_compiler/shader_cache/enabled=false`，避免受限环境的用户目录缓存写入错误。此设置只用于测试副本。

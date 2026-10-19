@@ -1,0 +1,334 @@
+[gd_scene format=3 uid="uid://2ds8mbjfhjgv"]
+
+[ext_resource type="Theme" path="res://content/assets/UI/app_theme.tres" id="theme"]
+[ext_resource type="Script" path="res://src/ui/main_menu.gd" id="script"]
+[ext_resource type="Script" path="res://src/ui/adaptive_row.gd" id="row"]
+[ext_resource type="Texture2D" path="res://content/assets/desktop_themes/Classic95/Styles/Window/CloseBtn.png" id="close_icon"]
+
+[ext_resource type="Texture2D" path="res://content/assets/desktop_themes/Classic95/Styles/Window/Window.png" id="window_texture"]
+
+[sub_resource type="AtlasTexture" id="title_atlas"]
+atlas = ExtResource("window_texture")
+region = Rect2(4, 3, 2, 18)
+filter_clip = true
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("theme")
+script = ExtResource("script")
+
+
+[node name="DesktopBackground" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.431373, 0.737255, 0.72549, 1)
+
+
+[node name="RootMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_bottom = 40
+
+
+[node name="MainVBox" type="VBoxContainer" parent="RootMargin"]
+layout_mode = 2
+
+
+[node name="ContentScroll" type="ScrollContainer" parent="RootMargin/MainVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 1
+
+
+[node name="CenterArea" type="MarginContainer" parent="RootMargin/MainVBox/ContentScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+
+[node name="MainCard" type="PanelContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DesktopFrame"
+
+
+[node name="FrameVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+
+[node name="TitleBar" type="PanelContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox"]
+layout_mode = 2
+
+
+[node name="BlueTitle" type="TextureRect" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/TitleBar"]
+layout_mode = 2
+texture_filter = 2
+texture = SubResource("title_atlas")
+expand_mode = 1
+mouse_filter = 2
+
+
+[node name="TitleMargin" type="MarginContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/TitleBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 3
+
+
+[node name="TitleRow" type="HBoxContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/TitleBar/TitleMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+
+[node name="WindowTitle" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/TitleBar/TitleMargin/TitleRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"UiWindowTitle"
+text = "Knowledge Admin"
+vertical_alignment = 1
+
+
+[node name="CloseButton" type="Button" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/TitleBar/TitleMargin/TitleRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(32, 0)
+icon = ExtResource("close_icon")
+expand_icon = true
+tooltip_text = "关闭"
+
+
+[node name="ToolbarMargin" type="MarginContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_bottom = 6
+
+
+[node name="Toolbar" type="HBoxContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/ToolbarMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+
+[node name="Caption" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/ToolbarMargin/Toolbar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "知识管理"
+vertical_alignment = 1
+
+
+[node name="AICardButton" type="Button" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/ToolbarMargin/Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(160, 40)
+text = "AI 制卡"
+
+[node name="SettingsButton" type="Button" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/ToolbarMargin/Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(144, 40)
+text = "设置"
+
+
+[node name="ToolsButton" type="MenuButton" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/ToolbarMargin/Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(144, 40)
+text = "工具"
+flat = false
+
+
+[node name="BodyMargin" type="MarginContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_bottom = 16
+
+
+[node name="LearningPanel" type="PanelContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DesktopFrame"
+
+
+[node name="LearningMargin" type="MarginContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 20
+
+
+[node name="LearningVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+
+[node name="OverviewRow" type="GridContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 16
+script = ExtResource("row")
+preferred_columns = 2
+minimum_column_width = 380.0
+
+
+[node name="OverviewVBox" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+
+[node name="OverviewLabel" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/OverviewVBox"]
+layout_mode = 2
+text = "学习概况"
+
+
+[node name="StatisticsBox" type="PanelContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/OverviewVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_type_variation = &"DesktopInset"
+
+
+[node name="StatisticsMargin" type="MarginContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_bottom = 16
+
+
+[node name="Statistics" type="GridContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 16
+
+
+[node name="DeckCaption" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "牌组总数："
+
+
+[node name="DeckValue" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "—"
+horizontal_alignment = 2
+
+
+[node name="DueCaption" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "待复习："
+
+
+[node name="DueValue" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "—"
+horizontal_alignment = 2
+
+
+[node name="TodayCaption" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "今日已学："
+
+
+[node name="TodayValue" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/OverviewVBox/StatisticsBox/StatisticsMargin/Statistics"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "—"
+horizontal_alignment = 2
+
+
+[node name="Actions" type="VBoxContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+
+[node name="ActionsLabel" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/Actions"]
+layout_mode = 2
+text = "操作"
+
+
+[node name="StudyBtn" type="Button" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(280, 48)
+text = "开始学习"
+disabled = true
+
+
+[node name="DeckListBtn" type="Button" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(280, 48)
+text = "牌组管理"
+
+
+[node name="NoteBrowseBtn" type="Button" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox/OverviewRow/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(280, 48)
+text = "笔记浏览"
+
+
+[node name="EmptyHint" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/BodyMargin/LearningPanel/LearningMargin/LearningVBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"UiMuted"
+text = "暂无牌组，请先新建或导入牌组。"
+autowrap_mode = 3
+
+
+[node name="StatusInset" type="PanelContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox"]
+layout_mode = 2
+theme_type_variation = &"DesktopStatus"
+
+
+[node name="StatusRow" type="HBoxContainer" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/StatusInset"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+
+[node name="StatusLabel" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/StatusInset/StatusRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"UiMuted"
+text = "正在读取统计…"
+autowrap_mode = 3
+
+
+[node name="VersionLabel" type="Label" parent="RootMargin/MainVBox/ContentScroll/CenterArea/MainCard/FrameVBox/StatusInset/StatusRow"]
+layout_mode = 2
+theme_type_variation = &"UiMuted"
+text = "v0.0.0.1"

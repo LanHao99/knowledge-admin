@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://dpxyfrm4yk52d"
+path="res://.godot/imported/deck_list.dialogue-5c470860680312e1cbc1c6e49436bfa4.tres"
+
+[deps]
+
+source_file="res://content/dialogue/tutorial/deck_list.dialogue"
+dest_files=["res://.godot/imported/deck_list.dialogue-5c470860680312e1cbc1c6e49436bfa4.tres"]
+
+[params]
+
+defaults=true

@@ -33,15 +33,15 @@ StoryDialogueOverlay (CanvasLayer)
 
 | 文件路径 | 职责 |
 |---------|------|
-| `res://game/dialogue/text_animation_controller.gd` | 文字动画控制器 |
-| `res://game/dialogue/text_effects.gd` | 独立文字特效（shake/glitch/wave） |
+| `res://src/dialogue/text_animation_controller.gd` | 文字动画控制器 |
+| `res://content/dialogue/story/text_effects.gd` | 独立文字特效（shake/glitch/wave） |
 
 ### 修改文件
 
 | 文件路径 | 修改内容 |
 |---------|------|
-| `game/dialogue/story_dialogue_overlay.gd` | 集成 TextAnimationController |
-| `game/dialogue/story_dialogue_overlay.tscn` | 添加动画控制器节点 |
+| `src/dialogue/story_dialogue_overlay.gd` | 集成 TextAnimationController |
+| `content/scenes/dialogue/story_dialogue_overlay.tscn` | 添加动画控制器节点 |
 
 ---
 
@@ -256,7 +256,7 @@ func _on_typewriter_done(line) -> void:
 为了减少手写标记的工作量，提供一个编辑器工具脚本：
 
 ```gdscript
-# res://game/dialogue/dialogue_markup_tool.gd
+# res://content/dialogue/story/dialogue_markup_tool.gd
 # 功能:
 # 1. 选中 .dialogue 文本 → 右键菜单 → 快速插入标记
 # 2. 批量给 MIRA 的省略号添加 {pause} 标记

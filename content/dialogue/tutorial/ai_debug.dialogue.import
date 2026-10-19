@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://byhvqvllsslkc"
+path="res://.godot/imported/ai_debug.dialogue-1711dbdc37ca4de16e542741c42c2ea4.tres"
+
+[deps]
+
+source_file="res://content/dialogue/tutorial/ai_debug.dialogue"
+dest_files=["res://.godot/imported/ai_debug.dialogue-1711dbdc37ca4de16e542741c42c2ea4.tres"]
+
+[params]
+
+defaults=true

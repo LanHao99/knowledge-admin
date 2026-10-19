@@ -1,7 +1,7 @@
 extends GutTest
 ## 验证预设资源、目录生成、文档编辑与覆盖档，不使用玩家存档。
 
-const VIEW_SCENE: PackedScene = preload("res://scenes/desktop/my_computer.tscn")
+const VIEW_SCENE: PackedScene = preload("res://content/scenes/desktop/my_computer.tscn")
 
 var _documents_path: String = ""
 
@@ -23,7 +23,7 @@ func test_default_scene_binds_existing_documents() -> void:
 	var view: Control = _open_view(false)
 	var catalog: DesktopFileCatalog = view.file_catalog as DesktopFileCatalog
 	assert_not_null(catalog)
-	assert_eq(catalog.resource_path, "res://data/desktop/my_computer_files.tres")
+	assert_eq(catalog.resource_path, "res://content/data/desktop/my_computer_files.tres")
 	assert_eq(catalog.documents.size(), 2)
 	assert_eq(catalog.documents[0].file_name, "使用说明.txt")
 	assert_eq(catalog.documents[1].file_name, "学习指南.txt")

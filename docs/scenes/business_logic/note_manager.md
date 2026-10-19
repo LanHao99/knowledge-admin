@@ -1,6 +1,6 @@
 # note_manager.gd (NoteManager)
 
-> **路径**: `res://scenes/business_logic/note_manager.gd`
+> **路径**: `res://src/business_logic/note_manager.gd`
 > **继承**: `Manager`
 > **类型**: 逻辑层
 

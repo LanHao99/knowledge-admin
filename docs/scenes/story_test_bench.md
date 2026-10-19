@@ -14,13 +14,13 @@
 
 ## 编辑场景
 
-固定结构位于 `res://scenes/desktop/story_test_bench.tscn`，可直接在 Godot 的 2D 编辑器里调整。脚本只填充剧情行、完成记录和标记编辑器，并通过 App 读取或提交数据。
+固定结构位于 `res://content/scenes/desktop/story_test_bench.tscn`，可直接在 Godot 的 2D 编辑器里调整。脚本只填充剧情行、完成记录和标记编辑器，并通过 App 读取或提交数据。
 
 关键节点为 Summary、MainTabs、EditorTabs、BackupTabs 和 DraftFooter。数值与完成记录复用已有自适应网格；滚动容器启用键盘焦点跟随并关闭横向滚动。固定短标签不启用自动换行，避免容器按零最小宽度把文字排成竖列。
 
 ## 验证
 
-在独立的 KnowledgeAdminDesktopVerification 工程和存档目录运行 `tests/desktop/verify_story_test.tscn`。追加 `-- --story-layout-only` 可单独运行布局与编辑交互检查；默认还检查剧情播放、停止、自然结束、退出指令和学习现场恢复。
+在独立的 KnowledgeAdminDesktopVerification 工程和存档目录运行 `tests/scenes/desktop/verify_story_test.tscn`。追加 `-- --story-layout-only` 可单独运行布局与编辑交互检查；默认还检查剧情播放、停止、自然结束、退出指令和学习现场恢复。
 
 布局矩阵包含 1280×720、1920×1080 的 100%／150% 字号，以及 720×500 最小窗口的 150% 字号。检查六个页面的真实画面、横向约束、滚动区可用高度和保存按钮可见性，同时实际点击保存与撤销，验证章节筛选和只读展开不改变草稿。
 

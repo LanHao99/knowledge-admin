@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://ch1intro00001"
+path="res://.godot/imported/ch1_intro.dialogue-96e5d9a383bb6752f9864a81d96eabfe.tres"
+
+[deps]
+
+source_file="res://content/dialogue/story/ch1_intro.dialogue"
+dest_files=["res://.godot/imported/ch1_intro.dialogue-96e5d9a383bb6752f9864a81d96eabfe.tres"]
+
+[params]
+
+defaults=true

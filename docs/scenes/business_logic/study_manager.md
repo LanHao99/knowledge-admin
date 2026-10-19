@@ -1,6 +1,6 @@
 # study_manager.gd (StudyManager)
 
-> **路径**: `res://scenes/business_logic/study_manager.gd`
+> **路径**: `res://src/business_logic/study_manager.gd`
 > **继承**: `Manager`
 > **类型**: 逻辑层
 

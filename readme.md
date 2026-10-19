@@ -12,9 +12,9 @@
 
 | 引擎 | 职责 | 实现位置 |
 | --- | --- | --- |
-| 闪卡引擎 | 牌组 / 笔记 / 卡片 CRUD、FSRS 调度、学习队列 | `scenes/ui`、`scenes/business_logic`、`scenes/data_access`、`src/scheduler` |
-| AVG 引擎 | 评分驱动进度、对话触发、选项羁绊、世界标记 | `game/dialogue`、`game/tutorial` |
-| 桌面引擎 | 窗口层、任务栏、开始菜单、壁纸、窗口特效 | `scenes/desktop`、`src/window_manager.gd` |
+| 闪卡引擎 | 牌组 / 笔记 / 卡片 CRUD、FSRS 调度、学习队列 | `content/scenes/ui`、`src/business_logic`、`src/data_access`、`src/scheduler` |
+| AVG 引擎 | 评分驱动进度、对话触发、选项羁绊、世界标记 | `content/dialogue/`、`src/dialogue/`、`src/tutorial/` |
+| 桌面引擎 | 窗口层、任务栏、开始菜单、壁纸、窗口特效 | `content/scenes/desktop`、`src/window_manager.gd` |
 
 允许的调用方向：
 
@@ -29,11 +29,11 @@
 闪卡部分采用五层解耦，调用方向自上而下。
 
 ```text
-UI 层          scenes/ui/                 渲染、接收输入、订阅信号，不碰数据库
-逻辑层         scenes/business_logic/     业务校验、事务编排、跨实体协调、发信号
+UI 层          src/ui/ + content/scenes/ui/ 渲染、接收输入、订阅信号，不碰数据库
+逻辑层         src/business_logic/     业务校验、事务编排、跨实体协调、发信号
 调度层         src/scheduler/             纯算法：当前状态 + 评分 → 下一状态，不做 I/O
 实体层         src/entities/              纯数据结构，替代裸 Dictionary 传参
-数据层         scenes/data_access/        SQL 拼装、参数绑定、结果集映射到实体
+数据层         src/data_access/        SQL 拼装、参数绑定、结果集映射到实体
 ```
 
 各层职责边界：
@@ -46,65 +46,51 @@ UI 层          scenes/ui/                 渲染、接收输入、订阅信号�
 | Entity 层 | 存数据、序列化辅助 | 业务逻辑、数据库访问 |
 | DB 层 | 执行 SQL、参数绑定、返回实体 | 业务规则、跨表事务编排 |
 
-## 目录结构
+## 目录结构与维护分工
+
+你日常编辑的内容集中在 `content/`，AI 维护的实现集中在 `src/`，测试在 `tests/`。详细对应关系见 [文件维护分工](docs/file_maintenance.md)。
 
 ```text
 res://
-├── project.godot                 # 主场景 boot_screen.tscn；Autoload 注册
-├── readme.md                     # 本文档
+├── content/                      # 你维护：场景、内容与素材
+│   ├── README.md                 # 内容编辑入口
+│   ├── scenes/                   # .tscn 场景，与脚本分开
+│   │   ├── desktop/              # 桌面、窗口、启动、摄像头与知识空间
+│   │   ├── ui/                   # 闪卡、牌组、设置与导入向导
+│   │   ├── ai/                   # AI 制卡助手场景
+│   │   ├── dialogue/             # 对话框与动作确认场景
+│   │   └── system/               # AI 维护的系统装配场景
+│   ├── dialogue/story/           # 剧情与大纲 .dialogue
+│   ├── dialogue/tutorial/        # 教程 .dialogue
+│   ├── data/desktop/             # 我的电脑、知识空间 .tres 内容
+│   ├── data/import_examples/     # JSON 导入示例
+│   └── assets/                   # 图标、壁纸、主题、字体、立绘与 Banks
+├── src/                          # AI 维护：.gd 实现
+│   ├── desktop/、ui/、ai/        # 场景行为
+│   ├── dialogue/、tutorial/      # 剧情与教程实现
+│   ├── business_logic/           # Manager 业务层
+│   ├── data_access/              # DB 数据层
+│   ├── entities/、scheduler/     # 实体与复习算法
+│   ├── resources/                # 自定义 Resource 类型
+│   ├── shaders/                  # .gdshader 着色器
+│   ├── data/db_schema.json       # 数据库结构
+│   └── utils/                    # 解析、存档读取工具
+├── tests/                        # AI 维护：自动化验证
+│   ├── scenes/                   # 验收 .tscn
+│   ├── scripts/                  # 验收 .gd
+│   ├── unit/                     # GUT 单元测试 .gd
+│   └── fixtures/                 # 动作替身与对白样本
+├── tools/                        # AI 维护：目录检查与归档
+├── docs/                         # 设计、功能说明与验证证据
+├── addons/                       # 插件及依赖，保持插件自己的目录布局
+├── saves/                        # 本地运行存档
+├── project.godot                 # 主场景与 Autoload
+├── kanban_tasks_data.kanban       # 你的项目计划
 ├── agents.md                     # AI 协作规范
-│
-├── scenes/
-│   ├── desktop/                  # 桌面引擎
-│   │   ├── boot_screen.tscn      # 启动封面与转场
-│   │   ├── desktop.tscn          # 桌面、图标、任务栏
-│   │   ├── managed_window.tscn   # 可拖动八向缩放的窗口
-│   │   ├── my_computer / recycle_bin / camera / window_lab
-│   │   ├── unknown_program       # 剧情宿主的隐藏程序
-│   │   └── story_test_bench.tscn # 调试用剧情测试台
-│   ├── ui/                       # 闪卡 UI 层
-│   │   ├── main_menu.tscn        # 桌面内的学习主页
-│   │   ├── deck_list / note_list / settings
-│   │   ├── study / study_session / card_ui
-│   │   └── debug_crud_panel      # 调试 CRUD 控制台
-│   ├── business_logic/           # 逻辑层 Manager
-│   │   ├── manager.gd            # 基类：事务、统一返回结构、变更信号
-│   │   ├── deck_manager / note_manager / card_manager
-│   │   ├── study_manager / notetype_manager / import_manager
-│   ├── data_access/              # 数据层
-│   │   ├── db_manager.gd         # 基类：SQLite 共享连接、schema 初始化
-│   │   └── deck_db / note_db / card_db / notetype_db
-│   └── import_*.gd               # JSON 导入向导各步骤
-│
-├── src/
-│   ├── app.gd / app.tscn         # App 门面（Autoload）
-│   ├── window_manager.gd         # 应用注册表与窗口唯一管理器
-│   ├── meta_rules.gd             # 标记规则表
-│   ├── ui_settings / shortcut_settings / wallpaper_settings / debug_settings
-│   ├── save_directory.gd         # 将 user:// 重定向到 res://saves
-│   ├── entities/                 # 实体层
-│   ├── scheduler/                # 调度层：Scheduler / SimpleScheduler / FsrsScheduler
-│   └── utils/schema_parser.gd    # JSON schema 解析
-│
-├── game/
-│   ├── AI/ai_debug.tscn          # AI 制卡助手
-│   ├── dialogue/                 # AVG：剧本、管理器、覆盖层、动作
-│   └── tutorial/                 # 教程系统
-│
-├── data/
-│   ├── db_schema.json            # 表结构配置
-│   └── desktop/my_computer_files.tres  # 我的电脑预设文档
-│
-├── tests/
-│   ├── unit/                     # GUT 单元测试
-│   ├── desktop/                  # 隔离工程验收脚本
-│   ├── ui/                       # UI 渲染验收
-│   └── fixtures/                 # 测试替身
-│
-├── assets/                       # 图标、壁纸、主题、立绘
-├── docs/                         # 设计与实现文档，见下方索引
-└── saves/                        # 运行时存档（已 gitignore）
+└── readme.md                     # 项目入口
 ```
+
+原根目录的图片与主题归入 `content/assets/`，示例 JSON 归入 `content/data/`，已有工程备份和动态库副本保存在 `tools/archive/`。本地配置 `api.cfg` 仍留在根目录；Godot 缓存和 AI 临时工作区保持隐藏。
 
 ## 运行时数据
 
@@ -167,7 +153,7 @@ godot --headless -s addons/gut/gut_cmdln.gd -gdir=res://tests/unit -ginclude_sub
 
 工程内没有 `.gutconfig.json`，所以必须显式传 `-gdir`；单元测试都在 `tests/unit` 平铺，加不加 `-ginclude_subdirs` 都能找到。
 
-桌面和 UI 的验收脚本位于 `tests/desktop` 与 `tests/ui`，需要在 `application/config/name` 改为验证专用名称的隔离工程里运行，避免写入正式存档。
+桌面和 UI 的验收脚本位于 `tests/scripts/desktop` 与 `tests/scripts/ui`，对应场景位于 `tests/scenes/`，需要在 `application/config/name` 改为验证专用名称的隔离工程里运行，避免写入正式存档。
 
 ## 外部依赖
 

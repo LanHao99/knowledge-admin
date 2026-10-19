@@ -2,7 +2,7 @@ extends GutTest
 ## 验证学习快捷键的默认值、冲突、存档和按状态分发。
 
 const SettingsScript: GDScript = preload("res://src/shortcut_settings.gd")
-const StudyScript: GDScript = preload("res://scenes/ui/study.gd")
+const StudyScript: GDScript = preload("res://src/ui/study.gd")
 
 var _settings: Node
 
@@ -145,7 +145,7 @@ func test_shortcut_effect_follows_card_state() -> void:
 ## 验证控制面板场景里有快捷键标签，并且列出七项动作。## 输入: 无。
 ## 输出: 无。
 func test_settings_scene_has_shortcut_tab() -> void:
-	var scene: Control = load("res://scenes/ui/settings.tscn").instantiate()
+	var scene: Control = load("res://content/scenes/ui/settings.tscn").instantiate()
 	add_child(scene)
 	var tabs := scene.find_child("SettingsTabs", true, false) as TabContainer
 	assert_not_null(tabs)

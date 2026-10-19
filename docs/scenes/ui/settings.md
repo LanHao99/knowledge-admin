@@ -8,8 +8,8 @@
 
 | 文件 | 路径 |
 |------|------|
-| 场景 | `res://scenes/ui/settings.tscn` |
-| 脚本 | `res://scenes/ui/settings.gd` |
+| 场景 | `res://content/scenes/ui/settings.tscn` |
+| 脚本 | `res://src/ui/settings.gd` |
 
 ## 节点树
 
@@ -111,7 +111,7 @@ Settings (Control)
 
 ## 壁纸
 
-控制面板增加壁纸页，列出 `res://assets/wallpapers/` 中的 png、jpg、jpeg 和 webp。
+控制面板增加壁纸页，列出 `res://content/assets/wallpapers/` 中的 png、jpg、jpeg 和 webp。
 默认是「无壁纸」，桌面保持青绿色。铺满时保持比例并裁切边缘；原始比例时完整显示图片，空白处为黑边。
 选择后立即应用到桌面，配置保存在 `user://wallpaper_settings.cfg`。
 

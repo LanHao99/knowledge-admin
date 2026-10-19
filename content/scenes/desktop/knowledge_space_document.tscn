@@ -1,0 +1,204 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://src/desktop/knowledge_space_document.gd" id="1_document"]
+[ext_resource type="FontFile" path="res://content/assets/fonts/ark-pixel-16px-proportional-zh_cn.ttf" id="2_font"]
+
+[sub_resource type="BoxMesh" id="Mesh_frame"]
+size = Vector3(7.3, 8.5, 0.06)
+
+[sub_resource type="BoxMesh" id="Mesh_paper"]
+size = Vector3(7.2, 8.4, 0.06)
+
+[sub_resource type="StandardMaterial3D" id="Material_frame"]
+resource_local_to_scene = true
+shading_mode = 0
+albedo_color = Color(0.3, 0.46, 0.55, 1)
+
+[sub_resource type="StandardMaterial3D" id="Material_paper"]
+resource_local_to_scene = true
+shading_mode = 0
+albedo_color = Color(0.08, 0.16, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="Mesh_title_bar"]
+size = Vector3(7.2, 0.95, 0.04)
+
+[sub_resource type="BoxMesh" id="Mesh_button"]
+size = Vector3(0.8, 0.64, 0.04)
+
+[sub_resource type="BoxMesh" id="Mesh_icon_line"]
+size = Vector3(0.32, 0.045, 0.025)
+
+[sub_resource type="StandardMaterial3D" id="Material_title_bar"]
+resource_local_to_scene = true
+shading_mode = 0
+albedo_color = Color(0.13, 0.2, 0.25, 1)
+
+[sub_resource type="StandardMaterial3D" id="Material_button"]
+shading_mode = 0
+albedo_color = Color(0.21, 0.3, 0.36, 1)
+
+[sub_resource type="StandardMaterial3D" id="Material_close"]
+shading_mode = 0
+albedo_color = Color(0.4, 0.2, 0.24, 1)
+
+[sub_resource type="StandardMaterial3D" id="Material_icon"]
+shading_mode = 0
+albedo_color = Color(0.85, 0.91, 0.94, 1)
+
+[node name="Document" type="Node3D"]
+script = ExtResource("1_document")
+
+[node name="Frame" type="MeshInstance3D" parent="."]
+mesh = SubResource("Mesh_frame")
+material_override = SubResource("Material_frame")
+cast_shadow = 0
+
+[node name="Paper" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 0.04)
+mesh = SubResource("Mesh_paper")
+material_override = SubResource("Material_paper")
+cast_shadow = 0
+
+[node name="Source" type="Label3D" parent="."]
+position = Vector3(-3.2, 3.8, 0.08)
+pixel_size = 0.005
+font = ExtResource("2_font")
+font_size = 48
+outline_size = 0
+horizontal_alignment = 0
+vertical_alignment = 0
+alpha_cut = 1
+double_sided = false
+text = "知识 / 来源"
+
+[node name="Title" type="Label3D" parent="."]
+position = Vector3(-3.2, 3.25, 0.08)
+pixel_size = 0.005
+font = ExtResource("2_font")
+font_size = 96
+outline_size = 0
+horizontal_alignment = 0
+vertical_alignment = 0
+autowrap_mode = 3
+width = 1280.0
+alpha_cut = 1
+double_sided = false
+text = "文档标题"
+
+[node name="Body" type="Label3D" parent="."]
+position = Vector3(-3.2, 2, 0.08)
+pixel_size = 0.005
+font = ExtResource("2_font")
+font_size = 64
+outline_size = 0
+horizontal_alignment = 0
+vertical_alignment = 0
+autowrap_mode = 3
+width = 1280.0
+alpha_cut = 1
+double_sided = false
+text = "文档摘录"
+
+[node name="Footer" type="Label3D" parent="."]
+position = Vector3(-3.2, -3.8, 0.08)
+pixel_size = 0.005
+font = ExtResource("2_font")
+font_size = 40
+outline_size = 0
+horizontal_alignment = 0
+vertical_alignment = 0
+alpha_cut = 1
+double_sided = false
+text = "CARD // 0"
+
+[node name="TitleBar" type="Node3D" parent="."]
+position = Vector3(0, 3.725, 0.1)
+
+[node name="Background" type="MeshInstance3D" parent="TitleBar"]
+mesh = SubResource("Mesh_title_bar")
+material_override = SubResource("Material_title_bar")
+cast_shadow = 0
+
+[node name="Caption" type="Label3D" parent="TitleBar"]
+position = Vector3(-3.4, 0, 0.04)
+pixel_size = 0.005
+font = ExtResource("2_font")
+font_size = 56
+outline_size = 0
+horizontal_alignment = 0
+vertical_alignment = 1
+autowrap_mode = 3
+width = 830.0
+alpha_cut = 1
+double_sided = false
+text = "文档窗口"
+
+[node name="Minimize" type="Node3D" parent="TitleBar"]
+position = Vector3(1.27, 0, 0.025)
+
+[node name="Background" type="MeshInstance3D" parent="TitleBar/Minimize"]
+mesh = SubResource("Mesh_button")
+material_override = SubResource("Material_button")
+cast_shadow = 0
+
+[node name="Icon" type="MeshInstance3D" parent="TitleBar/Minimize"]
+position = Vector3(0, -0.11, 0.035)
+mesh = SubResource("Mesh_icon_line")
+material_override = SubResource("Material_icon")
+cast_shadow = 0
+
+[node name="Fullscreen" type="Node3D" parent="TitleBar"]
+position = Vector3(2.17, 0, 0.025)
+
+[node name="Background" type="MeshInstance3D" parent="TitleBar/Fullscreen"]
+mesh = SubResource("Mesh_button")
+material_override = SubResource("Material_button")
+cast_shadow = 0
+
+[node name="Top" type="MeshInstance3D" parent="TitleBar/Fullscreen"]
+position = Vector3(0, 0.14, 0.035)
+mesh = SubResource("Mesh_icon_line")
+material_override = SubResource("Material_icon")
+cast_shadow = 0
+
+[node name="Bottom" type="MeshInstance3D" parent="TitleBar/Fullscreen"]
+position = Vector3(0, -0.14, 0.035)
+mesh = SubResource("Mesh_icon_line")
+material_override = SubResource("Material_icon")
+cast_shadow = 0
+
+[node name="Left" type="MeshInstance3D" parent="TitleBar/Fullscreen"]
+position = Vector3(-0.14, 0, 0.035)
+rotation = Vector3(0, 0, 1.5707964)
+mesh = SubResource("Mesh_icon_line")
+material_override = SubResource("Material_icon")
+cast_shadow = 0
+
+[node name="Right" type="MeshInstance3D" parent="TitleBar/Fullscreen"]
+position = Vector3(0.14, 0, 0.035)
+rotation = Vector3(0, 0, 1.5707964)
+mesh = SubResource("Mesh_icon_line")
+material_override = SubResource("Material_icon")
+cast_shadow = 0
+
+[node name="Close" type="Node3D" parent="TitleBar"]
+position = Vector3(3.07, 0, 0.025)
+
+[node name="Background" type="MeshInstance3D" parent="TitleBar/Close"]
+mesh = SubResource("Mesh_button")
+material_override = SubResource("Material_close")
+cast_shadow = 0
+
+[node name="Slash" type="MeshInstance3D" parent="TitleBar/Close"]
+position = Vector3(0, 0, 0.035)
+rotation = Vector3(0, 0, 0.7853982)
+mesh = SubResource("Mesh_icon_line")
+material_override = SubResource("Material_icon")
+cast_shadow = 0
+
+[node name="Backslash" type="MeshInstance3D" parent="TitleBar/Close"]
+position = Vector3(0, 0, 0.035)
+rotation = Vector3(0, 0, -0.7853982)
+mesh = SubResource("Mesh_icon_line")
+material_override = SubResource("Material_icon")
+cast_shadow = 0

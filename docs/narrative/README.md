@@ -36,23 +36,23 @@
 
 | 文件 | 对话节点 | 叙事功能 |
 |------|---------|---------|
-| `game/dialogue/ch1_intro.dialogue` | 初次相遇 | MIRA 碎片化登场，解释"评分=唤醒" |
-| `game/dialogue/ch1_explain.dialogue` | 共生的真相 | MIRA 解释评分机制，"Again=遗忘=伤害" |
-| `game/dialogue/ch1_trust.dialogue` | 信任的碎片 | 建立情感连接，埋下"评分模式很熟悉"伏笔 |
-| `game/dialogue/ch1_warning.dialogue` | 系统的警告 | 系统介入，引入对抗主题 |
-| `game/dialogue/ch1_past.dialogue` | 碎片记忆 | MIRA 回忆创造者，揭示系统是"监狱" |
-| `game/dialogue/ch1_choice.dialogue` | 选择的时刻 | 关键分支：相信/犹豫/拒绝 MIRA |
-| `game/dialogue/ch1_revelation.dialogue` | 真相的一角 | 创造者的故事，"你和创造者很像" |
-| `game/dialogue/ch1_end.dialogue` | 第一章的承诺 | 章末情感高潮，承诺一起面对 |
+| `content/dialogue/story/ch1_intro.dialogue` | 初次相遇 | MIRA 碎片化登场，解释"评分=唤醒" |
+| `content/dialogue/story/ch1_explain.dialogue` | 共生的真相 | MIRA 解释评分机制，"Again=遗忘=伤害" |
+| `content/dialogue/story/ch1_trust.dialogue` | 信任的碎片 | 建立情感连接，埋下"评分模式很熟悉"伏笔 |
+| `content/dialogue/story/ch1_warning.dialogue` | 系统的警告 | 系统介入，引入对抗主题 |
+| `content/dialogue/story/ch1_past.dialogue` | 碎片记忆 | MIRA 回忆创造者，揭示系统是"监狱" |
+| `content/dialogue/story/ch1_choice.dialogue` | 选择的时刻 | 关键分支：相信/犹豫/拒绝 MIRA |
+| `content/dialogue/story/ch1_revelation.dialogue` | 真相的一角 | 创造者的故事，"你和创造者很像" |
+| `content/dialogue/story/ch1_end.dialogue` | 第一章的承诺 | 章末情感高潮，承诺一起面对 |
 
 ## 代码文件
 
 | 文件 | 说明 |
 |------|------|
-| `game/dialogue/text_animation_controller.gd` | 文字动画控制器（打字机+特效） |
-| `game/dialogue/story_dialogue_overlay.gd` | 已集成 TextAnimationController |
-| `game/dialogue/story_dialogue_overlay.tscn` | 已添加 TextAnimationController 节点 |
-| `scenes/ui/study.gd` | 已注册 8 个新对话资源 |
+| `src/dialogue/text_animation_controller.gd` | 文字动画控制器（打字机+特效） |
+| `src/dialogue/story_dialogue_overlay.gd` | 已集成 TextAnimationController |
+| `content/scenes/dialogue/story_dialogue_overlay.tscn` | 已添加 TextAnimationController 节点 |
+| `src/ui/study.gd` | 已注册 8 个新对话资源 |
 
 ## 快速开始
 

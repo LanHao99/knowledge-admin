@@ -1,7 +1,7 @@
 extends GutTest
 ## 验证知识空间的限量查询、只读行为、档案解锁与可复用文档。
 
-const SPACE_SCENE: PackedScene = preload("res://scenes/desktop/knowledge_space.tscn")
+const SPACE_SCENE: PackedScene = preload("res://content/scenes/desktop/knowledge_space.tscn")
 var _db_path: String
 var _notes: NoteManager
 var _decks: DeckManager

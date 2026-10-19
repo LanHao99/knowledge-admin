@@ -61,22 +61,22 @@ ImportManager 作为 **跨仓库编排者**：持有 NoteManager / NoteTypeDB / 
 | 相对路径 | 职责 |
 |----------|------|
 | `src/entities/notetype_entity.gd` | NoteType 实体类 — 封装 note_types 表行，id/name/fields_schema/card_templates/created_at，JSON 序列化/反序列化，字段名提取 |
-| `scenes/data_access/notetype_db.gd` | NoteTypeDB — note_types 表 CRUD，extends DBManager。含 name_exists() 去重检查 |
-| `scenes/business_logic/notetype_manager.gd` | NoteTypeManager — NoteType 业务逻辑（名称唯一性校验、默认类型保护、增删改查），extends Manager |
-| `scenes/business_logic/import_manager.gd` | ImportManager — JSON 解析+校验+映射+逐行导入+进度反馈，extends Manager |
-| `scenes/ui/import_wizard.tscn` | 导入向导场景 — 三步骤 UI 容器（文件选择 → 映射配置 → 预览确认） |
-| `scenes/ui/import_wizard.gd` | 导入向导控制器 — 步骤状态机、信号连接、调用 ImportManager API |
+| `src/data_access/notetype_db.gd` | NoteTypeDB — note_types 表 CRUD，extends DBManager。含 name_exists() 去重检查 |
+| `src/business_logic/notetype_manager.gd` | NoteTypeManager — NoteType 业务逻辑（名称唯一性校验、默认类型保护、增删改查），extends Manager |
+| `src/business_logic/import_manager.gd` | ImportManager — JSON 解析+校验+映射+逐行导入+进度反馈，extends Manager |
+| `content/scenes/ui/import_wizard.tscn` | 导入向导场景 — 三步骤 UI 容器（文件选择 → 映射配置 → 预览确认） |
+| `content/scenes/ui/import_wizard.gd` | 导入向导控制器 — 步骤状态机、信号连接、调用 ImportManager API |
 
 #### 2.2 修改文件
 
 | 相对路径 | 修改内容 |
 |----------|----------|
-| `data/db_schema.json` | ① notes.note_type_id: `INTEGER NOT NULL` → `TEXT NOT NULL`；② 新增 `note_types` 表 + 索引；③ `drop_tables_order` 追加 `"note_types"` |
+| `src/data/db_schema.json` | ① notes.note_type_id: `INTEGER NOT NULL` → `TEXT NOT NULL`；② 新增 `note_types` 表 + 索引；③ `drop_tables_order` 追加 `"note_types"` |
 | `src/entities/note_entity.gd` | `note_type_id` 类型从 `int` 改为 `String`，默认值 `0` → `""`；`to_dict()`/`from_dict()` 适配 String |
-| `scenes/data_access/note_db.gd` | `create_note()` / `get_notes_by_type()` 的 `note_type_id` 参数从 `int` 改为 `String`；校验从 `<= 0` 改为 `is_empty()` |
-| `scenes/business_logic/note_manager.gd` | `create_note()` / `_generate_cards_for_note()` 的 `note_type_id` 参数从 `int` 改为 `String`；校验从 `<= 0` 改为 `.is_empty()` |
-| `scenes/business_logic/card_manager.gd` | 无结构性变更（仅作为 ImportManager 间接调用路径上的被调用方，无需新增方法） |
-| `scenes/data_access/card_db.gd` | 无结构性变更（ImportManager 不再直接调用） |
+| `src/data_access/note_db.gd` | `create_note()` / `get_notes_by_type()` 的 `note_type_id` 参数从 `int` 改为 `String`；校验从 `<= 0` 改为 `is_empty()` |
+| `src/business_logic/note_manager.gd` | `create_note()` / `_generate_cards_for_note()` 的 `note_type_id` 参数从 `int` 改为 `String`；校验从 `<= 0` 改为 `.is_empty()` |
+| `src/business_logic/card_manager.gd` | 无结构性变更（仅作为 ImportManager 间接调用路径上的被调用方，无需新增方法） |
+| `src/data_access/card_db.gd` | 无结构性变更（ImportManager 不再直接调用） |
 | `src/app.gd` | 扩展 init_schema 以包含 note_type_id 迁移 + 默认 NoteType 插入逻辑；或通过 DBManager 扩展点实现 |
 
 ---
@@ -516,11 +516,11 @@ sequenceDiagram
 - **优先级**: P0
 - **依赖**: 无
 - **涉及文件**:
-  - `data/db_schema.json` — **MODIFY**: ① notes.note_type_id 从 `INTEGER NOT NULL` → `TEXT NOT NULL`（移除 `default:0`）；② 新增 `note_types` 表定义（id TEXT PK, name TEXT UNIQUE NOT NULL, fields_schema TEXT NOT NULL, card_templates TEXT NOT NULL, created_at TEXT NOT NULL）；③ 新增索引 `idx_notetypes_name`（unique, on note_types(name)）；④ `drop_tables_order` 改为 `["cards","notes","note_types","decks"]`
+  - `src/data/db_schema.json` — **MODIFY**: ① notes.note_type_id 从 `INTEGER NOT NULL` → `TEXT NOT NULL`（移除 `default:0`）；② 新增 `note_types` 表定义（id TEXT PK, name TEXT UNIQUE NOT NULL, fields_schema TEXT NOT NULL, card_templates TEXT NOT NULL, created_at TEXT NOT NULL）；③ 新增索引 `idx_notetypes_name`（unique, on note_types(name)）；④ `drop_tables_order` 改为 `["cards","notes","note_types","decks"]`
   - `src/entities/notetype_entity.gd` — **NEW**: NoteTypeEntity（RefCounted）。属性: `id: String`, `name: String`, `fields_schema: Dictionary`（解析后的 `[{"name":"正面","order":0},...]` 数组）, `card_templates: Array`, `created_at: String`。方法: `to_dict()` / `from_dict(d)` / `get_field_names() → Array[String]` / `get_template_count() → int` / `get_required_fields() → Array[String]`（MVP 返回全部 field names）/ `is_default() → bool`
-  - `scenes/data_access/notetype_db.gd` — **NEW**: NoteTypeDB（extends DBManager）。CRUD 方法: `create_notetype(name, fields_schema, card_templates) → Dictionary`（内部生成 UUID id）、`get_notetype_by_id(id: String)`、`get_notetype_by_name(name: String)`、`get_all_notetypes()`、`update_notetype(entity: NoteTypeEntity)`、`delete_notetype(id: String)`、`name_exists(name, exclude_id="") → bool`、`insert_default_notetype() → Dictionary`（`INSERT OR IGNORE INTO note_types(id,name,fields_schema,card_templates,created_at) VALUES('__default__','基础','[{"name":"正面","order":0},{"name":"背面","order":1}]','[{"name":"正面→背面","qfmt":"{{正面}}","afmt":"{{背面}}"}]','...')`）
+  - `src/data_access/notetype_db.gd` — **NEW**: NoteTypeDB（extends DBManager）。CRUD 方法: `create_notetype(name, fields_schema, card_templates) → Dictionary`（内部生成 UUID id）、`get_notetype_by_id(id: String)`、`get_notetype_by_name(name: String)`、`get_all_notetypes()`、`update_notetype(entity: NoteTypeEntity)`、`delete_notetype(id: String)`、`name_exists(name, exclude_id="") → bool`、`insert_default_notetype() → Dictionary`（`INSERT OR IGNORE INTO note_types(id,name,fields_schema,card_templates,created_at) VALUES('__default__','基础','[{"name":"正面","order":0},{"name":"背面","order":1}]','[{"name":"正面→背面","qfmt":"{{正面}}","afmt":"{{背面}}"}]','...')`）
   - `src/entities/note_entity.gd` — **MODIFY**: `note_type_id` 类型从 `int = 0` 改为 `String = ""`；`to_dict()` 中 `"note_type_id": note_type_id`（不再强制 int）；`from_dict()` 中 `note_type_id = str(d.get("note_type_id", ""))`；`get_default_deck_id()` 保持返回 0
-  - `scenes/data_access/note_db.gd` — **MODIFY**: `create_note(note_type_id: String, ...)` 参数类型 int→String，校验 `note_type_id.is_empty()` 代替 `<= 0`；`get_notes_by_type(note_type_id: String)` 参数类型 int→String；内部 `_row_to_note_entity()` 无需改（依赖 NoteEntity.from_dict 自动适配）
+  - `src/data_access/note_db.gd` — **MODIFY**: `create_note(note_type_id: String, ...)` 参数类型 int→String，校验 `note_type_id.is_empty()` 代替 `<= 0`；`get_notes_by_type(note_type_id: String)` 参数类型 int→String；内部 `_row_to_note_entity()` 无需改（依赖 NoteEntity.from_dict 自动适配）
 - **产出物说明**:
   - **notes 表迁移逻辑**：在 `init_schema()` 扩展中执行（通过 `column_exists("notes", "note_type_id")` 判断当前列类型）。若当前为 INTEGER：`ALTER TABLE notes RENAME TO notes_old` → `CREATE TABLE notes(...)` 新 schema → `INSERT INTO notes SELECT id, CAST(note_type_id AS TEXT), fields_data, deck_id, created_at FROM notes_old` → `DROP TABLE notes_old` → `UPDATE notes SET note_type_id = '__default__' WHERE note_type_id = '0' OR note_type_id = ''`
   - 默认 NoteType `"__default__"` 在 `init_schema()` 建表后立即 `INSERT OR IGNORE`
@@ -533,8 +533,8 @@ sequenceDiagram
 - **优先级**: P0
 - **依赖**: T01
 - **涉及文件**:
-  - `scenes/business_logic/notetype_manager.gd` — **NEW**: NoteTypeManager（extends Manager）。setup(db_path) 初始化 NoteTypeDB → 调用 `insert_default_notetype()`；CRUD 包装 NoteTypeDB 方法；`delete_notetype()` 内检查 `_is_default_type(id)` 阻止删除默认类型；信号 entity_created/updated/deleted("notetype", id)
-  - `scenes/business_logic/import_manager.gd` — **NEW**: ImportManager（extends Manager）。核心方法:
+  - `src/business_logic/notetype_manager.gd` — **NEW**: NoteTypeManager（extends Manager）。setup(db_path) 初始化 NoteTypeDB → 调用 `insert_default_notetype()`；CRUD 包装 NoteTypeDB 方法；`delete_notetype()` 内检查 `_is_default_type(id)` 阻止删除默认类型；信号 entity_created/updated/deleted("notetype", id)
+  - `src/business_logic/import_manager.gd` — **NEW**: ImportManager（extends Manager）。核心方法:
     * `setup(note_manager: NoteManager, notetype_db: NoteTypeDB, deck_db: DeckDB) → void`
     * `import_from_file(path, deck_id, note_type_id, mapping) → Dictionary`
     * `import_from_dict(data_array: Array, deck_id, note_type_id, mapping) → Dictionary`
@@ -546,8 +546,8 @@ sequenceDiagram
     * `_validate_required_fields(mapping, note_type) → Dictionary` — 对比 note_type.get_field_names() 是否全部在 mapping.values() 中出现
     * `_build_note_fields(row: Dictionary, mapping: Dictionary) → Dictionary` — 按 mapping 提取并转换
     * `_execute_batch_import(data, mapping, deck_id, note_type_id) → Dictionary` — **逐行循环**: 每行 try/catch 包裹 `note_manager.create_note(note_type_id, fields, deck_id)`；成功 → imported++；失败 → 记录 `{row, error}`；每 500 行 emit `import_progress`；最终 emit `import_completed`
-  - `scenes/business_logic/note_manager.gd` — **MODIFY**: `create_note(note_type_id: String, ...)` 参数 int→String，校验 `note_type_id.is_empty()` 代替 `<= 0`；`_generate_cards_for_note(note_id, deck_id, note_type_id: String)` 参数 int→String，校验 `note_type_id.is_empty()` 代替 `<= 0`
-  - `scenes/business_logic/card_manager.gd` — **无结构性变更**（ImportManager 不直接调 CardManager，路径走 NoteManager → CardManager）
+  - `src/business_logic/note_manager.gd` — **MODIFY**: `create_note(note_type_id: String, ...)` 参数 int→String，校验 `note_type_id.is_empty()` 代替 `<= 0`；`_generate_cards_for_note(note_id, deck_id, note_type_id: String)` 参数 int→String，校验 `note_type_id.is_empty()` 代替 `<= 0`
+  - `src/business_logic/card_manager.gd` — **无结构性变更**（ImportManager 不直接调 CardManager，路径走 NoteManager → CardManager）
 - **产出物说明**:
   - ImportManager 不持有 NoteDB/CardDB 引用——所有 DB 操作通过 `note_manager.create_note()` 间接完成
   - `_execute_batch_import()` 对每行调用 `create_note()`，单个失败记录后 continue，不中断后续行
@@ -561,18 +561,18 @@ sequenceDiagram
 - **优先级**: P0
 - **依赖**: T02
 - **涉及文件**:
-  - `scenes/ui/import_wizard.tscn` — **NEW**: 三步骤向导 UI 场景。
+  - `content/scenes/ui/import_wizard.tscn` — **NEW**: 三步骤向导 UI 场景。
     * Step1 容器: FileDialog 按钮 + 已选文件路径 Label
     * Step2 容器: Deck Label (只读预填) + OptionButton(NoteType 列表，首位标注"默认"设 `__default__`) + 映射 GridContainer（每行: JSON key Label | "→" Icon | NoteType field OptionButton）+ required 缺失警告 Label(红色)
     * Step3 容器: 预览 Tree（前 5 条，列由 mapping 动态生成）+ 统计行 "共 N 条" + ProgressBar + "确认导入" Button
     * 结果弹窗: AcceptDialog（`"成功: X 条 | 失败: Y 条"` + ScrollContainer 内 Label 列出失败明细 "行号: 错误原因"）
-  - `scenes/ui/import_wizard.gd` — **NEW**: 控制器脚本。
+  - `content/scenes/ui/import_wizard.gd` — **NEW**: 控制器脚本。
     * 属性: `_step: int`（1/2/3）, `_deck_id: int`（构造时注入）, `_parsed_data: Array`, `_mapping: Dictionary`, `_notetype_id: String`
     * Step1 → Step2: `_on_file_selected(path)` → `import_manager._parse_json_file(path)` → 缓存 → 显示 Step2
     * Step2 初始化: 加载 NoteType 列表（调用 `notetype_db.get_all_notetypes()`），Deck Label 显示预填 deck 名称（`deck_db.get_deck_by_id(_deck_id)`）
     * Step2 → Step3: `_on_mapping_confirmed()` → `import_manager._auto_map_fields()` + `import_manager._validate_required_fields()` → 缓存 mapping → 显示预览
     * Step3 → 导入: `_on_import_confirmed()` → `import_manager.import_from_dict()` → 连接 `import_progress` 信号更新 ProgressBar → 连接 `import_completed` 信号显示结果弹窗
-  - `scenes/ui/deck_list.gd` — **MODIFY**: 在 Deck Tree 的右键菜单（`_on_tree_item_right_clicked` 或类似方法）中新增菜单项「导入到本牌组」，点击后实例化 ImportWizard 场景并传入 `deck_id`
+  - `src/ui/deck_list.gd` — **MODIFY**: 在 Deck Tree 的右键菜单（`_on_tree_item_right_clicked` 或类似方法）中新增菜单项「导入到本牌组」，点击后实例化 ImportWizard 场景并传入 `deck_id`
   - `src/app.gd` — **MODIFY**: 扩展 init_schema() 调用链：① 确保 NoteTypeDB 在 schema 初始化阶段被调用（含默认 NoteType 插入）；② 可选注册 ImportManager 单例或由 ImportWizard 按需实例化（建议由 ImportWizard 按需实例化，避免 Autoload 膨胀）
 - **产出物说明**:
   - Deck 右键菜单: 在已有右键处理逻辑中追加 `popup.add_item("导入到本牌组")` → 点击后 `ImportWizard.new(deck_id)` 并 `add_child()` 或弹出

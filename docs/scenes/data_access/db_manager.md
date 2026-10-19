@@ -1,6 +1,6 @@
 # db_manager.gd (DBManager)
 
-> **路径**: `res://scenes/data_access/db_manager.gd`
+> **路径**: `res://src/data_access/db_manager.gd`
 > **继承**: `Node`
 > **类型**: 数据层 - 基类
 
@@ -155,4 +155,4 @@
 
 | 常量 | 值 | 说明 |
 | --- | --- | --- |
-| `SCHEMA_JSON_PATH` | `"res://data/db_schema.json"` | 表结构配置文件路径 |
+| `SCHEMA_JSON_PATH` | `"res://src/data/db_schema.json"` | 表结构配置文件路径 |

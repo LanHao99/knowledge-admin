@@ -12,15 +12,15 @@ WindowManager 注册 knowledge_admin、ai_cards、control_panel、my_computer、
 
 “摄像头”在桌面和开始菜单提供入口，默认 560×560，显示 MIRA 的透明背景人物头像。普通缩放与最大化均保持整窗方形，复用现有拖动、最小化和任务栏行为。内容根节点通过 `@export` 暴露立绘、缩放、偏移、镜像、背景色及 CRT 参数，支持编辑器预览。CRT 只处理自己的画面，不采样桌面；详细参数及渲染证据见 [摄像头窗口](camera.md)。
 
-“知识空间”在桌面和开始菜单提供入口，默认 1100×740、最小 720×480。在独立 3D 视口中按牌组展示最近的闪卡文档，玩家可右键飞行、单击选择、双击聚焦及打开全文阅读。六份高亮剧情档案按已完成剧情解锁；不记录收集奖励或改变学习进度。内容和视觉配置集中在 `data/desktop/knowledge_space.tres`；操作、参数及验收见 [知识空间](knowledge_space.md)。
+“知识空间”在桌面和开始菜单提供入口，默认 1100×740、最小 720×480。在独立 3D 视口中按牌组展示最近的闪卡文档，玩家可右键飞行、单击选择、双击聚焦及打开全文阅读。六份高亮剧情档案按已完成剧情解锁；不记录收集奖励或改变学习进度。内容和视觉配置集中在 `content/data/desktop/knowledge_space.tres`；操作、参数及验收见 [知识空间](knowledge_space.md)。
 
 ## 我的电脑预设文件
 
-目录说明及虚拟 txt 正文统一保存在 `res://data/desktop/my_computer_files.tres`，由 `my_computer.tscn` 根节点的 `file_catalog` 属性引用。
+目录说明及虚拟 txt 正文统一保存在 `res://content/data/desktop/my_computer_files.tres`，由 `my_computer.tscn` 根节点的 `file_catalog` 属性引用。
 
 在 Godot Inspector 打开该资源：`drive_description` 与 `programs_description` 分别编辑系统盘和程序目录说明；`documents` 数组保存文档。展开每个 DesktopTextFile 资源，用 `file_name` 修改文件名，用多行 `content` 编辑正文。运行应用时按数组生成目录，因此新增、删除或改名条目无需修改查看器脚本。
 
-两个资源类型位于 `data/resources/desktop_file_catalog.gd` 与 `desktop_text_file.gd`；预设正文保存在这一个 `.tres` 中，两个 txt 为内嵌子资源。原有“使用说明.txt”“学习指南.txt”的内容保持一致。在 Inspector 中编辑并保存资源后，重新运行游戏即可看到预设变化。
+两个资源类型位于 `src/resources/desktop_file_catalog.gd` 与 `desktop_text_file.gd`；预设正文保存在这一个 `.tres` 中，两个 txt 为内嵌子资源。原有“使用说明.txt”“学习指南.txt”的内容保持一致。在 Inspector 中编辑并保存资源后，重新运行游戏即可看到预设变化。
 
 游戏内选中文档后可以直接修改正文。系统盘和程序目录仍只显示说明，正文使用不透明深灰，避免只读状态落到引擎默认的半透明浅色上。目录项悬浮时保持黑字，名称提示使用不透明浅黄底。切换文件不会询问，草稿留在当前窗口里，未保存的文件名末尾显示 `*`。`Ctrl+S` 只保存当前文档。关闭「我的电脑」，或从开始菜单关闭系统时，只要还有未保存文档，就询问保存、不保存或取消。保存失败时不关闭、不退出。剧情调用的 `App.quit_app()` 不插入这个询问。
 
@@ -30,7 +30,7 @@ WindowManager 注册 knowledge_admin、ai_cards、control_panel、my_computer、
 
 ## 壁纸
 
-桌面底色仍是青绿色。选择壁纸后，底色之上的全屏图层显示 `res://assets/wallpapers/` 中的图片。铺满时保持比例并裁切边缘；原比例时图片居中，周围是黑边。控制面板的「壁纸」页可以预览和切换，配置保存在 `user://wallpaper_settings.cfg`。未选择壁纸时不显示这一层。
+桌面底色仍是青绿色。选择壁纸后，底色之上的全屏图层显示 `res://content/assets/wallpapers/` 中的图片。铺满时保持比例并裁切边缘；原比例时图片居中，周围是黑边。控制面板的「壁纸」页可以预览和切换，配置保存在 `user://wallpaper_settings.cfg`。未选择壁纸时不显示这一层。
 
 ## 窗口与布局
 
@@ -44,7 +44,7 @@ ManagedWindow 的标题栏、内容区、边框及八个缩放把手均保存在
 
 ## AI 制卡助手
 
-场景为 `game/AI/ai_debug.tscn`，由桌面应用 `ai_cards` 打开，通过 DeepSeek 对话生成卡片并导入。
+场景为 `content/scenes/ai/ai_debug.tscn`，由桌面应用 `ai_cards` 打开，通过 DeepSeek 对话生成卡片并导入。
 
 发出的消息、AI 回复、系统提示和错误都包在圆角气泡里。发送内容靠右，回复靠左，系统提示居中。气泡随文字变窄，最长约为聊天区宽度的 72%，更长的内容在气泡内换行。顶栏只保留标题和设置，关闭窗口使用桌面标题栏，界面内不再提供「返回主菜单」。
 
@@ -82,12 +82,12 @@ StoryDialogueOverlay 现在是可复用 Control，继续使用 DialogueManager �
 
 tests/unit/test_desktop_window.gd 使用真实场景检查窗口矩形、八向缩放、最小化保留内容与按钮锁定。
 
-tests/desktop/verify_desktop.tscn 必须在 application/config/name 为 KnowledgeAdminDesktopVerification 的隔离工程运行；不会使用正式玩家的数据库和存档。它注入真实鼠标事件，检查启动、导航、AI 结果导入、JSON 文件导入、学习评分、剧情与帮助，并输出 desktop_review/verification.json 和 GPU 截图。
+tests/scenes/desktop/verify_desktop.tscn 必须在 application/config/name 为 KnowledgeAdminDesktopVerification 的隔离工程运行；不会使用正式玩家的数据库和存档。它注入真实鼠标事件，检查启动、导航、AI 结果导入、JSON 文件导入、学习评分、剧情与帮助，并输出 desktop_review/verification.json 和 GPU 截图。
 
 截图矩阵覆盖 1280×720、1920×1080 以及 80%、100%、150% 字号。AI 验收使用预设生成结果经过真实导入入口，不向外部模型服务发送请求。
 
 
-剧情测试台的 GUT 在 Godot 4.7.2 下 13 项、79 个断言通过，覆盖跨章完成记录、旧档迁移、羁绊前置、跳转重排、存档往返、备份恢复、保存失败和编辑冲突。隔离工程 `tests/desktop/verify_story_test.tscn` 另有 56 项检查通过，包含连续触发、自然结束、选项等待时停止、延迟回调、测试退出、桌面焦点和学习界面恢复，以及 1280×720、1920×1080 下 100% 和 150% 字号的真实渲染。
+剧情测试台的 GUT 在 Godot 4.7.2 下 13 项、79 个断言通过，覆盖跨章完成记录、旧档迁移、羁绊前置、跳转重排、存档往返、备份恢复、保存失败和编辑冲突。隔离工程 `tests/scenes/desktop/verify_story_test.tscn` 另有 56 项检查通过，包含连续触发、自然结束、选项等待时停止、延迟回调、测试退出、桌面焦点和学习界面恢复，以及 1280×720、1920×1080 下 100% 和 150% 字号的真实渲染。
 
 ## 验收记录
 

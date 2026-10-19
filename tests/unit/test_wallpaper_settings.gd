@@ -2,7 +2,7 @@ extends GutTest
 ## 验证壁纸列表、存档回退和桌面显示方式，不改写玩家的壁纸配置。
 
 const SettingsScript: GDScript = preload("res://src/wallpaper_settings.gd")
-const SAMPLE_WALLPAPER: String = "res://assets/wallpapers/leaf.jpg"
+const SAMPLE_WALLPAPER: String = "res://content/assets/wallpapers/leaf.jpg"
 
 var _settings: Node
 var _config_path: String = ""
@@ -31,11 +31,11 @@ func after_each() -> void:
 ## 输出: 无。
 func test_list_contains_wallpaper_images() -> void:
 	var expected := PackedStringArray()
-	var directory := DirAccess.open("res://assets/wallpapers")
+	var directory := DirAccess.open("res://content/assets/wallpapers")
 	assert_not_null(directory)
 	for file_name: String in directory.get_files():
 		if ["png", "jpg", "jpeg", "webp"].has(file_name.get_extension().to_lower()):
-			expected.append("res://assets/wallpapers".path_join(file_name))
+			expected.append("res://content/assets/wallpapers".path_join(file_name))
 	expected.sort()
 	var paths: PackedStringArray = _settings.list_wallpapers()
 	assert_gt(expected.size(), 0)
@@ -59,7 +59,7 @@ func test_configuration_round_trip() -> void:
 ## 输出: 无。
 func test_invalid_path_and_mode_fall_back() -> void:
 	var config := ConfigFile.new()
-	config.set_value("wallpaper", "path", "res://assets/wallpapers/missing.jpg")
+	config.set_value("wallpaper", "path", "res://content/assets/wallpapers/missing.jpg")
 	config.set_value("wallpaper", "mode", 9)
 	assert_eq(config.save(_config_path), OK)
 	_settings.load_settings(_config_path)
@@ -71,7 +71,7 @@ func test_invalid_path_and_mode_fall_back() -> void:
 	_settings.load_settings(_config_path)
 	assert_eq(_settings.wallpaper_path, SAMPLE_WALLPAPER)
 	assert_eq(_settings.display_mode, SettingsScript.MODE_FILL)
-	_settings.set_wallpaper("res://icon.svg")
+	_settings.set_wallpaper("res://content/assets/branding/icon.svg")
 	assert_eq(_settings.wallpaper_path, SAMPLE_WALLPAPER)
 
 
@@ -93,7 +93,7 @@ func test_duplicate_choice_is_quiet_and_invalid_mode_becomes_fill() -> void:
 ## 验证桌面在无壁纸、铺满和原比例之间切换纹理与拉伸方式。## 输入: 无。
 ## 输出: 无。
 func test_desktop_applies_wallpaper_modes() -> void:
-	var desktop := load("res://scenes/desktop/desktop.tscn").instantiate() as Control
+	var desktop := load("res://content/scenes/desktop/desktop.tscn").instantiate() as Control
 	add_child_autofree(desktop)
 	var layer := desktop.get_node("WallpaperLayer") as Control
 	var wallpaper := desktop.get_node("%Wallpaper") as TextureRect
@@ -117,7 +117,7 @@ func test_desktop_applies_wallpaper_modes() -> void:
 ## 验证控制面板仅列出无壁纸和已解锁图片，并按屏幕比例准备预览。## 输入: 无。
 ## 输出: 无。
 func test_control_panel_lists_wallpapers_and_preview() -> void:
-	var settings := load("res://scenes/ui/settings.tscn").instantiate() as Control
+	var settings := load("res://content/scenes/ui/settings.tscn").instantiate() as Control
 	add_child_autofree(settings)
 	var wallpaper_list := settings.get_node("%WallpaperList") as ItemList
 	assert_eq(wallpaper_list.get_item_text(0), "无壁纸")
@@ -151,7 +151,7 @@ func test_story_wallpapers_start_locked() -> void:
 		assert_eq(_settings.wallpaper_path, "")
 		assert_null(_settings.load_texture(path))
 	assert_true(_settings.is_wallpaper_unlocked(SAMPLE_WALLPAPER))
-	assert_false(_settings.unlock_wallpaper("res://icon.svg"))
+	assert_false(_settings.unlock_wallpaper("res://content/assets/branding/icon.svg"))
 
 
 ## 领取立即持久化，重复领取不重复发信号，恢复后仍能切换。## 输入: 无。输出: 无。
@@ -183,8 +183,25 @@ func test_legacy_and_invalid_unlock_records() -> void:
 	_settings.load_settings(_config_path)
 	assert_false(_settings.is_wallpaper_unlocked(path))
 	assert_eq(_settings.wallpaper_path, "")
-	config.set_value("wallpaper", "unlocked", [null, 3, "res://icon.svg", path, path])
+	config.set_value("wallpaper", "unlocked", [null, 3, "res://content/assets/branding/icon.svg", path, path])
 	assert_eq(config.save(_config_path), OK)
 	_settings.load_settings(_config_path)
 	assert_eq(_settings.wallpaper_path, path)
 	assert_eq(_settings.get("_unlocked_wallpapers"), PackedStringArray([path]))
+
+
+## 壁纸与解锁记录中的素材路径在读取后指向现有图片。## 输入: 无。
+## 输出: 无。
+func test_saved_wallpaper_paths_survive_content_directory_move() -> void:
+	var current: String = SettingsScript.LOCKED_BY_DEFAULT[0]
+	var previous: String = current.replace(SettingsScript.WALLPAPER_DIR, "res://assets/wallpapers/")
+	var config: ConfigFile = ConfigFile.new()
+	config.set_value("wallpaper", "path", previous)
+	config.set_value("wallpaper", "unlocked", PackedStringArray([previous]))
+	config.set_value("wallpaper", "mode", SettingsScript.MODE_FIT)
+	assert_eq(config.save(_config_path), OK)
+	_settings.load_settings(_config_path)
+	assert_eq(_settings.wallpaper_path, current)
+	assert_true(_settings.is_wallpaper_unlocked(current))
+	assert_eq(_settings.display_mode, SettingsScript.MODE_FIT)
+	assert_not_null(_settings.load_texture(current))

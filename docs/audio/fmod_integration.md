@@ -12,7 +12,7 @@
 | 插件 | `addons/fmod/plugin.cfg` 为 6.1.0，插件已列入 `project.godot` 的启用列表。 |
 | 原生运行库 | Windows 的 `fmod.dll`、`fmodL.dll`、`fmodstudio.dll`、`fmodstudioL.dll` 均为 2.3.6，即 FMOD 2.03.06。编辑器、Debug、Release 的扩展 DLL 均存在。 |
 | 自动加载 | 已注册 `FmodManager`，UID 与插件脚本相符；它负责逐帧更新和系统通知，没有业务音库加载逻辑。 |
-| 音库路径 | `Fmod/General/banks_path` 已设为 `res://assets/Banks`；目录存在，递归检查得到 0 个 `.bank`。 |
+| 音库路径 | `Fmod/General/banks_path` 已设为 `res://content/assets/Banks`；目录存在，递归检查得到 0 个 `.bank`。 |
 | 业务播放 | 在 `src`、`scenes`、`game` 中未发现 FMOD 播放调用或原生 AudioStreamPlayer 播放节点。 |
 | 设置与导出 | 尚无声音设置；当前导出目标为 Windows Desktop，嵌入 PCK。 |
 
@@ -34,8 +34,8 @@
 
 1. 首轮使用 FMOD Studio 2.03.06，与已经核对的运行库和插件发布组合一致。
 2. 创建本项目自己的 Studio 工程，导入 WAV 素材，建立 `event:/UI/Confirm` 测试事件，并将它分配到 `UI` Bank。
-3. 选择 Desktop 构建平台，把生成的音库输出或同步到本工程 `assets/Banks`。构建后检查该目录根部确有 `Master.strings.bank`、`Master.bank` 和 `UI.bank`；避免路径实际落在未配置的 `Desktop` 子目录。
-4. 在 Godot 的 FMOD General 设置中确认 Banks Path 为 `res://assets/Banks`、Auto Initialize 开启。调试时可开启 Live Update；本项目建议先以默认缓冲和立体声建立稳定播放。
+3. 选择 Desktop 构建平台，把生成的音库输出或同步到本工程 `content/assets/Banks`。构建后检查该目录根部确有 `Master.strings.bank`、`Master.bank` 和 `UI.bank`；避免路径实际落在未配置的 `Desktop` 子目录。
+4. 在 Godot 的 FMOD General 设置中确认 Banks Path 为 `res://content/assets/Banks`、Auto Initialize 开启。调试时可开启 Live Update；本项目建议先以默认缓冲和立体声建立稳定播放。
 5. 使用工具栏的 `Fmod Explorer` 查看和试听测试事件。若编辑器尚未刷新音库，重新打开工程后检查。
 
 Auto Initialize、Live Update 与 Explorer 的作用见[初始化说明](https://fmod-gdextension.readthedocs.io/en/latest/user-guide/2-initialization/)。Explorer 的试听成功只说明编辑器侧可以访问该事件，运行时还需要单独加载音库。
@@ -141,7 +141,7 @@ src/audio/audio_catalog.gd          AudioCatalog Resource 类型
 src/audio/audio_cue.gd              AudioCue Resource 类型
 scenes/audio/audio_manager.tscn     常驻音频场景与 BankLoader
 data/audio/audio_catalog.tres       一个目录，内含 Array[AudioCue] 子资源
-assets/Banks/                      FMOD 构建产物
+content/assets/Banks/                      FMOD 构建产物
 ```
 
 目录资源记录业务 ID、事件路径/GUID、所需 Bank、冷却与并发策略；素材随机、音高变化、效果链和音乐过渡放在 Studio。业务代码使用 `study_flip` 等稳定 ID，资源表统一映射 FMOD 事件。

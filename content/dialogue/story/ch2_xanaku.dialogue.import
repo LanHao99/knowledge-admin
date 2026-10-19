@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://bykjdaqmlyvxx"
+path="res://.godot/imported/ch2_xanaku.dialogue-a989ee68ea7746c34e88cebc7ec0760f.tres"
+
+[deps]
+
+source_file="res://content/dialogue/story/ch2_xanaku.dialogue"
+dest_files=["res://.godot/imported/ch2_xanaku.dialogue-a989ee68ea7746c34e88cebc7ec0760f.tres"]
+
+[params]
+
+defaults=true

@@ -1,6 +1,6 @@
 # deck_db.gd (DeckDB)
 
-> **路径**: `res://scenes/data_access/deck_db.gd`
+> **路径**: `res://src/data_access/deck_db.gd`
 > **继承**: `DBManager`
 > **类型**: 数据层
 

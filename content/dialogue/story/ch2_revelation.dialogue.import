@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://ch2rev0000001"
+path="res://.godot/imported/ch2_revelation.dialogue-ef42aa2aa584e122b5c1e92426613789.tres"
+
+[deps]
+
+source_file="res://content/dialogue/story/ch2_revelation.dialogue"
+dest_files=["res://.godot/imported/ch2_revelation.dialogue-ef42aa2aa584e122b5c1e92426613789.tres"]
+
+[params]
+
+defaults=true

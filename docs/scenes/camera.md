@@ -8,11 +8,11 @@
 
 ## 检查器编辑
 
-打开 `res://scenes/desktop/camera.tscn`，选择根节点 **Camera**。节点挂载 `@tool` 脚本 `camera.gd`，下面的属性通过 `@export` 暴露；修改后可在 2D 编辑器中即时预览，保存场景后用于下次运行。
+打开 `res://content/scenes/desktop/camera.tscn`，选择根节点 **Camera**。节点挂载 `@tool` 脚本 `camera.gd`，下面的属性通过 `@export` 暴露；修改后可在 2D 编辑器中即时预览，保存场景后用于下次运行。
 
 | 分组 | 属性 | 默认值与用途 |
 | --- | --- | --- |
-| Portrait | `portrait_texture` | `assets/characters/mira_camera.png`；可拖入其他 Texture2D。 |
+| Portrait | `portrait_texture` | `content/assets/characters/mira_camera.png`；可拖入其他 Texture2D。 |
 | Portrait | `portrait_zoom` | 1；保持比例完整显示，增大用于拉近。 |
 | Portrait | `portrait_offset` | (0, 0)；以画面尺寸为单位，正值向右、向下。 |
 | Portrait | `portrait_flip_h` | false；水平镜像。 |
@@ -45,6 +45,6 @@
 
 Godot 4.7.2 下，摄像头专项 5 项、原窗口 5 项、窗口管理器 8 项 GUT 测试通过，共 18 项、79 个断言。覆盖立绘接入与移除、材质独立、虚拟分辨率下限、八向方形缩放、最大化还原和小工作区，以及现有矩形窗口行为。
 
-`tests/desktop/verify_camera.tscn` 必须在名称为 `KnowledgeAdminDesktopVerification` 的隔离工程运行。使用真实 Forward+ / D3D12 渲染验证 17 项检查：应用入口、单实例、默认方形、纵向透明测试贴图的等比显示与镜像、CRT 产生实际像素变化、标题栏像素不变、最小化恢复、80%／100%／150% 字号的方形最大化及关闭释放。
+`tests/scenes/desktop/verify_camera.tscn` 必须在名称为 `KnowledgeAdminDesktopVerification` 的隔离工程运行。使用真实 Forward+ / D3D12 渲染验证 17 项检查：应用入口、单实例、默认方形、纵向透明测试贴图的等比显示与镜像、CRT 产生实际像素变化、标题栏像素不变、最小化恢复、80%／100%／150% 字号的方形最大化及关闭释放。
 
 验收报告和真实默认界面保存在 [camera_review](desktop_review/camera/verification.json) 与 [摄像头截图](desktop_review/camera/mira_camera.png)。测试色卡仅用于验证采样，未作为 MIRA 素材保存到正式内容中。

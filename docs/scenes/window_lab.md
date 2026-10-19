@@ -36,7 +36,7 @@ DamageCopy 使用 COPY_MODE_VIEWPORT。当前 Forward+ 渲染路径的矩形复�
 
 ## 可调整参数与接口
 
-打开 `scenes/desktop/desktop.tscn`，选择 WindowEffects：
+打开 `content/scenes/desktop/desktop.tscn`，选择 WindowEffects：
 
 | 属性 | 默认值 | 含义 |
 | --- | --- | --- |
@@ -71,4 +71,4 @@ Godot 4.7.2、Forward+／D3D12 实际渲染：
 
 证据保存在 [window_lab 验收目录](desktop_review/window_lab/verification.json)，其中有正常、破损、碎裂及重新打开的实际截图，以及桌面回归报告。
 
-复现时复制当前工作区到隔离工程，保留最新资源与插件，将 application/config/name 设置为 KnowledgeAdminDesktopVerification，移除 MCPRuntimeBridge 和编辑器 MCP 插件，使用该工程自己的 saves 目录。运行 `tests/desktop/verify_window_effects.tscn` 执行 GPU 验收；原桌面回归使用 `tests/desktop/verify_desktop.tscn`。
+复现时复制当前工作区到隔离工程，保留最新资源与插件，将 application/config/name 设置为 KnowledgeAdminDesktopVerification，移除 MCPRuntimeBridge 和编辑器 MCP 插件，使用该工程自己的 saves 目录。运行 `tests/scenes/desktop/verify_window_effects.tscn` 执行 GPU 验收；原桌面回归使用 `tests/scenes/desktop/verify_desktop.tscn`。

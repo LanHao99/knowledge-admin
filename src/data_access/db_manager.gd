@@ -1,0 +1,520 @@
+extends Node
+class_name DBManager
+
+## 这是"数据层基类"，专门负责：
+# 1) 管理 sqlite 连接
+# 2) 执行 SQL（查询/写入/事务）
+# 3) 把 JSON 格式的表结构配置转成真实 SQL 并初始化数据表
+# 4) 统一错误处理和返回格式
+# 你可以把它理解成：
+# - 业务层只说"我要查/改什么"
+# - DBManager 负责"具体怎么和数据库沟通"
+
+signal db_error(code: String, message: String)
+
+const SCHEMA_JSON_PATH: String = "res://src/data/db_schema.json" # 表结构配置文件路径
+
+# 进程内共享的 SQLite 句柄缓存：同一 db_path 仅持有一个底层连接，避免多连接对同一文件同时写入触发 SQLITE_BUSY (database is locked)
+# 值结构: {"db": SQLite, "refs": int}
+static var _shared_connections: Dictionary = {}
+
+var _db: SQLite = null
+var _db_path: String = "user://knowledge_admin.db"
+var _owns_connection: bool = false # 当前实例是否对共享连接持有一份引用计数
+var _schema_config: Dictionary = {}
+var _last_error: String = ""
+var _last_code: String = ""
+var _last_rows: Array[Dictionary] = []
+
+
+## 配置数据库文件路径，供后续调用 open() 使用。## 输入: db_path (String) - 数据库文件路径，支持 user:// 前缀，默认 "user://knowledge_admin.db"。
+## 输出: 无。
+func configure(db_path: String = "user://knowledge_admin.db") -> void:
+	_db_path = db_path
+
+
+## 创建或复用同 db_path 的共享连接，并加载 schema JSON。## 输入: 无。
+## 输出: bool - 成功拿到连接并加载 schema 配置时返回 true；打开数据库或读取 schema 失败时返回 false。
+func open() -> bool:
+	clear_last_error()
+
+	# 1) 优先复用已存在的共享连接，避免对同一文件开多个 SQLite 句柄导致跨连接写锁冲突
+	if _shared_connections.has(_db_path):
+		var entry: Dictionary = _shared_connections[_db_path]
+		_db = entry.get("db", null)
+		if _db == null:
+			_shared_connections.erase(_db_path)
+		elif not _owns_connection:
+			entry["refs"] = int(entry.get("refs", 0)) + 1
+			_owns_connection = true
+
+	# 2) 没有共享连接则新建一个并登记
+	if _db == null:
+		_db = SQLite.new()
+		_db.path = _db_path
+		if not _db.open_db():
+			_fail("DB_OPEN_FAILED", "打开数据库失败: %s" % _db_path)
+			_db = null
+			return false
+		_shared_connections[_db_path] = {"db": _db, "refs": 1}
+		_owns_connection = true
+
+	# 3) 读取 schema 配置文件（后续 init_schema 会用到）
+	var schema_result := load_schema_config()
+	if not schema_result.get("success", false):
+		close()
+		return false
+
+	return true
+
+
+## 释放当前实例对共享连接的引用，归零时真正放手底层 SQLite。## 输入: 无。
+## 输出: 无。
+func close() -> void:
+	if _owns_connection and _shared_connections.has(_db_path):
+		var entry: Dictionary = _shared_connections[_db_path]
+		var refs: int = int(entry.get("refs", 0)) - 1
+		if refs <= 0:
+			_shared_connections.erase(_db_path)
+		else:
+			entry["refs"] = refs
+	_owns_connection = false
+	_db = null
+
+
+## 暴露底层 SQLite 句柄，供跨仓库事务做"同连接去重"使用。## 输入: 无。
+## 输出: SQLite - 当前持有的底层连接；未打开返回 null。
+func get_sqlite() -> SQLite:
+	return _db
+
+
+## 节点销毁时自动释放共享连接引用，避免泄漏。## 输入: 无。
+## 输出: 无。
+func _exit_tree() -> void:
+	if _owns_connection:
+		close()
+
+
+## 检查数据库是否已经打开。## 输入: 无。
+## 输出: bool - 已持有底层 SQLite 连接返回 true，否则返回 false。
+func is_open() -> bool:
+	return _db != null
+
+
+## 要求数据库已打开，未打开时记录失败并发出错误信号。## 输入: 无。
+## 输出: bool - 已打开返回 true；未打开返回 false，错误码为 DB_NOT_OPEN。
+func require_open() -> bool:
+	if is_open():
+		return true
+	_fail("DB_NOT_OPEN", "数据库尚未打开，请先调用 open()")
+	return false
+
+
+## 从 JSON 文件读取 schema 配置并缓存到实例。## 输入: 无。
+## 输出: 返回标准字典。成功时 `data` 为解析出的 schema 配置字典；文件缺失或解析失败时透传 SchemaParser 的失败结果。
+func load_schema_config() -> Dictionary:
+	var result := SchemaParser.parse_json_file(SCHEMA_JSON_PATH)
+	if not result.get("success", false):
+		# 如果失败了，直接透传带有错误代码和信息的字典
+		return result
+
+	# 成功则缓存下来
+	_schema_config = result.get("data", {})
+	return ok(_schema_config)
+
+
+## 开始事务，保证多步写入要么全成功要么全失败。## 输入: 无。
+## 输出: bool - BEGIN 执行成功返回 true；数据库未打开或执行失败返回 false，错误码为 TX_BEGIN_FAILED。
+func begin_transaction() -> bool:
+	return _exec_bool("BEGIN TRANSACTION;", "TX_BEGIN_FAILED", "开启事务失败")
+
+
+## 提交事务，把本次事务中的改动真正写入数据库。## 输入: 无。
+## 输出: bool - COMMIT 执行成功返回 true；数据库未打开或执行失败返回 false，错误码为 TX_COMMIT_FAILED。
+func commit_transaction() -> bool:
+	return _exec_bool("COMMIT;", "TX_COMMIT_FAILED", "提交事务失败")
+
+
+## 回滚事务，放弃本次事务中的所有改动。## 输入: 无。
+## 输出: bool - ROLLBACK 执行成功返回 true；数据库未打开或执行失败返回 false，错误码为 TX_ROLLBACK_FAILED。
+func rollback_transaction() -> bool:
+	return _exec_bool("ROLLBACK;", "TX_ROLLBACK_FAILED", "回滚事务失败")
+
+
+## 执行不带参数的 SQL，返回统一结果字典。## 输入: sql (String) - 要执行的完整 SQL 语句。
+## 输出: 返回标准字典。成功时 `success` 为 true 并清空查询缓存；失败时 `code` 为 DB_NOT_OPEN 或 SQL_EXEC_FAILED。
+func execute(sql: String) -> Dictionary:
+	if not require_open():
+		return fail("DB_NOT_OPEN", "数据库尚未打开")
+
+	clear_last_error()
+	if not _db.query(sql):
+		return _sqlite_fail("SQL_EXEC_FAILED", sql)
+
+	_last_rows = [] # 写操作后清空上一轮查询缓存
+	return ok()
+
+
+## 执行带参数 SQL，推荐写操作使用。## 输入:
+##   sql (String) - 含 ? 占位符的 SQL 语句。
+##   params (Array) - 与占位符顺序对应的绑定参数，默认空数组。
+## 输出: 返回标准字典。成功时 `success` 为 true 并清空查询缓存；失败时 `code` 为 DB_NOT_OPEN 或 SQL_BIND_EXEC_FAILED。
+func execute_bind(sql: String, params: Array = []) -> Dictionary:
+	if not require_open():
+		return fail("DB_NOT_OPEN", "数据库尚未打开")
+
+	clear_last_error()
+	if not _db.query_with_bindings(sql, params):
+		return _sqlite_fail("SQL_BIND_EXEC_FAILED", sql)
+
+	_last_rows = [] # 写操作后清空上一轮查询缓存
+	return ok()
+
+
+## 查询多行数据，结果同时缓存到 _last_rows。## 输入:
+##   sql (String) - 查询语句。
+##   params (Array) - 绑定参数，为空时走不带参查询，默认空数组。
+## 输出: 返回标准字典。成功时 `data` 为 Array[Dictionary]（查询到的行）；执行失败时返回带 SQL_QUERY_FAILED 的失败结构。
+func fetch_all(sql: String, params: Array = []) -> Dictionary:
+	if not require_open():
+		return fail("DB_NOT_OPEN", "数据库尚未打开")
+
+	# 1) 执行查询（支持带/不带参）
+	clear_last_error()
+	var success: bool = false
+	if params.is_empty():
+		success = _db.query(sql)
+	else:
+		success = _db.query_with_bindings(sql, params)
+
+	if not success:
+		return _sqlite_fail("SQL_QUERY_FAILED", sql)
+
+	# 2) 整理结果，确保是字典数组
+	var rows: Array = _db.query_result
+	_last_rows = []
+	for row in rows:
+		if row is Dictionary:
+			_last_rows.append(row)
+
+	return ok(_last_rows)
+
+
+## 查询单行数据，内部复用 fetch_all。## 输入:
+##   sql (String) - 查询语句。
+##   params (Array) - 绑定参数，默认空数组。
+## 输出: 返回标准字典。成功时 `data` 为第一行的 Dictionary，无结果时为空字典；失败时透传 fetch_all 的失败结构。
+func fetch_one(sql: String, params: Array = []) -> Dictionary:
+	var result := fetch_all(sql, params)
+	if not result.get("success", false):
+		return result
+
+	var rows: Array = result.get("data", [])
+	if rows.is_empty():
+		return ok({})
+
+	return ok(rows[0])
+
+
+## 查询单值，如 COUNT(*) 或 MAX(列)。## 输入:
+##   sql (String) - 只返回一个字段的查询语句。
+##   params (Array) - 绑定参数，默认空数组。
+##   default_value (Variant) - 查询结果为空时的兜底值，默认 null。
+## 输出: 返回标准字典。成功时 `data` 为第一行第一个字段的值，无结果时为 default_value；失败时透传 fetch_one 的失败结构。
+func scalar(sql: String, params: Array = [], default_value: Variant = null) -> Dictionary:
+	var result := fetch_one(sql, params)
+	if not result.get("success", false):
+		return result
+
+	var row: Dictionary = result.get("data", {})
+	if row.is_empty():
+		return ok(default_value)
+
+	for key in row.keys():
+		return ok(row[key])
+
+	return ok(default_value)
+
+
+## 获取最后一次 INSERT 的 rowid。## 输入: 无。
+## 输出: 返回标准字典。成功时 `data` 为 int（本连接最近一次 INSERT 的自增 ID）。
+func last_insert_rowid() -> Dictionary:
+	var result := scalar("SELECT last_insert_rowid() AS rowid;", [], 0)
+	if not result.get("success", false):
+		return result
+	return ok(int(result.get("data", 0)))
+
+
+## 获取最后一次 INSERT、UPDATE 或 DELETE 操作影响的行数。## 输入: 无。
+## 输出: 返回标准字典。成功时 `data` 为 int（最后一次数据变更影响的行数）。
+func changes() -> Dictionary:
+	var result := scalar("SELECT changes() AS cnt;", [], 0)
+	if not result.get("success", false):
+		return result
+	return ok(int(result.get("data", 0)))
+
+
+## 检查指定表是否存在。## 输入: table_name (String) - 表名（如 "decks"）。
+## 输出: bool。存在返回 true，不存在或查询失败返回 false。
+func table_exists(table_name: String) -> bool:
+	if not _is_safe_identifier(table_name):
+		push_warning("[DBManager] 非法表名: %s" % table_name)
+		return false
+	var result := scalar("SELECT COUNT(*) AS cnt FROM sqlite_master WHERE type='table' AND name=?;", [table_name], 0)
+	if not result.get("success", false):
+		return false
+	return int(result.get("data", 0)) > 0
+
+
+## 获取表行数（支持 WHERE 子句）。## 输入:
+##   table_name (String) - 表名。
+##   where_sql (String) - 可选过滤条件，不要含 `WHERE` 关键字（如 "deck_id=? AND queue=?"）。
+##   params (Array) - where_sql 对应的绑定参数。
+## 输出: 返回标准字典。成功时 `data` 为 int（符合条件的行数）。
+func count(table_name: String, where_sql: String = "", params: Array = []) -> Dictionary:
+	if not _is_safe_identifier(table_name):
+		return fail("INVALID_TABLE_NAME", "非法表名: %s" % table_name)
+
+	var sql: String = "SELECT COUNT(*) AS cnt FROM %s" % table_name
+	if where_sql.strip_edges() != "":
+		sql += " WHERE %s" % where_sql
+	sql += ";"
+
+	var result := scalar(sql, params, 0)
+	if not result.get("success", false):
+		return result
+	return ok(int(result.get("data", 0)))
+
+
+## 根据 schema 配置动态创建表和索引，并补齐已有表缺失的列。## 输入: 无。
+## 输出: 返回标准字典。成功时 `success` 为 true；schema 未加载返回 SCHEMA_NOT_LOADED，建表过程中任一步失败会回滚事务并返回 SCHEMA_INIT_FAILED 或 TX_BEGIN_FAILED、TX_COMMIT_FAILED。
+func init_schema() -> Dictionary:
+	if not require_open():
+		return fail("DB_NOT_OPEN", "数据库尚未打开")
+	if _schema_config.is_empty():
+		return fail("SCHEMA_NOT_LOADED", "schema 配置未加载，请先调用 open()")
+
+	# 1) 调用专门的 SchemaParser，把 JSON 配置转成 SQL 列表
+	var statements_result := SchemaParser.build_schema_statements(_schema_config)
+	if not statements_result.get("success", false):
+		return statements_result
+
+	var statements: Array[String] = statements_result.get("data", [])
+
+	# 2) 用事务执行，保证"要么都成功，要么都失败"
+	if not begin_transaction():
+		return fail("TX_BEGIN_FAILED", "初始化表结构时无法开启事务")
+
+	for sql in statements:
+		if not _db.query(sql):
+			rollback_transaction()
+			return _sqlite_fail("SCHEMA_INIT_FAILED", sql)
+
+	# 3) 全部成功后提交
+	if not commit_transaction():
+		rollback_transaction()
+		return fail("TX_COMMIT_FAILED", "初始化表结构提交失败")
+
+	# 4) 执行列迁移（给已有数据库补齐新增的列）
+	var migrate_result := _migrate_missing_columns()
+	if not migrate_result.get("success", false):
+		return migrate_result
+
+	return ok()
+
+
+## 对已有数据库执行 ALTER TABLE 补齐 schema JSON 中定义但表中缺失的列。## 输入: 无。
+## 输出: 返回标准字典。
+func _migrate_missing_columns() -> Dictionary:
+	if _schema_config.is_empty():
+		return ok()
+
+	var tables: Dictionary = _schema_config.get("tables", {})
+	for table_name in tables:
+		var table_def: Dictionary = tables[table_name]
+		var columns: Dictionary = table_def.get("columns", {})
+		for col_name in columns:
+			var col_def: Dictionary = columns[col_name]
+			if col_def.get("primary_key", false) or col_def.get("auto_increment", false):
+				continue  # 跳过主键列
+			var check_sql := "PRAGMA table_info('%s');" % table_name
+			_db.query(check_sql)
+			var existing_cols: Array = _db.query_result
+			var exists := false
+			for row in existing_cols:
+				if row is Dictionary and str(row.get("name", "")) == col_name:
+					exists = true
+					break
+			if not exists:
+				var data_type: String = col_def.get("data_type", "TEXT")
+				var not_null: bool = col_def.get("not_null", false)
+				var default_val: String = ""
+				if col_def.has("default"):
+					var dv = col_def["default"]
+					if typeof(dv) == TYPE_STRING:
+						default_val = " DEFAULT '%s'" % dv
+					elif dv == null:
+						default_val = " DEFAULT NULL"
+					else:
+						default_val = " DEFAULT %s" % dv
+				elif not_null:
+					# NOT NULL 列必须有默认值
+					match data_type:
+						"INTEGER": default_val = " DEFAULT 0"
+						"REAL": default_val = " DEFAULT 0.0"
+						"TEXT": default_val = " DEFAULT ''"
+				var alter_sql := "ALTER TABLE %s ADD COLUMN %s %s%s;" % [table_name, col_name, data_type, default_val]
+				if not _db.query(alter_sql):
+					# 忽略"列已存在"错误（多连接竞争情况下可能发生）
+					pass
+	return ok()
+
+
+## 按 schema 配置的删除顺序删表后重建表结构，供开发调试使用。## 输入: 无。
+## 输出: 返回标准字典。成功时透传 init_schema 的结果；schema 未加载或删表失败时返回 SCHEMA_NOT_LOADED、TX_BEGIN_FAILED、SCHEMA_RESET_FAILED 或 TX_COMMIT_FAILED。
+func reset_schema() -> Dictionary:
+	if not require_open():
+		return fail("DB_NOT_OPEN", "数据库尚未打开")
+	if _schema_config.is_empty():
+		return fail("SCHEMA_NOT_LOADED", "schema 配置未加载，请先调用 open()")
+
+	# 1) 调用专门的 SchemaParser，根据配置拿到 DROP TABLE 顺序
+	var drop_result := SchemaParser.build_drop_statements(_schema_config)
+	if not drop_result.get("success", false):
+		return drop_result
+
+	var drop_sql: Array[String] = drop_result.get("data", [])
+
+	# 2) 先删旧表，再重建
+	if not begin_transaction():
+		return fail("TX_BEGIN_FAILED", "重置表结构时无法开启事务")
+
+	for sql in drop_sql:
+		if not _db.query(sql):
+			rollback_transaction()
+			return _sqlite_fail("SCHEMA_RESET_FAILED", sql)
+
+	if not commit_transaction():
+		rollback_transaction()
+		return fail("TX_COMMIT_FAILED", "删除旧表提交失败")
+
+	# 3) 删除完成后立刻按最新 JSON 重建
+	return init_schema()
+
+
+## 获取最近一次失败的错误信息。## 输入: 无。
+## 输出: String - 最近一次 _fail 记录的 message，没有错误时为空字符串。
+func get_last_error() -> String:
+	return _last_error
+
+
+## 获取最近一次失败的错误代码。## 输入: 无。
+## 输出: String - 最近一次 _fail 记录的 code，没有错误时为空字符串。
+func get_last_code() -> String:
+	return _last_code
+
+
+## 获取最近一次查询结果缓存。## 输入: 无。
+## 输出: Array[Dictionary] - 最近一次 fetch_all 整理后的行数组，写操作或尚未查询时为空数组。
+func get_last_rows() -> Array[Dictionary]:
+	return _last_rows
+
+
+## 清空最近一次错误信息和错误代码。## 输入: 无。
+## 输出: 无。
+func clear_last_error() -> void:
+	_last_error = ""
+	_last_code = ""
+
+
+## 返回与 Manager 对齐的成功结构。## 输入:
+##   data (Variant) - 成功时携带的数据，默认 null。
+##   warning (String) - 可选警告文本，非空时打印 push_warning，默认空字符串。
+## 输出: 返回标准字典，含 success=true、data、code="OK" 和 warning。
+func ok(data: Variant = null, warning: String = "") -> Dictionary:
+	var result := {
+		"success": true,
+		"data": data,
+		"error": "",
+		"code": "OK",
+		"warning": warning
+	}
+	if warning != "":
+		push_warning("[DBManager OK with warning] %s" % warning)
+	return result
+
+
+## 返回与 Manager 对齐的失败结构，是公开的失败入口。## 输入:
+##   code (String) - 错误代码，如 DB_NOT_OPEN。
+##   message (String) - 面向调用者的错误描述。
+##   data (Variant) - 失败时一并返回的数据，默认 null。
+## 输出: 返回标准字典，含 success=false、error、code 和 data。
+func fail(code: String, message: String, data: Variant = null) -> Dictionary:
+	return _fail(code, message, data)
+
+
+## 记录错误代码与信息、打印控制台并发出 db_error 信号。## 输入:
+##   code (String) - 错误代码。
+##   message (String) - 错误描述。
+##   data (Variant) - 失败时一并返回的数据，默认 null。
+## 输出: 返回标准字典，含 success=false、error、code 和 data。
+func _fail(code: String, message: String, data: Variant = null) -> Dictionary:
+	_last_code = code
+	_last_error = message
+	push_warning("[%s] %s" % [code, message])
+	printerr("[DBManager Fail] code=", code, " message=", message, " data=", data)
+	db_error.emit(code, message)
+	return {
+		"success": false,
+		"data": data,
+		"error": message,
+		"code": code
+	}
+
+
+## 给事务命令使用的简化布尔执行器。## 输入:
+##   sql (String) - 要执行的事务控制语句，如 "BEGIN TRANSACTION;"。
+##   code (String) - 执行失败时记录的错误代码。
+##   message (String) - 执行失败时的错误描述前缀。
+## 输出: bool - 语句执行成功返回 true；数据库未打开或语句执行失败返回 false。
+func _exec_bool(sql: String, code: String, message: String) -> bool:
+	if not require_open():
+		return false
+
+	clear_last_error()
+	if not _db.query(sql):
+		_sqlite_fail(code, sql, message)
+		return false
+
+	return true
+
+
+## 统一包装 sqlite 插件的报错内容后转交 _fail。## 输入:
+##   code (String) - 错误代码。
+##   sql (String) - 触发失败的 SQL 语句，会拼进错误信息。
+##   prefix (String) - 可选的中文前缀，非空时拼在错误信息最前，默认空字符串。
+## 输出: 返回标准字典，透传 _fail 构造的失败结构。
+func _sqlite_fail(code: String, sql: String, prefix: String = "") -> Dictionary:
+	var plugin_error: String = ""
+	if is_open():
+		plugin_error = str(_db.error_message)
+
+	var message: String = "%s | SQL: %s" % [code, sql]
+	if prefix != "":
+		message = "%s | %s" % [prefix, message]
+	if plugin_error != "":
+		message = "%s | sqlite: %s" % [message, plugin_error]
+
+	return _fail(code, message)
+
+
+## 校验 SQL 标识符是否合法（仅允许字母、数字、下划线，且不能以数字开头）。## 输入: identifier (String) - 待校验的标识符。
+## 输出: bool。合法返回 true，否则返回 false。
+func _is_safe_identifier(identifier: String) -> bool:
+	if identifier == "":
+		return false
+	var regex := RegEx.new()
+	var compile_code: int = regex.compile("^[A-Za-z_][A-Za-z0-9_]*$")
+	if compile_code != OK:
+		return false
+	return regex.search(identifier) != null

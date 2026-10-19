@@ -1,0 +1,195 @@
+[gd_scene format=3 uid="uid://c6qm842csuitm"]
+
+[ext_resource type="Script" uid="uid://bhmupko5l8v" path="res://src/ui/note_list.gd" id="1_script"]
+[ext_resource type="Theme" path="res://content/assets/UI/app_theme.tres" id="1_v0n6d"]
+
+[node name="NoteList" type="Control" unique_id=2000000001]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_v0n6d")
+script = ExtResource("1_script")
+
+[node name="RootMargin" type="MarginContainer" parent="." unique_id=2000000002]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 16
+
+[node name="MainVBox" type="VBoxContainer" parent="RootMargin" unique_id=2000000003]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="TopBar" type="HBoxContainer" parent="RootMargin/MainVBox" unique_id=2000000004]
+layout_mode = 2
+
+[node name="BackBtn" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=2000000005]
+layout_mode = 2
+text = "← 返回"
+
+[node name="TitleLabel" type="Label" parent="RootMargin/MainVBox/TopBar" unique_id=2000000006]
+theme_type_variation = &"UiTitle"
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "📝 笔记列表"
+
+[node name="TopSpacer" type="Control" parent="RootMargin/MainVBox/TopBar" unique_id=2000000007]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AICardBtn" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=2000000040]
+layout_mode = 2
+text = "AI 制卡"
+
+[node name="NewNoteBtn" type="Button" parent="RootMargin/MainVBox/TopBar" unique_id=2000000008]
+layout_mode = 2
+text = "+ 新建笔记"
+
+[node name="NoteTree" type="Tree" parent="RootMargin/MainVBox" unique_id=2000000009]
+layout_mode = 2
+size_flags_vertical = 3
+columns = 3
+column_titles_visible = true
+allow_reselect = true
+hide_root = true
+
+[node name="EditPanel" type="PanelContainer" parent="RootMargin/MainVBox" unique_id=2000000010]
+layout_mode = 2
+
+[node name="EditVBox" type="VBoxContainer" parent="RootMargin/MainVBox/EditPanel" unique_id=2000000011]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="EditHeader" type="HBoxContainer" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=2000000012]
+layout_mode = 2
+
+[node name="EditTitle" type="Label" parent="RootMargin/MainVBox/EditPanel/EditVBox/EditHeader" unique_id=2000000013]
+theme_type_variation = &"UiHeading"
+layout_mode = 2
+text = "编辑笔记"
+
+[node name="EditHeaderSpacer" type="Control" parent="RootMargin/MainVBox/EditPanel/EditVBox/EditHeader" unique_id=2000000014]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CloseEditBtn" type="Button" parent="RootMargin/MainVBox/EditPanel/EditVBox/EditHeader" unique_id=2000000015]
+layout_mode = 2
+text = "✕ 关闭"
+
+[node name="DeckRow" type="HBoxContainer" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=2000000036]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DeckSelectLabel" type="Label" parent="RootMargin/MainVBox/EditPanel/EditVBox/DeckRow" unique_id=2000000037]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+text = "牌组:"
+
+[node name="EditDeckSelect" type="OptionButton" parent="RootMargin/MainVBox/EditPanel/EditVBox/DeckRow" unique_id=2000000038]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="FieldsEdit" type="VBoxContainer" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=2000000016]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="MetaInfo" type="HBoxContainer" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=2000000017]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="DeckLabel" type="Label" parent="RootMargin/MainVBox/EditPanel/EditVBox/MetaInfo" unique_id=2000000018]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1)
+text = "牌组: —"
+
+[node name="CreatedLabel" type="Label" parent="RootMargin/MainVBox/EditPanel/EditVBox/MetaInfo" unique_id=2000000019]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1)
+text = "创建: —"
+
+[node name="ActionBar" type="HBoxContainer" parent="RootMargin/MainVBox/EditPanel/EditVBox" unique_id=2000000020]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="AICardBtn" type="Button" parent="RootMargin/MainVBox/EditPanel/EditVBox/ActionBar" unique_id=2000000025]
+custom_minimum_size = Vector2(110, 36)
+layout_mode = 2
+text = "🤖 AI 制卡"
+
+[node name="ActionSpacer" type="Control" parent="RootMargin/MainVBox/EditPanel/EditVBox/ActionBar" unique_id=2000000021]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SaveBtn" type="Button" parent="RootMargin/MainVBox/EditPanel/EditVBox/ActionBar" unique_id=2000000022]
+custom_minimum_size = Vector2(120, 36)
+layout_mode = 2
+text = "💾 保存"
+
+[node name="DeleteBtn" type="Button" parent="RootMargin/MainVBox/EditPanel/EditVBox/ActionBar" unique_id=2000000023]
+custom_minimum_size = Vector2(120, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.3, 0.3, 1)
+text = "🗑 删除"
+
+[node name="StatusBar" type="HBoxContainer" parent="RootMargin/MainVBox" unique_id=2000000024]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="RootMargin/MainVBox/StatusBar" unique_id=2000000025]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.6, 1)
+text = "就绪"
+
+[node name="NewNoteDialog" type="ConfirmationDialog" parent="." unique_id=2000000026]
+oversampling_override = 1.0
+title = "新建笔记"
+position = Vector2i(0, 36)
+size = Vector2i(420, 320)
+ok_button_text = "创建"
+
+[node name="DialogVBox" type="VBoxContainer" parent="NewNoteDialog" unique_id=2000000027]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 412.0
+offset_bottom = 271.0
+theme_override_constants/separation = 16
+
+[node name="DeckSelectLabel" type="Label" parent="NewNoteDialog/DialogVBox" unique_id=2000000028]
+layout_mode = 2
+text = "选择牌组:"
+
+[node name="DeckSelect" type="OptionButton" parent="NewNoteDialog/DialogVBox" unique_id=2000000029]
+layout_mode = 2
+
+[node name="Sep" type="HSeparator" parent="NewNoteDialog/DialogVBox" unique_id=2000000030]
+layout_mode = 2
+
+[node name="FieldsForm" type="VBoxContainer" parent="NewNoteDialog/DialogVBox" unique_id=2000000031]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="FrontLabel" type="Label" parent="NewNoteDialog/DialogVBox/FieldsForm" unique_id=2000000032]
+layout_mode = 2
+text = "正面:"
+
+[node name="FrontInput" type="LineEdit" parent="NewNoteDialog/DialogVBox/FieldsForm" unique_id=2000000033]
+layout_mode = 2
+placeholder_text = "输入正面内容…"
+
+[node name="BackLabel" type="Label" parent="NewNoteDialog/DialogVBox/FieldsForm" unique_id=2000000034]
+layout_mode = 2
+text = "背面:"
+
+[node name="BackInput" type="LineEdit" parent="NewNoteDialog/DialogVBox/FieldsForm" unique_id=2000000035]
+layout_mode = 2
+placeholder_text = "输入背面内容…"

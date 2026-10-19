@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://ch2trj0000003"
+path="res://.godot/imported/ch2_trojan.dialogue-5ef1da4a33a03ae7facf19e6aa2adfc5.tres"
+
+[deps]
+
+source_file="res://content/dialogue/story/ch2_trojan.dialogue"
+dest_files=["res://.godot/imported/ch2_trojan.dialogue-5ef1da4a33a03ae7facf19e6aa2adfc5.tres"]
+
+[params]
+
+defaults=true

@@ -1,6 +1,6 @@
 # card_db.gd (CardDB)
 
-> **路径**: `res://scenes/data_access/card_db.gd`
+> **路径**: `res://src/data_access/card_db.gd`
 > **继承**: `DBManager`
 > **类型**: 数据层
 

@@ -8,13 +8,13 @@ signal settings_save_failed(error: int)
 signal settings_saved()
 
 const SAVE_PATH: String = "user://wallpaper_settings.cfg"
-const WALLPAPER_DIR: String = "res://assets/wallpapers/"
+const WALLPAPER_DIR: String = "res://content/assets/wallpapers/"
 const MODE_FILL: int = 0
 const MODE_FIT: int = 1
 const IMAGE_EXTENSIONS: PackedStringArray = ["png", "jpg", "jpeg", "webp"]
 const LOCKED_BY_DEFAULT: PackedStringArray = [
-	"res://assets/wallpapers/mountain1.png",
-	"res://assets/wallpapers/tower1.png",
+	"res://content/assets/wallpapers/mountain1.png",
+	"res://content/assets/wallpapers/tower1.png",
 ]
 
 var wallpaper_path: String = ""
@@ -179,6 +179,8 @@ func _sanitize_path(path: Variant) -> String:
 	if not (path is String):
 		return ""
 	var text := str(path).strip_edges().replace("\\", "/")
+	if text.begins_with("res://assets/wallpapers/"):
+		text = WALLPAPER_DIR.path_join(text.trim_prefix("res://assets/wallpapers/"))
 	if text.is_empty() or not list_wallpapers().has(text):
 		return ""
 	return text

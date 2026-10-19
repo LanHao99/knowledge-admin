@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://b026012jtflpw"
+path="res://.godot/imported/ch1_bond_memory_1.dialogue-07d777dd27b06cea0b0c74b4df0acf0c.tres"
+
+[deps]
+
+source_file="res://content/dialogue/story/ch1_bond_memory_1.dialogue"
+dest_files=["res://.godot/imported/ch1_bond_memory_1.dialogue-07d777dd27b06cea0b0c74b4df0acf0c.tres"]
+
+[params]
+
+defaults=true

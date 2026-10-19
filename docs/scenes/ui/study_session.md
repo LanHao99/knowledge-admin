@@ -1,6 +1,6 @@
 # study_session.gd (StudySession)
 
-> **路径**: `res://scenes/ui/study_session.gd` / `study_session.tscn`
+> **路径**: `res://src/ui/study_session.gd` / `study_session.tscn`
 > **继承**: `Control`
 > **类型**: UI 层 — 学习入口场景
 > **状态**: 已实现（牌组选择 + 卡片学习 + 完成统计）

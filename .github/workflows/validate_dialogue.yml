@@ -3,10 +3,10 @@ name: Validate Dialogue Titles
 on:
   push:
     paths:
-      - 'game/dialogue/*.dialogue'
+      - 'content/dialogue/story/*.dialogue'
   pull_request:
     paths:
-      - 'game/dialogue/*.dialogue'
+      - 'content/dialogue/story/*.dialogue'
 
 jobs:
   validate-titles:
@@ -19,7 +19,7 @@ jobs:
           echo "Checking .dialogue title syntax..."
           errors=0
 
-          for f in game/dialogue/*.dialogue; do
+          for f in content/dialogue/story/*.dialogue; do
             # Extract titles: lines matching '~ title'
             grep -n '^~ ' "$f" | while IFS= read -r line; do
               lineno=$(echo "$line" | cut -d: -f1)

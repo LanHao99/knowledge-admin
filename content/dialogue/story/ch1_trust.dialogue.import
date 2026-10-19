@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://ch1trust00003"
+path="res://.godot/imported/ch1_trust.dialogue-2f3bb4f9067e5aa216df7315e1fd5375.tres"
+
+[deps]
+
+source_file="res://content/dialogue/story/ch1_trust.dialogue"
+dest_files=["res://.godot/imported/ch1_trust.dialogue-2f3bb4f9067e5aa216df7315e1fd5375.tres"]
+
+[params]
+
+defaults=true

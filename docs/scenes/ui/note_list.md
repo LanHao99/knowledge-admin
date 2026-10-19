@@ -1,6 +1,6 @@
 # note_list.gd (NoteList)
 
-> **路径**: `res://scenes/ui/note_list.gd`
+> **路径**: `res://src/ui/note_list.gd`
 > **继承**: `Control`
 > **类型**: UI层
 

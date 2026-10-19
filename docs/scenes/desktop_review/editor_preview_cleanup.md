@@ -2,7 +2,7 @@
 
 ## 问题
 
-2026-10-15，Godot 4.7.2 编辑器正在编辑 `res://scenes/desktop/boot_screen.tscn`，画布却显示旧的知识管理主页。现场检查发现，编辑器的预览 SubViewport 同时包含当前 `BootScreen` 和额外的可见 `MainMenu` 同级节点。导致额外实例遗留的具体操作尚未确定。
+2026-10-15，Godot 4.7.2 编辑器正在编辑 `res://content/scenes/desktop/boot_screen.tscn`，画布却显示旧的知识管理主页。现场检查发现，编辑器的预览 SubViewport 同时包含当前 `BootScreen` 和额外的可见 `MainMenu` 同级节点。导致额外实例遗留的具体操作尚未确定。
 
 ## 处理
 

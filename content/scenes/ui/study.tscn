@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://cue75gf0um62k"]
+
+[ext_resource type="PackedScene" uid="uid://dddcmah5tjw7q" path="res://content/scenes/ui/study_session.tscn" id="1_8q8l4"]
+[ext_resource type="Script" uid="uid://dqtr8vf8mgn3u" path="res://src/ui/study.gd" id="1_jhonx"]
+[ext_resource type="Theme" path="res://content/assets/UI/app_theme.tres" id="1_l4e01"]
+[ext_resource type="PackedScene" uid="uid://bvqb37meud3w8" path="res://content/scenes/ui/card_ui.tscn" id="2_x8trg"]
+
+[node name="Study" type="Control" unique_id=1293919655]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_l4e01")
+script = ExtResource("1_jhonx")
+
+[node name="StudySession" parent="." unique_id=948778194 instance=ExtResource("1_8q8l4")]
+layout_mode = 1
+
+[node name="CardUI" parent="." unique_id=1375471367 instance=ExtResource("2_x8trg")]
+visible = false
+layout_mode = 1

@@ -1,6 +1,6 @@
 # main_menu (MainMenu) — UI 设计方案
 
-> **路径**: `res://scenes/ui/main_menu.gd` / `main_menu.tscn`
+> **路径**: `res://src/ui/main_menu.gd` / `main_menu.tscn`
 > **继承**: `Control`（建议从 Node2D 迁移为 Control）
 > **类型**: UI 层 — 程序入口场景
 > **状态**: Phase 2 已实现（统计面板数据接入）
@@ -104,11 +104,11 @@ main_menu 通过 `App` Autoload 单例访问 Manager：
 
 | 按钮       | 点击行为                                                            | 状态检查    | 失败处理       |
 | -------- | --------------------------------------------------------------- | ------- | ---------- |
-| **牌组管理** | `change_scene_to_file("res://scenes/ui/deck_list.tscn")`        | App 已就绪 | Toast 提示   |
-| **笔记浏览** | `change_scene_to_file("res://scenes/ui/note_list.tscn")`        | 无需检查 | — （note_list 自建 Manager）  |
-| **开始学习** | `change_scene_to_file("res://scenes/ui/study_session.tscn")`    | 存在待复习卡片 | "无待复习卡片"提示 |
+| **牌组管理** | `change_scene_to_file("res://content/scenes/ui/deck_list.tscn")`        | App 已就绪 | Toast 提示   |
+| **笔记浏览** | `change_scene_to_file("res://content/scenes/ui/note_list.tscn")`        | 无需检查 | — （note_list 自建 Manager）  |
+| **开始学习** | `change_scene_to_file("res://content/scenes/ui/study_session.tscn")`    | 存在待复习卡片 | "无待复习卡片"提示 |
 | **设置**   | 弹出 Popup/Dialog，或跳转设置场景                                         | —       | —          |
-| **调试**   | `change_scene_to_file("res://scenes/ui/debug_crud_panel.tscn")` | —       | —          |
+| **调试**   | `change_scene_to_file("res://content/scenes/ui/debug_crud_panel.tscn")` | —       | —          |
 
 ---
 
@@ -158,8 +158,8 @@ main_menu._ready()
 
 使用项目已有字体：
 
-- `res://assets/fonts/ark-pixel-16px-proportional-zh_cn.ttf`（中文）
-- `res://assets/fonts/ark-pixel-16px-proportional-latin.ttf`（拉丁）
+- `res://content/assets/fonts/ark-pixel-16px-proportional-zh_cn.ttf`（中文）
+- `res://content/assets/fonts/ark-pixel-16px-proportional-latin.ttf`（拉丁）
 
 ---
 
@@ -221,7 +221,7 @@ main_menu._ready()
 - `CardDB` 新增两个全局统计方法：`get_global_due_count(now_day_index, now_timestamp)` 和 `get_today_studied_count(today_start_ts)`，均为 `scalar()` 聚合查询
 - `CardManager` 新增对应包装方法，透传到 CardDB
 - `main_menu.gd` 新增 `_exit_tree()` 释放 Manager 实例
-- **笔记浏览导航**确认已激活：`NoteBrowseBtn` 连接 `_on_note_browse_pressed()`，经 `_switch_scene()` 安全跳转 `res://scenes/ui/note_list.tscn`，`ResourceLoader.exists()` 前置检查，失败时底部状态栏红色提示
+- **笔记浏览导航**确认已激活：`NoteBrowseBtn` 连接 `_on_note_browse_pressed()`，经 `_switch_scene()` 安全跳转 `res://content/scenes/ui/note_list.tscn`，`ResourceLoader.exists()` 前置检查，失败时底部状态栏红色提示
 
 ## 顶部导航栏
 

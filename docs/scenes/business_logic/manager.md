@@ -1,6 +1,6 @@
 # manager.gd (Manager)
 
-> **路径**: `res://scenes/business_logic/manager.gd`
+> **路径**: `res://src/business_logic/manager.gd`
 > **继承**: `Node`
 > **类型**: 逻辑层 - 基类
 

@@ -1,0 +1,221 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://src/desktop/managed_window.gd" id="script"]
+[ext_resource type="StyleBox" path="res://content/assets/desktop_themes/Classic95/Styles/Panel/Panel.tres" id="frame"]
+[ext_resource type="Shader" path="res://src/shaders/desktop/window_damage.gdshader" id="damage_shader"]
+[sub_resource type="StyleBoxFlat" id="title"]
+bg_color = Color(0, 0, 0.5, 1)
+[sub_resource type="ShaderMaterial" id="damage_material"]
+resource_local_to_scene = true
+shader = ExtResource("damage_shader")
+[node name="ManagedWindow" type="Control"]
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 820.0
+mouse_filter = 0
+script = ExtResource("script")
+[node name="FramePanel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("frame")
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 6.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = -6.0
+theme_override_constants/separation = 4
+mouse_filter = 2
+[node name="TitleBarPanel" type="Panel" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 38)
+theme_override_styles/panel = SubResource("title")
+mouse_filter = 2
+[node name="TitleBar" type="HBoxContainer" parent="VBox/TitleBarPanel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 6.0
+offset_right = -3.0
+theme_override_constants/separation = 3
+mouse_filter = 0
+[node name="TitleLabel" type="Label" parent="VBox/TitleBarPanel/TitleBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "窗口"
+text_overrun_behavior = 3
+mouse_filter = 2
+[node name="MinimizeButton" type="Button" parent="VBox/TitleBarPanel/TitleBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+custom_minimum_size = Vector2(32, 28)
+text = "_"
+tooltip_text = "最小化"
+focus_mode = 0
+[node name="MaximizeButton" type="Button" parent="VBox/TitleBarPanel/TitleBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+custom_minimum_size = Vector2(32, 28)
+text = "□"
+tooltip_text = "最大化 / 还原"
+focus_mode = 0
+[node name="CloseButton" type="Button" parent="VBox/TitleBarPanel/TitleBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+custom_minimum_size = Vector2(32, 28)
+text = "×"
+tooltip_text = "关闭"
+focus_mode = 0
+[node name="ContentArea" type="Control" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+clip_contents = true
+mouse_filter = 1
+[node name="ResizeHandles" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+[node name="Top" type="Control" parent="ResizeHandles"]
+layout_mode = 1
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = 7.0
+offset_top = 0.0
+offset_right = -7.0
+offset_bottom = 6.0
+mouse_default_cursor_shape = 6
+metadata/direction = 1
+[node name="Bottom" type="Control" parent="ResizeHandles"]
+layout_mode = 1
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 7.0
+offset_top = -6.0
+offset_right = -7.0
+offset_bottom = 0.0
+mouse_default_cursor_shape = 6
+metadata/direction = 2
+[node name="Left" type="Control" parent="ResizeHandles"]
+layout_mode = 1
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 7.0
+offset_right = 6.0
+offset_bottom = -7.0
+mouse_default_cursor_shape = 5
+metadata/direction = 3
+[node name="Right" type="Control" parent="ResizeHandles"]
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -6.0
+offset_top = 7.0
+offset_right = 0.0
+offset_bottom = -7.0
+mouse_default_cursor_shape = 5
+metadata/direction = 4
+[node name="TopLeft" type="Control" parent="ResizeHandles"]
+layout_mode = 1
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 9.0
+offset_bottom = 9.0
+mouse_default_cursor_shape = 7
+metadata/direction = 5
+[node name="TopRight" type="Control" parent="ResizeHandles"]
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = -9.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 9.0
+mouse_default_cursor_shape = 8
+metadata/direction = 6
+[node name="BottomLeft" type="Control" parent="ResizeHandles"]
+layout_mode = 1
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = -9.0
+offset_right = 9.0
+offset_bottom = 0.0
+mouse_default_cursor_shape = 8
+metadata/direction = 7
+[node name="BottomRight" type="Control" parent="ResizeHandles"]
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -9.0
+offset_top = -9.0
+offset_right = 0.0
+offset_bottom = 0.0
+mouse_default_cursor_shape = 7
+metadata/direction = 8
+
+[node name="DamageCopy" type="BackBufferCopy" parent="."]
+copy_mode = 0
+
+[node name="DamageOverlay" type="ColorRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+material = SubResource("damage_material")
+
+[node name="ShatterInputBlocker" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0

@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=15
+type="Resource"
+uid="uid://ch2pro0000005"
+path="res://.godot/imported/ch2_protocol.dialogue-6c4d7f6a47fd5abb833e090eb103f0bc.tres"
+
+[deps]
+
+source_file="res://content/dialogue/story/ch2_protocol.dialogue"
+dest_files=["res://.godot/imported/ch2_protocol.dialogue-6c4d7f6a47fd5abb833e090eb103f0bc.tres"]
+
+[params]
+
+defaults=true

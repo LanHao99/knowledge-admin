@@ -1,6 +1,6 @@
 # note_db.gd (NoteDB)
 
-> **路径**: `res://scenes/data_access/note_db.gd`
+> **路径**: `res://src/data_access/note_db.gd`
 > **继承**: `DBManager`
 > **类型**: 数据层
 

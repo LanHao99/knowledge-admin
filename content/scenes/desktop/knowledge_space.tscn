@@ -1,0 +1,255 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://src/desktop/knowledge_space.gd" id="1_space"]
+[ext_resource type="Resource" path="res://content/data/desktop/knowledge_space.tres" id="2_config"]
+
+[sub_resource type="StyleBoxFlat" id="Style_shell"]
+bg_color = Color(0.035, 0.07, 0.105, 1)
+
+[sub_resource type="StyleBoxFlat" id="Style_reader"]
+bg_color = Color(0.045, 0.09, 0.13, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.55, 0.64, 1)
+shadow_color = Color(0, 0, 0, 0.7)
+shadow_size = 12
+
+[sub_resource type="Environment" id="Environment_space"]
+resource_local_to_scene = true
+background_mode = 1
+background_color = Color(0.02, 0.047, 0.09, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.4, 0.5, 0.6, 1)
+ambient_light_energy = 0.4
+tonemap_mode = 0
+
+[sub_resource type="World3D" id="World_space"]
+
+[node name="KnowledgeSpace" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_space")
+configuration = ExtResource("2_config")
+
+[node name="Shell" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("Style_shell")
+
+[node name="Margin" type="MarginContainer" parent="Shell"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
+[node name="Layout" type="VBoxContainer" parent="Shell/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Heading" type="HBoxContainer" parent="Shell/Margin/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Shell/Margin/Layout/Heading"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.92, 0.96, 1)
+text = "知识空间"
+
+[node name="Summary" type="Label" parent="Shell/Margin/Layout/Heading"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.53, 0.69, 0.78, 1)
+text = "本地知识 0 / 已解锁档案 0"
+horizontal_alignment = 2
+text_overrun_behavior = 3
+
+[node name="Toolbar" type="HFlowContainer" parent="Shell/Margin/Layout"]
+layout_mode = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
+
+[node name="RefreshButton" type="Button" parent="Shell/Margin/Layout/Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "刷新内容"
+tooltip_text = "重新读取最近创建的闪卡"
+
+[node name="HomeButton" type="Button" parent="Shell/Margin/Layout/Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "回到入口"
+
+[node name="FocusButton" type="Button" parent="Shell/Margin/Layout/Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+disabled = true
+text = "聚焦"
+
+[node name="ReadButton" type="Button" parent="Shell/Margin/Layout/Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+disabled = true
+text = "阅读全文"
+
+[node name="ViewArea" type="Control" parent="Shell/Margin/Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+clip_contents = true
+
+[node name="ViewportContainer" type="SubViewportContainer" parent="Shell/Margin/Layout/ViewArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+stretch = true
+
+[node name="SpaceViewport" type="SubViewport" parent="Shell/Margin/Layout/ViewArea/ViewportContainer"]
+unique_name_in_owner = true
+handle_input_locally = false
+gui_disable_input = true
+world_3d = SubResource("World_space")
+size = Vector2i(1080, 560)
+msaa_3d = 2
+
+[node name="World" type="Node3D" parent="Shell/Margin/Layout/ViewArea/ViewportContainer/SpaceViewport"]
+
+[node name="SpaceEnvironment" type="WorldEnvironment" parent="Shell/Margin/Layout/ViewArea/ViewportContainer/SpaceViewport/World"]
+unique_name_in_owner = true
+environment = SubResource("Environment_space")
+
+[node name="SpaceCamera" type="Camera3D" parent="Shell/Margin/Layout/ViewArea/ViewportContainer/SpaceViewport/World"]
+unique_name_in_owner = true
+position = Vector3(0, 3, 26)
+current = true
+fov = 65.0
+near = 0.05
+far = 600.0
+
+[node name="CardDocuments" type="Node3D" parent="Shell/Margin/Layout/ViewArea/ViewportContainer/SpaceViewport/World"]
+unique_name_in_owner = true
+
+[node name="StoryDocuments" type="Node3D" parent="Shell/Margin/Layout/ViewArea/ViewportContainer/SpaceViewport/World"]
+unique_name_in_owner = true
+
+[node name="ReferencePoints" type="MultiMeshInstance3D" parent="Shell/Margin/Layout/ViewArea/ViewportContainer/SpaceViewport/World"]
+unique_name_in_owner = true
+cast_shadow = 0
+
+[node name="FlightSurface" type="Control" parent="Shell/Margin/Layout/ViewArea"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 2
+mouse_default_cursor_shape = 2
+
+[node name="EmptyMessage" type="Label" parent="Shell/Margin/Layout/ViewArea"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.53, 0.69, 0.78, 1)
+text = "暂无闪卡。添加卡片后点击「刷新内容」。"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="SelectionName" type="Label" parent="Shell/Margin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.81, 0.87, 0.9, 1)
+text = "单击选择文档 · 标题栏可折叠、全屏或关闭"
+text_overrun_behavior = 3
+
+[node name="Status" type="Label" parent="Shell/Margin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.53, 0.69, 0.78, 1)
+text = "右键 + WASD 飞行 · Q/E 升降 · Shift 加速 · Esc 释放鼠标"
+autowrap_mode = 3
+
+[node name="Reader" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("Style_reader")
+
+[node name="Margin" type="MarginContainer" parent="Reader"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 16
+
+[node name="Layout" type="VBoxContainer" parent="Reader/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="Reader/Margin/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ReaderTitle" type="Label" parent="Reader/Margin/Layout/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.84, 0.63, 1)
+text = "文档"
+autowrap_mode = 3
+
+[node name="CloseReader" type="Button" parent="Reader/Margin/Layout/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 0
+text = "返回空间"
+
+[node name="ReaderSource" type="Label" parent="Reader/Margin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.53, 0.69, 0.78, 1)
+text_overrun_behavior = 3
+
+[node name="ReaderScroll" type="ScrollContainer" parent="Reader/Margin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ReaderText" type="Label" parent="Reader/Margin/Layout/ReaderScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+theme_override_colors/font_color = Color(0.85, 0.91, 0.94, 1)
+autowrap_mode = 3

@@ -131,21 +131,21 @@
 | `docs/narrative/text_enhancement_design.md` | 文档 |
 | `docs/narrative/gameplay_integration_matrix.md` | 文档 |
 | `docs/narrative/implementation_roadmap.md` | 本文档 |
-| `game/dialogue/text_animation_controller.gd` | 代码 |
-| `game/dialogue/ch1_intro.dialogue` | 剧本 |
-| `game/dialogue/ch1_explain.dialogue` | 剧本 |
-| `game/dialogue/ch1_trust.dialogue` | 剧本 |
-| `game/dialogue/ch1_warning.dialogue` | 剧本 |
-| `game/dialogue/ch1_past.dialogue` | 剧本 |
-| `game/dialogue/ch1_choice.dialogue` | 剧本 |
-| `game/dialogue/ch1_revelation.dialogue` | 剧本 |
-| `game/dialogue/ch1_end.dialogue` | 剧本 |
+| `src/dialogue/text_animation_controller.gd` | 代码 |
+| `content/dialogue/story/ch1_intro.dialogue` | 剧本 |
+| `content/dialogue/story/ch1_explain.dialogue` | 剧本 |
+| `content/dialogue/story/ch1_trust.dialogue` | 剧本 |
+| `content/dialogue/story/ch1_warning.dialogue` | 剧本 |
+| `content/dialogue/story/ch1_past.dialogue` | 剧本 |
+| `content/dialogue/story/ch1_choice.dialogue` | 剧本 |
+| `content/dialogue/story/ch1_revelation.dialogue` | 剧本 |
+| `content/dialogue/story/ch1_end.dialogue` | 剧本 |
 | 8 个对应的 `.dialogue.import` 文件 | 配置 |
 
 ### 修改文件
 
 | 文件 | 修改内容 |
 |------|---------|
-| `scenes/ui/study.gd` | 注册新对话资源映射 |
-| `game/dialogue/story_dialogue_overlay.gd` | 集成 TextAnimationController（Phase 2 实施） |
-| `game/dialogue/story_dialogue_overlay.tscn` | 添加 TextAnimationController 节点（Phase 2 实施） |
+| `src/ui/study.gd` | 注册新对话资源映射 |
+| `src/dialogue/story_dialogue_overlay.gd` | 集成 TextAnimationController（Phase 2 实施） |
+| `content/scenes/dialogue/story_dialogue_overlay.tscn` | 添加 TextAnimationController 节点（Phase 2 实施） |

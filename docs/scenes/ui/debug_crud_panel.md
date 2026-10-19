@@ -1,6 +1,6 @@
 # debug_crud_panel.gd
 
-> **路径**: `res://scenes/ui/debug_crud_panel.gd`
+> **路径**: `res://src/ui/debug_crud_panel.gd`
 > **继承**: `Control`
 > **类型**: UI层
 

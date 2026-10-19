@@ -5,7 +5,7 @@ extends RefCounted
 # 它的所有方法都是 static 的，不需要实例化即可调用。
 # 这样做可以将“解析逻辑”与“数据库执行逻辑”彻底解耦。
 
-## 解析 JSON 文件并返回 schema_config 字典。## 输入: file_path (String) - JSON 文件的绝对或相对路径（如 "res://data/db_schema.json"）。
+## 解析 JSON 文件并返回 schema_config 字典。## 输入: file_path (String) - JSON 文件的绝对或相对路径（如 "res://src/data/db_schema.json"）。
 ## 输出: 返回标准字典。成功时 `data` 为解析出来的 Dictionary。
 static func parse_json_file(file_path: String) -> Dictionary:
 	if not FileAccess.file_exists(file_path):

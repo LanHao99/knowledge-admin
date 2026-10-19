@@ -5,19 +5,19 @@
 在 `.dialogue` 中直接调用，三个参数依次为图片路径、提示内容、是否允许“否”：
 
 ```text
-do App.send_wallpaper("res://assets/wallpapers/mountain1.png", "收到一张壁纸，是否更换？", false)
+do App.send_wallpaper("res://content/assets/wallpapers/mountain1.png", "收到一张壁纸，是否更换？", false)
 ```
 
 `false` 表示只能选“是”；确认层没有标题栏关闭按钮，Esc、点击背景均不能拒绝。`true` 表示提供“是”和“否”，Esc 等同“否”。
 
-图片在收到时解锁并立即保存。选择“是”后才运行 `game/dialogue/actions/send_wallpaper.gd`，自动更换并保存当前壁纸；选择“否”保留解锁状态，之后可到控制面板手动选择。无效图片不会弹窗，重复领取不会重复添加记录。
+图片在收到时解锁并立即保存。选择“是”后才运行 `src/dialogue/actions/send_wallpaper.gd`，自动更换并保存当前壁纸；选择“否”保留解锁状态，之后可到控制面板手动选择。无效图片不会弹窗，重复领取不会重复添加记录。
 
 第二章第一段 `ch2_revelation.dialogue` 的 `~ 世界的真相` 开头发送 `mountain1.png`，不允许拒绝。`tower1.png` 也默认锁定，后续剧情可用同一调用解锁。
 
 ## 通用确认后运行脚本
 
 ```text
-do App.run_confirmed_action("res://game/dialogue/actions/send_wallpaper.gd", "是否更换为已收到的壁纸？", true, ["res://assets/wallpapers/mountain1.png"])
+do App.run_confirmed_action("res://src/dialogue/actions/send_wallpaper.gd", "是否更换为已收到的壁纸？", true, ["res://content/assets/wallpapers/mountain1.png"])
 ```
 
 参数为脚本路径、可编辑的提示、是否允许“否”和动作参数数组。脚本须继承 `RefCounted`，提供 `execute(arguments: Array) -> bool`；需要等待的动作可以在函数内使用 `await`。通用入口只负责确认与执行，壁纸须先由接收入口解锁。
@@ -32,7 +32,7 @@ func execute(arguments: Array) -> bool:
 
 DialogueManager 会等待确认和动作执行完毕，再读取下一句。选“否”时不运行脚本。并发请求被拒绝，按钮重复点击只产生一次结果。
 
-确认框布局位于 `game/dialogue/dialogue_action_confirmation.tscn`，使用现有主题，文案和是否允许“否”可在 Inspector 编辑，也可由上述剧情调用覆盖。CanvasLayer 覆盖剧情窗口，背景点击被拦截，Tab 在确认层按钮间循环。
+确认框布局位于 `content/scenes/dialogue/dialogue_action_confirmation.tscn`，使用现有主题，文案和是否允许“否”可在 Inspector 编辑，也可由上述剧情调用覆盖。CanvasLayer 覆盖剧情窗口，背景点击被拦截，Tab 在确认层按钮间循环。
 
 测试播放会额外显示“停止测试”。停止会解除未决确认且不运行待确认动作，当前段不记完成；收到并已保存的解锁仍保留。剧情测试台的存档恢复只管理剧情数据，壁纸配置单独保存。
 
@@ -65,7 +65,7 @@ do App.shatter_story_window()
 
 - `tests/unit/test_dialogue_actions.gd`：确认时序、是与否、Esc、重复调用、内部停止、接收存档及窗口释放。
 - `tests/unit/test_wallpaper_settings.gd`：默认锁定、即时解锁落盘、读回、旧存档和损坏字段。
-- `tests/desktop/verify_dialogue_actions.tscn`：隔离工程中验证真实剧情调用、两种破损、确认层与桌面壁纸的 GPU 画面。
+- `tests/scenes/desktop/verify_dialogue_actions.tscn`：隔离工程中验证真实剧情调用、两种破损、确认层与桌面壁纸的 GPU 画面。
 
 剧情结束释放进程的定向 GUT 9 项、95 条断言通过；剧情动作 GPU 54 项及剧情测试台 GPU 265 项检查通过。当前完整 GUT 103 项中有 7 项「我的电脑」既有场景错误，详见 [剧情进程释放回归](../scenes/desktop_review/dialogue_actions/process_cleanup_validation.md)。
 

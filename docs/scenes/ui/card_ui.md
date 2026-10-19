@@ -1,6 +1,6 @@
 # card_ui.gd (CardUI)
 
-> **路径**: `res://scenes/ui/card_ui.gd`
+> **路径**: `res://src/ui/card_ui.gd`
 > **继承**: `Control`
 > **类型**: UI层
 
